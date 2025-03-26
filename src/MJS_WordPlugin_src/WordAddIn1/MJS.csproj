@@ -1,0 +1,622 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <!--
+    This section defines project-level properties.
+
+    AssemblyName
+      Name of the output assembly.
+    Configuration
+      Specifies a default value for debug.
+    OutputType
+      Must be "Library" for VSTO.
+    Platform
+      Specifies what CPU the output of this project can run on.
+    NoStandardLibraries
+      Set to "false" for VSTO.
+    RootNamespace
+      In C#, this specifies the namespace given to new files. In VB, all objects are
+      wrapped in this namespace at runtime.
+  -->
+  <PropertyGroup>
+    <ProjectTypeGuids>{BAA0C2D2-18E2-41B9-852F-F413020CAA33};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9CBED0F7-2808-4F15-96AC-40377F83969A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <RootNamespace>WordAddIn1</RootNamespace>
+    <AssemblyName>MJSワードプラグイン</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <DefineConstants>VSTO40</DefineConstants>
+    <IsWebBootstrapper>False</IsWebBootstrapper>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>15.0</OldToolsVersion>
+    <VSTO_TrustAssembliesLocation>true</VSTO_TrustAssembliesLocation>
+    <TargetFrameworkProfile />
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <PublishUrl>C:\MJS_plugin\WordAddIn1\bin\Release\</PublishUrl>
+    <InstallUrl />
+    <TargetCulture>ja</TargetCulture>
+    <ApplicationVersion>2.0.0.35</ApplicationVersion>
+    <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>days</UpdateIntervalUnits>
+    <ProductName>MJSワードプラグイン</ProductName>
+    <PublisherName />
+    <SupportUrl />
+    <FriendlyName>MJSワードプラグイン</FriendlyName>
+    <OfficeApplicationDescription />
+    <LoadBehavior>3</LoadBehavior>
+  </PropertyGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Office.PIARedist.2007">
+      <Visible>False</Visible>
+      <ProductName>Microsoft Office 2007 Primary Interop Assemblies</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.VSTORuntime.4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft Visual Studio 2010 Tools for Office Runtime %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <PropertyGroup>
+    <!--
+      OfficeApplication
+        Add-in host application
+    -->
+    <OfficeApplication>Word</OfficeApplication>
+  </PropertyGroup>
+  <!--
+    This section defines properties that are set when the "Debug" configuration is selected.
+
+    DebugSymbols
+      If "true", create symbols (.pdb). If "false", do not create symbols.
+    DefineConstants
+      Constants defined for the preprocessor.
+    EnableUnmanagedDebugging
+      If "true", starting the debugger will attach both managed and unmanaged debuggers.
+    Optimize
+      If "true", optimize the build output. If "false", do not optimize.
+    OutputPath
+      Output path of project relative to the project file.
+    WarningLevel
+      Warning level for the compiler.
+  -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!--
+    This section defines properties that are set when the "Release" configuration is selected.
+
+    DebugSymbols
+      If "true", create symbols (.pdb). If "false", do not create symbols.
+    DefineConstants
+      Constants defined for the preprocessor.
+    EnableUnmanagedDebugging
+      If "true", starting the debugger will attach both managed and unmanaged debuggers.
+    Optimize
+      If "true", optimize the build output. If "false", do not optimize.
+    OutputPath
+      Output path of project relative to the project file.
+    WarningLevel
+      Warning level for the compiler.
+  -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!--
+    This section specifies references for the project.
+  -->
+  <ItemGroup>
+    <Reference Include="Accessibility">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Office.Tools, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Office.Tools.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Office.Tools.Word, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Tools.Applications.Runtime, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Office, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Management.Automation.dll.10.0.10586.0\lib\net40\System.Management.Automation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Tools.v4.0.Framework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Tools.Common.v4.0.Utilities, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <!--
+    This section defines the user source files that are part of the project.
+     
+    A "Compile" element specifies a source file to compile.
+    An "EmbeddedResource" element specifies an .resx file for embedded resources.
+    A "None" element specifies a file that is not to be passed to the compiler (for instance, 
+    a text file or XML file).
+    The "AppDesigner" element specifies the directory where the application properties files
+    can be found.
+  -->
+  <ItemGroup>
+    <Compile Include="alert.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="alert.Designer.cs">
+      <DependentUpon>alert.cs</DependentUpon>
+    </Compile>
+    <Compile Include="bookInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="bookInfo.Designer.cs">
+      <DependentUpon>bookInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckForm.Designer.cs">
+      <DependentUpon>CheckForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckInfo.cs" />
+    <Compile Include="CoverSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CoverSelectionForm.Designer.cs">
+      <DependentUpon>CoverSelectionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CoverSelectionItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CoverSelectionItem.Designer.cs">
+      <DependentUpon>CoverSelectionItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HeadingInfo.cs" />
+    <Compile Include="loader.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="loader.Designer.cs">
+      <DependentUpon>loader.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProgressBar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProgressBar.Designer.cs">
+      <DependentUpon>ProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="alert.resx">
+      <DependentUpon>alert.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="bookInfo.resx">
+      <DependentUpon>bookInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CheckForm.resx">
+      <DependentUpon>CheckForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CoverSelectionForm.resx">
+      <DependentUpon>CoverSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CoverSelectionItem.resx">
+      <DependentUpon>CoverSelectionItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="loader.resx">
+      <DependentUpon>loader.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProgressBar.resx">
+      <DependentUpon>ProgressBar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ribbon1.resx">
+      <DependentUpon>Ribbon1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="setLink.resx">
+      <DependentUpon>setLink.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <EmbeddedResource Include="htmlTemplates.zip" />
+    <None Include="MJS.pfx" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Ribbon1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Designer.cs">
+      <DependentUpon>Ribbon1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="setLink.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="setLink.Designer.cs">
+      <DependentUpon>setLink.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ThisAddIn.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <None Include="ThisAddIn.Designer.xml">
+      <DependentUpon>ThisAddIn.cs</DependentUpon>
+    </None>
+    <Compile Include="ThisAddIn.Designer.cs">
+      <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
+    </Compile>
+    <AppDesigner Include="Properties\" />
+    <None Include="WordAddIn1_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\document.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\output.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\check-mark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\employees.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\checked.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\notebook.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\headerOutput.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\setLink.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\styleCheck.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\htmlOutput.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\touka.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\hyousi.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\EdgeTracker_logo50mm.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MJS_LOGO_255.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\loading.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\loading1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\1amw.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1amw1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\preloaders.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\preloaders1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\xsRHIWj_XDBEQDY1555031574.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\index.ajax-spinner-preloader.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ajaxloader.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Preloader_2.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edge.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\kai.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pattern1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pattern2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pattern3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="htmlTemplates\cover.css" />
+    <Content Include="htmlTemplates\font.css" />
+    <Content Include="htmlTemplates\fontchange.js" />
+    <Content Include="htmlTemplates\html2canvas.min.js" />
+    <Content Include="htmlTemplates\jquery-3.1.0.min.js" />
+    <Content Include="htmlTemplates\jquery.cookie.js" />
+    <Content Include="htmlTemplates\jspdf.debug.js" />
+    <Content Include="htmlTemplates\jspdf.js" />
+    <Content Include="htmlTemplates\jspdf.min.js" />
+    <Content Include="htmlTemplates\MJSHELP2002.css" />
+    <Content Include="htmlTemplates\parentdata.js" />
+    <Content Include="htmlTemplates\pdf.js" />
+    <Content Include="htmlTemplates\pict\arrow.png" />
+    <Content Include="htmlTemplates\projectdata.js" />
+    <Content Include="htmlTemplates\promise-6.1.0.min.js" />
+    <Content Include="htmlTemplates\resp.css" />
+    <Content Include="htmlTemplates\resp.js" />
+    <Content Include="htmlTemplates\screendata.js" />
+    <Content Include="htmlTemplates\search.js" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\andsearch_mark.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\andsearch_nomark.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\back_mobile_filter.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\back_mobile_ltr.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\back_mobile_rtl.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_clearall.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_desktop_applied.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_mark.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_mark_radio.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_mobile_applied.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_nomark.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_nomark_radio.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\filter_tab_applied.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\glossary_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\glossary_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\glossary_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\icon_pdf.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\idx_topic.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\index_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\index_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\index_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\layout.css" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\loading.gif" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\logo.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\menu.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\menu_close.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\next.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\next_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\next_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\next_mobile_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\next_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\next_tab_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\previous.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\previous_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\previous_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\previous_mobile_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\previous_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\previous_tab_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\print_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\remove.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_desktop_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_desktop_navigation.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_mobile_active.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_mobile_navigation.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\search_topic_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\slider_ltr.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\slider_open_ltr.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\slider_open_rtl.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\slider_rtl.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\social_close_ltr.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\social_close_rtl.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\social_open.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_closed_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_closed_desktop_selected.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_closed_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_closed_mobile_selected.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_open_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_open_desktop_selected.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_open_drildown.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_open_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_book_open_mobile_selected.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_link_desktop_ltr.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_link_desktop_rtl.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_link_mobile_ltr.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_link_mobile_rtl.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_tab.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_topic_desktop.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_topic_desktop_selected.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_topic_mobile.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\toc_topic_mobile_selected.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\top.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\usersettings.js" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\_icon_pdf.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\__back_mobile_ltr .png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\__menu.png" />
+    <Content Include="htmlTemplates\template\Azure_Blue01\__search_mobile_navigation.png" />
+    <Content Include="htmlTemplates\template\images\cover-1.png" />
+    <Content Include="htmlTemplates\template\images\cover-2.png" />
+    <Content Include="htmlTemplates\template\images\cover-3.png" />
+    <Content Include="htmlTemplates\template\images\expand.png" />
+    <Content Include="htmlTemplates\template\images\modal-close.png" />
+    <Content Include="htmlTemplates\template\resources\BSBack.png" />
+    <Content Include="htmlTemplates\template\resources\BSNext.png" />
+    <Content Include="htmlTemplates\template\scripts\common.min.js" />
+    <Content Include="htmlTemplates\template\scripts\constants.js" />
+    <Content Include="htmlTemplates\template\scripts\jquery-3.1.0.min.js" />
+    <Content Include="htmlTemplates\template\scripts\layout.min.js" />
+    <Content Include="htmlTemplates\template\scripts\loadcsh.js" />
+    <Content Include="htmlTemplates\template\scripts\loadparentdata.js" />
+    <Content Include="htmlTemplates\template\scripts\loadprojdata.js" />
+    <Content Include="htmlTemplates\template\scripts\loadscreen.js" />
+    <Content Include="htmlTemplates\template\scripts\mhfhost.js" />
+    <Content Include="htmlTemplates\template\scripts\mhlang.js" />
+    <Content Include="htmlTemplates\template\scripts\mhtopic.js" />
+    <Content Include="htmlTemplates\template\scripts\mhutils.js" />
+    <Content Include="htmlTemplates\template\scripts\mhver.js" />
+    <Content Include="htmlTemplates\template\scripts\pageloader.js" />
+    <Content Include="htmlTemplates\template\scripts\projectdata.js" />
+    <Content Include="htmlTemplates\template\scripts\resp.js" />
+    <Content Include="htmlTemplates\template\scripts\rh.min.js" />
+    <Content Include="htmlTemplates\template\scripts\search.js" />
+    <Content Include="htmlTemplates\template\scripts\settings.js" />
+    <Content Include="htmlTemplates\template\scripts\showhidecontrols.js" />
+    <Content Include="htmlTemplates\template\scripts\topic.min.js" />
+    <Content Include="htmlTemplates\template\scripts\utils.js" />
+    <Content Include="htmlTemplates\template\scripts\XmlJsReader.js" />
+    <Content Include="htmlTemplates\template\styles\font.css" />
+    <Content Include="htmlTemplates\template\styles\layout.min.css" />
+    <Content Include="htmlTemplates\template\styles\layoutfix.min.css" />
+    <Content Include="htmlTemplates\template\styles\pdf.css" />
+    <Content Include="htmlTemplates\template\styles\resp.css" />
+    <Content Include="htmlTemplates\template\styles\topic.min.css" />
+    <Content Include="htmlTemplates\template\styles\widgets.min.css" />
+    <Content Include="htmlTemplates\whxdata\glo.new.js" />
+    <Content Include="htmlTemplates\whxdata\idx.new.js" />
+    <Content Include="htmlTemplates\whxdata\searchAuto_Index.js" />
+    <Content Include="htmlTemplates\whxdata\searchAuto_Map_0.js" />
+    <Content Include="htmlTemplates\whxdata\whtagdata.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>WordAddIn1_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>711343D23890A2610C8676A479E455CFD8500F30</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <!-- Include the build rules for a C# project. -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Include additional build rules for an Office application add-in. -->
+  <Import Project="$(VSToolsPath)\OfficeTools\Microsoft.VisualStudio.Tools.Office.targets" Condition="'$(VSToolsPath)' != ''" />
+  <!-- This section defines VSTO properties that describe the host-changeable project properties. -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{BAA0C2D2-18E2-41B9-852F-F413020CAA33}">
+        <ProjectProperties HostName="Word" HostPackage="{29A7B9D7-A7F1-4328-8EF0-6B2D1A56B2C1}" OfficeVersion="15.0" VstxVersion="4.0" ApplicationType="Word" Language="cs" TemplatesPath="VSTOTemplates" DebugInfoExeName="#Software\Microsoft\Office\16.0\Word\InstallRoot\Path#WINWORD.EXE" DebugInfoCommandLine="/w" AddItemTemplatesGuid="{51063C3A-E220-4D12-8922-BDA915ACD783}" />
+        <Host Name="Word" GeneratedCodeNamespace="WordAddIn1" PublishedHash="69C324AB27932AA2FBF2B7EA72250886FF164DE6" IconIndex="0">
+          <HostItem Name="ThisAddIn" Code="ThisAddIn.cs" CanonicalName="AddIn" PublishedHash="7E435CBF6B810563CE449515FA01C5EFB8CFE78F" CanActivate="false" IconIndex="1" Blueprint="ThisAddIn.Designer.xml" GeneratedCode="ThisAddIn.Designer.cs" />
+        </Host>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

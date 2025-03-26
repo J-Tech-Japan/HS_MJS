@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32427.441
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MJS", "WordAddIn1\MJS.csproj", "{9CBED0F7-2808-4F15-96AC-40377F83969A}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MJSPluginSetup", "MJSPluginSetup\MJSPluginSetup.vdproj", "{FBA28615-449E-4AA2-882D-A1B7D53A3202}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CBED0F7-2808-4F15-96AC-40377F83969A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CBED0F7-2808-4F15-96AC-40377F83969A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CBED0F7-2808-4F15-96AC-40377F83969A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CBED0F7-2808-4F15-96AC-40377F83969A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBA28615-449E-4AA2-882D-A1B7D53A3202}.Debug|Any CPU.ActiveCfg = Debug
+		{FBA28615-449E-4AA2-882D-A1B7D53A3202}.Debug|Any CPU.Build.0 = Debug
+		{FBA28615-449E-4AA2-882D-A1B7D53A3202}.Release|Any CPU.ActiveCfg = Release
+		{FBA28615-449E-4AA2-882D-A1B7D53A3202}.Release|Any CPU.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A68DA948-162D-401F-B3A3-8CC9322E1C03}
+	EndGlobalSection
+EndGlobal
