@@ -27,7 +27,7 @@
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>WordAddIn1</RootNamespace>
     <AssemblyName>MJSワードプラグイン</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <DefineConstants>VSTO40</DefineConstants>
     <IsWebBootstrapper>False</IsWebBootstrapper>
     <FileUpgradeFlags>
@@ -303,6 +303,7 @@
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="MJS.pfx" />
+    <None Include="MJS_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -593,10 +594,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>WordAddIn1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MJS_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>711343D23890A2610C8676A479E455CFD8500F30</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>C697476D91906519A1DC9FBCAD8EAA64D075DA69</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
