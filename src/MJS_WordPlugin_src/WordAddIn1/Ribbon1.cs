@@ -2502,8 +2502,6 @@ namespace WordAddIn1
                     int lv2count = 0;
                     int lv3count = 0;
 
-                    int splitCount = 1;
-
                     bool chapterSplit = false;
 
                     log.WriteLine("変換ループ開始");
@@ -4331,7 +4329,7 @@ namespace WordAddIn1
                                 isMerge = true;
                             }
                         }
-                        catch (Exception ex) { }
+                        catch (Exception) { }
 
 
                         if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[４4](?![・用])")
@@ -5530,6 +5528,11 @@ namespace WordAddIn1
             }
 
             return ret;
+        }
+
+        private void button11_Click(object sender, RibbonControlEventArgs e)
+        {
+
         }
         // SOURCELINK追加==========================================================================END
     }

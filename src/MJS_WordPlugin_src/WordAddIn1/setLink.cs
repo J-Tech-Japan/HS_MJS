@@ -33,7 +33,7 @@ namespace WordAddIn1
                 initText = selectionRange.Text;
                 //tbDisplayStr.Text = Regex.Replace(selectionRange.Text, @"^[\s　]*(?:\d+\.)*\d+[\s　]+", "");
             }
-            catch(Exception ex)
+            catch (Exception)
             {
             }
         }
@@ -75,7 +75,7 @@ namespace WordAddIn1
                     openFileDialog1.InitialDirectory = Path.GetDirectoryName(tbFilePath.Text);
                 }
             }
-            catch(Exception ex)
+            catch (Exception)
             {
             }
 
@@ -168,6 +168,11 @@ namespace WordAddIn1
             WordAddIn1.Properties.Settings.Default.Save();
 
             this.Close();
+        }
+
+        private void tbDisplayStr_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
