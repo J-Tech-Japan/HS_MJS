@@ -199,6 +199,7 @@
             this.button11.Label = " ";
             this.button11.Name = "button11";
             this.button11.ShowImage = true;
+            this.button11.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button11_Click);
             // 
             // Ribbon1
             // 
