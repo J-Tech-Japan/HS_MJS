@@ -1,10 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\src",
-    "\\src\\MJS_WordPlugin_src",
-    "\\src\\MJS_WordPlugin_src\\WordAddIn1"
+    ""
   ],
-  "SelectedNode": "\\src\\MJS_WordPlugin_src\\WordAddIn1\\bookInfo.Designer.cs",
+  "SelectedNode": "\\MJS.sln",
   "PreviewInSolutionExplorer": false
 }

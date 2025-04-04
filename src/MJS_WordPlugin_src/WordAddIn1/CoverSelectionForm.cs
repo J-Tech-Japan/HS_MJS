@@ -91,7 +91,7 @@ namespace WordAddIn1
         {
             if (this.selectedCoverTemplate == CoverTemplateEnum.None)
             {
-                MessageBox.Show("表紙のパターンをを選択してください。");
+                MessageBox.Show("表紙のパターンを選択してください。");
             }
             else if (this.selectedCoverTemplate == CoverTemplateEnum.GeneralPattern3)
             {
