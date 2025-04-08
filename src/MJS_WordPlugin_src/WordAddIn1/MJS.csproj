@@ -333,15 +333,21 @@
     <Compile Include="Ribbon1.Button5.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.CheckDocInfomation.cs" />
-    <Compile Include="Ribbon1.CheckSortInfomation.cs" />
+    <Compile Include="Ribbon1.CheckDocInfomation.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.CheckSortInfomation.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Ribbon1.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ribbon1.Designer.cs">
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Ribbon1.MakeBookInfomation.cs" />
+    <Compile Include="Ribbon1.MakeBookInfomation.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="setLink.cs">
       <SubType>Form</SubType>
     </Compile>
