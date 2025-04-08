@@ -345,6 +345,9 @@
     <Compile Include="Ribbon1.Designer.cs">
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Ribbon1.InnerNode.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Ribbon1.MakeBookInfomation.cs">
       <SubType>Component</SubType>
     </Compile>
