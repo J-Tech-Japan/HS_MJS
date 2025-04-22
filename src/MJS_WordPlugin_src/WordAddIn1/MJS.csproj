@@ -336,6 +336,27 @@
     <Compile Include="Ribbon1.Button3.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Ribbon1.Button3.Helper.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.htmlCoverTemplate1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.IdxHtmlTemplate.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.HTMLXMLProcessor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.ProcessCoverImages.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.Search.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.StyleProcessor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Ribbon1.Button4.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -353,6 +374,9 @@
     </Compile>
     <Compile Include="Ribbon1.Designer.cs">
       <DependentUpon>Ribbon1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.HtmlTemplate1.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ribbon1.InnerNode.cs">
       <SubType>Component</SubType>

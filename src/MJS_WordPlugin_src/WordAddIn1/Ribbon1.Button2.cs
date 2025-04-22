@@ -7,6 +7,7 @@ using Word = Microsoft.Office.Interop.Word;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace WordAddIn1
 {
@@ -151,7 +152,10 @@ namespace WordAddIn1
             // プログレスバーを閉じる
             ProgressBar.Close();
             ProgressBar.mInstance = null;
-            
+
+            //Marshal.ReleaseComObject(selection);
+            //Marshal.ReleaseComObject(activeDocument);
+            //Marshal.ReleaseComObject(application);
         }
 
 
