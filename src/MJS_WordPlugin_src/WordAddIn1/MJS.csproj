@@ -339,13 +339,13 @@
     <Compile Include="Ribbon1.Button3.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.htmlCoverTemplate1.cs">
+    <Compile Include="Ribbon1.Button3.HtmlCoverTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ribbon1.Button3.IdxHtmlTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.HTMLXMLProcessor.cs">
+    <Compile Include="Ribbon1.Button3.XMLProcessor.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ribbon1.Button3.ProcessCoverImages.cs">
@@ -392,6 +392,9 @@
     </Compile>
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Button3.SearchIndex.cs">
+      <SubType>Component</SubType>
     </Compile>
     <None Include="ThisAddIn.Designer.xml">
       <DependentUpon>ThisAddIn.cs</DependentUpon>

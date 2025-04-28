@@ -1,0 +1,112 @@
+
+「書誌情報出力」：button4
+「リンク設定」：button5
+「スタイルチェック」：button2
+「HTML出力」：button3
+
+◆◆◆◆◆◆◆◆◆◆
+Ribbon1.Button3.cs
+application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);の手前
+
+ //ActiveDocumentのパスは、「WordAddIn1.application.ActiveDocument.Path」で取得できます。
+ //index.htmlが出力されるとして、「WordAddIn1.application.ActiveDocument.Path + @"\index.html"」に
+ //出力されるindex.htmlのパスという想定で、以下に出力後のHTMLをブラウザで閲覧するか否かの
+ //メッセージボックス表示のコードを書いています。
+
+
+ //DialogResult selectMess = MessageBox.Show(WordAddIn1.application.ActiveDocument.Path + "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？", "HTML出力成功", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+ //if (selectMess == DialogResult.Yes)
+ //{
+ //    try
+ //    {
+ //        Process.Start(WordAddIn1.application.ActiveDocument.Path + @"\index.html");
+ //    }
+ //    catch
+ //    {
+ //        MessageBox.Show("HTMLの出力に失敗しました。", "HTML出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+ //    }
+ //}
+
+ /*以下は、次期対応変更履歴保存用コードの一部です。
+ var activeDoc = WordAddIn1.application.ActiveDocument as Microsoft.Office.Interop.Word.Document;
+ Word.Selection ws = WordAddIn1.application.Selection;
+ string text = "No,Page,Type,Revision,User\r\n";
+ foreach (Word.Revision r in activeDoc.Revisions)
+ {
+     string word = r.Range.Text;
+     if(word.Contains("\r"))
+     {
+         word = @"""" + word + @"""";
+         word = word.Replace("\r", "\n");
+     }
+     text += r.Index + "," + r.Range.Information[Word.WdInformation.wdActiveEndPageNumber] + "," + cordConvert((int)r.Type) + "," + word + "," + r.Author + "\r\n";
+ }
+ using (StreamWriter sw = new StreamWriter(@"./revision.csv", false, Encoding.UTF8))
+ {
+     sw.Write(text);
+ }
+ */
+
+
+◆◆◆◆◆◆◆◆◆◆
+Ribbon1.Button3.XML.cs
+else if (Regex.IsMatch(thisStyleName, @"(見出し|Heading)\s*[３3](?![・用])"))の下
+
+//if ((lv1styleName == "") || (lv1styleName == thisStyleName) ||
+//   (lv2styleName == "") || (lv2styleName == thisStyleName) ||
+//   (lv3styleName == "") || (lv3styleName == thisStyleName))
+//{
+//    if ((lv1styleName == "") || (lv1styleName == thisStyleName))
+//    {
+//        lv1count++;
+//        lv2styleName = "";
+//        lv2count = 0;
+//        lv3styleName = "";
+//        lv3count = 0;
+
+//        objTocCurrent = objTocCurrent.SelectSingleNode("/result/item");
+//    }
+//    else if ((lv2styleName == "") || (lv2styleName == thisStyleName))
+//    {
+//        lv2count++;
+//        lv3styleName = "";
+//        lv3count = 0;
+
+//        objTocCurrent = objTocCurrent.SelectSingleNode("ancestor-or-self::item[count(ancestor::item) = 1]");
+//    }
+//    else if ((lv3styleName == "") || (lv3styleName == thisStyleName))
+//    {
+//        lv3count++;
+
+//        objTocCurrent = objTocCurrent.SelectSingleNode("ancestor-or-self::item[count(ancestor::item) = 2]");
+
+//    }
+
+//    objTocCurrent = objTocCurrent.AppendChild(objToc.CreateElement("item"));
+//    ((XmlElement)objTocCurrent).SetAttribute("title", childs.InnerText);
+//    ((XmlElement)objTocCurrent).SetAttribute("href", setid);
+
+//    objBodyCurrent = objBody.DocumentElement.AppendChild(objBody.CreateElement("div"));
+//    ((XmlElement)objBodyCurrent).SetAttribute("id", setid);
+
+//    objBodyCurrent.AppendChild(objBody.CreateElement("p"));
+//    ((XmlElement)objBodyCurrent.LastChild).SetAttribute("class", "Heading1");
+
+//    foreach (XmlNode childItem in childs.ChildNodes)
+//    {
+//        innerNode(styleName, objBodyCurrent.LastChild, childItem);
+//    }
+
+//    if ((lv1styleName == "") || (lv1styleName == thisStyleName))
+//    {
+//        lv1styleName = thisStyleName;
+//    }
+//    else if ((lv2styleName == "") || (lv2styleName == thisStyleName))
+//    {
+//        lv2styleName = thisStyleName;
+//    }
+//    else
+//    {
+//        lv3styleName = thisStyleName;
+//    }
+//}

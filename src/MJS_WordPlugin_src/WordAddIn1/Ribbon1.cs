@@ -26,15 +26,18 @@ namespace WordAddIn1
         private string bookInfoDef = "";
         private Dictionary<string, string> bookInfoDic = new Dictionary<string, string>();
         private bool checkOK = false;
+        private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
+        private const string InvalidFileNameMessage = "開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」";
+        private const string ErrFileNameRule = "ファイル命名規則エラー";
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
-            //WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument.TrackRevisions = true;
-            //WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument.ShowRevisions = false;
-            WordAddIn1.Globals.ThisAddIn.Application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
+            //Globals.ThisAddIn.Application.ActiveDocument.TrackRevisions = true;
+            //Globals.ThisAddIn.Application.ActiveDocument.ShowRevisions = false;
+            Globals.ThisAddIn.Application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
 
-            //            WordAddIn1.Globals.ThisAddIn.Application.WindowSelectionChange -= delegate (Word.Selection mySelection) { Application_WindowSelectionChange(); };
-            WordAddIn1.Globals.ThisAddIn.Application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
+            //            Globals.ThisAddIn.Application.WindowSelectionChange -= delegate (Word.Selection mySelection) { Application_WindowSelectionChange(); };
+            Globals.ThisAddIn.Application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
         }
 
         static int CompareKeyValuePair(KeyValuePair<string, float> x, KeyValuePair<string, float> y)
@@ -75,7 +78,7 @@ namespace WordAddIn1
         private void Application_DocumentChange()
         {
             bookInfoDef = "";
-            Word.Document Doc = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
+            Word.Document Doc = Globals.ThisAddIn.Application.ActiveDocument;
 
             // ブックマーク表示オプションをオンにする
             Doc.ActiveWindow.View.ShowBookmarks = true;
@@ -106,7 +109,7 @@ namespace WordAddIn1
 
         //private void Application_DocumentBeforeSave(Word.Document Doc, ref bool SaveAsUI, ref bool Cancel)
         //{
-        //    Word.Document activeDoc = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
+        //    Word.Document activeDoc = Globals.ThisAddIn.Application.ActiveDocument;
 
         //    if (!File.Exists(activeDoc.Path + "\\" + Path.ChangeExtension(activeDoc.Name, ".h")))
         //            File.CreateText(activeDoc.Path + "\\" + Path.ChangeExtension(activeDoc.Name, ".h"));
@@ -126,8 +129,8 @@ namespace WordAddIn1
         //    if (toggleButton1.Checked == true)
         //        button2.Enabled = true;
         //    else button2.Enabled = false;
-        //    var activeDoc = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument as Microsoft.Office.Interop.Word.Document;
-        //    Word.Selection ws = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+        //    var activeDoc = Globals.ThisAddIn.Application.ActiveDocument as Microsoft.Office.Interop.Word.Document;
+        //    Word.Selection ws = Globals.ThisAddIn.Application.Selection;
 
         //    if (toggleButton1.Checked)
         //    {
@@ -255,9 +258,9 @@ namespace WordAddIn1
                 return;
             }
 
-            WordAddIn1.Globals.ThisAddIn.Application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
+            Globals.ThisAddIn.Application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
 
-            //            WordAddIn1.Globals.ThisAddIn.Application.WindowSelectionChange -= delegate (Word.Selection mySelection) { Application_WindowSelectionChange(); };
+            //            Globals.ThisAddIn.Application.WindowSelectionChange -= delegate (Word.Selection mySelection) { Application_WindowSelectionChange(); };
             if (button3.Enabled)
             {
                 MessageBox.Show("「スタイルチェック」クリック後に変更が加えられました。\r\n「HTML出力」を実行するためには\r\nもう一度「スタイルチェック」を実行してください。", "ドキュメントが変更されました！", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
