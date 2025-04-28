@@ -245,5 +245,18 @@ namespace WordAddIn1
             htmlCoverTemplate2 += @"</p>" + "\n";
         }
 
+        // すべてのパターンに共通するHTMLテンプレートの追加
+        public void AppendHtmlCoverTemplate2(ref string htmlCoverTemplate2)
+        {
+            htmlCoverTemplate2 += @"<script type=""text/javascript"" language=""javascript1.2"">//<![CDATA[" + "\n";
+            htmlCoverTemplate2 += @"<!--" + "\n";
+            htmlCoverTemplate2 += @"if (window.writeIntopicBar)" + "\n";
+            htmlCoverTemplate2 += @"   writeIntopicBar(0);" + "\n";
+            htmlCoverTemplate2 += @"//-->" + "\n";
+            htmlCoverTemplate2 += @"//]]></script>" + "\n";
+            htmlCoverTemplate2 += @"</body>" + "\n";
+            htmlCoverTemplate2 += @"</html>" + "\n";
+        }
+
     }
 }

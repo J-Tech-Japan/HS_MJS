@@ -20,11 +20,11 @@ namespace WordAddIn1
             Word.Document thisDocument = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
 
             // 命名規則に違反している場合
-            if (!Regex.IsMatch(thisDocument.Name, @"^[A-Z]{3}(_[^_]*?){2}\.docx*$"))
+            if (!Regex.IsMatch(thisDocument.Name, FileNamePattern))
             {
                 // エラーメッセージを表示して処理を終了
                 load.Visible = false;
-                MessageBox.Show("開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」", "ファイル命名規則エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(InvalidFileNameMessage, ErrFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.DoEvents();
                 WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
                 return false;

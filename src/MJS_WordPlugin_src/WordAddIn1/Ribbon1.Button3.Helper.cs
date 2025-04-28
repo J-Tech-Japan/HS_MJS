@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
@@ -12,6 +14,71 @@ namespace WordAddIn1
 {
     public partial class Ribbon1
     {
+        // 指定されたパスにあるテキストファイル（書誌情報）を読み込み、mergeScript にデータを追加
+        public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
+        {
+            using (StreamReader sr = new StreamReader(
+                    documentPath + "\\headerFile\\" + Regex.Replace(documentName, "^(.{3}).+$", "$1") + @".txt", Encoding.Default))
+            {
+                while (sr.Peek() >= 0)
+                {
+                    string strBuffer = sr.ReadLine();
+                    string[] info = strBuffer.Split('\t');
+
+                    if (info.Length == 4)
+                    {
+                        if (!info[3].Equals(""))
+                        {
+                            info[3] = info[3].Replace("(", "").Replace(")", "");
+                            if (!mergeScript.Any(x => x.Key == info[2] && x.Value == info[3]))
+                            {
+                                mergeScript.Add(info[2], info[3]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void PrepareHtmlTemplates(System.Reflection.Assembly assembly, string rootPath, string exportDir)
+        {
+            // アセンブリからリソースを取得し、テンプレートZIPファイルを作成
+            using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
+            {
+                FileStream fs = File.Create(rootPath + "\\htmlTemplates.zip");
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.CopyTo(fs);
+                fs.Close();
+            }
+
+            // 既存のテンプレートフォルダを削除
+            if (Directory.Exists(rootPath + "\\htmlTemplates"))
+            {
+                Directory.Delete(rootPath + "\\htmlTemplates", true);
+            }
+
+            // ZIPファイルを解凍
+            ZipFile.ExtractToDirectory(rootPath + "\\htmlTemplates.zip", rootPath);
+
+            // 出力ディレクトリを削除
+            if (Directory.Exists(rootPath + "\\" + exportDir))
+            {
+                Directory.Delete(rootPath + "\\" + exportDir, true);
+            }
+
+            // 一時的なカバーピクチャフォルダを削除
+            if (Directory.Exists(rootPath + "\\tmpcoverpic"))
+            {
+                Directory.Delete(rootPath + "\\tmpcoverpic", true);
+            }
+
+            // テンプレートフォルダを出力ディレクトリに移動
+            Directory.Move(rootPath + "\\htmlTemplates", rootPath + "\\" + exportDir);
+
+            // ZIPファイルを削除
+            File.Delete(rootPath + "\\htmlTemplates.zip");
+        }
+
         // 表紙に関連する段落を収集
         public void CollectCoverParagraphs(Document docCopy, ref string manualTitle, ref string manualSubTitle, ref string manualVersion,
                                       ref string manualTitleCenter, ref string manualSubTitleCenter, ref string manualVersionCenter,
@@ -198,6 +265,50 @@ namespace WordAddIn1
                     }
                 }
             }
+        }
+
+        public void GenerateZipArchive(string zipDirPath, string rootPath, string exportDir, string headerDir, string docFullName, string docName, StreamWriter log)
+        {
+            if (Directory.Exists(zipDirPath))
+            {
+                Directory.Delete(zipDirPath, true);
+            }
+            Directory.CreateDirectory(zipDirPath);
+
+            copyDirectory(rootPath + "\\" + exportDir, Path.Combine(zipDirPath, exportDir));
+            if (Directory.Exists(rootPath + "\\" + headerDir))
+            {
+                copyDirectory(rootPath + "\\" + headerDir, Path.Combine(zipDirPath, headerDir));
+            }
+            File.Copy(docFullName, Path.Combine(zipDirPath, docName));
+
+            log.WriteLine(docFullName + ":" + Path.Combine(zipDirPath, docName));
+
+            if (File.Exists(zipDirPath + ".zip"))
+            {
+                File.Delete(zipDirPath + ".zip");
+            }
+
+            System.IO.Compression.ZipFile.CreateFromDirectory(zipDirPath, zipDirPath + ".zip", System.IO.Compression.CompressionLevel.Optimal, true, Encoding.GetEncoding("Shift_JIS"));
+
+            Directory.Delete(zipDirPath, true);
+        }
+
+        private void CleanUpManualTitles(
+            ref string manualTitle,
+            ref string manualSubTitle,
+            ref string manualVersion,
+            ref string manualTitleCenter,
+            ref string manualSubTitleCenter,
+            ref string manualVersionCenter)
+        {
+            string bell = new string((char)7, 1);
+            manualTitle = Regex.Replace(manualTitle, @"<br/>$", "").Replace(bell, "").Trim();
+            manualSubTitle = Regex.Replace(manualSubTitle, @"<br/>$", "").Replace(bell, "").Trim();
+            manualVersion = Regex.Replace(manualVersion, @"<br/>$", "").Replace(bell, "").Trim();
+            manualTitleCenter = Regex.Replace(manualTitleCenter, @"<br/>$", "").Replace(bell, "").Trim();
+            manualSubTitleCenter = Regex.Replace(manualSubTitleCenter, @"<br/>$", "").Replace(bell, "").Trim();
+            manualVersionCenter = Regex.Replace(manualVersionCenter, @"<br/>$", "").Replace(bell, "").Trim();
         }
     }
 }
