@@ -62,6 +62,7 @@ namespace WordAddIn1
                 MessageBox.Show($"アドイン終了時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+        
         #region VSTO で生成されたコード
 
         /// <summary>

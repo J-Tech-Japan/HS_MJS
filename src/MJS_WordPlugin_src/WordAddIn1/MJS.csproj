@@ -321,7 +321,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Ribbon1.Button2.Config.cs">
+    <Compile Include="Ribbon1.ClearClipboard.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.Config.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Ribbon1.Button2.cs">
