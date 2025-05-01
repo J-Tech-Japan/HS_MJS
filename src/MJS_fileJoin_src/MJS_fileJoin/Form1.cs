@@ -108,7 +108,7 @@ namespace MJS_fileJoin
                 addHtmlDir(folderBrowserDialog1.SelectedPath);
             }
         }
-
+        
         private bool addHtmlDir(string dirPath)
         {
             if (Directory.Exists(Path.Combine(Path.GetDirectoryName(dirPath), "headerFile")))

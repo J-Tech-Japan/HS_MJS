@@ -149,10 +149,12 @@ namespace WordAddIn1
             StreamWriter log,
             ref string trademarkTitle,
             ref List<string> trademarkTextList,
-            ref string trademarkRight,
-            ref bool isTradeMarksDetected,
-            ref bool isRightDetected)
+            ref string trademarkRight
+            )
         {
+            bool isTradeMarksDetected = false;
+            bool isRightDetected = false;
+
             foreach (Paragraph wp in docCopy.Sections[lastSectionIdx].Range.Paragraphs)
             {
                 log.WriteLine(wp.Range.Text);

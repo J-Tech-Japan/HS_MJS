@@ -26,9 +26,6 @@ namespace WordAddIn1
         private string bookInfoDef = "";
         private Dictionary<string, string> bookInfoDic = new Dictionary<string, string>();
         private bool checkOK = false;
-        private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
-        private const string InvalidFileNameMessage = "開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」";
-        private const string ErrFileNameRule = "ファイル命名規則エラー";
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {

@@ -17,6 +17,7 @@ using System.Xml;
 using System.Threading;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 
 namespace WordAddIn1
 {
@@ -33,14 +34,14 @@ namespace WordAddIn1
             var application = Globals.ThisAddIn.Application;
             var activeDocument = application.ActiveDocument;
 
-            application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
-
+            // イベントハンドラの解除
+            application.WindowSelectionChange -= Application_WindowSelectionChange;
             button3.Enabled = false;
-
-            application.DocumentChange -= new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
+            application.DocumentChange -= Application_DocumentChange;
 
             var defaultView = application.ActiveWindow.View.Type;
 
+            // ファイル名の検証
             if (!Regex.IsMatch(activeDocument.Name, FileNamePattern))
             {
                 load.Close();
@@ -49,17 +50,14 @@ namespace WordAddIn1
                 return;
             }
 
-            Microsoft.Office.Core.DocumentProperties properties;
-            properties = (Microsoft.Office.Core.DocumentProperties)activeDocument.CustomDocumentProperties;
-            string webHelpFolderName = null;
-
-            if (properties.Cast<Microsoft.Office.Core.DocumentProperty>().Any(x => x.Name == "webHelpFolderName"))
-            {
-                webHelpFolderName = properties["webHelpFolderName"].Value;
-            }
+            // カスタムプロパティの取得
+            var properties = (Microsoft.Office.Core.DocumentProperties)activeDocument.CustomDocumentProperties;
+            string webHelpFolderName = properties.Cast<Microsoft.Office.Core.DocumentProperty>()
+                                                 .FirstOrDefault(x => x.Name == "webHelpFolderName")?.Value;
 
             load.Visible = false;
 
+            // BookInfoの作成
             if (!makeBookInfo(load))
             {
                 load.Close();
@@ -67,12 +65,12 @@ namespace WordAddIn1
                 return;
             }
 
+            // マージスクリプトの収集
             Dictionary<string, string> mergeScript = new Dictionary<string, string>();
-
             CollectMergeScript(activeDocument.Path, activeDocument.Name, mergeScript);
 
+            // カバー選択の処理
             bool isEasyCloud, isEdgeTracker, isPattern1, isPattern2;
-
             if (!HandleCoverSelection(load, out isEasyCloud, out isEdgeTracker, out isPattern1, out isPattern2))
             {
                 return;
@@ -88,47 +86,62 @@ namespace WordAddIn1
             string docFullName = activeDocument.FullName;
             string exportDir = "webHelp";
             string headerDir = "headerFile";
+            string exportDirPath = Path.Combine(rootPath, exportDir);
+            string tmpDocPath = Path.Combine(rootPath, "tmp.doc");
+            string logPath = Path.Combine(rootPath, "log.txt");
+            string tmpHtmlPath = Path.Combine(rootPath, "tmp.html");
+            string indexHtmlPath = Path.Combine(rootPath, exportDir, "index.html");
+            string tmpFolderForImagesSavedBySaveAs2Method = Path.Combine(rootPath, "tmp.files");
+            string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
+            string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
+            string zipDirPath = Path.Combine(rootPath, $"{docid}_{exportDir}_{DateTime.Today:yyyyMMdd}");
 
             if (webHelpFolderName != null && webHelpFolderName.Length > 0)
             {
                 exportDir = webHelpFolderName;
             }
 
-            using (StreamWriter log = new StreamWriter(rootPath + "\\log.txt", false, Encoding.UTF8))
+            using (StreamWriter log = new StreamWriter(logPath, false, Encoding.UTF8))
             {
                 try
                 {
                     log.WriteLine("テンプレートデータ準備");
 
+                    // 現在実行中のアセンブリ（DLLまたはEXE）に関する情報を取得
                     System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                    
                     // HTMLテンプレートの準備
                     PrepareHtmlTemplates(assembly, rootPath, exportDir);
-
-                    string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
-                    string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
-                    string zipDirPath = rootPath + "\\" + docid + "_" + exportDir + "_" + DateTime.Today.ToString("yyyyMMdd");
 
                     Application.DoEvents();
 
                     log.WriteLine("HTML保存");
                     Application.DoEvents();
 
-                    Clipboard.Clear();
-                    Clipboard.SetDataObject(new DataObject());
+                    //Clipboard.Clear();
+                    ClearClipboardSafely();
+                    //Clipboard.SetDataObject(new DataObject());
                     Application.DoEvents();
+
+                    // ドキュメント全体を選択してクリップボードにコピー
                     application.Selection.WholeStory();
                     application.Selection.Copy();
+
                     Application.DoEvents();
+
+                    // 選択範囲をドキュメントの先頭に折りたたむ
+                    // （選択が解除され、カーソルがドキュメントの先頭に移動）
                     application.Selection.Collapse(Word.WdCollapseDirection.wdCollapseStart);
 
-                    if (File.Exists(rootPath + "\\tmp.doc"))
+                    // 一時ファイルを削除
+                    if (File.Exists(tmpDocPath))
                     {
-                        try { File.Delete(rootPath + "\\tmp.doc"); }
+                        try { File.Delete(tmpDocPath); }
                         catch
                         {
                             load.Close();
                             load.Dispose();
-                            MessageBox.Show("同階層のtmp.docが開かれています。\r\ntmp.docを閉じてから実行してください。", "ファイルエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(ErrMessageTmpDocOpen, ErrFile, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
                     }
@@ -137,24 +150,18 @@ namespace WordAddIn1
                     Word.Document docCopy = application.Documents.Add();
 
                     Application.DoEvents();
-                    docCopy.SaveAs2(rootPath + "\\tmp.doc");
+                    docCopy.SaveAs2(tmpDocPath);
                     docCopy.TrackRevisions = false;
                     docCopy.AcceptAllRevisions();
 
                     docCopy.Select();
                     Application.DoEvents();
+
+                    // クリップボードの内容を貼り付け、貼り付け先のスタイルを適用
                     application.Selection.PasteAndFormat(Word.WdRecoveryType.wdUseDestinationStylesRecovery);
 
-                    load.Invoke((MethodInvoker)delegate
-                    {
-                        Clipboard.Clear();
-                    });
-
-                    //Clipboard.Clear();
-                    // クリップボードをクリアする代わりに、空のデータを設定して内容を上書きする
-                    //Clipboard.SetDataObject(new DataObject());
-
                     Application.DoEvents();
+                    ClearClipboardSafely();
 
                     int biCount = 0;
                     bool coverExist = false;
@@ -169,7 +176,10 @@ namespace WordAddIn1
                     List<string> trademarkTextList = new List<string>();
                     string trademarkRight = "";
 
+                    // ドキュメント内のセクション数をログに記録
                     log.WriteLine("Number of sections: " + docCopy.Sections.Count);
+
+                    // ドキュメントの最後のセクションのインデックスを取得
                     int lastSectionIdx = docCopy.Sections.Count;
 
                     // 表紙に関連する段落を収集
@@ -183,9 +193,6 @@ namespace WordAddIn1
                         ref manualVersionCenter,
                         ref coverExist);
 
-                    bool isTradeMarksDetected = false;
-                    bool isRightDetected = false;
-
                     // 商標情報と著作権情報を収集
                     CollectTrademarkAndCopyrightDetails(
                         docCopy,
@@ -193,10 +200,10 @@ namespace WordAddIn1
                         log,
                         ref trademarkTitle,
                         ref trademarkTextList,
-                        ref trademarkRight,
-                        ref isTradeMarksDetected,
-                        ref isRightDetected);
+                        ref trademarkRight
+                        );
 
+                    // 不要なタグや制御文字を削除
                     CleanUpManualTitles(
                         ref manualTitle,
                         ref manualSubTitle,
@@ -207,6 +214,7 @@ namespace WordAddIn1
 
                     List<List<string>> productSubLogoGroups = new List<List<string>>();
 
+                    // 特定の条件に基づいて画像を抽出・変換・保存する
                     if (coverExist)
                     {
                         ProcessCoverImages(
@@ -223,74 +231,103 @@ namespace WordAddIn1
                             );
                     }
 
+                    // ドキュメントの末尾にカーソルを移動
                     application.Selection.EndKey(Word.WdUnits.wdStory);
                     object selectionRange = application.Selection.Range;
-                    Word.Shape wst = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
-                    wst.WrapFormat.Type = Word.WdWrapType.wdWrapInline;
 
-                    // キャンバスに関連する図形のプロパティを調整
+                    // ドキュメントにキャンバスを追加（位置: 0, 0、サイズ: 1x1ポイント）
+                    Word.Shape temporaryCanvas = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
+
+                    // キャンバスの折り返し設定を「行内」に変更
+                    temporaryCanvas.WrapFormat.Type = Word.WdWrapType.wdWrapInline;
+
+                    // キャンバス内の図形のプロパティを調整
                     AdjustCanvasShapes(docCopy);
 
-                    wst.Delete();
+                    temporaryCanvas.Delete();
 
+                    // 表の幅がポイント単位で指定されている場合、自動調整を有効
                     foreach (Word.Table wt in docCopy.Tables)
                     {
                         if (wt.PreferredWidthType == Word.WdPreferredWidthType.wdPreferredWidthPoints)
                             wt.AllowAutoFit = true;
                     }
-                    
+
+                    // スタイル名が「奥付タイトル」の場合、スタイル名を「titledef」に変更
                     foreach (Word.Style ws in docCopy.Styles)
                         if (ws.NameLocal == "奥付タイトル")
                             ws.NameLocal = "titledef";
 
+                    // ドキュメントのWebオプションをUTF-8エンコーディングに設定
                     docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
-                    docCopy.SaveAs2(rootPath + "\\tmp.html", Word.WdSaveFormat.wdFormatFilteredHTML);
+
+                    // ドキュメントをHTML形式（フィルタ済み）で保存
+                    docCopy.SaveAs2(tmpHtmlPath, Word.WdSaveFormat.wdFormatFilteredHTML);
                     docCopy.Close();
-                    File.Delete(rootPath + "\\tmp.doc");
+
+                    File.Delete(tmpDocPath);
 
                     log.WriteLine("画像フォルダ コピー");
 
-                    string tmpFolderForImagesSavedBySaveAs2Method = rootPath + "\\tmp.files";
                     bool isTmpDot = true;
 
-                    if (!Directory.Exists(tmpFolderForImagesSavedBySaveAs2Method))
-                    {
-                        isTmpDot = false;
-                        tmpFolderForImagesSavedBySaveAs2Method = rootPath + "\\tmp_files";
-                    }
-
+                    // 一時フォルダが存在するか確認
                     if (Directory.Exists(tmpFolderForImagesSavedBySaveAs2Method))
                     {
-                        foreach (string pict in Directory.GetFiles(tmpFolderForImagesSavedBySaveAs2Method))
+                        try
                         {
-                            File.Copy(pict, rootPath + "\\" + exportDir + "\\pict\\" + Path.GetFileName(pict));
-                        }
+                            isTmpDot = false;
 
-                        Directory.Delete(tmpFolderForImagesSavedBySaveAs2Method, true);
+                            // 一時フォルダ内のすべての画像ファイルをコピー
+                            foreach (string pict in Directory.GetFiles(tmpFolderForImagesSavedBySaveAs2Method))
+                            {
+                                File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
+                            }
+
+                            // 一時フォルダを削除
+                            Directory.Delete(tmpFolderForImagesSavedBySaveAs2Method, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
+                            throw;
+                        }
                     }
 
-                    StreamReader sr = new StreamReader(rootPath + "\\tmp.html", Encoding.UTF8);
-                    string htmlStr = sr.ReadToEnd();
-                    sr.Close();
+                    string htmlStr;
 
+                    using (StreamReader sr = new StreamReader(tmpHtmlPath, Encoding.UTF8))
+                    {
+                        // HTMLファイルの内容を文字列として読み取る
+                        htmlStr = sr.ReadToEnd();
+                    }
+
+                    // HTML文字列を処理
                     htmlStr = ProcessHtmlString(htmlStr, isTmpDot);
 
+                    // HTML文字列をXML形式に変換してロード
                     XmlDocument objXml = new XmlDocument();
-
                     objXml.LoadXml(htmlStr);
 
+                    // 目次（TOC）と本文（Body）のXMLドキュメントを生成
                     ProcessXmlDocuments(objXml, docTitle, out XmlDocument objToc, out XmlDocument objBody);
 
+                    // 現在の目次ノードと本文ノードを取得
                     XmlNode objTocCurrent = objToc.DocumentElement;
                     XmlNode objBodyCurrent = objBody.DocumentElement;
 
+                    // CSSスタイル情報を取得
                     string className = "";
                     className = objXml.SelectSingleNode("/html/head/style[contains(comment(), 'mso-style-name')]").OuterXml;
+
+                    // CSSスタイル文字列を整形（不要な空白や改行を削除）
                     className = Regex.Replace(className, "[\r\n\t ]+", "");
                     className = Regex.Replace(className, "}", "}\n");
 
+                    // スタイル名を格納する辞書
                     Dictionary<string, string> styleName = new Dictionary<string, string>();
 
+                    // 章分割に使用するCSSクラスを初期化
                     string chapterSplitClass = "";
 
                     // CSSスタイルのような文字列を解析し、特定の条件に一致するスタイルを抽出・加工
@@ -298,19 +335,23 @@ namespace WordAddIn1
 
                     log.WriteLine("index.html出力");
 
+                    // タイトル定義を格納するリスト
                     List<string> titleDeffenition = new List<string>();
 
+                    // XMLドキュメント内の<p>タグでクラス名が'titledef'の要素を検索し、
+                    // そのテキスト内容をトリムしてリストに追加
                     foreach (XmlElement link in objXml.SelectNodes("//p[@class='titledef']"))
                     {
                         titleDeffenition.Add(link.InnerText.Trim());
                     }
 
+                    // インデックスHTMLテンプレートを生成
                     string idxHtmlTemplate = BuildIdxHtmlTemplate(docTitle, docid, mergeScript);
-
-                    sw = new StreamWriter(rootPath + "\\" + exportDir + "\\index.html", false, Encoding.UTF8);
+                    sw = new StreamWriter(indexHtmlPath, false, Encoding.UTF8);
                     sw.Write(idxHtmlTemplate);
                     sw.Close();
 
+                    // カバーテンプレート1とカバーテンプレート2を生成
                     string htmlCoverTemplate1 = BuildHtmlCoverTemplate1(isEdgeTracker);
                     string htmlCoverTemplate2 = "";
 
@@ -371,16 +412,19 @@ namespace WordAddIn1
 
                     // すべてのパターンに共通するHTMLテンプレートの追加
                     AppendHtmlCoverTemplate2(ref htmlCoverTemplate2);
-                    
+
+                    // HTMLテンプレート1を生成とHTMLテンプレート2を生成
                     string htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript);
                     string htmlTemplate2 = "";
                     htmlTemplate2 += @"</body>" + "\n";
                     htmlTemplate2 += @"</html>" + "\n";
 
+                    // 検索用JavaScriptコードを生成
                     string searchJs = BuildSearchJs();
                     
                     log.WriteLine("変換ループ開始");
 
+                    // 目次（TOC）と本文（Body）を生成
                     GenerateTocAndBody(
                         objXml,
                         objBody,
@@ -393,6 +437,7 @@ namespace WordAddIn1
                         ref objTocCurrent,
                         load);
 
+                    // 本文の最初のノードにIDが設定されていない場合、デフォルトのIDを設定
                     if (((XmlElement)objBody.DocumentElement.FirstChild).GetAttribute("id") == "")
                     {
                         ((XmlElement)objBody.DocumentElement.FirstChild).SetAttribute("id", docid + "00000");
@@ -401,9 +446,8 @@ namespace WordAddIn1
                     // 目次ファイルを作成
                     GenerateTocFiles(objToc, rootPath, exportDir, mergeScript);
 
-                    //objXml.Save(rootPath + "\\base.xml");
                     objXml = null;
-                    File.Delete(rootPath + "\\tmp.html");
+                    File.Delete(tmpHtmlPath);
 
                     // CleanUpXmlNodes メソッドを呼び出す
                     CleanUpXmlNodes(objBody);
@@ -424,8 +468,9 @@ namespace WordAddIn1
                     );
 
                     log.WriteLine("Zipファイル作成");
-                    GenerateZipArchive(zipDirPath, rootPath, exportDir, headerDir, docFullName, docName, log);
 
+                    // Zipファイルを作成
+                    GenerateZipArchive(zipDirPath, rootPath, exportDir, headerDir, docFullName, docName, log);
                 }
 
                 catch (Exception ex)
@@ -433,14 +478,17 @@ namespace WordAddIn1
                     load.Close();
                     load.Dispose();
 
+                    // スタックトレースを取得（例外発生箇所の詳細情報を含む）
                     StackTrace stackTrace = new StackTrace(ex, true);
 
-                    log.WriteLine(ex.Message);
-                    log.WriteLine(ex.HelpLink);
-                    log.WriteLine(ex.Source);
-                    log.WriteLine(ex.StackTrace);
-                    log.WriteLine(ex.TargetSite);
-                    MessageBox.Show("エラーが発生しました");
+                    // 例外の詳細情報をログに記録
+                    log.WriteLine("[Error] Exception Details:");
+                    log.WriteLine($"  Source: {ex.Source ?? "Unknown Source"}");
+                    log.WriteLine($"  TargetSite: {ex.TargetSite}");
+                    log.WriteLine($"  Message: {ex.Message}");
+                    log.WriteLine($"  StackTrace: {stackTrace}");
+
+                    MessageBox.Show(ErrMsg);
 
                     button3.Enabled = true;
                     return;
@@ -454,20 +502,24 @@ namespace WordAddIn1
             load.Close();
             load.Dispose();
 
-            DialogResult selectMess = MessageBox.Show(rootPath + "\\" + exportDir + "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？", "HTML出力成功", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            // ユーザーに出力したHTMLをブラウザで表示するか確認するメッセージボックスを表示
+            DialogResult selectMsg = MessageBox.Show(exportDirPath + HtmlOutputSuccessMsg1, HtmlOutputSuccessMsg2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             
-            if (selectMess == DialogResult.Yes)
+            if (selectMsg == DialogResult.Yes)
             {
                 try
                 {
-                    Process.Start(rootPath + "\\" + exportDir + @"\index.html");
+                    // index.htmlを既定のブラウザで開く
+                    Process.Start(indexHtmlPath);
                 }
                 catch
                 {
-                    MessageBox.Show("HTMLの出力に失敗しました。", "HTML出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // index.htmlの起動に失敗した場合、エラーメッセージを表示
+                    MessageBox.Show(HtmlOutputFailureMsg1, HtmlOutputFailureMsg2, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-           
+
+            // イベントハンドラを再登録
             application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
         }
     }
