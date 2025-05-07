@@ -16,8 +16,10 @@ namespace WordAddIn1
         private bool makeBookInfo(loader load, StreamWriter swLog = null)
         {
             // 画面更新を無効化して処理を高速化
-            WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = false;
-            Word.Document thisDocument = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
+            Globals.ThisAddIn.Application.ScreenUpdating = false;
+            Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
+
+            
 
             // 命名規則に違反している場合
             if (!Regex.IsMatch(thisDocument.Name, FileNamePattern))
@@ -26,119 +28,43 @@ namespace WordAddIn1
                 load.Visible = false;
                 MessageBox.Show(InvalidFileNameMessage, ErrFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.DoEvents();
-                WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
+                Globals.ThisAddIn.Application.ScreenUpdating = true;
                 return false;
             }
 
             // 現在の選択範囲の開始位置と終了位置を保存
-            int selStart = WordAddIn1.Globals.ThisAddIn.Application.Selection.Start;
-            int selEnd = WordAddIn1.Globals.ThisAddIn.Application.Selection.End;
+            int selStart = Globals.ThisAddIn.Application.Selection.Start;
+            int selEnd = Globals.ThisAddIn.Application.Selection.End;
 
             // ドキュメント全体を選択
-            WordAddIn1.Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
+            Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
             Application.DoEvents();
-            WordAddIn1.Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+            Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
             Application.DoEvents();
 
 
             // 選択範囲が図形の場合、カーソルを左に移動
-            if (WordAddIn1.Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
-                WordAddIn1.Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
-                WordAddIn1.Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
+            if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
+                Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
+                Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
 
             // 書誌情報の初期化
             bookInfoDef = "";
-            Word.Document Doc = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
+            Word.Document Doc = Globals.ThisAddIn.Application.ActiveDocument;
 
-            // 書誌情報番号とその最大値を初期化
             int bibNum = 0;  // 現在の書誌情報番号
             int bibMaxNum = 0;  // 書誌情報番号の最大値
+            bool checkBL = false;  // チェックフラグ
 
-            // チェックフラグの初期化
-            bool checkBL = false;
-
-            // 指定されたヘッダーファイルが存在するか確認
-            if (File.Exists(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt"))
+            // ヘッダーファイルの確認と読み込み
+            if (CheckAndLoadHeaderFile(Doc, load, bibNum, bibMaxNum))
             {
-                // ヘッダーファイルを開けるか確認（他のプロセスでロックされていないかチェック）
-                try
-                {
-                    using (Stream stream = new FileStream(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt", FileMode.Open))
-                    {
-                    }
-                }
-                catch
-                {
-                    // ファイルが開かれている場合、エラーメッセージを表示して処理を終了
-                    load.Visible = false;
-                    MessageBox.Show(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt" + "が開かれています。\r\nファイルを閉じてから書誌情報出力を実行してください。",
-                        "ファイルエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.DoEvents();
-                    WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
-                    return false;
-                }
-
-                // SOURCELINK追加==========================================================================START
-                oldInfo = new List<HeadingInfo>();  // 旧書誌情報
-                newInfo = new List<HeadingInfo>();  // 新書誌情報
-                checkResult = new List<CheckInfo>();  // 比較結果
-
-                // SOURCELINK追加==========================================================================END
-
-                // ヘッダーファイルを読み込み、書誌情報番号の最大値を取得
-                using (StreamReader sr = new StreamReader(
-                    Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt", System.Text.Encoding.Default))
-                {
-                    // 書誌情報番号の最大値取得
-                    while (sr.Peek() >= 0)
-                    {
-                        string strBuffer = sr.ReadLine();
-
-                        // SOURCELINK追加==========================================================================START
-
-                        // ヘッダーファイルの内容を分割して書誌情報を作成
-                        string[] info = strBuffer.Split('\t');
-
-                        HeadingInfo headingInfo = new HeadingInfo();
-                        headingInfo.num = info[0];  // 書誌番号
-                        headingInfo.title = info[1];  // タイトル
-
-                        if (info.Length == 4)
-                        {
-                            headingInfo.mergeto = info[3];  // 結合先情報
-                        }
-
-                        headingInfo.id = info[2];  // ID
-                        oldInfo.Add(headingInfo);  // 旧書誌情報リストに追加
-
-                        // SOURCELINK追加==========================================================================END
-
-                        // 書誌情報番号の最大値を取得
-                        bibNum = int.Parse(info[2].Substring(info[2].Length - 3, 3));
-                        if (bibMaxNum < bibNum)
-                        {
-                            bibMaxNum = bibNum;
-                        }
-                    }
-                }
-
-                // ドキュメント内のブックマークを確認し、書誌情報のデフォルト値を取得
-                foreach (Word.Bookmark bm in Doc.Bookmarks)
-                {
-                    if (Regex.IsMatch(bm.Name, "^" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1")))
-                    {
-                        bookInfoDef = Regex.Replace(bm.Name, "^.{3}(.{2}).*$", "$1");
-                        break;
-                    }
-                }
-
                 button4.Enabled = true;
                 button2.Enabled = true;
                 button5.Enabled = true;
             }
             else
             {
-                // ヘッダーファイルが存在しない場合、ボタンを無効化してチェックフラグを設定
                 button3.Enabled = false;
                 button2.Enabled = false;
                 button5.Enabled = false;
@@ -148,14 +74,18 @@ namespace WordAddIn1
             // ドキュメントの保存先ディレクトリのパスを取得
             string rootPath = thisDocument.Path;
 
+            string logPath = Path.Combine(rootPath, "log.txt");
+
             // ドキュメントのファイル名を取得
             string docName = thisDocument.Name;
 
             // ヘッダーファイルが格納されるディレクトリ名を指定
             string headerDir = "headerFile";
 
+            string headerDirPath = Path.Combine(rootPath, headerDir);
+
             // ドキュメント名の先頭3文字を抽出してドキュメントIDとして使用
-            string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
+            string docID = Regex.Replace(docName, "^(.{3}).+$", "$1");
 
             // ドキュメント名からタイトルを抽出
             string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
@@ -169,7 +99,7 @@ namespace WordAddIn1
             if (swLog == null)
             {
                 // "log.txt" ファイルを作成し、UTF-8 で書き込みを行う
-                log = new StreamWriter(rootPath + "\\log.txt", false, Encoding.UTF8);
+                log = new StreamWriter(logPath, false, Encoding.UTF8);
             }
 
             try
@@ -178,21 +108,32 @@ namespace WordAddIn1
                 if (bookInfoDef == "")
                 {
                     // ドキュメント内のすべてのブックマークを削除
-                    foreach (Word.Bookmark wb in thisDocument.Bookmarks) wb.Delete();
+                    if (thisDocument.Bookmarks.Count > 0)
+                    {
+                        foreach (Word.Bookmark bookmark in thisDocument.Bookmarks.Cast<Word.Bookmark>().ToList())
+                        {
+                            bookmark.Delete();
+                        }
+                    }
 
                     // 書誌情報入力フォームを表示
-                    using (bookInfo bi = new bookInfo())
+                    using (var bookInfoForm = new bookInfo())
                     {
-                        if (bi.ShowDialog() == DialogResult.OK)
+                        var dialogResult = bookInfoForm.ShowDialog();
+                        if (dialogResult == DialogResult.OK)
                         {
                             // ユーザーが入力したデフォルト値を取得
-                            bookInfoDef = bi.tbxDefaultValue.Text;
+                            bookInfoDef = bookInfoForm.tbxDefaultValue.Text;
                         }
                         else
                         {
                             // キャンセルされた場合、ログを閉じてファイルを削除して処理を終了
-                            log.Close();
-                            if (File.Exists(rootPath + "\\log.txt")) File.Delete(rootPath + "\\log.txt");
+                            log?.Close();
+                            if (File.Exists(logPath))
+                            {
+                                File.Delete(logPath);
+                            }
+
                             button4.Enabled = true;
                             return false;
                         }
@@ -204,50 +145,19 @@ namespace WordAddIn1
                 HashSet<string> ls = new HashSet<string>();
 
                 // ヘッダーファイルのディレクトリが存在しない場合、新規作成
-                if (!Directory.Exists(rootPath + "\\" + headerDir))
+                if (!Directory.Exists(headerDirPath))
                 {
-                    Directory.CreateDirectory(rootPath + "\\" + headerDir);
+                    Directory.CreateDirectory(headerDirPath);
                 }
 
-                // ドキュメント内のすべてのブックマークを確認し、ネストされたブックマークを削除
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    try
-                    {
-                        for (int w = 1; w < wb.Range.Bookmarks.Count; w++)
-                        {
-                            wb.Range.Bookmarks[w].Delete();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        // エラーが発生した場合、例外をログに出力
-                        Console.WriteLine(e);
-                    }
-                }
+                // ドキュメント内のネストされたブックマークを削除
+                DeleteNestedBookmarks(thisDocument);
 
                 // ブックマークの名前が指定された形式に一致しない場合削除
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    foreach (Word.Bookmark wbInWb in wb.Range.Bookmarks)
-                    {
-                        if (!Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}$") &&
-                            !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}♯" + docid + bookInfoDef + @"\d{3}$") &&
-                            !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}$") &&
-                            !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}＃" + docid + bookInfoDef + @"\d{3}$"))
-                            wbInWb.Delete();
-                    }
-                }
+                DeleteInvalidBookmarks(thisDocument, docID, bookInfoDef);
 
                 // 重複するブックマークを削除し、一意の名前をセットに追加
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    if (!ls.Contains(wb.Name.Substring(wb.Name.Length - 3, 3)))
-                        ls.Add(wb.Name.Substring(wb.Name.Length - 3, 3));
-                    else
-                        wb.Delete();
-                }
-
+                DeleteDuplicateBookmarks(thisDocument, ls);
 
                 // ブックマーク名の最大値を取得し、書誌情報番号の最大値を更新
                 if (ls.Count != 0)
@@ -272,38 +182,33 @@ namespace WordAddIn1
                 bool breakFlg = false;
 
                 // 書誌情報辞書に「表紙」のエントリが存在しない場合
-                if (!bookInfoDic.ContainsKey(docid + "00000"))
+                if (!bookInfoDic.ContainsKey(docID + "00000"))
                 {
                     // ドキュメントIDに「00000」を付加して「表紙」として登録
-                    bookInfoDic.Add(docid + "00000", "表紙");
+                    bookInfoDic.Add(docID + "00000", "表紙");
                 }
 
                 // ログに書誌情報リスト作成の開始を記録
                 log.WriteLine("書誌情報リスト作成開始");
 
-                // 上位クラスIDを保持する変数を初期化
+                // 上位クラスIDを保持する変数
                 string upperClassID = "";
 
-                // 前回のセットIDを保持する変数を初期化
+                // 前回のセットIDを保持する変数
                 string previousSetId = "";
 
-                // 結合処理が必要かどうかを示すフラグを初期化
+                // 結合処理が必要かどうかを示すフラグ
                 bool isMerge = false;
 
-                // 結合先情報を保持する辞書を初期化
+                // 結合先情報を保持する辞書
                 Dictionary<string, string> mergeSetId = new Dictionary<string, string>();
 
-                // タイトル情報を保持するコレクションを初期化
+                // タイトル情報とヘッダー情報
                 title4Collection = new Dictionary<string, string[]>();
-
-                // ヘッダー情報を保持するコレクションを初期化
                 headerCollection = new Dictionary<string, string[]>();
 
-
-                // ドキュメント内のセクションをループ
                 foreach (Word.Section tgtSect in thisDocument.Sections)
                 {
-                    // セクションの範囲内の段落をループ
                     foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
                     {
                         // 段落のスタイル名を取得
@@ -312,7 +217,6 @@ namespace WordAddIn1
                         // 段落のスタイル名が「MJS_参照先」の場合
                         if (styleName.Equals("MJS_参照先"))
                         {
-                            // 段落内のフィールドをループ
                             foreach (Word.Field fld in tgtPara.Range.Fields)
                             {
                                 // フィールドが参照フィールドの場合
@@ -395,12 +299,11 @@ namespace WordAddIn1
                         // スタイル名が「章 扉 タイトル」に一致する場合
                         if (Regex.IsMatch(styleName, @"章[　 ]*扉.*タイトル"))
                         {
-                            // 他のイベントを処理してUIを更新
                             Application.DoEvents();
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             // ブックマークIDを初期化
@@ -409,8 +312,8 @@ namespace WordAddIn1
                             // 段落内のすべてのブックマークをループ処理
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                // ブックマーク名が「docid + bookInfoDef + 3桁の数字」の形式に一致する場合
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}$"))
+                                // ブックマーク名が「docID + bookInfoDef + 3桁の数字」の形式に一致する場合
+                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}$"))
                                 {
                                     // ブックマークIDを設定し、上位クラスIDとして保持
                                     setid = bm.Name;
@@ -433,11 +336,11 @@ namespace WordAddIn1
                                 ls.Add(splitCount.ToString("000"));
 
                                 // 新しいブックマークIDを生成し、 上位クラスIDとして設定
-                                setid = docid + bookInfoDef + splitCount.ToString("000");
+                                setid = docID + bookInfoDef + splitCount.ToString("000");
                                 upperClassID = setid;
 
                                 // 行末尾に新しいブックマークを追加
-                                sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
+                                sel.Bookmarks.Add(docID + bookInfoDef + splitCount.ToString("000"));
 
                                 // 書誌情報辞書に新しいエントリを追加
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
@@ -487,7 +390,7 @@ namespace WordAddIn1
                             {
                                 // 段落の行末尾を選択状態にする
                                 tgtPara.Range.Select();
-                                Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                                Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                                 sel.EndKey(Word.WdUnits.wdLine);
 
                                 string setid = "";
@@ -495,8 +398,8 @@ namespace WordAddIn1
                                 // 段落内のすべてのブックマークをループ処理
                                 foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                                 {
-                                    // ブックマーク名が「docid + bookInfoDef + 3桁の数字」の形式に一致する場合
-                                    if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}$"))
+                                    // ブックマーク名が「docID + bookInfoDef + 3桁の数字」の形式に一致する場合
+                                    if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}$"))
                                     {
                                         // ブックマークIDを設定し、上位クラスIDとして保持
                                         setid = bm.Name;
@@ -520,11 +423,11 @@ namespace WordAddIn1
                                     ls.Add(splitCount.ToString("000"));
 
                                     // 新しいブックマークIDを生成し、 上位クラスIDとして設定
-                                    setid = docid + bookInfoDef + splitCount.ToString("000");
-                                    upperClassID = docid + bookInfoDef + splitCount.ToString("000");
+                                    setid = docID + bookInfoDef + splitCount.ToString("000");
+                                    upperClassID = docID + bookInfoDef + splitCount.ToString("000");
 
                                     // 行末尾に新しいブックマークを追加
-                                    sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
+                                    sel.Bookmarks.Add(docID + bookInfoDef + splitCount.ToString("000"));
 
                                     // 書誌情報辞書に新しいエントリを追加
                                     bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
@@ -582,7 +485,7 @@ namespace WordAddIn1
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -590,8 +493,8 @@ namespace WordAddIn1
                             // 段落内のすべてのブックマークをループ処理
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                // ブックマーク名が「docid + bookInfoDef + 3桁の数字」の形式に一致する場合
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}$"))
+                                // ブックマーク名が「docID + bookInfoDef + 3桁の数字」の形式に一致する場合
+                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}$"))
                                 {
                                     // ブックマークIDを設定し、上位クラスIDとして保持
                                     setid = bm.Name;
@@ -613,11 +516,11 @@ namespace WordAddIn1
                                 ls.Add(splitCount.ToString("000"));
 
                                 // 新しいブックマークIDを生成し、 上位クラスIDとして設定
-                                setid = docid + bookInfoDef + splitCount.ToString("000");
-                                upperClassID = docid + bookInfoDef + splitCount.ToString("000");
+                                setid = docID + bookInfoDef + splitCount.ToString("000");
+                                upperClassID = docID + bookInfoDef + splitCount.ToString("000");
 
                                 // 行末尾にブックマークを追加
-                                sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
+                                sel.Bookmarks.Add(docID + bookInfoDef + splitCount.ToString("000"));
 
                                 // 書誌情報辞書に新しいエントリを追加
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
@@ -672,7 +575,7 @@ namespace WordAddIn1
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -680,8 +583,8 @@ namespace WordAddIn1
                             // 段落内のブックマークをループ処理
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                // ブックマーク名が（docid + bookInfoDef + 3桁 + ♯ + docid + bookInfoDef + 3桁）に一致する場合
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}" + "♯" + docid + bookInfoDef + @"\d{3}$"))
+                                // ブックマーク名が（docID + bookInfoDef + 3桁 + ♯ + docID + bookInfoDef + 3桁）に一致する場合
+                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}" + "♯" + docID + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(♯.*?)$", "$1");
 
@@ -691,7 +594,7 @@ namespace WordAddIn1
                                 }
 
                                 
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}" + "＃" + docid + bookInfoDef + @"\d{3}$"))
+                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}" + "＃" + docID + bookInfoDef + @"\d{3}$"))
                                 {
                                     // 上位クラスIDとブックマーク名を結合して、新しいIDを生成
                                     setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(＃.*?)$", "$1");
@@ -712,10 +615,10 @@ namespace WordAddIn1
                                 ls.Add(splitCount.ToString("000"));
 
                                 // 新しいブックマークIDを生成し、 上位クラスIDとして設定
-                                setid = upperClassID + "♯" + docid + bookInfoDef + splitCount.ToString("000");
+                                setid = upperClassID + "♯" + docID + bookInfoDef + splitCount.ToString("000");
                                 
                                 // 行末尾にブックマークを追加
-                                sel.Bookmarks.Add(upperClassID + "♯" + docid + bookInfoDef + splitCount.ToString("000"));
+                                sel.Bookmarks.Add(upperClassID + "♯" + docID + bookInfoDef + splitCount.ToString("000"));
 
                                 // 書誌情報辞書に新しいエントリを追加
                                 // キー: 新しいブックマークID、値: 段落のリスト番号とテキストを結合した文字列
@@ -782,7 +685,7 @@ namespace WordAddIn1
                 if (checkBL || oldInfo.Count == 0)
                 {
                     // 書誌情報を保存するためのファイルを作成
-                    using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docid + ".txt", false, Encoding.UTF8))
+                    using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docID + ".txt", false, Encoding.UTF8))
                     {
                         // 書誌情報辞書のすべてのキーをループ処理
                         foreach (string key in bookInfoDic.Keys)
@@ -920,7 +823,7 @@ namespace WordAddIn1
                     if (ret == 0)
                     {
                         // 処理結果が正常の場合、書誌情報を保存するためのファイルを作成
-                        using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docid + ".txt", false, Encoding.UTF8))
+                        using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docID + ".txt", false, Encoding.UTF8))
                         {
                             foreach (HeadingInfo info in newInfo)
                             {
@@ -997,7 +900,7 @@ namespace WordAddIn1
 
                                         // 行末尾を選択状態にする
                                         tgtPara.Range.Select();
-                                        Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                                        Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                                         sel.EndKey(Word.WdUnits.wdLine);
 
                                         // 項番を取得
@@ -1024,7 +927,7 @@ namespace WordAddIn1
                             }
 
                             // 書誌情報を保存するためのファイルを作成
-                            using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docid + ".txt", false, Encoding.UTF8))
+                            using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docID + ".txt", false, Encoding.UTF8))
                             {
                                 // 比較結果リストをループ処理
                                 foreach (CheckInfo info in checkResult)
@@ -1094,18 +997,13 @@ namespace WordAddIn1
             finally
             {
                 // ドキュメントのカーソル位置を先頭に戻す
-                WordAddIn1.Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+                Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
                 
                 Application.DoEvents();
 
                 //  画面更新を再有効化
-                WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
+                Globals.ThisAddIn.Application.ScreenUpdating = true;
             }
-
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.Start = selStart;
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.End = selEnd;
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.MoveRight(Unit: Word.WdUnits.wdCharacter, Count: 1);
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.MoveLeft(Unit: Word.WdUnits.wdCharacter, Count: 1);
         }
     }
 }
