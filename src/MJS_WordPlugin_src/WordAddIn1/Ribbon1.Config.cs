@@ -4,6 +4,8 @@ namespace WordAddIn1
 {
     public partial class Ribbon1
     {
+        //private Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
+
         // ファイル名形式の規定
         private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
 

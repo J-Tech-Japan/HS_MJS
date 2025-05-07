@@ -384,7 +384,10 @@
     <Compile Include="Ribbon1.InnerNode.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.MakeBookInfomation.cs">
+    <Compile Include="Ribbon1.MakeBookInfo.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Ribbon1.MakeBookInfo.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="setLink.cs">

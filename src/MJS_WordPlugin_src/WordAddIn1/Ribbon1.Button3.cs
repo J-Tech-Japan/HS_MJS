@@ -351,7 +351,7 @@ namespace WordAddIn1
                     sw.Write(idxHtmlTemplate);
                     sw.Close();
 
-                    // カバーテンプレート1とカバーテンプレート2を生成
+                    // 表紙テンプレート1と表紙テンプレート2を生成
                     string htmlCoverTemplate1 = BuildHtmlCoverTemplate1(isEdgeTracker);
                     string htmlCoverTemplate2 = "";
 

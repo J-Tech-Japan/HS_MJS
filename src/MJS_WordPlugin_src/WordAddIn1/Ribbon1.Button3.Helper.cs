@@ -10,73 +10,187 @@ using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 using Word = Microsoft.Office.Interop.Word;
 
+// リファクタリング完了
 namespace WordAddIn1
 {
     public partial class Ribbon1
     {
-        // 指定されたパスにあるテキストファイル（書誌情報）を読み込み、mergeScript にデータを追加
+        // 改善前のコード(2025,05.02)
+        //public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
+        //{
+        //    using (StreamReader sr = new StreamReader(
+        //            documentPath + "\\headerFile\\" + Regex.Replace(documentName, "^(.{3}).+$", "$1") + @".txt", Encoding.Default))
+        //    {
+        //        while (sr.Peek() >= 0)
+        //        {
+        //            string strBuffer = sr.ReadLine();
+        //            string[] info = strBuffer.Split('\t');
+
+        //            if (info.Length == 4)
+        //            {
+        //                if (!info[3].Equals(""))
+        //                {
+        //                    info[3] = info[3].Replace("(", "").Replace(")", "");
+        //                    if (!mergeScript.Any(x => x.Key == info[2] && x.Value == info[3]))
+        //                    {
+        //                        mergeScript.Add(info[2], info[3]);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        // 改善済のコード
+        // 指定されたパスにある書誌情報を読み込み、mergeScript にデータを追加
         public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
         {
-            using (StreamReader sr = new StreamReader(
-                    documentPath + "\\headerFile\\" + Regex.Replace(documentName, "^(.{3}).+$", "$1") + @".txt", Encoding.Default))
+            try
             {
-                while (sr.Peek() >= 0)
-                {
-                    string strBuffer = sr.ReadLine();
-                    string[] info = strBuffer.Split('\t');
+                // ファイルパスを安全に結合
+                // ドキュメント名の最初の3文字を抽出して、対応するヘッダーファイルのパスを生成
+                string headerFilePath = Path.Combine(documentPath, "headerFile", Regex.Replace(documentName, "^(.{3}).+$", "$1") + ".txt");
 
-                    if (info.Length == 4)
+                // ヘッダーファイルをUTF-8エンコーディングで読み込む
+                using (StreamReader sr = new StreamReader(headerFilePath, Encoding.UTF8))
+                {
+                    // ファイルの終端まで1行ずつ読み込む
+                    while (sr.Peek() >= 0)
                     {
-                        if (!info[3].Equals(""))
+                        string strBuffer = sr.ReadLine();
+
+                        // 空行や空白行をスキップ
+                        if (string.IsNullOrWhiteSpace(strBuffer)) continue;
+
+                        // タブ区切りで行を分割
+                        string[] info = strBuffer.Split('\t');
+
+                        // 必要な情報が揃っている場合のみ処理を続行
+                        if (info.Length == 4 && !string.IsNullOrEmpty(info[3]))
                         {
-                            info[3] = info[3].Replace("(", "").Replace(")", "");
-                            if (!mergeScript.Any(x => x.Key == info[2] && x.Value == info[3]))
+                            string key = info[2]; // 辞書のキー
+                            string value = info[3].Replace("(", "").Replace(")", ""); // 値から括弧を削除
+
+                            // 辞書に同じキーと値のペアが存在しない場合のみ追加
+                            if (!mergeScript.ContainsKey(key) || mergeScript[key] != value)
                             {
-                                mergeScript.Add(info[2], info[3]);
+                                mergeScript[key] = value;
                             }
                         }
                     }
                 }
             }
+            catch (FileNotFoundException ex)
+            {
+                // ファイルが見つからない場合のエラーメッセージを表示
+                MessageBox.Show($"ファイルが見つかりません: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                // その他の例外が発生した場合のエラーメッセージを表示
+                MessageBox.Show($"エラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
+        // 改善前のコード(2025,05.02)
+        //public void PrepareHtmlTemplates(System.Reflection.Assembly assembly, string rootPath, string exportDir)
+        //{
+        //    // アセンブリからリソースを取得し、テンプレートZIPファイルを作成
+        //    using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
+        //    {
+        //        FileStream fs = File.Create(rootPath + "\\htmlTemplates.zip");
+        //        stream.Seek(0, SeekOrigin.Begin);
+        //        stream.CopyTo(fs);
+        //        fs.Close();
+        //    }
+
+        //    // 既存のテンプレートフォルダを削除
+        //    if (Directory.Exists(rootPath + "\\htmlTemplates"))
+        //    {
+        //        Directory.Delete(rootPath + "\\htmlTemplates", true);
+        //    }
+
+        //    // ZIPファイルを解凍
+        //    ZipFile.ExtractToDirectory(rootPath + "\\htmlTemplates.zip", rootPath);
+
+        //    // 出力ディレクトリを削除
+        //    if (Directory.Exists(rootPath + "\\" + exportDir))
+        //    {
+        //        Directory.Delete(rootPath + "\\" + exportDir, true);
+        //    }
+
+        //    // 一時的なカバーピクチャフォルダを削除
+        //    if (Directory.Exists(rootPath + "\\tmpcoverpic"))
+        //    {
+        //        Directory.Delete(rootPath + "\\tmpcoverpic", true);
+        //    }
+
+        //    // テンプレートフォルダを出力ディレクトリに移動
+        //    Directory.Move(rootPath + "\\htmlTemplates", rootPath + "\\" + exportDir);
+
+        //    // ZIPファイルを削除
+        //    File.Delete(rootPath + "\\htmlTemplates.zip");
+        //}
+
+        // 改善済のコード
+        // テンプレートZIPファイルをアセンブリから取得し、指定されたパスに解凍
         public void PrepareHtmlTemplates(System.Reflection.Assembly assembly, string rootPath, string exportDir)
         {
-            // アセンブリからリソースを取得し、テンプレートZIPファイルを作成
-            using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
+            try
             {
-                FileStream fs = File.Create(rootPath + "\\htmlTemplates.zip");
-                stream.Seek(0, SeekOrigin.Begin);
-                stream.CopyTo(fs);
-                fs.Close();
-            }
+                // テンプレートZIPファイルのパス
+                string zipFilePath = Path.Combine(rootPath, "htmlTemplates.zip");
+                string templatesDirPath = Path.Combine(rootPath, "htmlTemplates");
+                string exportDirPath = Path.Combine(rootPath, exportDir);
+                string tmpCoverPicDirPath = Path.Combine(rootPath, "tmpcoverpic");
+                string FileNotFoundExceptionMsg = "リソース 'htmlTemplates.zip' が見つかりません。";
 
-            // 既存のテンプレートフォルダを削除
-            if (Directory.Exists(rootPath + "\\htmlTemplates"))
+                // アセンブリからリソースを取得し、テンプレートZIPファイルを作成
+                using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
+                {
+                    if (stream == null)
+                    {
+                        throw new FileNotFoundException(FileNotFoundExceptionMsg);
+                    }
+
+                    using (FileStream fs = File.Create(zipFilePath))
+                    {
+                        stream.CopyTo(fs);
+                    }
+                }
+
+                // 既存のテンプレートフォルダを削除
+                if (Directory.Exists(templatesDirPath))
+                {
+                    Directory.Delete(templatesDirPath, true);
+                }
+
+                // ZIPファイルを解凍
+                ZipFile.ExtractToDirectory(zipFilePath, rootPath);
+
+                // 出力ディレクトリを削除
+                if (Directory.Exists(exportDirPath))
+                {
+                    Directory.Delete(exportDirPath, true);
+                }
+
+                // 一時的なカバーピクチャフォルダを削除
+                if (Directory.Exists(tmpCoverPicDirPath))
+                {
+                    Directory.Delete(tmpCoverPicDirPath, true);
+                }
+
+                // テンプレートフォルダを出力ディレクトリに移動
+                Directory.Move(templatesDirPath, exportDirPath);
+
+                // ZIPファイルを削除
+                File.Delete(zipFilePath);
+            }
+            catch (Exception ex)
             {
-                Directory.Delete(rootPath + "\\htmlTemplates", true);
+                string ErrMsgTemplatePreparation = "テンプレートの準備中にエラーが発生しました: ";
+                MessageBox.Show(ErrMsgTemplatePreparation + ex.Message, ErrMsg, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            // ZIPファイルを解凍
-            ZipFile.ExtractToDirectory(rootPath + "\\htmlTemplates.zip", rootPath);
-
-            // 出力ディレクトリを削除
-            if (Directory.Exists(rootPath + "\\" + exportDir))
-            {
-                Directory.Delete(rootPath + "\\" + exportDir, true);
-            }
-
-            // 一時的なカバーピクチャフォルダを削除
-            if (Directory.Exists(rootPath + "\\tmpcoverpic"))
-            {
-                Directory.Delete(rootPath + "\\tmpcoverpic", true);
-            }
-
-            // テンプレートフォルダを出力ディレクトリに移動
-            Directory.Move(rootPath + "\\htmlTemplates", rootPath + "\\" + exportDir);
-
-            // ZIPファイルを削除
-            File.Delete(rootPath + "\\htmlTemplates.zip");
         }
 
         // 表紙に関連する段落を収集
@@ -142,6 +256,55 @@ namespace WordAddIn1
                 }
             }
         }
+
+        // 改善前のコード(2025,05.02)
+        // 商標情報と著作権情報を収集
+        //public void CollectTrademarkAndCopyrightDetails(
+        //    Document docCopy,
+        //    int lastSectionIdx,
+        //    StreamWriter log,
+        //    ref string trademarkTitle,
+        //    ref List<string> trademarkTextList,
+        //    ref string trademarkRight
+        //    )
+        //{
+        //    bool isTradeMarksDetected = false;
+        //    bool isRightDetected = false;
+
+        //    foreach (Paragraph wp in docCopy.Sections[lastSectionIdx].Range.Paragraphs)
+        //    {
+        //        log.WriteLine(wp.Range.Text);
+
+        //        string wpTextTrim = wp.Range.Text.Trim();
+        //        string wpStyleName = wp.get_Style().NameLocal;
+
+        //        if (string.IsNullOrEmpty(wpTextTrim) || wpTextTrim == "/")
+        //        {
+        //            continue;
+        //        }
+
+        //        if (wpTextTrim.Contains("商標")
+        //            && (wpStyleName.Contains("MJS_見出し 4") || wpStyleName.Contains("MJS_見出し 5")))
+        //        {
+        //            trademarkTitle = wp.Range.Text + "<br/>";
+        //            isTradeMarksDetected = true;
+        //        }
+        //        else if (isTradeMarksDetected && (!isRightDetected)
+        //            && (wpStyleName.Contains("MJS_箇条書き")
+        //                || wpStyleName.Contains("MJS_箇条書き2")))
+        //        {
+        //            trademarkTextList.Add(wp.Range.Text + "<br/>");
+        //        }
+        //        else if (wpTextTrim.Contains("All rights reserved")
+        //            && (wpStyleName.Contains("MJS_リード文")))
+        //        {
+        //            trademarkRight = wp.Range.Text + "<br/>";
+        //            isRightDetected = true;
+        //        }
+        //    }
+        //}
+
+        // 改善済のコード
         // 商標情報と著作権情報を収集
         public void CollectTrademarkAndCopyrightDetails(
             Document docCopy,
@@ -149,45 +312,63 @@ namespace WordAddIn1
             StreamWriter log,
             ref string trademarkTitle,
             ref List<string> trademarkTextList,
-            ref string trademarkRight
-            )
+            ref string trademarkRight)
         {
-            bool isTradeMarksDetected = false;
-            bool isRightDetected = false;
-
-            foreach (Paragraph wp in docCopy.Sections[lastSectionIdx].Range.Paragraphs)
+            try
             {
-                log.WriteLine(wp.Range.Text);
+                bool isTradeMarksDetected = false;
+                bool isRightDetected = false;
 
-                string wpTextTrim = wp.Range.Text.Trim();
-                string wpStyleName = wp.get_Style().NameLocal;
+                foreach (Paragraph wp in docCopy.Sections[lastSectionIdx].Range.Paragraphs)
+                {
+                    string wpTextTrim = wp.Range.Text.Trim();
+                    string wpStyleName = wp.get_Style().NameLocal;
 
-                if (string.IsNullOrEmpty(wpTextTrim) || wpTextTrim == "/")
-                {
-                    continue;
-                }
+                    // ログに段落の内容を記録
+                    log.WriteLine($"[Style: {wpStyleName}] {wpTextTrim}");
 
-                if (wpTextTrim.Contains("商標")
-                    && (wpStyleName.Contains("MJS_見出し 4") || wpStyleName.Contains("MJS_見出し 5")))
-                {
-                    trademarkTitle = wp.Range.Text + "<br/>";
-                    isTradeMarksDetected = true;
+                    // 空行や無効な行をスキップ
+                    if (string.IsNullOrEmpty(wpTextTrim) || wpTextTrim == "/")
+                    {
+                        continue;
+                    }
+
+                    // 商標タイトルの検出
+                    if (!isTradeMarksDetected && wpTextTrim.Contains("商標") &&
+                        (wpStyleName.Contains("MJS_見出し 4") || wpStyleName.Contains("MJS_見出し 5")))
+                    {
+                        trademarkTitle = wpTextTrim + "<br/>";
+                        isTradeMarksDetected = true;
+                        continue;
+                    }
+
+                    // 商標情報のリスト追加
+                    if (isTradeMarksDetected && !isRightDetected &&
+                        (wpStyleName.Contains("MJS_箇条書き") || wpStyleName.Contains("MJS_箇条書き2")))
+                    {
+                        trademarkTextList.Add(wpTextTrim + "<br/>");
+                        continue;
+                    }
+
+                    // 著作権情報の検出
+                    if (!isRightDetected && wpTextTrim.Contains("All rights reserved") &&
+                        wpStyleName.Contains("MJS_リード文"))
+                    {
+                        trademarkRight = wpTextTrim + "<br/>";
+                        isRightDetected = true;
+                        continue;
+                    }
                 }
-                else if (isTradeMarksDetected && (!isRightDetected)
-                    && (wpStyleName.Contains("MJS_箇条書き")
-                        || wpStyleName.Contains("MJS_箇条書き2")))
-                {
-                    trademarkTextList.Add(wp.Range.Text + "<br/>");
-                }
-                else if (wpTextTrim.Contains("All rights reserved")
-                    && (wpStyleName.Contains("MJS_リード文")))
-                {
-                    trademarkRight = wp.Range.Text + "<br/>";
-                    isRightDetected = true;
-                }
+            }
+            catch (Exception ex)
+            {
+                // エラー発生時のログとメッセージ表示
+                log.WriteLine($"エラー: {ex.Message}");
+                MessageBox.Show($"商標および著作権情報の収集中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // 改善の必要なし
         // 表紙選択ダイアログを表示し、選択されたテンプレートに応じてフラグを設定
         public bool HandleCoverSelection(loader load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2)
         {
@@ -271,16 +452,19 @@ namespace WordAddIn1
 
         public void GenerateZipArchive(string zipDirPath, string rootPath, string exportDir, string headerDir, string docFullName, string docName, StreamWriter log)
         {
+            string exportDirPath = Path.Combine(rootPath, exportDir);
+            string headerDirPath = Path.Combine(rootPath, headerDir);
+
             if (Directory.Exists(zipDirPath))
             {
                 Directory.Delete(zipDirPath, true);
             }
             Directory.CreateDirectory(zipDirPath);
 
-            copyDirectory(rootPath + "\\" + exportDir, Path.Combine(zipDirPath, exportDir));
-            if (Directory.Exists(rootPath + "\\" + headerDir))
+            copyDirectory(exportDirPath, Path.Combine(zipDirPath, exportDir));
+            if (Directory.Exists(headerDirPath))
             {
-                copyDirectory(rootPath + "\\" + headerDir, Path.Combine(zipDirPath, headerDir));
+                copyDirectory(headerDirPath, Path.Combine(zipDirPath, headerDir));
             }
             File.Copy(docFullName, Path.Combine(zipDirPath, docName));
 
@@ -291,7 +475,7 @@ namespace WordAddIn1
                 File.Delete(zipDirPath + ".zip");
             }
 
-            System.IO.Compression.ZipFile.CreateFromDirectory(zipDirPath, zipDirPath + ".zip", System.IO.Compression.CompressionLevel.Optimal, true, Encoding.GetEncoding("Shift_JIS"));
+            ZipFile.CreateFromDirectory(zipDirPath, zipDirPath + ".zip", CompressionLevel.Optimal, true, Encoding.GetEncoding("Shift_JIS"));
 
             Directory.Delete(zipDirPath, true);
         }
