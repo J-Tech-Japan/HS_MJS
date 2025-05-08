@@ -46,7 +46,7 @@ namespace WordAddIn1
             {
                 load.Close();
                 load.Dispose();
-                MessageBox.Show(InvalidFileNameMessage, ErrFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ErrMsgInvalidFileName, ErrMsgFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -141,7 +141,7 @@ namespace WordAddIn1
                         {
                             load.Close();
                             load.Dispose();
-                            MessageBox.Show(ErrMessageTmpDocOpen, ErrFile, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(ErrMsgTmpDocOpen, ErrMsgFile, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
                     }
@@ -262,6 +262,7 @@ namespace WordAddIn1
                     docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
 
                     // ドキュメントをHTML形式（フィルタ済み）で保存
+                    // ドキュメント内の画像を tmp.files フォルダに自動的に出力
                     docCopy.SaveAs2(tmpHtmlPath, Word.WdSaveFormat.wdFormatFilteredHTML);
                     docCopy.Close();
 
@@ -271,28 +272,28 @@ namespace WordAddIn1
 
                     bool isTmpDot = true;
 
+                    CopyAndDeleteTemporaryImages(tmpFolderForImagesSavedBySaveAs2Method, rootPath, exportDir, log);
+
                     // 一時フォルダが存在するか確認
-                    if (Directory.Exists(tmpFolderForImagesSavedBySaveAs2Method))
-                    {
-                        try
-                        {
-                            isTmpDot = false;
+                    //if (Directory.Exists(tmpFolderForImagesSavedBySaveAs2Method))
+                    //{
+                    //    try
+                    //    {
+                    //        // 一時フォルダ内のすべての画像ファイルをコピー
+                    //        foreach (string pict in Directory.GetFiles(tmpFolderForImagesSavedBySaveAs2Method))
+                    //        {
+                    //            File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
+                    //        }
 
-                            // 一時フォルダ内のすべての画像ファイルをコピー
-                            foreach (string pict in Directory.GetFiles(tmpFolderForImagesSavedBySaveAs2Method))
-                            {
-                                File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
-                            }
-
-                            // 一時フォルダを削除
-                            Directory.Delete(tmpFolderForImagesSavedBySaveAs2Method, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
-                            throw;
-                        }
-                    }
+                    //        // 一時フォルダを削除
+                    //        Directory.Delete(tmpFolderForImagesSavedBySaveAs2Method, true);
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
+                    //        throw;
+                    //    }
+                    //}
 
                     string htmlStr;
 
@@ -503,7 +504,7 @@ namespace WordAddIn1
             load.Dispose();
 
             // ユーザーに出力したHTMLをブラウザで表示するか確認するメッセージボックスを表示
-            DialogResult selectMsg = MessageBox.Show(exportDirPath + HtmlOutputSuccessMsg1, HtmlOutputSuccessMsg2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult selectMsg = MessageBox.Show(exportDirPath + MsgHtmlOutputSuccess1, MsgHtmlOutputSuccess2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             
             if (selectMsg == DialogResult.Yes)
             {
@@ -515,7 +516,7 @@ namespace WordAddIn1
                 catch
                 {
                     // index.htmlの起動に失敗した場合、エラーメッセージを表示
-                    MessageBox.Show(HtmlOutputFailureMsg1, HtmlOutputFailureMsg2, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ErrMsgHtmlOutputFailure1, ErrMsgHtmlOutputFailure2, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
