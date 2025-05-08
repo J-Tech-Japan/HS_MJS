@@ -19,14 +19,12 @@ namespace WordAddIn1
             Globals.ThisAddIn.Application.ScreenUpdating = false;
             Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
 
-            
-
             // 命名規則に違反している場合
             if (!Regex.IsMatch(thisDocument.Name, FileNamePattern))
             {
                 // エラーメッセージを表示して処理を終了
                 load.Visible = false;
-                MessageBox.Show(InvalidFileNameMessage, ErrFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ErrMsgInvalidFileName, ErrMsgFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.DoEvents();
                 Globals.ThisAddIn.Application.ScreenUpdating = true;
                 return false;
@@ -41,7 +39,6 @@ namespace WordAddIn1
             Application.DoEvents();
             Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
             Application.DoEvents();
-
 
             // 選択範囲が図形の場合、カーソルを左に移動
             if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
@@ -71,20 +68,13 @@ namespace WordAddIn1
                 checkBL = true;
             }
 
-            // ドキュメントの保存先ディレクトリのパスを取得
             string rootPath = thisDocument.Path;
-
-            string logPath = Path.Combine(rootPath, "log.txt");
-
-            // ドキュメントのファイル名を取得
             string docName = thisDocument.Name;
-
-            // ヘッダーファイルが格納されるディレクトリ名を指定
             string headerDir = "headerFile";
-
+            string logPath = Path.Combine(rootPath, "log.txt");
             string headerDirPath = Path.Combine(rootPath, headerDir);
 
-            // ドキュメント名の先頭3文字を抽出してドキュメントIDとして使用
+            // ドキュメント名の先頭3文字を抽出
             string docID = Regex.Replace(docName, "^(.{3}).+$", "$1");
 
             // ドキュメント名からタイトルを抽出
@@ -98,7 +88,6 @@ namespace WordAddIn1
             // ログファイルが指定されていない場合、新規作成
             if (swLog == null)
             {
-                // "log.txt" ファイルを作成し、UTF-8 で書き込みを行う
                 log = new StreamWriter(logPath, false, Encoding.UTF8);
             }
 
@@ -108,13 +97,7 @@ namespace WordAddIn1
                 if (bookInfoDef == "")
                 {
                     // ドキュメント内のすべてのブックマークを削除
-                    if (thisDocument.Bookmarks.Count > 0)
-                    {
-                        foreach (Word.Bookmark bookmark in thisDocument.Bookmarks.Cast<Word.Bookmark>().ToList())
-                        {
-                            bookmark.Delete();
-                        }
-                    }
+                    DeleteAllBookmarks(thisDocument);
 
                     // 書誌情報入力フォームを表示
                     using (var bookInfoForm = new bookInfo())
@@ -191,10 +174,8 @@ namespace WordAddIn1
                 // ログに書誌情報リスト作成の開始を記録
                 log.WriteLine("書誌情報リスト作成開始");
 
-                // 上位クラスIDを保持する変数
+                // 上位クラスID、前回のセットID
                 string upperClassID = "";
-
-                // 前回のセットIDを保持する変数
                 string previousSetId = "";
 
                 // 結合処理が必要かどうかを示すフラグ
@@ -309,21 +290,13 @@ namespace WordAddIn1
                             // ブックマークIDを初期化
                             string setid = "";
 
-                            // 段落内のすべてのブックマークをループ処理
-                            foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
-                            {
-                                // ブックマーク名が「docID + bookInfoDef + 3桁の数字」の形式に一致する場合
-                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}$"))
-                                {
-                                    // ブックマークIDを設定し、上位クラスIDとして保持
-                                    setid = bm.Name;
-                                    upperClassID = bm.Name;
-
-                                    // 行末尾にブックマークを追加
-                                    sel.Bookmarks.Add(setid);
-                                    break;
-                                }
-                            }
+                            SetBookmarkIfMatch(
+                                tgtPara.Range.Bookmarks,
+                                docID,
+                                bookInfoDef,
+                                sel,
+                                ref setid,
+                                ref upperClassID);
 
                             // ブックマークIDが空の場合、新しいIDを生成
                             if (setid == "")
@@ -395,22 +368,13 @@ namespace WordAddIn1
 
                                 string setid = "";
 
-                                // 段落内のすべてのブックマークをループ処理
-                                foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
-                                {
-                                    // ブックマーク名が「docID + bookInfoDef + 3桁の数字」の形式に一致する場合
-                                    if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}$"))
-                                    {
-                                        // ブックマークIDを設定し、上位クラスIDとして保持
-                                        setid = bm.Name;
-                                        upperClassID = bm.Name;
-
-                                        // 行末尾にブックマークを追加
-                                        sel.Bookmarks.Add(setid);
-
-                                        break;
-                                    }
-                                }
+                                SetBookmarkIfMatch(
+                                    tgtPara.Range.Bookmarks,
+                                    docID,
+                                    bookInfoDef,
+                                    sel,
+                                    ref setid,
+                                    ref upperClassID);
 
                                 // ブックマークIDが空の場合、新しいIDを生成
                                 if (setid == "")
@@ -490,21 +454,14 @@ namespace WordAddIn1
 
                             string setid = "";
 
-                            // 段落内のすべてのブックマークをループ処理
-                            foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
-                            {
-                                // ブックマーク名が「docID + bookInfoDef + 3桁の数字」の形式に一致する場合
-                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}$"))
-                                {
-                                    // ブックマークIDを設定し、上位クラスIDとして保持
-                                    setid = bm.Name;
-                                    upperClassID = bm.Name;
-
-                                    // 行末尾にブックマークを追加する
-                                    sel.Bookmarks.Add(setid);
-                                    break;
-                                }
-                            }
+                            // 指定された段落内のブックマークを検索し、条件に一致するブックマークを設定
+                            SetBookmarkIfMatch(
+                                tgtPara.Range.Bookmarks,
+                                docID,
+                                bookInfoDef,
+                                sel,
+                                ref setid,
+                                ref upperClassID);
 
                             if (setid == "")
                             {
@@ -862,12 +819,10 @@ namespace WordAddIn1
                                 load.Visible = true;
 
                             // ドキュメント内のすべてのブックマークを削除
-                            foreach (Word.Bookmark wb in thisDocument.Bookmarks) wb.Delete();
+                            DeleteAllBookmarks(thisDocument);
 
-                            // ドキュメント内のセクションをループ処理
                             foreach (Word.Section tgtSect in thisDocument.Sections)
                             {
-                                // セクション内の段落をループ処理
                                 foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
                                 {
                                     // 段落のスタイル名を取得
@@ -926,21 +881,11 @@ namespace WordAddIn1
                                 if (breakFlg) break;
                             }
 
-                            // 書誌情報を保存するためのファイルを作成
-                            using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docID + ".txt", false, Encoding.UTF8))
-                            {
-                                // 比較結果リストをループ処理
-                                foreach (CheckInfo info in checkResult)
-                                {
-                                    // 新しいIDが空の場合はスキップ
-                                    if (string.IsNullOrEmpty(info.new_id))
-                                    {
-                                        continue;
-                                    }
-                                    // ヘッダー行を作成してファイルに書き込む
-                                    makeHeaderLine(docinfo, mergeSetId, info.new_num, info.new_title, info.new_id_show.Split(new char[] { '(' })[0].Trim());
-                                }
-                            }
+                            // ヘッダーファイルのパス
+                            string headerFilePath = Path.Combine(rootPath, headerDir, $"{docID}.txt");
+
+                            // ヘッダーファイルを作成
+                            CreateHeaderFile(headerFilePath, checkResult, mergeSetId);
 
                             thisDocument.Save();
                             log.WriteLine("書誌情報リスト作成終了");
@@ -967,32 +912,7 @@ namespace WordAddIn1
 
             catch (Exception ex)
             {
-                // スタックトレースを取得（例外の発生箇所を特定するための情報）
-                StackTrace stackTrace = new StackTrace(ex, true);
-
-                // ログに例外の詳細情報を記録
-                log.WriteLine(ex.Message);  // 例外メッセージ
-                log.WriteLine(ex.HelpLink);  // ヘルプリンク
-                log.WriteLine(ex.Source);  // 例外の発生元
-                log.WriteLine(ex.StackTrace);  // スタックトレース
-                log.WriteLine(ex.TargetSite);  // 例外が発生したメソッド
-
-                // ログファイルが指定されていない場合、ログを閉じる
-                if (swLog == null)
-                {
-                    log.Close();
-                }
-
-                load.Visible = false;
-                MessageBox.Show("エラーが発生しました");
-
-                // ボタンを有効化して操作可能にする
-                button4.Enabled = true;
-
-                // HTML公開フラグを無効化
-                blHTMLPublish = false;
-
-                return false;
+                return LogAndDisplayError(ex, log, swLog, load);
             }
             finally
             {

@@ -15,6 +15,30 @@ namespace WordAddIn1
 {
     public partial class Ribbon1
     {
+        // 画像をコピーして一時フォルダを削除
+        public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)
+        {
+            if (Directory.Exists(tmpFolder))
+            {
+                try
+                {
+                    // 一時フォルダ内のすべての画像ファイルをコピー
+                    foreach (string pict in Directory.GetFiles(tmpFolder))
+                    {
+                        File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
+                    }
+
+                    // 一時フォルダを削除
+                    Directory.Delete(tmpFolder, true);
+                }
+                catch (Exception ex)
+                {
+                    log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
         // 改善前のコード(2025,05.02)
         //public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
         //{
