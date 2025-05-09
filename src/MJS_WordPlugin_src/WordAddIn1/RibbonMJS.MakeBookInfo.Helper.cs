@@ -12,84 +12,44 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
-        // ヘッダーファイルの確認と読み込み
-        public bool CheckAndLoadHeaderFile(Word.Document Doc, loader load, int bibNum, int bibMaxNum)
+        public void AddReferenceFieldBookmarks(Word.Paragraph paragraph)
         {
-            string headerFilePath = Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt";
-
-            // 指定されたヘッダーファイルが存在するか確認
-            if (File.Exists(headerFilePath))
+            foreach (Word.Field fld in paragraph.Range.Fields)
             {
-                // ヘッダーファイルを開けるか確認（他のプロセスでロックされていないかチェック）
-                try
+                // フィールドが参照フィールドの場合
+                if (fld.Type == Word.WdFieldType.wdFieldRef)
                 {
-                    using (Stream stream = new FileStream(headerFilePath, FileMode.Open))
-                    {
-                    }
+                    // フィールドコードからブックマーク名を生成し、"_ref"を付加
+                    string bookmarkName = fld.Code.Text.Split(new char[] { ' ' })[2] + "_ref";
+
+                    // ブックマークを段落範囲に追加
+                    paragraph.Range.Bookmarks.Add(bookmarkName);
+
+                    // フィールドコードをハイパーリンク形式に変更
+                    fld.Code.Text = "HYPERLINK " + fld.Code.Text.Split(new char[] { ' ' })[2];
                 }
-                catch
-                {
-                    load.Visible = false;
-                    MessageBox.Show(headerFilePath + "が開かれています。\r\nファイルを閉じてから書誌情報出力を実行してください。",
-                        "ファイルエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.DoEvents();
-                    Globals.ThisAddIn.Application.ScreenUpdating = true;
-                    return false;
-                }
-
-                oldInfo = new List<HeadingInfo>();  // 旧書誌情報
-                newInfo = new List<HeadingInfo>();  // 新書誌情報
-                checkResult = new List<CheckInfo>();  // 比較結果
-
-                // ヘッダーファイルを読み込み、書誌情報番号の最大値を取得
-                using (StreamReader sr = new StreamReader(headerFilePath, System.Text.Encoding.Default))
-                {
-                    // 書誌情報番号の最大値取得
-                    while (sr.Peek() >= 0)
-                    {
-                        string strBuffer = sr.ReadLine();
-
-                        // ヘッダーファイルの内容を分割して書誌情報を作成
-                        string[] info = strBuffer.Split('\t');
-
-                        HeadingInfo headingInfo = new HeadingInfo();
-                        headingInfo.num = info[0];  // 書誌番号
-                        headingInfo.title = info[1];  // タイトル
-
-                        if (info.Length == 4)
-                        {
-                            headingInfo.mergeto = info[3];  // 結合先情報
-                        }
-
-                        headingInfo.id = info[2];  // ID
-                        oldInfo.Add(headingInfo);  // 旧書誌情報リストに追加
-
-                        // 書誌情報番号の最大値を取得
-                        bibNum = int.Parse(info[2].Substring(info[2].Length - 3, 3));
-                        if (bibMaxNum < bibNum)
-                        {
-                            bibMaxNum = bibNum;
-                        }
-                    }
-                }
-
-                // ドキュメント内のブックマークを確認し、書誌情報のデフォルト値を取得
-                foreach (Word.Bookmark bm in Doc.Bookmarks)
-                {
-                    if (Regex.IsMatch(bm.Name, "^" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1")))
-                    {
-                        bookInfoDef = Regex.Replace(bm.Name, "^.{3}(.{2}).*$", "$1");
-                        break;
-                    }
-                }
-
-                return true;
             }
-            else
+        }
+
+        // 見出しのブックマークをコレクションに追加
+        public void AddBookmarksToTitleCollection(Word.Paragraph tgtPara, Dictionary<string, string[]> title4Collection, string upperClassID)
+        {
+            // 隠しブックマークを表示
+            tgtPara.Range.Bookmarks.ShowHidden = true;
+
+            // 段落内のすべてのブックマークをループ処理
+            foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
             {
-                // ヘッダーファイルが存在しない場合
-                return false;
+                // ブックマーク名が"_Ref"で始まり、タイトルコレクションに未登録の場合
+                if (bm.Name.StartsWith("_Ref") && !title4Collection.ContainsKey(bm.Name))
+                {
+                    // タイトルコレクションにブックマーク名と関連情報を追加
+                    title4Collection.Add(bm.Name, new string[] { upperClassID, tgtPara.Range.Text.Replace("\r", "").Replace("\n", "").Replace("\"", "\"\"") });
+                }
             }
+
+            // 隠しブックマークを非表示に戻す
+            tgtPara.Range.Bookmarks.ShowHidden = false;
         }
 
         // ドキュメント内のブックマークを削除
