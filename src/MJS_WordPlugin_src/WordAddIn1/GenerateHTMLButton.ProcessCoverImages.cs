@@ -58,7 +58,7 @@ using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         public void ProcessCoverImages(
             Word.Document docCopy,

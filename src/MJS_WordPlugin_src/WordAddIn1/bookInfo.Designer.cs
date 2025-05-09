@@ -95,7 +95,6 @@ namespace WordAddIn1
             this.PerformLayout();
 
         }
-
         #endregion
 
         private System.Windows.Forms.Label label1;

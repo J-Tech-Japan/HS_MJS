@@ -311,15 +311,15 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Ribbon1.resx">
-      <DependentUpon>Ribbon1.cs</DependentUpon>
+    <EmbeddedResource Include="RibbonMJS.resx">
+      <DependentUpon>RibbonMJS.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="setLink.resx">
       <DependentUpon>setLink.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
-    <None Include="MJS_1_TemporaryKey.pfx" />
+    <None Include="MJS.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -335,73 +335,73 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Ribbon1.ClearClipboard.cs">
+    <Compile Include="RibbonMJS.ClearClipboard.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Config.cs">
+    <Compile Include="RibbonMJS.Config.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button2.cs">
+    <Compile Include="StyleCheckButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button2.NonInlineShape.cs">
+    <Compile Include="StyleCheckButton.NonInlineShape.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button2.Paragraphs.cs">
+    <Compile Include="StyleCheckButton.Paragraphs.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.cs">
+    <Compile Include="GenerateHTMLButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.Helper.cs">
+    <Compile Include="GenerateHTMLButton.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.HtmlCoverTemplate.cs">
+    <Compile Include="GenerateHTMLButton.HtmlCoverTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.IdxHtmlTemplate.cs">
+    <Compile Include="GenerateHTMLButton.IdxHtmlTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.XMLProcessor.cs">
+    <Compile Include="GenerateHTMLButton.XMLProcessor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.ProcessCoverImages.cs">
+    <Compile Include="GenerateHTMLButton.ProcessCoverImages.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.Search.cs">
+    <Compile Include="GenerateHTMLButton.Search.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.StyleProcessor.cs">
+    <Compile Include="GenerateHTMLButton.StyleProcessor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button4.cs">
+    <Compile Include="BookInfoButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button5.cs">
+    <Compile Include="SetLinkButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.CheckDocInfomation.cs">
+    <Compile Include="RibbonMJS.CheckDocInfomation.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.CheckSortInfomation.cs">
+    <Compile Include="RibbonMJS.CheckSortInfomation.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.cs">
+    <Compile Include="RibbonMJS.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Designer.cs">
-      <DependentUpon>Ribbon1.cs</DependentUpon>
+    <Compile Include="RibbonMJS.Designer.cs">
+      <DependentUpon>RibbonMJS.cs</DependentUpon>
     </Compile>
-    <Compile Include="Ribbon1.Button3.HtmlTemplate1.cs">
+    <Compile Include="GenerateHTMLButton.HtmlTemplate1.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.InnerNode.cs">
+    <Compile Include="RibbonMJS.InnerNode.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.MakeBookInfo.cs">
+    <Compile Include="RibbonMJS.MakeBookInfo.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.MakeBookInfo.Helper.cs">
+    <Compile Include="RibbonMJS.MakeBookInfo.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="setLink.cs">
@@ -413,7 +413,7 @@
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Button3.SearchIndex.cs">
+    <Compile Include="GenerateHTMLButton.SearchIndex.cs">
       <SubType>Component</SubType>
     </Compile>
     <None Include="ThisAddIn.Designer.xml">

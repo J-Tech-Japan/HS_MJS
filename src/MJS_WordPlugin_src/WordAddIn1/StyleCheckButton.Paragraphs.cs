@@ -7,7 +7,7 @@ using Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         // 段落を処理するメソッド
         private void ProcessParagraphs(Word.Document activeDoc, List<string> styleList, Stopwatch sw, ref int pro, ref bool isProcessing, ref bool isProcessHalted, ref bool flag)

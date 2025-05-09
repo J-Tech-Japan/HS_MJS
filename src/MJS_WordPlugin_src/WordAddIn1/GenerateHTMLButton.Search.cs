@@ -1,6 +1,6 @@
 ﻿namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         private static string BuildSearchJs()
         {

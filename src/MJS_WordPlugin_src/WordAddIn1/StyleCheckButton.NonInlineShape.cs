@@ -6,7 +6,7 @@ using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         // 図形が行内配置になっていないことをコメント
         private void AddCommentForNonInlineShape(Word.Document activeDoc, ref bool bl)

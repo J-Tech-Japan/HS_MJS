@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         private bool makeBookInfo(loader load, StreamWriter swLog = null)
         {

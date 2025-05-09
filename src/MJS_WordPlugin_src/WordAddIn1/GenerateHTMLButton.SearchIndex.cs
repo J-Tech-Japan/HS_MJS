@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
 		// 検索用データを生成
 		public void GenerateSearchFiles(XmlDocument objBody, string rootPath, string exportDir, string docid, string htmlTemplate1, string htmlTemplate2, string htmlCoverTemplate1, string htmlCoverTemplate2, XmlDocument objToc, Dictionary<string, string> mergeScript, string searchJs)

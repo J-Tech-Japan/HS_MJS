@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         // 指定されたCSSスタイル定義を解析し、条件に基づいてスタイル名を抽出・処理
         private void ProcessStyleBlock(string clsName, string pattern, ref string chapterSplitClass, Dictionary<string, string> styleName)
