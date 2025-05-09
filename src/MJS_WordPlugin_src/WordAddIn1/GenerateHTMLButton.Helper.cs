@@ -7,7 +7,6 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Microsoft.Office.Interop.Word;
 
 // リファクタリング完了
 namespace WordAddIn1

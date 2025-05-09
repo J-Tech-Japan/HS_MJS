@@ -11,8 +11,6 @@ using System.Windows.Forms;
 using System.Xml;
 
 using Word = Microsoft.Office.Interop.Word;
-using System.Diagnostics;
-using System.Xml;
 
 namespace WordAddIn1
 {
