@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         // HTML 文字列を処理する   
         public string ProcessHtmlString(string htmlStr, bool isTmpDot)

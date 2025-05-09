@@ -14,11 +14,11 @@ namespace WordAddIn1
 {
     public partial class CheckForm : Form
     {
-        public Ribbon1 ribbon1;
+        public RibbonMJS ribbon1;
 
         private List<CheckInfo> showResult;
 
-        public CheckForm(Ribbon1 _ribbon1)
+        public CheckForm(RibbonMJS _ribbon1)
         {
             InitializeComponent();
 

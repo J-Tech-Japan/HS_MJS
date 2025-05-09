@@ -21,9 +21,9 @@ using System.Runtime.InteropServices;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
-        private void button3_Click_1(object sender, RibbonControlEventArgs e)
+        private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
             StreamWriter sw;
             blHTMLPublish = true;
@@ -118,7 +118,6 @@ namespace WordAddIn1
                     log.WriteLine("HTML保存");
                     Application.DoEvents();
 
-                    //Clipboard.Clear();
                     ClearClipboardSafely();
                     //Clipboard.SetDataObject(new DataObject());
                     Application.DoEvents();

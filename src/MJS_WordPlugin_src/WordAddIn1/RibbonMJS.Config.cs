@@ -2,7 +2,7 @@
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         //private Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
 

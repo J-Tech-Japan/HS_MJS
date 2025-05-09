@@ -13,7 +13,7 @@ using Word = Microsoft.Office.Interop.Word;
 // リファクタリング完了
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         // 画像をコピーして一時フォルダを削除
         public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)

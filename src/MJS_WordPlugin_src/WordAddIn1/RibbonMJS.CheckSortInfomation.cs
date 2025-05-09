@@ -20,7 +20,7 @@ using System.Reflection.Emit;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         private bool checkSortInfo(CheckInfo old, List<CheckInfo> newInfos, int j)
         {

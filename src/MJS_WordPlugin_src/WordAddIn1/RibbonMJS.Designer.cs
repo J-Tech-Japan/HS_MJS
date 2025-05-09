@@ -1,13 +1,13 @@
 ﻿namespace WordAddIn1
 {
-    partial class Ribbon1 : Microsoft.Office.Tools.Ribbon.RibbonBase
+    partial class RibbonMJS : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
         /// <summary>
         /// 必要なデザイナー変数です。
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        public Ribbon1()
+        public RibbonMJS()
             : base(Globals.Factory.GetRibbonFactory())
         {
             InitializeComponent();
@@ -114,7 +114,7 @@
             this.button4.Label = "書誌情報\n出力";
             this.button4.Name = "button4";
             this.button4.ShowImage = true;
-            this.button4.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button4_Click);
+            this.button4.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.BookInfoButton);
             // 
             // button7
             // 
@@ -133,7 +133,7 @@
             this.button5.Label = "リンク設定";
             this.button5.Name = "button5";
             this.button5.ShowImage = true;
-            this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button5_Click);
+            this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.SetLinkButton);
             // 
             // button8
             // 
@@ -170,7 +170,7 @@
             this.button2.Label = "スタイルチェック";
             this.button2.Name = "button2";
             this.button2.ShowImage = true;
-            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button2_Click);
+            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.StyleCheckButton);
             // 
             // button10
             // 
@@ -189,7 +189,7 @@
             this.button3.Label = "HTML\n出力";
             this.button3.Name = "button3";
             this.button3.ShowImage = true;
-            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button3_Click_1);
+            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateHTMLButton);
             // 
             // button11
             // 
@@ -241,9 +241,9 @@
 
     partial class ThisRibbonCollection
     {
-        internal Ribbon1 Ribbon1
+        internal RibbonMJS Ribbon1
         {
-            get { return this.GetRibbon<Ribbon1>(); }
+            get { return this.GetRibbon<RibbonMJS>(); }
         }
     }
 }
