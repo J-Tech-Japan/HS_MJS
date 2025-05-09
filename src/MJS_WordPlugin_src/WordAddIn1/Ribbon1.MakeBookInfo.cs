@@ -6,8 +6,6 @@ using System.Text;
 using Word = Microsoft.Office.Interop.Word;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
 
 namespace WordAddIn1
 {
@@ -664,24 +662,10 @@ namespace WordAddIn1
                             HeadingInfo headingInfo = new HeadingInfo();
 
                             // 項番が空の場合は空文字を設定、それ以外の場合はsecText[0]を設定
-                            if (string.IsNullOrEmpty(secText[0]))
-                            {
-                                headingInfo.num = "";
-                            }
-                            else
-                            {
-                                headingInfo.num = secText[0];
-                            }
+                            headingInfo.num = string.IsNullOrEmpty(secText[0]) ? "" : secText[0];
 
                             // タイトルが空の場合は空文字を設定、それ以外の場合はsecText[1]を設定
-                            if (string.IsNullOrEmpty(secText[1]))
-                            {
-                                headingInfo.title = "";
-                            }
-                            else
-                            {
-                                headingInfo.title = secText[1];
-                            }
+                            headingInfo.title = string.IsNullOrEmpty(secText[1]) ? "" : secText[1];
 
                             // IDを設定（特殊文字「♯」を「#」に置換）
                             headingInfo.id = key.Replace("♯", "#");
@@ -729,24 +713,10 @@ namespace WordAddIn1
                         HeadingInfo headingInfo = new HeadingInfo();
 
                         // 項番が空の場合は空文字を設定、それ以外の場合はsecText[0]を設定
-                        if (string.IsNullOrEmpty(secText[0]))
-                        {
-                            headingInfo.num = "";
-                        }
-                        else
-                        {
-                            headingInfo.num = secText[0];
-                        }
+                        headingInfo.num = string.IsNullOrEmpty(secText[0]) ? "" : secText[0];
 
                         // タイトルが空の場合は空文字を設定、それ以外の場合はsecText[1]を設定
-                        if (string.IsNullOrEmpty(secText[1]))
-                        {
-                            headingInfo.title = "";
-                        }
-                        else
-                        {
-                            headingInfo.title = secText[1];
-                        }
+                        headingInfo.title = string.IsNullOrEmpty(secText[1]) ? "" : secText[1];
 
                         // 特殊文字「＃」が含まれている場合
                         // 「＃」を「#」に置換してIDを設定

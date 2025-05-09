@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Office.Tools.Ribbon;
@@ -7,7 +6,6 @@ using Word = Microsoft.Office.Interop.Word;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace WordAddIn1
 {

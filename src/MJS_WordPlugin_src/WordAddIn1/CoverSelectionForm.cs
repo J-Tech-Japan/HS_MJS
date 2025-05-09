@@ -31,7 +31,7 @@ namespace WordAddIn1
         {
             get
             {
-                return this.selectedCoverTemplate;
+                return selectedCoverTemplate;
             }
         }
 
@@ -54,56 +54,48 @@ namespace WordAddIn1
             else
             {
                 // アイテムが選択解除された場合、selectedCoverTemplateをNoneに設定
-                this.selectedCoverTemplate = CoverTemplateEnum.None;
+                selectedCoverTemplate = CoverTemplateEnum.None;
             }
         }
 
         // 選択されたアイテムに応じてselectedCoverTemplateを設定するメソッド
         private void UpdateSelectedCoverTemplate(CoverSelectionItem item)
         {
-            if (item == this.CoverSelectionItemEasyCloud)
+            if (item == CoverSelectionItemEasyCloud)
             {
-                this.selectedCoverTemplate = CoverTemplateEnum.EasyCloud;
-            }
-            else if (item == this.CoverSelectionItemEdgeTracker)
-            {
-                this.selectedCoverTemplate = CoverTemplateEnum.EdgeTracker;
-            }
-            else if (item == this.CoverSelectionItemGeneralPattern1)
-            {
-                this.selectedCoverTemplate = CoverTemplateEnum.GeneralPattern1;
-            }
-            else if (item == this.CoverSelectionItemGeneralPattern2)
-            {
-                this.selectedCoverTemplate = CoverTemplateEnum.GeneralPattern2;
+                selectedCoverTemplate = CoverTemplateEnum.EasyCloud;
             }
             else
             {
-                this.selectedCoverTemplate = CoverTemplateEnum.None;
+                selectedCoverTemplate = item == CoverSelectionItemEdgeTracker
+                    ? CoverTemplateEnum.EdgeTracker
+                    : item == CoverSelectionItemGeneralPattern1
+                                    ? CoverTemplateEnum.GeneralPattern1
+                                    : item == CoverSelectionItemGeneralPattern2 ? CoverTemplateEnum.GeneralPattern2 : CoverTemplateEnum.None;
             }
         }
 
         // 他のアイテムの選択状態を解除するメソッド
         private void DeselectOtherItems(CoverSelectionItem selectedItem)
         {
-            if (selectedItem != this.CoverSelectionItemEasyCloud)
+            if (selectedItem != CoverSelectionItemEasyCloud)
             {
-                this.CoverSelectionItemEasyCloud.Selected = false;
+                CoverSelectionItemEasyCloud.Selected = false;
             }
 
-            if (selectedItem != this.CoverSelectionItemEdgeTracker)
+            if (selectedItem != CoverSelectionItemEdgeTracker)
             {
-                this.CoverSelectionItemEdgeTracker.Selected = false;
+                CoverSelectionItemEdgeTracker.Selected = false;
             }
 
-            if (selectedItem != this.CoverSelectionItemGeneralPattern1)
+            if (selectedItem != CoverSelectionItemGeneralPattern1)
             {
-                this.CoverSelectionItemGeneralPattern1.Selected = false;
+                CoverSelectionItemGeneralPattern1.Selected = false;
             }
 
-            if (selectedItem != this.CoverSelectionItemGeneralPattern2)
+            if (selectedItem != CoverSelectionItemGeneralPattern2)
             {
-                this.CoverSelectionItemGeneralPattern2.Selected = false;
+                CoverSelectionItemGeneralPattern2.Selected = false;
             }
 
             //if (selectedItem != this.CoverSelectionItemGeneralPattern3)
@@ -116,20 +108,20 @@ namespace WordAddIn1
         private void BtnOK_Click(object sender, EventArgs e)
         {
             // 表紙テンプレートが選択されていない場合の処理
-            if (this.selectedCoverTemplate == CoverTemplateEnum.None)
+            if (selectedCoverTemplate == CoverTemplateEnum.None)
             {
                 MessageBox.Show("表紙のパターンをを選択してください。");
             }
             // 汎用パターン3が選択された場合の処理
-            else if (this.selectedCoverTemplate == CoverTemplateEnum.GeneralPattern3)
+            else if (selectedCoverTemplate == CoverTemplateEnum.GeneralPattern3)
             {
                 MessageBox.Show("[汎用パターン3]テンプレートはまもなく登場します。");
             }
             else
             {
                 // 選択されたテンプレートが有効な場合、ダイアログを閉じる
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                DialogResult = DialogResult.OK;
+                Close();
             }
         }
 
@@ -137,8 +129,8 @@ namespace WordAddIn1
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             // ダイアログをキャンセルとして閉じる
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
     }
