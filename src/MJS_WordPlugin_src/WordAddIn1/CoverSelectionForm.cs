@@ -61,18 +61,13 @@ namespace WordAddIn1
         // 選択されたアイテムに応じてselectedCoverTemplateを設定するメソッド
         private void UpdateSelectedCoverTemplate(CoverSelectionItem item)
         {
-            if (item == CoverSelectionItemEasyCloud)
-            {
-                selectedCoverTemplate = CoverTemplateEnum.EasyCloud;
-            }
-            else
-            {
-                selectedCoverTemplate = item == CoverSelectionItemEdgeTracker
+            selectedCoverTemplate = item == CoverSelectionItemEasyCloud
+                ? CoverTemplateEnum.EasyCloud
+                : item == CoverSelectionItemEdgeTracker
                     ? CoverTemplateEnum.EdgeTracker
                     : item == CoverSelectionItemGeneralPattern1
                                     ? CoverTemplateEnum.GeneralPattern1
                                     : item == CoverSelectionItemGeneralPattern2 ? CoverTemplateEnum.GeneralPattern2 : CoverTemplateEnum.None;
-            }
         }
 
         // 他のアイテムの選択状態を解除するメソッド
