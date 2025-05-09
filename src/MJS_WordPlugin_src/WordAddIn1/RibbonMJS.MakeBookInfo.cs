@@ -193,25 +193,31 @@ namespace WordAddIn1
                         // 段落のスタイル名を取得
                         string styleName = tgtPara.get_Style().NameLocal;
 
-                        // 段落のスタイル名が「MJS_参照先」の場合
                         if (styleName.Equals("MJS_参照先"))
                         {
-                            foreach (Word.Field fld in tgtPara.Range.Fields)
-                            {
-                                // フィールドが参照フィールドの場合
-                                if (fld.Type == Word.WdFieldType.wdFieldRef)
-                                {
-                                    // フィールドコードからブックマーク名を生成し、"_ref"を付加
-                                    string bookmarkName = fld.Code.Text.Split(new char[] { ' ' })[2] + "_ref";
-
-                                    // ブックマークを段落範囲に追加
-                                    tgtPara.Range.Bookmarks.Add(bookmarkName);
-
-                                    // フィールドコードをハイパーリンク形式に変更
-                                    fld.Code.Text = "HYPERLINK " + fld.Code.Text.Split(new char[] { ' ' })[2];
-                                }
-                            }
+                            // 参照フィールドにブックマークを追加
+                            AddReferenceFieldBookmarks(tgtPara);
                         }
+
+                        // 段落のスタイル名が「MJS_参照先」の場合
+                        //if (styleName.Equals("MJS_参照先"))
+                        //{
+                        //    foreach (Word.Field fld in tgtPara.Range.Fields)
+                        //    {
+                        //        // フィールドが参照フィールドの場合
+                        //        if (fld.Type == Word.WdFieldType.wdFieldRef)
+                        //        {
+                        //            // フィールドコードからブックマーク名を生成し、"_ref"を付加
+                        //            string bookmarkName = fld.Code.Text.Split(new char[] { ' ' })[2] + "_ref";
+
+                        //            // ブックマークを段落範囲に追加
+                        //            tgtPara.Range.Bookmarks.Add(bookmarkName);
+
+                        //            // フィールドコードをハイパーリンク形式に変更
+                        //            fld.Code.Text = "HYPERLINK " + fld.Code.Text.Split(new char[] { ' ' })[2];
+                        //        }
+                        //    }
+                        //}
 
                         // 結合処理フラグを初期化
                         isMerge = false;
@@ -229,34 +235,18 @@ namespace WordAddIn1
                         }
                         catch (Exception) { }
 
+                        //AddHeadingBookmarksToCollection(tgtPara, title4Collection, upperClassID);
+
                         // スタイル名が特定の「見出し」形式に一致する場合
-                        if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[４4](?![・用])")
-                            || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[５5](?![・用])")
-                            || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?![・用])")
-                            || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[２2](?![・用])")
-                            || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[３3](?![・用])"))
+                        if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1-５5](?![・用])"))
                         {
-                            // 隠しブックマークを表示
-                            tgtPara.Range.Bookmarks.ShowHidden = true;
-
-                            // 段落内のすべてのブックマークをループ処理
-                            foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
-                            {
-                                // ブックマーク名が"タイトルコレクションに未登録の場合
-                                if (!title4Collection.ContainsKey(bm.Name))
-                                {
-                                    // ブックマーク名が"_Ref"で始まる場合
-                                    if (bm.Name.IndexOf("_Ref") == 0)
-                                    {
-                                        // タイトルコレクションにブックマーク名と関連情報を追加
-                                        title4Collection.Add(bm.Name, new string[] { upperClassID, tgtPara.Range.Text.Replace("\r", "").Replace("\n", "").Replace("\"", "\"\"") });
-                                    }
-                                }
-                            }
-
-                            // 隠しブックマークを非表示に戻す
-                            tgtPara.Range.Bookmarks.ShowHidden = false;
+                            // 見出しのブックマークをコレクションに追加
+                            AddBookmarksToTitleCollection(tgtPara, title4Collection, upperClassID);
                         }
+
+                        // スタイル名が「章 扉 タイトル」に一致しない、かつ「見出し」を含まない場合は次の段落へ
+                        if (!Regex.IsMatch(styleName, @"章[　 ]*扉.*タイトル") && !styleName.Contains("見出し"))
+                            continue;
 
                         // スタイル名が「章 扉 タイトル」に一致しない、かつ「見出し」を含まない場合は次の段落へ
                         if (!Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") && !styleName.Contains("見出し")) continue;
@@ -306,7 +296,7 @@ namespace WordAddIn1
                                 // 一意の番号をリストに追加
                                 ls.Add(splitCount.ToString("000"));
 
-                                // 新しいブックマークIDを生成し、 上位クラスIDとして設定
+                                // 新しいブックマークIDを生成し、上位クラスIDとして設定
                                 setid = docID + bookInfoDef + splitCount.ToString("000");
                                 upperClassID = setid;
 
@@ -538,21 +528,12 @@ namespace WordAddIn1
                             // 段落内のブックマークをループ処理
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                // ブックマーク名が（docID + bookInfoDef + 3桁 + ♯ + docID + bookInfoDef + 3桁）に一致する場合
-                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}" + "♯" + docID + bookInfoDef + @"\d{3}$"))
-                                {
-                                    setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(♯.*?)$", "$1");
-
-                                    // 行末尾にブックマークを追加
-                                    sel.Bookmarks.Add(setid);
-                                    break;
-                                }
-
-                                
-                                if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}" + "＃" + docID + bookInfoDef + @"\d{3}$"))
+                                // ブックマーク名が特定のパターン（♯または＃）に一致する場合
+                                Match match = Regex.Match(bm.Name, "^" + docID + bookInfoDef + @"\d{3}(♯|＃)" + docID + bookInfoDef + @"\d{3}$");
+                                if (match.Success)
                                 {
                                     // 上位クラスIDとブックマーク名を結合して、新しいIDを生成
-                                    setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(＃.*?)$", "$1");
+                                    setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(" + match.Groups[1].Value + @".*?)$", "$1");
 
                                     // 行末尾にブックマークを追加
                                     sel.Bookmarks.Add(setid);
