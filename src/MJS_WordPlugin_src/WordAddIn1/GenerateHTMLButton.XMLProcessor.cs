@@ -26,14 +26,9 @@ namespace WordAddIn1
                 htmlStr = Regex.Replace(htmlStr, @"(<[A-z]+[^>]* [A-z-]+=)([^""'][^ />]*)", @"$1""$2""");
             }
 
-            if (isTmpDot)
-            {
-                htmlStr = Regex.Replace(htmlStr, @"src=""tmp\.files/", @"src=""pict/");
-            }
-            else
-            {
-                htmlStr = Regex.Replace(htmlStr, @"src=""tmp_files/", @"src=""pict/");
-            }
+            htmlStr = isTmpDot
+                ? Regex.Replace(htmlStr, @"src=""tmp\.files/", @"src=""pict/")
+                : Regex.Replace(htmlStr, @"src=""tmp_files/", @"src=""pict/");
             htmlStr = Regex.Replace(htmlStr, @"<a name=""_Toc\d+?""></a>", "");
             htmlStr = Regex.Replace(htmlStr, @"<span lang=""[^""]+?"">([^<]+?)</span>", "$1");
             htmlStr = Regex.Replace(htmlStr, @"(<hr(?: [^/>]*)?)(>)", "$1/$2");

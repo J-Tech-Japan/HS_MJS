@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WordAddIn1
@@ -71,7 +64,7 @@ namespace WordAddIn1
 
             if (mInstance.InvokeRequired)
             {
-                mInstance.Invoke(new Action<int>(SetProgressBar), new object[]{iMax});
+                mInstance.Invoke(new Action<int>(SetProgressBar), new object[] { iMax });
             }
             else
             {

@@ -25,13 +25,13 @@ namespace WordAddIn1
             // 入力が2桁の数字かどうかを確認
             if (IsValidTwoDigitNumber(tbxDefaultValue.Text))
             {
-                this.DialogResult = DialogResult.OK;
+                DialogResult = DialogResult.OK;
             }
             // 入力が1桁の数字かどうかを確認
             else if (IsValidSingleDigitNumber(tbxDefaultValue.Text))
             {
                 tbxDefaultValue.Text = "0" + tbxDefaultValue.Text;
-                this.DialogResult = DialogResult.OK;
+                DialogResult = DialogResult.OK;
             }
             else
             {
@@ -43,13 +43,13 @@ namespace WordAddIn1
         private void btnCancel_Click(object sender, EventArgs e)
         {
             tbxDefaultValue.Text = string.Empty;
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         // フォームがロードされたときの処理
         private void bookInfo_Load(object sender, EventArgs e)
         {
-            this.Visible = true;
+            Visible = true;
         }
 
         // テキストボックスでキーが押されたときの処理

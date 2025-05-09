@@ -1,13 +1,13 @@
-﻿using System;
-using System.IO;
+﻿using Microsoft.Office.Tools.Ribbon;
+
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Office.Tools.Ribbon;
-using Word = Microsoft.Office.Interop.Word;
-using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows.Forms;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -218,6 +218,6 @@ namespace WordAddIn1
             button3.Enabled = false;
             MessageBox.Show("スタイルチェックNGです。\r\n「校閲」タブ-「コメント」-「次へ」ボタンで\r\n使用できない書式を確認できます。", "スタイルチェックNG", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        
+
     }
 }

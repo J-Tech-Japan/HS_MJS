@@ -1,23 +1,16 @@
-﻿using System;
-using System.IO;
+﻿using Microsoft.Office.Tools.Ribbon;
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.Office.Tools.Ribbon;
-using Word = Microsoft.Office.Interop.Word;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Xml.Linq;
-using System.Drawing.Imaging;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using System.Diagnostics;
-using System.Drawing;
 using System.Xml;
-using System.Threading;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -70,8 +63,7 @@ namespace WordAddIn1
             CollectMergeScript(activeDocument.Path, activeDocument.Name, mergeScript);
 
             // カバー選択の処理
-            bool isEasyCloud, isEdgeTracker, isPattern1, isPattern2;
-            if (!HandleCoverSelection(load, out isEasyCloud, out isEdgeTracker, out isPattern1, out isPattern2))
+            if (!HandleCoverSelection(load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2))
             {
                 return;
             }
@@ -109,7 +101,7 @@ namespace WordAddIn1
 
                     // 現在実行中のアセンブリ（DLLまたはEXE）に関する情報を取得
                     System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                    
+
                     // HTMLテンプレートの準備
                     PrepareHtmlTemplates(assembly, rootPath, exportDir);
 
@@ -421,7 +413,7 @@ namespace WordAddIn1
 
                     // 検索用JavaScriptコードを生成
                     string searchJs = BuildSearchJs();
-                    
+
                     log.WriteLine("変換ループ開始");
 
                     // 目次（TOC）と本文（Body）を生成
@@ -504,7 +496,7 @@ namespace WordAddIn1
 
             // ユーザーに出力したHTMLをブラウザで表示するか確認するメッセージボックスを表示
             DialogResult selectMsg = MessageBox.Show(exportDirPath + MsgHtmlOutputSuccess1, MsgHtmlOutputSuccess2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            
+
             if (selectMsg == DialogResult.Yes)
             {
                 try

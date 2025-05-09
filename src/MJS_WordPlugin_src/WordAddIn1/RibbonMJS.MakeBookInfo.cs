@@ -1,13 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using Word = Microsoft.Office.Interop.Word;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -79,7 +78,7 @@ namespace WordAddIn1
 
             // ドキュメント名からタイトルを抽出
             string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
-            
+
             bookInfoDic.Clear();
 
             // ログ出力用のStreamWriterを設定（引数で渡されたものを使用、なければ後で新規作成）
@@ -550,7 +549,7 @@ namespace WordAddIn1
                                     break;
                                 }
 
-                                
+
                                 if (Regex.IsMatch(bm.Name, "^" + docID + bookInfoDef + @"\d{3}" + "＃" + docID + bookInfoDef + @"\d{3}$"))
                                 {
                                     // 上位クラスIDとブックマーク名を結合して、新しいIDを生成
@@ -573,14 +572,14 @@ namespace WordAddIn1
 
                                 // 新しいブックマークIDを生成し、 上位クラスIDとして設定
                                 setid = upperClassID + "♯" + docID + bookInfoDef + splitCount.ToString("000");
-                                
+
                                 // 行末尾にブックマークを追加
                                 sel.Bookmarks.Add(upperClassID + "♯" + docID + bookInfoDef + splitCount.ToString("000"));
 
                                 // 書誌情報辞書に新しいエントリを追加
                                 // キー: 新しいブックマークID、値: 段落のリスト番号とテキストを結合した文字列
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
-                                
+
                                 if (isMerge)
                                 {
                                     mergeSetId.Add(setid, previousSetId);
@@ -594,7 +593,7 @@ namespace WordAddIn1
                                 // 書誌情報辞書に新しいエントリを追加
                                 // キー: 既存のブックマークID、値: 段落のリスト番号とテキストを結合した文字列
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
-                                
+
                                 if (isMerge)
                                 {
                                     mergeSetId.Add(setid, previousSetId);
@@ -664,24 +663,10 @@ namespace WordAddIn1
                             HeadingInfo headingInfo = new HeadingInfo();
 
                             // 項番が空の場合は空文字を設定、それ以外の場合はsecText[0]を設定
-                            if (string.IsNullOrEmpty(secText[0]))
-                            {
-                                headingInfo.num = "";
-                            }
-                            else
-                            {
-                                headingInfo.num = secText[0];
-                            }
+                            headingInfo.num = string.IsNullOrEmpty(secText[0]) ? "" : secText[0];
 
                             // タイトルが空の場合は空文字を設定、それ以外の場合はsecText[1]を設定
-                            if (string.IsNullOrEmpty(secText[1]))
-                            {
-                                headingInfo.title = "";
-                            }
-                            else
-                            {
-                                headingInfo.title = secText[1];
-                            }
+                            headingInfo.title = string.IsNullOrEmpty(secText[1]) ? "" : secText[1];
 
                             // IDを設定（特殊文字「♯」を「#」に置換）
                             headingInfo.id = key.Replace("♯", "#");
@@ -729,24 +714,10 @@ namespace WordAddIn1
                         HeadingInfo headingInfo = new HeadingInfo();
 
                         // 項番が空の場合は空文字を設定、それ以外の場合はsecText[0]を設定
-                        if (string.IsNullOrEmpty(secText[0]))
-                        {
-                            headingInfo.num = "";
-                        }
-                        else
-                        {
-                            headingInfo.num = secText[0];
-                        }
+                        headingInfo.num = string.IsNullOrEmpty(secText[0]) ? "" : secText[0];
 
                         // タイトルが空の場合は空文字を設定、それ以外の場合はsecText[1]を設定
-                        if (string.IsNullOrEmpty(secText[1]))
-                        {
-                            headingInfo.title = "";
-                        }
-                        else
-                        {
-                            headingInfo.title = secText[1];
-                        }
+                        headingInfo.title = string.IsNullOrEmpty(secText[1]) ? "" : secText[1];
 
                         // 特殊文字「＃」が含まれている場合
                         // 「＃」を「#」に置換してIDを設定
@@ -918,7 +889,7 @@ namespace WordAddIn1
             {
                 // ドキュメントのカーソル位置を先頭に戻す
                 Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
-                
+
                 Application.DoEvents();
 
                 //  画面更新を再有効化

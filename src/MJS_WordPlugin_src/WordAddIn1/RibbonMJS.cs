@@ -1,22 +1,12 @@
-﻿using System;
-using System.IO;
+﻿using Microsoft.Office.Tools.Ribbon;
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Office.Tools.Ribbon;
-using Word = Microsoft.Office.Interop.Word;
+using System.IO;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using System.Drawing.Imaging;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using System.Diagnostics;
-using System.Drawing;
-using System.Xml;
 using System.Threading;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using System.Reflection.Emit;
+using System.Windows.Forms;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -37,24 +27,17 @@ namespace WordAddIn1
             Globals.ThisAddIn.Application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
         }
 
-        static int CompareKeyValuePair(KeyValuePair<string, float> x, KeyValuePair<string, float> y)
+        private static int CompareKeyValuePair(KeyValuePair<string, float> x, KeyValuePair<string, float> y)
         {
             return x.Value.CompareTo(y.Value);
         }
 
-        static string makeHrefWithMerge(Dictionary<string, string> mergeData, string id)
+        private static string makeHrefWithMerge(Dictionary<string, string> mergeData, string id)
         {
-            if (mergeData.ContainsKey(id))
-            {
-                return mergeData[id] + ".html" + "#" + id;
-            }
-            else
-            {
-                return id + ".html";
-            }
+            return mergeData.ContainsKey(id) ? mergeData[id] + ".html" + "#" + id : id + ".html";
         }
 
-        static void makeHeaderLine(StreamWriter docinfo, Dictionary<string, string> mergeSetId, string num, string title, string id)
+        private static void makeHeaderLine(StreamWriter docinfo, Dictionary<string, string> mergeSetId, string num, string title, string id)
         {
             string newId = id;
             // checked merge exiets
@@ -337,7 +320,7 @@ namespace WordAddIn1
         {
 
         }
-        
+
         // SOURCELINK追加==========================================================================END
     }
 }

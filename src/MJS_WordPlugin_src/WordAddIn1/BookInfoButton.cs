@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Tools.Ribbon;
+
 using System.Windows.Forms;
 
 namespace WordAddIn1

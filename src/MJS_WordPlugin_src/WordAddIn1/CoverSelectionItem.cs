@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace WordAddIn1
@@ -17,11 +13,11 @@ namespace WordAddIn1
         {
             get
             {
-                return this.LblCaption.Text;
+                return LblCaption.Text;
             }
             set
             {
-                this.LblCaption.Text = value;
+                LblCaption.Text = value;
                 Invalidate();
             }
         }
@@ -32,11 +28,11 @@ namespace WordAddIn1
         {
             get
             {
-                return this.ImgCover.Image;
+                return ImgCover.Image;
             }
             set
             {
-                this.ImgCover.Image = value;
+                ImgCover.Image = value;
                 Invalidate();
             }
         }
@@ -49,26 +45,19 @@ namespace WordAddIn1
         {
             get
             {
-                return this.selected;
+                return selected;
             }
             set
             {
-                this.selected = value;
+                selected = value;
 
-                this.UpdateSelectionStatusDisplay(this.selected);
+                UpdateSelectionStatusDisplay(selected);
             }
         }
 
         private void UpdateSelectionStatusDisplay(bool selected)
         {
-            if (selected)
-            {
-                this.BackColor = Color.FromArgb(255, 255, 153);
-            }
-            else
-            {
-                this.BackColor = Color.Transparent;
-            }
+            BackColor = selected ? Color.FromArgb(255, 255, 153) : Color.Transparent;
 
             Invalidate();
         }
@@ -82,17 +71,17 @@ namespace WordAddIn1
         {
             InitializeComponent();
 
-            this.LblCaption.BackColor = Color.Transparent;
+            LblCaption.BackColor = Color.Transparent;
         }
 
         private void CoverSelectionItem_MouseClick(object sender, EventArgs e)
         {
-            this.selected = !this.selected;
-            this.UpdateSelectionStatusDisplay(this.selected);
+            selected = !selected;
+            UpdateSelectionStatusDisplay(selected);
 
-            if (this.OnSelectedStatusChanged != null)
+            if (OnSelectedStatusChanged != null)
             {
-                this.OnSelectedStatusChanged(this, new EventArgs());
+                OnSelectedStatusChanged(this, new EventArgs());
             }
         }
     }

@@ -15,17 +15,17 @@
         public string id;
 
         // Merger to
-        public string mergeto="";
+        public string mergeto = "";
 
         // Equalsオーバーライド
         public override bool Equals(object obj)
         {
-            if (obj == null || this.GetType() != obj.GetType())
+            if (obj == null || GetType() != obj.GetType())
             {
                 return false;
             }
             HeadingInfo c = (HeadingInfo)obj;
-            return (this.num == c.num) && (this.title == c.title) && (this.id == c.id) && (this.mergeto.Replace("(", "").Replace(")", "") == c.mergeto.Replace("(", "").Replace(")",""));
-        }        
+            return (num == c.num) && (title == c.title) && (id == c.id) && (mergeto.Replace("(", "").Replace(")", "") == c.mergeto.Replace("(", "").Replace(")", ""));
+        }
     }
 }
