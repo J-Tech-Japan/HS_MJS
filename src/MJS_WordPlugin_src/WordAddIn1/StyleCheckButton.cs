@@ -11,9 +11,9 @@ using System.Runtime.InteropServices;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
-        private void button2_Click(object sender, RibbonControlEventArgs e)
+        private void StyleCheckButton(object sender, RibbonControlEventArgs e)
         {
             var application = Globals.ThisAddIn.Application;
             var activeDocument = application.ActiveDocument;

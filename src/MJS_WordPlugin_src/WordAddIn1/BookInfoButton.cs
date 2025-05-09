@@ -3,9 +3,9 @@ using System.Windows.Forms;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
-        private void button4_Click(object sender, RibbonControlEventArgs e)
+        private void BookInfoButton(object sender, RibbonControlEventArgs e)
         {
             loader load = new loader();
             load.Visible = false;

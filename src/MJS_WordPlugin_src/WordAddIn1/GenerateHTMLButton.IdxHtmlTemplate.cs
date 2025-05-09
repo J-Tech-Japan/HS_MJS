@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         private static string BuildIdxHtmlTemplate(string docTitle, string docid, Dictionary<string, string> mergeScript)
         {

@@ -10,7 +10,7 @@ using System.Text;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         // ヘッダーファイルの確認と読み込み
         public bool CheckAndLoadHeaderFile(Word.Document Doc, loader load, int bibNum, int bibMaxNum)

@@ -2,9 +2,9 @@
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
-        private void button5_Click(object sender, RibbonControlEventArgs e)
+        private void SetLinkButton(object sender, RibbonControlEventArgs e)
         {
             setLink stLink = new setLink();
             stLink.Show();

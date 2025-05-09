@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         private static string BuildHtmlTemplate1(Dictionary<string, string[]> title4Collection, Dictionary<string, string> mergeScript)
         {

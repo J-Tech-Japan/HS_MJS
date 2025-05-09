@@ -55,7 +55,7 @@ namespace WordAddIn1
             this.tbxDefaultValue.Name = "tbxDefaultValue";
             this.tbxDefaultValue.Size = new System.Drawing.Size(132, 22);
             this.tbxDefaultValue.TabIndex = 1;
-            this.tbxDefaultValue.TextChanged += new System.EventHandler(this.tbxDefaultValue_TextChanged);
+            // this.tbxDefaultValue.TextChanged += new System.EventHandler(this.tbxDefaultValue_TextChanged);
             this.tbxDefaultValue.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbxDefaultValue_KeyPress);
             // 
             // btnEnter
@@ -92,21 +92,21 @@ namespace WordAddIn1
             this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "bookInfo";
             this.Text = "書誌情報出力";
-            this.Load += new System.EventHandler(this.bookInfo_Load_1);
+            //this.Load += new System.EventHandler(this.bookInfo_Load_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
-        private void bookInfo_Load_1(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        //private void bookInfo_Load_1(object sender, EventArgs e)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        private void tbxDefaultValue_TextChanged(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        //private void tbxDefaultValue_TextChanged(object sender, EventArgs e)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         #endregion
 

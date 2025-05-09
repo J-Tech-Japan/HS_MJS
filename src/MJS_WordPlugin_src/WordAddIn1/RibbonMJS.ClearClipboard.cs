@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace WordAddIn1
 {
-    public partial class Ribbon1
+    public partial class RibbonMJS
     {
         private void ClearClipboardSafely()
         {
