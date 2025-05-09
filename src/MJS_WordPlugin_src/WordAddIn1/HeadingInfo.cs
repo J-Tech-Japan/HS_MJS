@@ -25,7 +25,7 @@
                 return false;
             }
             HeadingInfo c = (HeadingInfo)obj;
-            return (num == c.num) && (title == c.title) && (id == c.id) && (mergeto.Replace("(", "").Replace(")", "") == c.mergeto.Replace("(", "").Replace(")", ""));
-        }
+            return (num == c.num) && (title == c.title) && (id == c.id) && (mergeto.Replace("(", "").Replace(")", "") == c.mergeto.Replace("(", "").Replace(")",""));
+        }        
     }
 }

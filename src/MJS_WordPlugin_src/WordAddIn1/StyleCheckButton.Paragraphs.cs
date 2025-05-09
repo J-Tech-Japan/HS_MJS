@@ -31,6 +31,7 @@ namespace WordAddIn1
 
                 try
                 {
+                    var pStyle = paragraph.Range.ParagraphStyle();
                     // 空の段落をスキップ
                     if (IsEmptyParagraph(paragraph, activeDoc.Styles[-1].NameLocal))
                     {
@@ -38,28 +39,28 @@ namespace WordAddIn1
                     }
 
                     // 特定のスタイルをスキップ
-                    if (IsExcludedStyle(paragraph.Range.ParagraphStyle()))
+                    if (IsExcludedStyle(pStyle))
                     {
                         continue;
                     }
 
                     // 使用できないスタイルを検出
-                    if (!styleList.Contains(paragraph.Range.ParagraphStyle()))
+                    if (!styleList.Contains(pStyle))
                     {
-                        AddComment(paragraph.Range, $"【{paragraph.Range.ParagraphStyle()}】: 使用できない書式です。");
+                        AddComment(paragraph.Range, $"【{pStyle}】: 使用できない書式です。");
                         flag = true;
                     }
 
                     // 手順番号リセット用スタイルのチェック
-                    if (paragraph.Range.ParagraphStyle() == "MJS_見出し-手順")
+                    if (pStyle == "MJS_見出し-手順")
                     {
                         isProcessing = true;
                     }
-                    else if (isProcessing && paragraph.Range.ParagraphStyle() == "MJS_手順番号リセット用")
+                    else if (isProcessing && pStyle == "MJS_手順番号リセット用")
                     {
                         isProcessing = false;
                     }
-                    else if (isProcessing && paragraph.Range.ParagraphStyle() == "MJS_手順文")
+                    else if (isProcessing && pStyle == "MJS_手順文")
                     {
                         isProcessing = false;
                         AddComment(paragraph.Range, "上の段落に【MJS_手順番号リセット用】スタイルを挿入してください。");

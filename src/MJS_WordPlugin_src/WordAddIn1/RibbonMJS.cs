@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+using Microsoft.Office.Tools.Ribbon;
 
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +7,13 @@ using System.Threading;
 using System.Windows.Forms;
 
 using Word = Microsoft.Office.Interop.Word;
+using System.IO;
+using System.Collections.Generic;
+using Microsoft.Office.Tools.Ribbon;
+using Word = Microsoft.Office.Interop.Word;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using System.Threading;
 
 namespace WordAddIn1
 {
