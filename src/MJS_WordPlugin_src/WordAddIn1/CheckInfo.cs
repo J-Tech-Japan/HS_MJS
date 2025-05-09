@@ -9,50 +9,50 @@
         public int old1
         {
             get { return _old1; }
-            set { this._old1 = value; }
+            set { _old1 = value; }
         }
         private int _old2 = 0;
         public int old2
         {
             get { return _old2; }
-            set { this._old2 = value; }
+            set { _old2 = value; }
         }
         private int _old3 = 0;
         public int old3
         {
             get { return _old3; }
-            set { this._old3 = value; }
+            set { _old3 = value; }
         }
         private int _old4 = 0;
         public int old4
         {
             get { return _old4; }
-            set { this._old4 = value; }
+            set { _old4 = value; }
         }
 
         private int _new1 = 0;
         public int new1
         {
             get { return _new1; }
-            set { this._new1 = value; }
+            set { _new1 = value; }
         }
         private int _new2 = 0;
         public int new2
         {
             get { return _new2; }
-            set { this._new2 = value; }
+            set { _new2 = value; }
         }
         private int _new3 = 0;
         public int new3
         {
             get { return _new3; }
-            set { this._new3 = value; }
+            set { _new3 = value; }
         }
         private int _new4 = 0;
         public int new4
         {
             get { return _new4; }
-            set { this._new4 = value; }
+            set { _new4 = value; }
         }
 
         // 旧.項番
@@ -62,7 +62,7 @@
             get { return _old_num; }
             set
             {
-                this._old_num = value;
+                _old_num = value;
 
                 if (string.IsNullOrEmpty(value))
                 {
@@ -100,7 +100,7 @@
         public string old_title
         {
             get { return _old_title; }
-            set { this._old_title = value; }
+            set { _old_title = value; }
         }
 
         // 旧.ID
@@ -108,7 +108,7 @@
         public string old_id
         {
             get { return _old_id; }
-            set { this._old_id = value; }
+            set { _old_id = value; }
         }
 
         // 新.項番
@@ -118,7 +118,7 @@
             get { return _new_num; }
             set
             {
-                this._new_num = value;
+                _new_num = value;
 
                 if (string.IsNullOrEmpty(value))
                 {
@@ -156,7 +156,7 @@
         public string new_num_color
         {
             get { return _new_num_color; }
-            set { this._new_num_color = value; }
+            set { _new_num_color = value; }
         }
 
         // 新.タイトル
@@ -164,7 +164,7 @@
         public string new_title
         {
             get { return _new_title; }
-            set { this._new_title = value; }
+            set { _new_title = value; }
         }
 
         // 新.タイトル（色）
@@ -172,7 +172,7 @@
         public string new_title_color
         {
             get { return _new_title_color; }
-            set { this._new_title_color = value; }
+            set { _new_title_color = value; }
         }
 
         // 新.ID
@@ -180,7 +180,7 @@
         public string new_id
         {
             get { return _new_id; }
-            set { this._new_id = value; }
+            set { _new_id = value; }
         }
 
         // 新.ID（色）
@@ -188,7 +188,7 @@
         public string new_id_color
         {
             get { return _new_id_color; }
-            set { this._new_id_color = value; }
+            set { _new_id_color = value; }
         }
 
         // 新.ID（修正候補）
@@ -196,7 +196,7 @@
         public string new_id_show
         {
             get { return _new_id_show; }
-            set { this._new_id_show = value; }
+            set { _new_id_show = value; }
         }
 
         // 新.ID（修正候補）色
@@ -204,7 +204,7 @@
         public string new_id_show_color
         {
             get { return _new_id_show_color; }
-            set { this._new_id_show_color = value; }
+            set { _new_id_show_color = value; }
         }
 
         // 差異内容
@@ -212,7 +212,7 @@
         public string diff
         {
             get { return _diff; }
-            set { this._diff = value; }
+            set { _diff = value; }
         }
 
         // 差異内容（色）
@@ -220,7 +220,7 @@
         public string diff_color
         {
             get { return _diff_color; }
-            set { this._diff_color = value; }
+            set { _diff_color = value; }
         }
 
         // 修正処理（候補）
@@ -228,7 +228,7 @@
         public string editshow
         {
             get { return _editshow; }
-            set { this._editshow = value; }
+            set { _editshow = value; }
         }
 
         // 修正処理（候補）（色）
@@ -236,7 +236,7 @@
         public string editshow_color
         {
             get { return _editshow_color; }
-            set { this._editshow_color = value; }
+            set { _editshow_color = value; }
         }
 
         // 新規追加
@@ -244,7 +244,7 @@
         public string edit
         {
             get { return _edit; }
-            set { this._edit = value; }
+            set { _edit = value; }
         }
 
         // 新規追加（色）
@@ -252,7 +252,7 @@
         public string edit_color
         {
             get { return _edit_color; }
-            set { this._edit_color = value; }
+            set { _edit_color = value; }
         }
 
     }

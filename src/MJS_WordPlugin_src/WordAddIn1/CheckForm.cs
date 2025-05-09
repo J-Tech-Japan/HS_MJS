@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
@@ -22,7 +20,7 @@ namespace WordAddIn1
         {
             InitializeComponent();
 
-            this.DialogResult = DialogResult.No;
+            DialogResult = DialogResult.No;
 
             ribbon1 = _ribbon1;
 
@@ -39,8 +37,8 @@ namespace WordAddIn1
                 //}
             }
 
-            this.dataGridView1.AutoGenerateColumns = false;
-            this.dataGridView1.DataSource = showResult;
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.DataSource = showResult;
 
         }
 
@@ -546,8 +544,8 @@ namespace WordAddIn1
             //    setColor();
             //}
 
-            this.dataGridView1.DataSource = showResult;
-            this.dataGridView1.Refresh();
+            dataGridView1.DataSource = showResult;
+            dataGridView1.Refresh();
 
             setColor();
         }
@@ -652,13 +650,13 @@ namespace WordAddIn1
             //    }
             //}            
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         //private void CheckForm_SizeChanged(object sender, EventArgs e)

@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using Word = Microsoft.Office.Interop.Word;
-using System.Web;
 
 namespace WordAddIn1
 {
@@ -91,8 +85,7 @@ namespace WordAddIn1
         {
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
-                if (row.Index != e.RowIndex) row.Cells[0].Value = false;
-                else row.Cells[0].Value = true;
+                row.Cells[0].Value = row.Index != e.RowIndex ? false : (object)true;
             }
             Word.Document thisDocument = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
             Uri u1 = new Uri(Path.GetDirectoryName(Uri.UnescapeDataString(thisDocument.FullName)) + "\\");
@@ -109,34 +102,25 @@ namespace WordAddIn1
             }
             else
             {
-                if (Regex.IsMatch(dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString(), @"^\d+$") && e.RowIndex + 1 < dataGridView1.RowCount - 1)
-                {
-                    if (dataGridView1.Rows[e.RowIndex + 1].Cells[3].Value.ToString().Contains("#"))
-                        tbURL.Text = Uri.UnescapeDataString(relativePath + Regex.Replace(dataGridView1.Rows[e.RowIndex + 1].Cells[3].Value.ToString(), @"^(.*?)#(.*?)$", "$1.html#$2"));
-                    else
-                        tbURL.Text = Uri.UnescapeDataString(relativePath + dataGridView1.Rows[e.RowIndex + 1].Cells[3].Value.ToString() + ".html");
-                }
-                else
-                {
-                    if (dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString().Contains("#"))
-                        tbURL.Text = Uri.UnescapeDataString(relativePath + Regex.Replace(dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString(), @"^(.*?)#(.*?)$", "$1.html#$2"));
-                    else
-                        tbURL.Text = Uri.UnescapeDataString(relativePath + dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString() + ".html");
-
-                }
+                tbURL.Text = Regex.IsMatch(dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString(), @"^\d+$") && e.RowIndex + 1 < dataGridView1.RowCount - 1
+                    ? dataGridView1.Rows[e.RowIndex + 1].Cells[3].Value.ToString().Contains("#")
+                        ? Uri.UnescapeDataString(relativePath + Regex.Replace(dataGridView1.Rows[e.RowIndex + 1].Cells[3].Value.ToString(), @"^(.*?)#(.*?)$", "$1.html#$2"))
+                        : Uri.UnescapeDataString(relativePath + dataGridView1.Rows[e.RowIndex + 1].Cells[3].Value.ToString() + ".html")
+                    : dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString().Contains("#")
+                        ? Uri.UnescapeDataString(relativePath + Regex.Replace(dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString(), @"^(.*?)#(.*?)$", "$1.html#$2"))
+                        : Uri.UnescapeDataString(relativePath + dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString() + ".html");
                 if (String.IsNullOrEmpty(initText))
                 {
-                    if (!String.IsNullOrEmpty(dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString()))
-                        tbDisplayStr.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() + "　" + dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
-                    else
-                        tbDisplayStr.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+                    tbDisplayStr.Text = !String.IsNullOrEmpty(dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString())
+                        ? dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() + "　" + dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString()
+                        : dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
                 }
             }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -167,7 +151,7 @@ namespace WordAddIn1
             WordAddIn1.Properties.Settings.Default.tbFilePathLast = tbFilePath.Text;
             WordAddIn1.Properties.Settings.Default.Save();
 
-            this.Close();
+            Close();
         }
 
         private void tbDisplayStr_TextChanged(object sender, EventArgs e)

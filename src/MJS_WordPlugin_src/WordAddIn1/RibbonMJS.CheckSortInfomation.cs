@@ -1,22 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Office.Tools.Ribbon;
-using Word = Microsoft.Office.Interop.Word;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using System.Drawing.Imaging;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using System.Diagnostics;
-using System.Drawing;
-using System.Xml;
-using System.Threading;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using System.Reflection.Emit;
+﻿using System.Collections.Generic;
 
 namespace WordAddIn1
 {

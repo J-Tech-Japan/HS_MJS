@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace WordAddIn1
 {
-    partial class RibbonMJS
+    public partial class RibbonMJS
     {
 		// 検索用データを生成
 		public void GenerateSearchFiles(XmlDocument objBody, string rootPath, string exportDir, string docid, string htmlTemplate1, string htmlTemplate2, string htmlCoverTemplate1, string htmlCoverTemplate2, XmlDocument objToc, Dictionary<string, string> mergeScript, string searchJs)
