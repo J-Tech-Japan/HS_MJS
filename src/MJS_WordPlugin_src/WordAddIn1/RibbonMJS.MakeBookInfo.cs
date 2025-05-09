@@ -34,9 +34,7 @@ namespace WordAddIn1
 
             // ドキュメント全体を選択
             Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
-            Application.DoEvents();
             Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
-            Application.DoEvents();
 
             // 選択範囲が図形の場合、カーソルを左に移動
             if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
@@ -72,7 +70,7 @@ namespace WordAddIn1
             string logPath = Path.Combine(rootPath, "log.txt");
             string headerDirPath = Path.Combine(rootPath, headerDir);
 
-            // ドキュメント名の先頭3文字を抽出
+            // ドキュメント名の先頭3文字
             string docID = Regex.Replace(docName, "^(.{3}).+$", "$1");
 
             // ドキュメント名からタイトルを抽出
@@ -199,26 +197,6 @@ namespace WordAddIn1
                             AddReferenceFieldBookmarks(tgtPara);
                         }
 
-                        // 段落のスタイル名が「MJS_参照先」の場合
-                        //if (styleName.Equals("MJS_参照先"))
-                        //{
-                        //    foreach (Word.Field fld in tgtPara.Range.Fields)
-                        //    {
-                        //        // フィールドが参照フィールドの場合
-                        //        if (fld.Type == Word.WdFieldType.wdFieldRef)
-                        //        {
-                        //            // フィールドコードからブックマーク名を生成し、"_ref"を付加
-                        //            string bookmarkName = fld.Code.Text.Split(new char[] { ' ' })[2] + "_ref";
-
-                        //            // ブックマークを段落範囲に追加
-                        //            tgtPara.Range.Bookmarks.Add(bookmarkName);
-
-                        //            // フィールドコードをハイパーリンク形式に変更
-                        //            fld.Code.Text = "HYPERLINK " + fld.Code.Text.Split(new char[] { ' ' })[2];
-                        //        }
-                        //    }
-                        //}
-
                         // 結合処理フラグを初期化
                         isMerge = false;
 
@@ -227,15 +205,12 @@ namespace WordAddIn1
                             // 段落の文字スタイル名を取得
                             string styleCharacterName = tgtPara.Range.CharacterStyle.NameLocal;
 
-                            // スタイルが「MJS_見出し結合用」の場合
                             if (styleCharacterName.Equals("MJS_見出し結合用"))
                             {
                                 isMerge = true;
                             }
                         }
                         catch (Exception) { }
-
-                        //AddHeadingBookmarksToCollection(tgtPara, title4Collection, upperClassID);
 
                         // スタイル名が特定の「見出し」形式に一致する場合
                         if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1-５5](?![・用])"))
@@ -268,7 +243,7 @@ namespace WordAddIn1
                         // スタイル名が「章 扉 タイトル」に一致する場合
                         if (Regex.IsMatch(styleName, @"章[　 ]*扉.*タイトル"))
                         {
-                            Application.DoEvents();
+                            //Application.DoEvents();
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
@@ -327,16 +302,11 @@ namespace WordAddIn1
                                 previousSetId = setid;
                             }
 
-                            // レベル1のカウントをインクリメント
                             lv1count++;
-
-                            // レベル2とレベル3のスタイル名とカウントを初期化
                             lv2styleName = "";
                             lv2count = 0;
                             lv3styleName = "";
                             lv3count = 0;
-
-                            // レベル1のスタイル名を現在のスタイル名に設定
                             lv1styleName = styleName;
                         }
 
@@ -344,7 +314,7 @@ namespace WordAddIn1
                         else if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$"))
                         {
                             // 他のイベントを処理してUIを更新
-                            Application.DoEvents();
+                            //Application.DoEvents();
 
                             // 段落のテキストが「目次」に一致しない場合
                             if (!Regex.IsMatch(innerText, @"目\s*次\s*$"))
@@ -433,7 +403,7 @@ namespace WordAddIn1
                         // スタイル名が「見出し2」に一致する場合
                         else if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[２2](?![・用])"))
                         {
-                            Application.DoEvents();
+                            //Application.DoEvents();
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
@@ -516,7 +486,7 @@ namespace WordAddIn1
                         // スタイル名が「見出し3」に一致する場合
                         else if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[３3](?![・用])"))
                         {
-                            Application.DoEvents();
+                            //Application.DoEvents();
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
@@ -590,7 +560,6 @@ namespace WordAddIn1
                                 lv2count = 0;
                                 lv3styleName = "";
                                 lv3count = 0;
-
                                 lv1styleName = styleName;
                             }
                             else if ((lv2styleName == "") || (lv2styleName == styleName))
@@ -615,114 +584,19 @@ namespace WordAddIn1
                     if (breakFlg) break;
                 }
 
-                // SOURCELINK変更==========================================================================START
-
                 // チェックフラグが立っている、または旧書誌情報が空の場合
                 if (checkBL || oldInfo.Count == 0)
                 {
-                    // 書誌情報を保存するためのファイルを作成
-                    using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docID + ".txt", false, Encoding.UTF8))
-                    {
-                        // 書誌情報辞書のすべてのキーをループ処理
-                        foreach (string key in bookInfoDic.Keys)
-                        {
-                            // 書誌情報を分割して取得
-                            string[] secText = new string[2];
-
-                            // 書誌情報に「♪」が含まれている場合、分割して項番とタイトルを取得
-                            if (bookInfoDic[key].Contains("♪"))
-                            {
-                                secText[0] = Regex.Replace(bookInfoDic[key], "^(.*?)♪.*?$", "$1");
-                                secText[1] = Regex.Replace(bookInfoDic[key], "^.*?♪(.*?)$", "$1");
-                            }
-                            else
-                                // 「♪」が含まれていない場合、タイトルのみを設定
-                                secText[1] = bookInfoDic[key];
-
-                            // 書誌情報を格納するクラスのインスタンスを作成
-                            HeadingInfo headingInfo = new HeadingInfo();
-
-                            // 項番が空の場合は空文字を設定、それ以外の場合はsecText[0]を設定
-                            headingInfo.num = string.IsNullOrEmpty(secText[0]) ? "" : secText[0];
-
-                            // タイトルが空の場合は空文字を設定、それ以外の場合はsecText[1]を設定
-                            headingInfo.title = string.IsNullOrEmpty(secText[1]) ? "" : secText[1];
-
-                            // IDを設定（特殊文字「♯」を「#」に置換）
-                            headingInfo.id = key.Replace("♯", "#");
-
-                            // 結合先情報が存在する場合
-                            if (mergeSetId.ContainsKey(headingInfo.id))
-                            {
-                                // 結合先IDを取得し、headingInfo.mergetoに設定
-                                headingInfo.mergeto = mergeSetId[headingInfo.id].Split(new char[] { '♯', '#' })[0];
-
-                                // ヘッダー行を作成してファイルに書き込む
-                                makeHeaderLine(docinfo, mergeSetId, headingInfo.num, headingInfo.title, headingInfo.id);
-                            }
-                            else
-                            {
-                                // 結合先情報がない場合、項番、タイトル、IDをタブ区切りでファイルに書き込む
-                                docinfo.WriteLine(secText[0] + "\t" + secText[1] + "\t" + key.Replace("♯", "#") + "\t");
-                            }
-                        }
-                    }
+                    // ヘッダー行を作成してファイルに書き込む
+                    WriteBookInfoToFile(rootPath, headerDir, docID, bookInfoDic, mergeSetId);
 
                     thisDocument.Save();
-
                     log.WriteLine("書誌情報リスト作成終了");
                 }
                 else
                 {
-                    // 書誌情報辞書のキーをループ処理
-                    foreach (string key in bookInfoDic.Keys)
-                    {
-                        // 書誌情報を分割して取得
-                        string[] secText = new string[2];
-
-                        // 書誌情報に「♪」が含まれている場合、項番とタイトルを分割
-                        if (bookInfoDic[key].Contains("♪"))
-                        {
-                            secText[0] = Regex.Replace(bookInfoDic[key], "^(.*?)♪.*?$", "$1");
-                            secText[1] = Regex.Replace(bookInfoDic[key], "^.*?♪(.*?)$", "$1");
-                        }
-                        // 書誌情報に「♪」が含まれていない場合、タイトルのみを設定
-                        else
-                            secText[1] = bookInfoDic[key];
-
-                        // 書誌情報を格納するクラスのインスタンスを作成
-                        HeadingInfo headingInfo = new HeadingInfo();
-
-                        // 項番が空の場合は空文字を設定、それ以外の場合はsecText[0]を設定
-                        headingInfo.num = string.IsNullOrEmpty(secText[0]) ? "" : secText[0];
-
-                        // タイトルが空の場合は空文字を設定、それ以外の場合はsecText[1]を設定
-                        headingInfo.title = string.IsNullOrEmpty(secText[1]) ? "" : secText[1];
-
-                        // 特殊文字「＃」が含まれている場合
-                        // 「＃」を「#」に置換してIDを設定
-                        if (key.Contains("＃"))
-                        {
-                            headingInfo.id = key.Replace("＃", "#");
-                        }
-
-                        // 特殊文字「＃」が含まれていない場合
-                        else
-                        {
-                            // 「♯」を「#」に置換してIDを設定
-                            headingInfo.id = key.Replace("♯", "#");
-                        }
-
-                        // 結合先情報が存在する場合
-                        if (mergeSetId.ContainsKey(headingInfo.id))
-                        {
-                            // 結合先IDを取得し、headingInfo.mergetoに設定
-                            headingInfo.mergeto = mergeSetId[headingInfo.id].Split(new char[] { '♯', '#' })[0];
-                        }
-
-                        // 新しい書誌情報をリストに追加
-                        newInfo.Add(headingInfo);
-                    }
+                    // 正規表現を使ってデータを解析し、HeadingInfo オブジェクトを生成
+                    ParseBookInfo(bookInfoDic, mergeSetId, newInfo);
 
                     // 新旧比較処理
                     int ret = checkDocInfo(oldInfo, newInfo, out checkResult);
@@ -730,7 +604,7 @@ namespace WordAddIn1
                     // 処理結果が0:正常の場合
                     if (ret == 0)
                     {
-                        // 処理結果が正常の場合、書誌情報を保存するためのファイルを作成
+                        // 書誌情報を保存するためのファイルを作成
                         using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docID + ".txt", false, Encoding.UTF8))
                         {
                             foreach (HeadingInfo info in newInfo)
@@ -772,65 +646,49 @@ namespace WordAddIn1
                             // ドキュメント内のすべてのブックマークを削除
                             DeleteAllBookmarks(thisDocument);
 
-                            foreach (Word.Section tgtSect in thisDocument.Sections)
-                            {
-                                foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
-                                {
-                                    // 段落のスタイル名を取得
-                                    string styleName = tgtPara.get_Style().NameLocal;
+                            
+                            ProcessParagraphsInSections(thisDocument, checkResult, docID, bookInfoDef, ref breakFlg);
 
-                                    // スタイル名が「章 扉 タイトル」に一致しない、かつ「見出し」を含まない場合は次の段落へ
-                                    if (!Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") && !styleName.Contains("見出し")) continue;
 
-                                    // 段落のテキストを取得
-                                    string innerText = tgtPara.Range.Text.Trim();
+                            //foreach (Word.Section tgtSect in thisDocument.Sections)
+                            //{
+                            //    foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
+                            //    {
+                            //        // 段落のスタイル名を取得
+                            //        string styleName = tgtPara.get_Style().NameLocal;
 
-                                    // 段落のテキストが空の場合は次の段落へ
-                                    if (tgtPara.Range.Text.Trim() == "") continue;
+                            //        // スタイル名が「章 扉 タイトル」に一致しない、かつ「見出し」を含まない場合は次の段落へ
+                            //        if (!Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") && !styleName.Contains("見出し")) continue;
 
-                                    // 段落のテキストが「索引」に一致し、特定のスタイル名の場合、処理を中断
-                                    if (Regex.IsMatch(innerText, @"^[\s　]*索[\s　]*引[\s　]*$") && (Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$")))
-                                    {
-                                        // 処理中断フラグを設定
-                                        breakFlg = true;
-                                        break;
-                                    }
+                            //        // 段落のテキストを取得
+                            //        string innerText = tgtPara.Range.Text.Trim();
 
-                                    // スタイル名が特定の条件に一致する場合
-                                    if (Regex.IsMatch(styleName, @"章[　 ]*扉.*タイトル")
-                                        || (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$") && !Regex.IsMatch(innerText, @"目\s*次\s*$"))
-                                        || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[２2](?![・用])")
-                                        || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[３3](?![・用])"))
-                                    {
-                                        Application.DoEvents();
+                            //        // 段落のテキストが空の場合は次の段落へ
+                            //        if (tgtPara.Range.Text.Trim() == "") continue;
 
-                                        // 行末尾を選択状態にする
-                                        tgtPara.Range.Select();
-                                        Word.Selection sel = Globals.ThisAddIn.Application.Selection;
-                                        sel.EndKey(Word.WdUnits.wdLine);
+                            //        // 段落のテキストが「索引」に一致し、特定のスタイル名の場合、処理を中断
+                            //        if (Regex.IsMatch(innerText, @"^[\s　]*索[\s　]*引[\s　]*$") && (Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$")))
+                            //        {
+                            //            // 処理中断フラグを設定
+                            //            breakFlg = true;
+                            //            break;
+                            //        }
 
-                                        // 項番を取得
-                                        string num = Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "");
+                            //        // 統合された正規表現パターン
+                            //        string pattern = @"章[　 ]*扉.*タイトル|見出し|Heading\s*[１1-３3](?!.*目\s*次|[・用])";
 
-                                        // タイトルを取得
-                                        string title = tgtPara.Range.Text.Trim();
+                            //        if (Regex.IsMatch(styleName, pattern))
+                            //        {
+                            //            // 比較結果リストから一致する情報を検索し、ブックマークを追加
+                            //            AddBookmarkIfMatch(tgtPara, checkResult, docID, bookInfoDef);
 
-                                        // 比較結果リストから一致する情報を検索
-                                        CheckInfo info = checkResult.Where(p => ((string.IsNullOrEmpty(p.new_num) && string.IsNullOrEmpty(num)) || p.new_num.Equals(num))
-                                            && p.new_title.Equals(title)).FirstOrDefault();
+                            //        }
 
-                                        // 一致する情報が存在する場合、ブックマークを追加
-                                        if (info != null)
-                                        {
-                                            // 行末尾にブックマークを追加する
-                                            sel.Bookmarks.Add(info.new_id_show.Split(new char[] { '(' })[0].Trim().Replace("#", "♯"));
-                                        }
-                                    }
-                                }
+                            //    }
 
-                                // 処理中断フラグが設定されている場合、セクションのループを終了
-                                if (breakFlg) break;
-                            }
+                            //    // 処理中断フラグが設定されている場合、セクションのループを終了
+                            //    if (breakFlg) break;
+                            //}
 
                             // ヘッダーファイルのパス
                             string headerFilePath = Path.Combine(rootPath, headerDir, $"{docID}.txt");
@@ -843,8 +701,6 @@ namespace WordAddIn1
                         }
                     }
                 }
-
-                // SOURCELINK変更==========================================================================END
 
                 // ログファイルが指定されていない場合、ログを閉じる
                 if (swLog == null)
