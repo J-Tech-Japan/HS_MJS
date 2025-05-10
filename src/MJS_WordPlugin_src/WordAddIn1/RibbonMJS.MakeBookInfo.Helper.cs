@@ -317,6 +317,7 @@ namespace WordAddIn1
             }
         }
 
+        // ドキュメント内の段落を解析し、条件に基づいてブックマークを追加
         public void ProcessParagraphsInSections(
             Word.Document document,
             List<CheckInfo> checkResult,
@@ -348,7 +349,6 @@ namespace WordAddIn1
                         break;
                     }
 
-                    // 統合された正規表現パターン
                     string pattern = @"章[　 ]*扉.*タイトル|見出し|Heading\s*[１1-３3](?!.*目\s*次|[・用])";
 
                     if (Regex.IsMatch(styleName, pattern))
