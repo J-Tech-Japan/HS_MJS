@@ -243,8 +243,6 @@ namespace WordAddIn1
                         // スタイル名が「章 扉 タイトル」に一致する場合
                         if (Regex.IsMatch(styleName, @"章[　 ]*扉.*タイトル"))
                         {
-                            //Application.DoEvents();
-
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
                             Word.Selection sel = Globals.ThisAddIn.Application.Selection;
@@ -313,9 +311,7 @@ namespace WordAddIn1
                         // スタイル名が「見出し1」に一致する場合
                         else if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$"))
                         {
-                            // 他のイベントを処理してUIを更新
                             //Application.DoEvents();
-
                             // 段落のテキストが「目次」に一致しない場合
                             if (!Regex.IsMatch(innerText, @"目\s*次\s*$"))
                             {
@@ -634,7 +630,6 @@ namespace WordAddIn1
                             {
                                 log.Close();
                             }
-
                             return false;
                         }
                         else
@@ -646,54 +641,11 @@ namespace WordAddIn1
                             // ドキュメント内のすべてのブックマークを削除
                             DeleteAllBookmarks(thisDocument);
 
-                            
+                            // ブックマークを再作成
                             ProcessParagraphsInSections(thisDocument, checkResult, docID, bookInfoDef, ref breakFlg);
 
-
-                            //foreach (Word.Section tgtSect in thisDocument.Sections)
-                            //{
-                            //    foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
-                            //    {
-                            //        // 段落のスタイル名を取得
-                            //        string styleName = tgtPara.get_Style().NameLocal;
-
-                            //        // スタイル名が「章 扉 タイトル」に一致しない、かつ「見出し」を含まない場合は次の段落へ
-                            //        if (!Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") && !styleName.Contains("見出し")) continue;
-
-                            //        // 段落のテキストを取得
-                            //        string innerText = tgtPara.Range.Text.Trim();
-
-                            //        // 段落のテキストが空の場合は次の段落へ
-                            //        if (tgtPara.Range.Text.Trim() == "") continue;
-
-                            //        // 段落のテキストが「索引」に一致し、特定のスタイル名の場合、処理を中断
-                            //        if (Regex.IsMatch(innerText, @"^[\s　]*索[\s　]*引[\s　]*$") && (Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$")))
-                            //        {
-                            //            // 処理中断フラグを設定
-                            //            breakFlg = true;
-                            //            break;
-                            //        }
-
-                            //        // 統合された正規表現パターン
-                            //        string pattern = @"章[　 ]*扉.*タイトル|見出し|Heading\s*[１1-３3](?!.*目\s*次|[・用])";
-
-                            //        if (Regex.IsMatch(styleName, pattern))
-                            //        {
-                            //            // 比較結果リストから一致する情報を検索し、ブックマークを追加
-                            //            AddBookmarkIfMatch(tgtPara, checkResult, docID, bookInfoDef);
-
-                            //        }
-
-                            //    }
-
-                            //    // 処理中断フラグが設定されている場合、セクションのループを終了
-                            //    if (breakFlg) break;
-                            //}
-
-                            // ヘッダーファイルのパス
-                            string headerFilePath = Path.Combine(rootPath, headerDir, $"{docID}.txt");
-
                             // ヘッダーファイルを作成
+                            string headerFilePath = Path.Combine(rootPath, headerDir, $"{docID}.txt");
                             CreateHeaderFile(headerFilePath, checkResult, mergeSetId);
 
                             thisDocument.Save();
@@ -706,7 +658,7 @@ namespace WordAddIn1
                 if (swLog == null)
                 {
                     log.Close();
-                    File.Delete(rootPath + "\\log.txt");
+                    File.Delete(logPath);
                 }
 
                 // HTML公開フラグを無効化
@@ -714,7 +666,6 @@ namespace WordAddIn1
 
                 // 処理が正常に終了したことを示す
                 return true;
-
             }
 
             catch (Exception ex)
@@ -723,12 +674,8 @@ namespace WordAddIn1
             }
             finally
             {
-                // ドキュメントのカーソル位置を先頭に戻す
+                // ドキュメントのカーソル位置を先頭に戻して画面更新を再有効化
                 Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
-                
-                Application.DoEvents();
-
-                //  画面更新を再有効化
                 Globals.ThisAddIn.Application.ScreenUpdating = true;
             }
         }
