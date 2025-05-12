@@ -269,6 +269,9 @@
     <Compile Include="CoverSelectionItem.Designer.cs">
       <DependentUpon>CoverSelectionItem.cs</DependentUpon>
     </Compile>
+    <Compile Include="GenerateHTMLButton.ProcessHTML.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="HeadingInfo.cs" />
     <Compile Include="loader.cs">
       <SubType>Form</SubType>
@@ -366,7 +369,7 @@
     <Compile Include="GenerateHTMLButton.IdxHtmlTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GenerateHTMLButton.XMLProcessor.cs">
+    <Compile Include="GenerateHTMLButton.ProcessXML.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.ProcessCoverImages.cs">

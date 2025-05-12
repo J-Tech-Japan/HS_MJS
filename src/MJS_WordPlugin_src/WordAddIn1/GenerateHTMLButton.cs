@@ -466,7 +466,7 @@ namespace WordAddIn1
             }
 
             // log.txtを削除したい場合は以下のコードを有効にする
-            //File.Delete(rootPath + "\\log.txt");
+            //File.Delete(logPath);
 
             application.ActiveWindow.View.Type = defaultView;
             load.Close();

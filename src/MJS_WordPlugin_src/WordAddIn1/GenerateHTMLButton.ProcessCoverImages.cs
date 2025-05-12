@@ -1,50 +1,49 @@
 ﻿/*
 ProcessCoverImages メソッドでは、Word ドキュメント内の図形や画像を処理し、
 特定の条件に基づいて画像を抽出・変換・保存する一連の処理が行われています。
----
+
 1. 一時ディレクトリの作成
 •	EnsureDirectoryExists メソッドを使用して、rootPath 配下に tmpcoverpic ディレクトリを作成します。
 •	このディレクトリは、処理中に生成される画像ファイルを一時的に保存するために使用されます。
----
+
 2. 図形のグループ解除
 •	UngroupShapes メソッドを呼び出し、Word ドキュメント内の図形 (Shapes) を再帰的にグループ解除します。
 •	グループ化された図形を個別の図形として扱えるようにします。
----
+
 3. キャンバス内のコンテンツ抽出
 •	ExtractCanvasContent メソッドを呼び出し、キャンバス (msoCanvas) 内のテキストや画像を処理します。
 •	テキスト抽出: キャンバス内の図形からテキストを抽出し、subTitle に格納します。
 •	画像保存: キャンバス内の画像を PNG 形式で保存します。
----
+
 4. 図形をインライン図形に変換
 •	ConvertPicturesToInlineShapes メソッドを呼び出し、msoPicture タイプの図形をインライン図形に変換します。
 •	インライン図形にすることで、後続の処理で扱いやすくします。
----
+
 5. ロゴの抽出
 •	ExtractLogos メソッドを呼び出し、特定のスタイル（例: MJS_製品ロゴ（メイン） や MJS_製品ロゴ（サブ））を持つ段落からロゴ画像を抽出します。
 •	メインロゴ: 最初のロゴ画像を抽出し、product_logo_main.png として保存。
 •	サブロゴ: 最大 3 つのサブロゴを抽出し、それぞれ別のファイルに保存。
----
+
 6. インライン図形の画像抽出
 •	ExtractInlineShapes メソッドを呼び出し、インライン図形から画像を抽出します。
 •	特定の条件（例: アスペクト比や高さ）を満たす画像のみを PNG 形式で保存します。
----
+
 7. 画像のエクスポート
 •	ProcessCoverImagesForExport メソッドを呼び出し、抽出した画像をエクスポートします。
 •	パターン 1 または 2 の場合: 画像を特定のディレクトリに移動。
 •	それ以外の場合: 画像をリサイズして保存。
----
+
 8. 一時ディレクトリの削除
 •	CleanupTemporaryDirectory メソッドを呼び出し、処理が完了した後に一時ディレクトリを削除します。
----
+
 9. 例外処理
 •	処理中に例外が発生した場合、log にエラーメッセージを記録します。
----
+
 処理の全体像
 このメソッドは、以下のようなシナリオで使用されることを想定しています：
 1.	Word ドキュメント内の図形や画像を解析。
 2.	必要な画像やテキストを抽出。
 3.	抽出したデータを特定の形式やディレクトリ構造で保存。
-このように、ProcessCoverImages は Word ドキュメントの画像処理を中心とした複雑なロジックを実現するためのメソッドです。
 */
 
 using System;
@@ -146,6 +145,7 @@ namespace WordAddIn1
             }
         }
 
+        // 図形や画像がグループ化されている場合、解除する
         private void UngroupCanvasItems(Word.Shape canvas)
         {
             bool checkCanvas;
@@ -163,6 +163,7 @@ namespace WordAddIn1
             } while (checkCanvas);
         }
 
+        // キャンバス内の図形からテキストを抽出
         private void ExtractTextFromCanvas(Word.Shape canvas, ref string subTitle)
         {
             foreach (Word.Shape item in canvas.CanvasItems)
@@ -183,6 +184,7 @@ namespace WordAddIn1
             }
         }
 
+        // キャンバス内の画像を保存
         private void SaveCanvasImage(Word.Shape canvas, Word.Application application, string tempDir, ref int biCount)
         {
             byte[] imageData = (byte[])application.Selection.EnhMetaFileBits;
@@ -202,6 +204,7 @@ namespace WordAddIn1
             }
         }
 
+        // 図形をインライン図形に変換
         private void ConvertPicturesToInlineShapes(Word.Document docCopy, Word.Application application)
         {
             foreach (Word.Shape shape in docCopy.Shapes)
@@ -213,6 +216,7 @@ namespace WordAddIn1
             }
         }
 
+        // ロゴを抽出
         private void ExtractLogos(
             Word.Document docCopy,
             Word.Application application,
@@ -236,6 +240,7 @@ namespace WordAddIn1
             }
         }
 
+        // メインロゴを抽出
         private void ExtractMainLogo(Word.Paragraph paragraph, Word.Application application, string tempDir, StreamWriter log)
         {
             try
@@ -257,6 +262,7 @@ namespace WordAddIn1
             }
         }
 
+        // サブロゴを抽出
         private void ExtractSubLogos(
             Word.Paragraph paragraph,
             Word.Application application,
@@ -298,6 +304,7 @@ namespace WordAddIn1
             }
         }
 
+        // インライン図形から画像を抽出
         private void ExtractInlineShapes(Word.Document docCopy, string tempDir, ref int biCount)
         {
             foreach (Word.InlineShape inlineShape in docCopy.Sections[1].Range.InlineShapes)
@@ -322,6 +329,7 @@ namespace WordAddIn1
             }
         }
 
+        // 画像をエクスポート
         private void ProcessCoverImagesForExport(string tempDir, string rootPath, string exportDir, bool isPattern1, bool isPattern2)
         {
             string[] coverPics = Directory.GetFiles(tempDir, "*.png", SearchOption.AllDirectories);
@@ -341,6 +349,7 @@ namespace WordAddIn1
             }
         }
 
+        // 画像をパターン 1 またはパターン 2 用にエクスポート
         private void ExportImagesForPattern(List<KeyValuePair<string, long>> sortedImages, string rootPath, string exportDir)
         {
             string destDir = Path.Combine(rootPath, exportDir, "template", "images");
@@ -358,6 +367,7 @@ namespace WordAddIn1
             }
         }
 
+        // 画像をデフォルト用にエクスポート
         private void ExportImagesForDefault(List<KeyValuePair<string, long>> sortedImages, string rootPath, string exportDir)
         {
             string destDir = Path.Combine(rootPath, exportDir, "template", "images");
@@ -385,6 +395,7 @@ namespace WordAddIn1
             }
         }
 
+        // 画像をリサイズして保存
         private void ResizeAndSaveImage(string sourcePath, string destPath, float scale)
         {
             using (Bitmap src = new Bitmap(sourcePath))
