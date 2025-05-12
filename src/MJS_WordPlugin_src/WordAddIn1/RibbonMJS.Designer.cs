@@ -49,7 +49,7 @@
             this.button2 = this.Factory.CreateRibbonButton();
             this.button10 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
-            this.button11 = this.Factory.CreateRibbonButton();
+            //this.button11 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -150,7 +150,7 @@
             this.group4.Items.Add(this.button2);
             this.group4.Items.Add(this.button10);
             this.group4.Items.Add(this.button3);
-            this.group4.Items.Add(this.button11);
+            //this.group4.Items.Add(this.button11);
             this.group4.Name = "group4";
             // 
             // button9
@@ -193,13 +193,13 @@
             // 
             // button11
             // 
-            this.button11.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.button11.Enabled = false;
-            this.button11.Image = global::WordAddIn1.Properties.Resources.touka;
-            this.button11.Label = " ";
-            this.button11.Name = "button11";
-            this.button11.ShowImage = true;
-            this.button11.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button11_Click);
+            //this.button11.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            //this.button11.Enabled = false;
+            //this.button11.Image = global::WordAddIn1.Properties.Resources.touka;
+            //this.button11.Label = " ";
+            //this.button11.Name = "button11";
+            //this.button11.ShowImage = true;
+            //this.button11.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button11_Click);
             // 
             // Ribbon1
             // 
@@ -236,7 +236,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button8;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button9;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button10;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button11;
+        //internal Microsoft.Office.Tools.Ribbon.RibbonButton button11;
     }
 
     partial class ThisRibbonCollection

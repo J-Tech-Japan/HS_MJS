@@ -17,6 +17,10 @@ namespace WordAddIn1
         private const string ErrMsgTmpDocOpen = "同階層のtmp.docが開かれています。\r\ntmp.docを閉じてから実行してください。";
         private const string ErrMsgFile = "ファイルエラー";
 
+        // スタイルチェック中に文書が変更された時のメッセージ
+        private const string ErrMsgDocumentChanged1 = "「スタイルチェック」クリック後に変更が加えられました。\r\n「HTML出力」を実行するためには\r\nもう一度「スタイルチェック」を実行してください。";
+        private const string ErrMsgDocumentChanged2 = "ドキュメントが変更されました！";
+
         // HTML出力が成功した場合に表示するメッセージ
         private const string MsgHtmlOutputSuccess1 = "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？";
         private const string MsgHtmlOutputSuccess2 = "HTML出力成功";

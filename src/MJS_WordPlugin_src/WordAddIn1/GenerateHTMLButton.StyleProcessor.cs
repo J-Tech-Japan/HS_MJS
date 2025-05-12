@@ -57,55 +57,5 @@ namespace WordAddIn1
             }
         }
 
-        // 改善前のコード(2025.05.01)
-        //public void ProcessStyles(string className, ref string chapterSplitClass, Dictionary<string, string> styleName)
-        //{
-        //    foreach (string clsName in className.Split('\n'))
-        //    {
-        //        string clsBefore, clsAfter;
-
-        //        if (Regex.IsMatch(clsName, "mso-style-name:"))
-        //        {
-        //            clsBefore = Regex.Replace(clsName, "^(.+?){.+?}$", "$1");
-        //            clsAfter = Regex.Replace(clsName, @"^.+?{.*mso-style-name:""(.+?)\\,.*"";.*}", "$1");
-        //            clsAfter = Regex.Replace(clsAfter, "^.+?{.*mso-style-name:(.+?);.*}", "$1");
-
-        //            foreach (string cls in clsBefore.Split(','))
-        //            {
-        //                if (Regex.IsMatch(clsAfter, "章[　 ]*扉.*タイトル"))
-        //                {
-        //                    if (chapterSplitClass != "")
-        //                    {
-        //                        chapterSplitClass += "|";
-        //                    }
-        //                    chapterSplitClass += Regex.Replace(cls, @"^(.+?)\.(.+?)$", "$1[@class='$2']");
-        //                }
-
-        //                styleName.Add(cls, Regex.Replace(clsAfter, @"\\", ""));
-        //            }
-        //        }
-        //        else if (Regex.IsMatch(clsName, "mso-style-link:"))
-        //        {
-        //            clsBefore = Regex.Replace(clsName, "^(.+?){.+?}$", "$1");
-        //            clsAfter = Regex.Replace(clsName, @"^.+?{.*mso-style-link:""(.+?)\\,.*"";.*}", "$1");
-        //            clsAfter = Regex.Replace(clsAfter, "^.+?{.*mso-style-link:(.+?);.*}", "$1");
-
-        //            foreach (string cls in clsBefore.Split(','))
-        //            {
-        //                if (Regex.IsMatch(clsAfter, "章[　 ]*扉.*タイトル"))
-        //                {
-        //                    if (chapterSplitClass != "")
-        //                    {
-        //                        chapterSplitClass += "|";
-        //                    }
-        //                    chapterSplitClass += Regex.Replace(cls, @"^(.+?)\.(.+?)$", "$1[@class='$2']");
-        //                }
-
-        //                styleName.Add(cls, Regex.Replace(clsAfter, @"\\", ""));
-        //            }
-        //        }
-        //    }
-        //}
-
     }
 }
