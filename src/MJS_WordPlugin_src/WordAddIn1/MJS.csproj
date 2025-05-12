@@ -269,6 +269,9 @@
     <Compile Include="CoverSelectionItem.Designer.cs">
       <DependentUpon>CoverSelectionItem.cs</DependentUpon>
     </Compile>
+    <Compile Include="GenerateHTMLButton.ProcessHTML.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="HeadingInfo.cs" />
     <Compile Include="loader.cs">
       <SubType>Form</SubType>
@@ -320,6 +323,7 @@
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="MJS.pfx" />
+    <None Include="MJS_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -339,6 +343,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="RibbonMJS.Config.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="RibbonMJS.MakeBookInfo.HeaderFile.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="StyleCheckButton.cs">
@@ -362,7 +369,7 @@
     <Compile Include="GenerateHTMLButton.IdxHtmlTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GenerateHTMLButton.XMLProcessor.cs">
+    <Compile Include="GenerateHTMLButton.ProcessXML.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.ProcessCoverImages.cs">
@@ -675,10 +682,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MJS_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MJS_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>B0E1BED902F52F6B2BDD56C9F00138C135470ECB</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>9BEBE799A2935EBDB19062218193BD60D876986E</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

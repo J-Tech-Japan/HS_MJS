@@ -17,63 +17,101 @@ namespace WordAddIn1
         private Dictionary<string, string> bookInfoDic = new Dictionary<string, string>();
         private bool checkOK = false;
 
+        // リボンロード時の初期化
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
-            //Globals.ThisAddIn.Application.ActiveDocument.TrackRevisions = true;
-            //Globals.ThisAddIn.Application.ActiveDocument.ShowRevisions = false;
-            Globals.ThisAddIn.Application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
+            try
+            {
+                Globals.ThisAddIn.Application.WindowSelectionChange -=
+                    new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
+            }
+            catch { /* 既に解除済みの場合は無視 */ }
 
-            //            Globals.ThisAddIn.Application.WindowSelectionChange -= delegate (Word.Selection mySelection) { Application_WindowSelectionChange(); };
-            Globals.ThisAddIn.Application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
+            Globals.ThisAddIn.Application.DocumentChange +=
+                new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
         }
 
+        // KeyValuePairのValueで比較
         private static int CompareKeyValuePair(KeyValuePair<string, float> x, KeyValuePair<string, float> y)
         {
             return x.Value.CompareTo(y.Value);
         }
 
+        // マージ情報付きのhref生成
         private static string makeHrefWithMerge(Dictionary<string, string> mergeData, string id)
         {
-            return mergeData.ContainsKey(id) ? mergeData[id] + ".html" + "#" + id : id + ".html";
+            if (mergeData == null || string.IsNullOrEmpty(id))
+                return id + ".html";
+            return mergeData.ContainsKey(id)
+                ? mergeData[id] + ".html#" + id
+                : id + ".html";
         }
 
+        // ヘッダー行の出力
         private static void makeHeaderLine(StreamWriter docinfo, Dictionary<string, string> mergeSetId, string num, string title, string id)
         {
             string newId = id;
-            // checked merge exiets
-            if (mergeSetId.ContainsKey(id))
+            if (mergeSetId != null && mergeSetId.ContainsKey(id))
             {
-                // check # exists
+                // "♯"が含まれていれば最初の部分だけ取得
                 if (mergeSetId[id].Contains("♯"))
                 {
-                    // get first #
                     mergeSetId[id] = mergeSetId[id].Split(new char[] { '♯' })[0];
                 }
-
                 newId = mergeSetId[id] + "♯" + id;
             }
-            docinfo.WriteLine(num + "\t" + title + "\t" + id + "\t" + (mergeSetId.ContainsKey(id) ? "(" + mergeSetId[id] + ")" : ""));
+            docinfo.WriteLine($"{num}\t{title}\t{id}\t{(mergeSetId != null && mergeSetId.ContainsKey(id) ? "(" + mergeSetId[id] + ")" : "")}");
         }
 
+        // ドキュメント切替時の処理
         private void Application_DocumentChange()
         {
-            bookInfoDef = "";
-            Word.Document Doc = Globals.ThisAddIn.Application.ActiveDocument;
+            bookInfoDef = string.Empty;
 
-            // ブックマーク表示オプションをオンにする
-            Doc.ActiveWindow.View.ShowBookmarks = true;
-
-            if (File.Exists(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt"))
+            Word.Document activeDoc = null;
+            try
             {
-                foreach (Word.Bookmark bm in Doc.Bookmarks)
+                activeDoc = Globals.ThisAddIn.Application.ActiveDocument;
+            }
+            catch
+            {
+                // ドキュメントが取得できない場合は何もしない
+                return;
+            }
+
+            if (activeDoc == null || activeDoc.ActiveWindow == null)
+                return;
+
+            // ブックマーク表示オプションをON
+            try
+            {
+                activeDoc.ActiveWindow.View.ShowBookmarks = true;
+            }
+            catch
+            {
+                // 例外発生時は無視
+            }
+
+            // ヘッダーファイルのパスを生成
+            string docNamePrefix = Regex.Replace(activeDoc.Name, "^(.{3}).+$", "$1");
+            string headerFilePath = Path.Combine(
+                Path.GetDirectoryName(activeDoc.FullName) ?? "",
+                "headerFile",
+                docNamePrefix + ".txt"
+            );
+
+            // ヘッダーファイルの存在チェック
+            if (File.Exists(headerFilePath))
+            {
+                foreach (Word.Bookmark bm in activeDoc.Bookmarks)
                 {
-                    if (Regex.IsMatch(bm.Name, "^" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1")))
+                    if (Regex.IsMatch(bm.Name, "^" + docNamePrefix))
                     {
+                        // ブックマーク名から2文字を抽出
                         bookInfoDef = Regex.Replace(bm.Name, "^.{3}(.{2}).*$", "$1");
                         break;
                     }
                 }
-                //bookInfoDef = Regex.Replace(Doc.Name, "^(.{3}).+$", "$1");
                 button4.Enabled = true;
                 button2.Enabled = true;
                 button5.Enabled = true;
@@ -189,38 +227,45 @@ namespace WordAddIn1
             return rireki;
         }
         */
-        private void NowLoadingProc()
-        {
-            alert f = new alert();
-            try
-            {
-                f.ShowDialog();
-                f.Dispose();
-            }
-            catch (ThreadAbortException)
-            {
-                f.Close();
-            }
-        }
 
+        //private void NowLoadingProc()
+        //{
+        //    alert f = new alert();
+        //    try
+        //    {
+        //        f.ShowDialog();
+        //        f.Dispose();
+        //    }
+        //    catch (ThreadAbortException)
+        //    {
+        //        f.Close();
+        //    }
+        //}
+
+        // 指定したディレクトリ（fromPath）配下の全ファイル・サブディレクトリを別ディレクトリ（toPath）へコピー
         private void copyDirectory(string fromPath, string toPath)
         {
-            DirectoryInfo di = new DirectoryInfo(fromPath);
-            FileInfo[] files = di.GetFiles();
+            // コピー元ディレクトリの情報を取得
+            DirectoryInfo sourceDirectory = new DirectoryInfo(fromPath);
+
+            // コピー元ディレクトリ内の全ファイルを取得
+            FileInfo[] files = sourceDirectory.GetFiles();
 
             if (!Directory.Exists(toPath))
             {
                 Directory.CreateDirectory(toPath);
             }
 
+            // 各ファイルをコピー先ディレクトリにコピー（同名ファイルは上書き）
             foreach (FileInfo file in files)
             {
                 file.CopyTo(Path.Combine(toPath, file.Name), true);
             }
 
-            DirectoryInfo[] dirs = di.GetDirectories();
+            DirectoryInfo[] sourceSubDirectories = sourceDirectory.GetDirectories();
 
-            foreach (DirectoryInfo dir in dirs)
+            // 各サブディレクトリについて再帰的にコピー処理を実行
+            foreach (DirectoryInfo dir in sourceSubDirectories)
             {
                 if (!Directory.Exists(Path.Combine(toPath, dir.Name)))
                 {
@@ -230,97 +275,119 @@ namespace WordAddIn1
             }
         }
 
+
+        // Wordの選択範囲が変更されたときに呼び出されるイベントハンドラ。
+        // スタイルチェック後にドキュメントが変更された場合、再チェックを促す。
         private void Application_WindowSelectionChange(Word.Selection ws)
         {
+            // スタイルチェック直後の一度だけは何もしない（フラグをリセットして終了）
             if (checkOK)
             {
                 checkOK = false;
                 return;
             }
 
+            // このイベントハンドラを一時的に解除（多重呼び出し防止）
             Globals.ThisAddIn.Application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
 
-            //            Globals.ThisAddIn.Application.WindowSelectionChange -= delegate (Word.Selection mySelection) { Application_WindowSelectionChange(); };
+            // スタイルチェックボタンが有効な場合、ドキュメント変更を通知し再チェックを促す
             if (button3.Enabled)
             {
-                MessageBox.Show("「スタイルチェック」クリック後に変更が加えられました。\r\n「HTML出力」を実行するためには\r\nもう一度「スタイルチェック」を実行してください。", "ドキュメントが変更されました！", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show(ErrMsgDocumentChanged1, ErrMsgDocumentChanged2, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 button3.Enabled = false;
                 return;
             }
         }
 
+        // 指定ノードのスタイル名をディクショナリから取得する。
+        // class属性や子要素のclass属性も考慮する。
         private string getStyleName(Dictionary<string, string> styleName, System.Xml.XmlNode seekNode)
         {
-            string thisStyleName = "";
+            if (styleName == null || seekNode == null)
+                return string.Empty;
 
-            if (seekNode.SelectSingleNode("@class") == null)
+            // 1.ノード自身のclass属性を確認
+            var classAttr = seekNode.SelectSingleNode("@class");
+            if (classAttr != null)
             {
-                if (styleName.ContainsKey(seekNode.Name))
-                {
-                    thisStyleName = styleName[seekNode.Name];
-                }
+                string key = seekNode.Name + "." + classAttr.InnerText;
+                if (styleName.TryGetValue(key, out string value))
+                    return value;
             }
             else
             {
-                if (styleName.ContainsKey(seekNode.Name + "." + seekNode.SelectSingleNode("@class").InnerText))
+                // class属性がなければノード名のみで検索
+                if (styleName.TryGetValue(seekNode.Name, out string value))
+                    return value;
+            }
+
+            // 2.子ノードでclass属性を持つものを探す
+            var childWithClass = seekNode.SelectSingleNode("*[@class != '']");
+            if (childWithClass != null)
+            {
+                var childClassAttr = childWithClass.SelectSingleNode("@class");
+                if (childClassAttr != null)
                 {
-                    thisStyleName = styleName[seekNode.Name + "." + seekNode.SelectSingleNode("@class").InnerText];
+                    string key = childWithClass.Name + "." + childClassAttr.InnerText;
+                    if (styleName.TryGetValue(key, out string value))
+                        return value;
                 }
             }
 
-            if ((thisStyleName == "") && (seekNode.SelectSingleNode("*[@class != '']") != null))
+            // 3.子ノードで名前がh*（h1, h2, ...）のものを探す
+            var headingNode = seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']");
+            if (headingNode != null)
             {
-                if (styleName.ContainsKey(seekNode.SelectSingleNode("*[@class != '']").Name + "." + seekNode.SelectSingleNode("*[@class != '']/@class").InnerText))
-                {
-                    thisStyleName = styleName[seekNode.SelectSingleNode("*[@class != '']").Name + "." + seekNode.SelectSingleNode("*[@class != '']/@class").InnerText];
-                }
+                if (styleName.TryGetValue(headingNode.Name, out string value))
+                    return value;
             }
-            else if ((thisStyleName == "") && (seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']") != null))
-            {
-                if (styleName.ContainsKey(seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']").Name))
-                {
-                    thisStyleName = styleName[seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']").Name];
-                }
-            }
-            return thisStyleName;
+
+            // どれにも該当しない場合は空文字列
+            return string.Empty;
         }
 
-        // SOURCELINK追加==========================================================================START
-        // 書誌情報（旧）
-        public List<HeadingInfo> oldInfo;
-        // 書誌情報（新）
-        public List<HeadingInfo> newInfo;
-        // 比較結果
-        public List<CheckInfo> checkResult;
-        // MAX番号保存用
-        public int? maxNo;
+        //private string getStyleName(Dictionary<string, string> styleName, System.Xml.XmlNode seekNode)
+        //{
+        //    string thisStyleName = "";
 
-        // Title 4 collection
+        //    if (seekNode.SelectSingleNode("@class") == null)
+        //    {
+        //        if (styleName.ContainsKey(seekNode.Name))
+        //        {
+        //            thisStyleName = styleName[seekNode.Name];
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (styleName.ContainsKey(seekNode.Name + "." + seekNode.SelectSingleNode("@class").InnerText))
+        //        {
+        //            thisStyleName = styleName[seekNode.Name + "." + seekNode.SelectSingleNode("@class").InnerText];
+        //        }
+        //    }
+
+        //    if ((thisStyleName == "") && (seekNode.SelectSingleNode("*[@class != '']") != null))
+        //    {
+        //        if (styleName.ContainsKey(seekNode.SelectSingleNode("*[@class != '']").Name + "." + seekNode.SelectSingleNode("*[@class != '']/@class").InnerText))
+        //        {
+        //            thisStyleName = styleName[seekNode.SelectSingleNode("*[@class != '']").Name + "." + seekNode.SelectSingleNode("*[@class != '']/@class").InnerText];
+        //        }
+        //    }
+        //    else if ((thisStyleName == "") && (seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']") != null))
+        //    {
+        //        if (styleName.ContainsKey(seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']").Name))
+        //        {
+        //            thisStyleName = styleName[seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']").Name];
+        //        }
+        //    }
+        //    return thisStyleName;
+        //}
+
+        public List<HeadingInfo> oldInfo;  // 書誌情報（旧）
+        public List<HeadingInfo> newInfo;  // 書誌情報（新）
+        public List<CheckInfo> checkResult;  // 比較結果
+        public int? maxNo; // MAX番号保存用 
+
         public Dictionary<string, string[]> title4Collection = new Dictionary<string, string[]>();
         public Dictionary<string, string[]> headerCollection = new Dictionary<string, string[]>();
-
-        // SOURCELINK追加==========================================================================END
-
-
-        // SOURCELINK追加==========================================================================START
-        /// <summary>
-        /// 新規比較処理
-        /// </summary>
-        /// <param name="oldInfos">書誌情報（旧）</param>
-        /// <param name="newInfos">書誌情報（新）</param>
-        /// <param name="checkResult">比較結果リスト</param>
-        /// <returns>処理結果</returns>
-
-        private void button1_Click(object sender, RibbonControlEventArgs e)
-        {
-
-        }
-
-        private void button11_Click(object sender, RibbonControlEventArgs e)
-        {
-
-        }
-
-        // SOURCELINK追加==========================================================================END
     }
 }

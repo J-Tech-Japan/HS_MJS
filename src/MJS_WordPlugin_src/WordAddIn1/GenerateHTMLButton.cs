@@ -265,27 +265,6 @@ namespace WordAddIn1
 
                     CopyAndDeleteTemporaryImages(tmpFolderForImagesSavedBySaveAs2Method, rootPath, exportDir, log);
 
-                    // 一時フォルダが存在するか確認
-                    //if (Directory.Exists(tmpFolderForImagesSavedBySaveAs2Method))
-                    //{
-                    //    try
-                    //    {
-                    //        // 一時フォルダ内のすべての画像ファイルをコピー
-                    //        foreach (string pict in Directory.GetFiles(tmpFolderForImagesSavedBySaveAs2Method))
-                    //        {
-                    //            File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
-                    //        }
-
-                    //        // 一時フォルダを削除
-                    //        Directory.Delete(tmpFolderForImagesSavedBySaveAs2Method, true);
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
-                    //        throw;
-                    //    }
-                    //}
-
                     string htmlStr;
 
                     using (StreamReader sr = new StreamReader(tmpHtmlPath, Encoding.UTF8))
@@ -488,7 +467,7 @@ namespace WordAddIn1
             }
 
             // log.txtを削除したい場合は以下のコードを有効にする
-            //File.Delete(rootPath + "\\log.txt");
+            //File.Delete(logPath);
 
             application.ActiveWindow.View.Type = defaultView;
             load.Close();
