@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Office.Interop.Word;
+
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -41,6 +43,15 @@ namespace WordAddIn1
                 link.InnerText = Regex.Replace(link.InnerText, @"^(.*?)(?=[\s　](\d+\.\d+|[^\s|　]*?章))", "");
                 link.InnerText = Regex.Replace(link.InnerText, @"^[\s　]*(?:第[\d０-９]+章)*[\s　]+", "");
                 link.InnerText = Regex.Replace(link.InnerText, @"^[\s　]*(?:\d+\.)*\d+[\s　]+", "");
+            }
+
+            // 見出しで箇条書きタグを削除
+            foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
+            {
+                foreach (XmlElement childSpan in toc.SelectNodes("span"))
+                    toc.RemoveChild(childSpan);
+                foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes("span[contains(@style, 'Wingdings')]"))
+                    toc.ParentNode.RemoveChild(brotherSpan);
             }
 
             // objToc と objBody の初期化

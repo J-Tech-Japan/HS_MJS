@@ -79,7 +79,6 @@ namespace WordAddIn1
             string exportDir = "webHelp";
             string headerDir = "headerFile";
             string exportDirPath = Path.Combine(rootPath, exportDir);
-            string tmpDocPath = Path.Combine(rootPath, "tmp.doc");
             string logPath = Path.Combine(rootPath, "log.txt");
             string tmpHtmlPath = Path.Combine(rootPath, "tmp.html");
             string indexHtmlPath = Path.Combine(rootPath, exportDir, "index.html");
@@ -124,24 +123,10 @@ namespace WordAddIn1
                     // （選択が解除され、カーソルがドキュメントの先頭に移動）
                     application.Selection.Collapse(Word.WdCollapseDirection.wdCollapseStart);
 
-                    // 一時ファイルを削除
-                    if (File.Exists(tmpDocPath))
-                    {
-                        try { File.Delete(tmpDocPath); }
-                        catch
-                        {
-                            load.Close();
-                            load.Dispose();
-                            MessageBox.Show(ErrMsgTmpDocOpen, ErrMsgFile, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                    }
-
                     Application.DoEvents();
                     Word.Document docCopy = application.Documents.Add();
 
                     Application.DoEvents();
-                    docCopy.SaveAs2(tmpDocPath);
                     docCopy.TrackRevisions = false;
                     docCopy.AcceptAllRevisions();
 
@@ -257,8 +242,6 @@ namespace WordAddIn1
                     docCopy.SaveAs2(tmpHtmlPath, Word.WdSaveFormat.wdFormatFilteredHTML);
                     docCopy.Close();
 
-                    File.Delete(tmpDocPath);
-
                     log.WriteLine("画像フォルダ コピー");
 
                     bool isTmpDot = true;
@@ -305,16 +288,6 @@ namespace WordAddIn1
                     ProcessStyles(className, ref chapterSplitClass, styleName);
 
                     log.WriteLine("index.html出力");
-
-                    // タイトル定義を格納するリスト
-                    List<string> titleDeffenition = new List<string>();
-
-                    // XMLドキュメント内の<p>タグでクラス名が'titledef'の要素を検索し、
-                    // そのテキスト内容をトリムしてリストに追加
-                    foreach (XmlElement link in objXml.SelectNodes("//p[@class='titledef']"))
-                    {
-                        titleDeffenition.Add(link.InnerText.Trim());
-                    }
 
                     // インデックスHTMLテンプレートを生成
                     string idxHtmlTemplate = BuildIdxHtmlTemplate(docTitle, docid, mergeScript);
