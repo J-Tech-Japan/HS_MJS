@@ -5,8 +5,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WordAddIn1
 {
@@ -133,7 +133,7 @@ namespace WordAddIn1
                 {
                     dataGridView1[6, i].Style.BackColor = Color.LightGray;
                 }
-               
+
                 if ("red".Equals(check.new_num_color))
                 {
                     dataGridView1[3, i].Style.ForeColor = Color.Red;
@@ -256,7 +256,7 @@ namespace WordAddIn1
                             {
                                 dataGridView1[6, i].Style.BackColor = Color.LightPink;
                             }
-                            else  break;
+                            else break;
                         }
                     }
                 }
@@ -627,13 +627,13 @@ namespace WordAddIn1
         {
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                if(dataGridView1[6, i].Style.BackColor == Color.LightPink)
+                if (dataGridView1[6, i].Style.BackColor == Color.LightPink)
                 {
                     MessageBox.Show("IDに不具合があります。");
                     return;
                 }
             }
-                // 重複チェック
+            // 重複チェック
             //    foreach (CheckInfo sr in showResult)
             //{
             //    if (string.IsNullOrEmpty(sr.new_id_show))

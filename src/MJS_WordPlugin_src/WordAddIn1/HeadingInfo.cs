@@ -15,7 +15,7 @@
         public string id;
 
         // Merger to
-        public string mergeto="";
+        public string mergeto = "";
 
         // Equalsオーバーライド
         public override bool Equals(object obj)

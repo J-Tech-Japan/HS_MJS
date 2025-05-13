@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using Microsoft.Office.Tools.Ribbon;
+
 using System.Collections.Generic;
-using Microsoft.Office.Tools.Ribbon;
-using Word = Microsoft.Office.Interop.Word;
+using System.IO;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using System.Threading;
+using System.Windows.Forms;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -387,16 +389,5 @@ namespace WordAddIn1
 
         public Dictionary<string, string[]> title4Collection = new Dictionary<string, string[]>();
         public Dictionary<string, string[]> headerCollection = new Dictionary<string, string[]>();
-
-        private void button1_Click(object sender, RibbonControlEventArgs e)
-        {
-
-        }
-
-        //private void button11_Click(object sender, RibbonControlEventArgs e)
-        //{
-
-        //}
-        
     }
 }

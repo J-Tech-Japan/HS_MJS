@@ -1,11 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using Word = Microsoft.Office.Interop.Word;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -75,7 +76,7 @@ namespace WordAddIn1
 
             // ドキュメント名からタイトルを抽出
             string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
-            
+
             bookInfoDic.Clear();
 
             // ログ出力用のStreamWriterを設定（引数で渡されたものを使用、なければ後で新規作成）
@@ -518,14 +519,14 @@ namespace WordAddIn1
 
                                 // 新しいブックマークIDを生成し、 上位クラスIDとして設定
                                 setid = upperClassID + "♯" + docID + bookInfoDef + splitCount.ToString("000");
-                                
+
                                 // 行末尾にブックマークを追加
                                 sel.Bookmarks.Add(upperClassID + "♯" + docID + bookInfoDef + splitCount.ToString("000"));
 
                                 // 書誌情報辞書に新しいエントリを追加
                                 // キー: 新しいブックマークID、値: 段落のリスト番号とテキストを結合した文字列
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
-                                
+
                                 if (isMerge)
                                 {
                                     mergeSetId.Add(setid, previousSetId);
@@ -539,7 +540,7 @@ namespace WordAddIn1
                                 // 書誌情報辞書に新しいエントリを追加
                                 // キー: 既存のブックマークID、値: 段落のリスト番号とテキストを結合した文字列
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
-                                
+
                                 if (isMerge)
                                 {
                                     mergeSetId.Add(setid, previousSetId);

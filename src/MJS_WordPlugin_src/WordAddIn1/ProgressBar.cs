@@ -64,7 +64,7 @@ namespace WordAddIn1
 
             if (mInstance.InvokeRequired)
             {
-                mInstance.Invoke(new Action<int>(SetProgressBar), new object[]{iMax});
+                mInstance.Invoke(new Action<int>(SetProgressBar), new object[] { iMax });
             }
             else
             {

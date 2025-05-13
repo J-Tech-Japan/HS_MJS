@@ -18,7 +18,7 @@ namespace WordAddIn1
             Word.Application thisApp = WordAddIn1.Globals.ThisAddIn.Application;
 
             // set last using data
-            tbFilePath.Text = WordAddIn1.Properties.Settings.Default.tbFilePathLast;      
+            tbFilePath.Text = WordAddIn1.Properties.Settings.Default.tbFilePathLast;
 
             try
             {
@@ -31,7 +31,7 @@ namespace WordAddIn1
             {
             }
         }
-        
+
         private void tbFilePath_TextChanged(object sender, EventArgs e)
         {
             if (File.Exists(tbFilePath.Text))
@@ -41,7 +41,7 @@ namespace WordAddIn1
                 dataGridView1.Enabled = true;
                 using (StreamReader sr = new StreamReader(tbFilePath.Text))
                 {
-                    while(!sr.EndOfStream)
+                    while (!sr.EndOfStream)
                     {
                         string[] lineStr = (sr.ReadLine()).Split('\t');
                         dataGridView1.Rows.Add();
@@ -97,7 +97,7 @@ namespace WordAddIn1
             if (Regex.IsMatch(Path.GetFileName(dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString()), @"^[A-Z]{3}0+$"))
             {
                 tbURL.Text = Uri.UnescapeDataString(relativePath + "index.html");
-                if(String.IsNullOrEmpty(initText))
+                if (String.IsNullOrEmpty(initText))
                     tbDisplayStr.Text = Regex.Replace(thisDocument.Name, @"^[A-Z]{3}_([^_]*?)_.*?$", "$1");
             }
             else

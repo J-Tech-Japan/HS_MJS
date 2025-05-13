@@ -323,7 +323,6 @@
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="MJS.pfx" />
-    <None Include="MJS_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -682,10 +681,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MJS_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MJS.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>9BEBE799A2935EBDB19062218193BD60D876986E</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>F98A15D9B44B2CAC5102D245BBA64E85039279C9</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

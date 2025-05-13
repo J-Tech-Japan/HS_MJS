@@ -49,7 +49,6 @@
             this.button2 = this.Factory.CreateRibbonButton();
             this.button10 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
-            //this.button11 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -87,7 +86,6 @@
             this.button1.Name = "button1";
             this.button1.ShowImage = true;
             this.button1.Visible = false;
-            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
             // 
             // group2
             // 
@@ -150,7 +148,6 @@
             this.group4.Items.Add(this.button2);
             this.group4.Items.Add(this.button10);
             this.group4.Items.Add(this.button3);
-            //this.group4.Items.Add(this.button11);
             this.group4.Name = "group4";
             // 
             // button9
@@ -191,19 +188,9 @@
             this.button3.ShowImage = true;
             this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateHTMLButton);
             // 
-            // button11
+            // RibbonMJS
             // 
-            //this.button11.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            //this.button11.Enabled = false;
-            //this.button11.Image = global::WordAddIn1.Properties.Resources.touka;
-            //this.button11.Label = " ";
-            //this.button11.Name = "button11";
-            //this.button11.ShowImage = true;
-            //this.button11.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button11_Click);
-            // 
-            // Ribbon1
-            // 
-            this.Name = "Ribbon1";
+            this.Name = "RibbonMJS";
             this.RibbonType = "Microsoft.Word.Document";
             this.Tabs.Add(this.tab1);
             this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.Ribbon1_Load);
