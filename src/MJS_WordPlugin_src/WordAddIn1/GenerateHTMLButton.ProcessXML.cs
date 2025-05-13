@@ -48,10 +48,10 @@ namespace WordAddIn1
             // 見出しで箇条書きタグを削除
             foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
             {
-                foreach (XmlElement childSpan in toc.SelectNodes("span"))
-                    toc.RemoveChild(childSpan);
-                foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes("span[contains(@style, 'Wingdings')]"))
-                    toc.ParentNode.RemoveChild(brotherSpan);
+                foreach (XmlElement childSpan in toc.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
+                    childSpan.ParentNode.RemoveChild(childSpan);
+                foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
+                    brotherSpan.ParentNode.RemoveChild(brotherSpan);
             }
 
             // objToc と objBody の初期化
