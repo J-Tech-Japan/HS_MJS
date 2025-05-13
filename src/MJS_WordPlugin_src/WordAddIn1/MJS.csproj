@@ -323,6 +323,7 @@
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="MJS.pfx" />
+    <None Include="MJS_1_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -342,6 +343,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="RibbonMJS.Config.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="RibbonMJS.InnerNode.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="RibbonMJS.MakeBookInfo.HeaderFile.cs">
@@ -681,10 +685,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MJS.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MJS_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>F98A15D9B44B2CAC5102D245BBA64E85039279C9</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>8425450C9CE65C79914495518DE254363A79D43B</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
