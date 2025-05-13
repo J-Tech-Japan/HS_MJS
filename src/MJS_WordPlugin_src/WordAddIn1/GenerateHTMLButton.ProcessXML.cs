@@ -237,7 +237,7 @@ namespace WordAddIn1
 
                             foreach (XmlNode childItem in childs.ChildNodes)
                             {
-                                innerNode(styleName, objBodyCurrent.LastChild, childItem);
+                                InnerNode(styleName, objBodyCurrent.LastChild, childItem);
                             }
                         }
                     }
@@ -286,7 +286,7 @@ namespace WordAddIn1
 
                         foreach (XmlNode childItem in childs.ChildNodes)
                         {
-                            innerNode(styleName, objBodyCurrent.LastChild, childItem);
+                            InnerNode(styleName, objBodyCurrent.LastChild, childItem);
                         }
 
                         if ((lv1styleName == "") || (lv1styleName == thisStyleName))
@@ -310,7 +310,7 @@ namespace WordAddIn1
 
                         foreach (XmlNode childItem in childs.ChildNodes)
                         {
-                            innerNode(styleName, objBodyCurrent.LastChild, childItem);
+                            InnerNode(styleName, objBodyCurrent.LastChild, childItem);
                         }
                     }
                     else if (Regex.IsMatch(thisStyleName, @"(見出し|Heading)\s*[４4](?![・用])"))
@@ -319,7 +319,7 @@ namespace WordAddIn1
                         ((XmlElement)objBodyCurrent.LastChild).SetAttribute("class", "Heading4");
                         foreach (XmlNode childItem in childs.ChildNodes)
                         {
-                            innerNode(styleName, objBodyCurrent.LastChild, childItem);
+                            InnerNode(styleName, objBodyCurrent.LastChild, childItem);
                         }
                     }
                     else if (Regex.IsMatch(thisStyleName, @"(見出し|Heading)\s*[５5]"))
@@ -328,7 +328,7 @@ namespace WordAddIn1
                         ((XmlElement)objBodyCurrent.LastChild).SetAttribute("class", "Heading5");
                         foreach (XmlNode childItem in childs.ChildNodes)
                         {
-                            innerNode(styleName, objBodyCurrent.LastChild, childItem);
+                            InnerNode(styleName, objBodyCurrent.LastChild, childItem);
                         }
                     }
                     else
@@ -337,7 +337,7 @@ namespace WordAddIn1
                         {
                             objBodyCurrent = objBody.DocumentElement.AppendChild(objBody.CreateElement("div"));
                         }
-                        innerNode(styleName, objBodyCurrent, childs);
+                        InnerNode(styleName, objBodyCurrent, childs);
                     }
                 }
 
