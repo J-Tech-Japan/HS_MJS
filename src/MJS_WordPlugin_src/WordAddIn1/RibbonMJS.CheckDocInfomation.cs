@@ -452,7 +452,7 @@ namespace WordAddIn1
 
                 for (int j = 0; j < syoriList.Count; j++)
                 {
-                    while (!stopFlag && checkSortInfo(deleteList[i], syoriList, j))
+                    while (!stopFlag && CheckSortInfo(deleteList[i], syoriList, j))
                     {
                         checkResult.Add(deleteList[i]);
                         i++;
