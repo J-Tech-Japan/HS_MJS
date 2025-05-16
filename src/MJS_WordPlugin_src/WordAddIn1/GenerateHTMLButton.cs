@@ -110,7 +110,6 @@ namespace WordAddIn1
                     Application.DoEvents();
 
                     ClearClipboardSafely();
-                    //Clipboard.SetDataObject(new DataObject());
                     Application.DoEvents();
 
                     // ドキュメント全体を選択してクリップボードにコピー

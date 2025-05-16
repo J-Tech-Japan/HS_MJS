@@ -156,13 +156,12 @@ namespace WordAddIn1
                     {
                         if (childs.SelectSingleNode(".//a[starts-with(@name, '" + docid + bookInfoDef + "')]") != null)
                         {
-                            //aaa
                             setid = ((XmlElement)childs.SelectSingleNode(".//a[starts-with(@name, '" + docid + bookInfoDef + "')]")).GetAttribute("name");
                         }
                         else
                         {
                             load.Visible = false;
-                            MessageBox.Show(childs.InnerText + ":書誌情報ブックマークの設定が行われていません。");
+                            //MessageBox.Show(childs.InnerText + ":書誌情報ブックマークの設定が行われていません。");
                             load.Visible = true;
                         }
                     }

@@ -1,259 +1,82 @@
 ﻿namespace WordAddIn1
 {
-    /// <summary>
-    /// 比較結果
-    /// </summary>
+    // 比較結果
     public class CheckInfo
     {
-        private int _old1 = 0;
-        public int old1
-        {
-            get { return _old1; }
-            set { _old1 = value; }
-        }
-        private int _old2 = 0;
-        public int old2
-        {
-            get { return _old2; }
-            set { _old2 = value; }
-        }
-        private int _old3 = 0;
-        public int old3
-        {
-            get { return _old3; }
-            set { _old3 = value; }
-        }
-        private int _old4 = 0;
-        public int old4
-        {
-            get { return _old4; }
-            set { _old4 = value; }
-        }
+        // 旧.項番情報
+        public int old1 { get; set; }
+        public int old2 { get; set; }
+        public int old3 { get; set; }
+        public int old4 { get; set; }
 
-        private int _new1 = 0;
-        public int new1
-        {
-            get { return _new1; }
-            set { _new1 = value; }
-        }
-        private int _new2 = 0;
-        public int new2
-        {
-            get { return _new2; }
-            set { _new2 = value; }
-        }
-        private int _new3 = 0;
-        public int new3
-        {
-            get { return _new3; }
-            set { _new3 = value; }
-        }
-        private int _new4 = 0;
-        public int new4
-        {
-            get { return _new4; }
-            set { _new4 = value; }
-        }
+        // 新.項番情報
+        public int new1 { get; set; }
+        public int new2 { get; set; }
+        public int new3 { get; set; }
+        public int new4 { get; set; }
 
-        // 旧.項番
         private string _old_num = "";
+
         public string old_num
         {
             get { return _old_num; }
             set
             {
                 _old_num = value;
-
-                if (string.IsNullOrEmpty(value))
-                {
-                    return;
-                }
-
-                string[] oldnums = value.Split('.');
-                if (oldnums.Length == 4)
-                {
-                    old1 = int.Parse(oldnums[0]);
-                    old2 = int.Parse(oldnums[1]);
-                    old3 = int.Parse(oldnums[2]);
-                    old4 = int.Parse(oldnums[3]);
-                }
-                else if (oldnums.Length == 3)
-                {
-                    old1 = int.Parse(oldnums[0]);
-                    old2 = int.Parse(oldnums[1]);
-                    old3 = int.Parse(oldnums[2]);
-                }
-                else if (oldnums.Length == 2)
-                {
-                    old1 = int.Parse(oldnums[0]);
-                    old2 = int.Parse(oldnums[1]);
-                }
-                else if (oldnums.Length == 1)
-                {
-                    old1 = int.Parse(oldnums[0]);
-                }
+                ParseNum(value, out int n1, out int n2, out int n3, out int n4);
+                old1 = n1; old2 = n2; old3 = n3; old4 = n4;
             }
         }
 
-        // 旧.タイトル
-        private string _old_title = "";
-        public string old_title
-        {
-            get { return _old_title; }
-            set { _old_title = value; }
-        }
-
-        // 旧.ID
-        private string _old_id = "";
-        public string old_id
-        {
-            get { return _old_id; }
-            set { _old_id = value; }
-        }
-
-        // 新.項番
         private string _new_num = "";
+
         public string new_num
         {
             get { return _new_num; }
             set
             {
                 _new_num = value;
-
-                if (string.IsNullOrEmpty(value))
-                {
-                    return;
-                }
-
-                string[] newnums = value.Split('.');
-                if (newnums.Length == 4)
-                {
-                    new1 = int.Parse(newnums[0]);
-                    new2 = int.Parse(newnums[1]);
-                    new3 = int.Parse(newnums[2]);
-                    new4 = int.Parse(newnums[3]);
-                }
-                else if (newnums.Length == 3)
-                {
-                    new1 = int.Parse(newnums[0]);
-                    new2 = int.Parse(newnums[1]);
-                    new3 = int.Parse(newnums[2]);
-                }
-                else if (newnums.Length == 2)
-                {
-                    new1 = int.Parse(newnums[0]);
-                    new2 = int.Parse(newnums[1]);
-                }
-                else if (newnums.Length == 1)
-                {
-                    new1 = int.Parse(newnums[0]);
-                }
+                ParseNum(value, out int n1, out int n2, out int n3, out int n4);
+                new1 = n1; new2 = n2; new3 = n3; new4 = n4;
             }
         }
 
-        // 新.項番（色）
-        private string _new_num_color = "";
-        public string new_num_color
+        // 共通のパース処理
+        private void ParseNum(string value, out int n1, out int n2, out int n3, out int n4)
         {
-            get { return _new_num_color; }
-            set { _new_num_color = value; }
+            n1 = n2 = n3 = n4 = 0;
+            if (string.IsNullOrEmpty(value)) return;
+            var nums = value.Split('.');
+            if (nums.Length > 0) int.TryParse(nums[0], out n1);
+            if (nums.Length > 1) int.TryParse(nums[1], out n2);
+            if (nums.Length > 2) int.TryParse(nums[2], out n3);
+            if (nums.Length > 3) int.TryParse(nums[3], out n4);
         }
 
-        // 新.タイトル
-        private string _new_title = "";
-        public string new_title
-        {
-            get { return _new_title; }
-            set { _new_title = value; }
-        }
+        public string old_title { get; set; } = "";
+        public string old_id { get; set; } = "";
+        public string new_title { get; set; } = "";
+        public string new_num_color { get; set; } = "";
+        public string new_title_color { get; set; } = "";
+        public string new_id { get; set; } = "";
+        public string new_id_color { get; set; } = "";
+        public string new_id_show { get; set; } = "";
+        public string new_id_show_color { get; set; } = "";
+        public string diff { get; set; } = "";
+        public string diff_color { get; set; } = "";
+        public string editshow { get; set; } = "";
+        public string editshow_color { get; set; } = "";
+        public string edit { get; set; } = "";
+        public string edit_color { get; set; } = "";
 
-        // 新.タイトル（色）
-        private string _new_title_color = "";
-        public string new_title_color
+        // 比較用メソッド（old1～old4の順で比較）
+        public int CompareOldTo(CheckInfo other)
         {
-            get { return _new_title_color; }
-            set { _new_title_color = value; }
+            if (old1 != other.old1) return old1.CompareTo(other.old1);
+            if (old2 != other.old2) return old2.CompareTo(other.old2);
+            if (old3 != other.old3) return old3.CompareTo(other.old3);
+            if (old4 != other.old4) return old4.CompareTo(other.old4);
+            return 0;
         }
-
-        // 新.ID
-        private string _new_id = "";
-        public string new_id
-        {
-            get { return _new_id; }
-            set { _new_id = value; }
-        }
-
-        // 新.ID（色）
-        private string _new_id_color = "";
-        public string new_id_color
-        {
-            get { return _new_id_color; }
-            set { _new_id_color = value; }
-        }
-
-        // 新.ID（修正候補）
-        private string _new_id_show = "";
-        public string new_id_show
-        {
-            get { return _new_id_show; }
-            set { _new_id_show = value; }
-        }
-
-        // 新.ID（修正候補）色
-        private string _new_id_show_color = "";
-        public string new_id_show_color
-        {
-            get { return _new_id_show_color; }
-            set { _new_id_show_color = value; }
-        }
-
-        // 差異内容
-        private string _diff = "";
-        public string diff
-        {
-            get { return _diff; }
-            set { _diff = value; }
-        }
-
-        // 差異内容（色）
-        private string _diff_color = "";
-        public string diff_color
-        {
-            get { return _diff_color; }
-            set { _diff_color = value; }
-        }
-
-        // 修正処理（候補）
-        private string _editshow = "";
-        public string editshow
-        {
-            get { return _editshow; }
-            set { _editshow = value; }
-        }
-
-        // 修正処理（候補）（色）
-        private string _editshow_color = "";
-        public string editshow_color
-        {
-            get { return _editshow_color; }
-            set { _editshow_color = value; }
-        }
-
-        // 新規追加
-        private string _edit = "";
-        public string edit
-        {
-            get { return _edit; }
-            set { _edit = value; }
-        }
-
-        // 新規追加（色）
-        private string _edit_color = "";
-        public string edit_color
-        {
-            get { return _edit_color; }
-            set { _edit_color = value; }
-        }
-
     }
 }
