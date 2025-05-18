@@ -1,6 +1,6 @@
 ﻿namespace MJS_fileJoin
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 必要なデザイナー変数です。
@@ -919,14 +919,14 @@
             this.checkBox5.Text = "PDFファイル";
             this.checkBox5.UseVisualStyleBackColor = true;
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(423, 593);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "MJSワンソースマルチユース　ファイル結合ツール V2";
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
