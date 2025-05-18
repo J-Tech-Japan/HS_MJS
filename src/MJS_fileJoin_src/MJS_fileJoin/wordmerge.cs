@@ -12,10 +12,10 @@ namespace DocMergerComponent
 {
     public class DocMerger
     {
-        public void Merge(string strOrgDoc, string[] arrCopies, string strOutDoc, Form1 form, bool check1, bool check2, bool check3, object nothing)
+        public void Merge(string strOrgDoc, string[] arrCopies, string strOutDoc, MainForm form, bool check1, bool check2, bool check3, object nothing)
         {
             Word.Application objApp = null;
-            Form1 fm = form;
+            MainForm fm = form;
             object objMissing = Missing.Value;
             object objFalse = false;
             object objTarget = Word.WdMergeTarget.wdMergeTargetSelected;
@@ -615,9 +615,9 @@ namespace DocMergerComponent
                 objApp = null;
             }
         }
-        public void Merge(string strOrgDoc, List<string> strCopyFolder, string strOutDoc, Form1 fm, bool check1, bool check2, bool check3)
+        public void Merge(string strOrgDoc, List<string> strCopyFolder, string strOutDoc, MainForm fm, bool check1, bool check2, bool check3)
         {
-            Form1 form = fm;
+            MainForm form = fm;
             string[] arrFiles = strCopyFolder.ToArray();
             Merge(strOrgDoc, arrFiles, strOutDoc, form, check1, check2, check3, null);
         }
