@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -229,6 +230,80 @@ namespace MJS_fileJoin
             if (!checkBox3.Checked) textBox2.Text = "webHelp";
             if (checkBox3.Checked) textBox2.Enabled = true;
             else textBox2.Enabled = false;
+        }
+
+        private void tbSelectJoinList_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        private void btnHtmlListFile_Click(object sender, EventArgs e)
+        {
+            if ((folderBrowserDialog1.ShowDialog() == DialogResult.OK) && !lbHtmlList.Items.Contains(folderBrowserDialog1.SelectedPath))
+            {
+                addHtmlDir(folderBrowserDialog1.SelectedPath);
+            }
+        }
+
+        private void lbHtmlList_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            List<string> webHelpFol = new List<string>();
+            foreach (string folder in s)
+            {
+                if (File.Exists(folder)) continue;
+                if (Path.GetFileName(folder) == "webHelp")
+                    webHelpFol.Add(folder);
+                else
+                {
+                    string[] fol = Directory.GetDirectories(folder, "webHelp", SearchOption.AllDirectories);
+                    foreach (string webhelp in fol) webHelpFol.Add(webhelp);
+                }
+            }
+
+            for (int i = 0; i < webHelpFol.Count; i++)
+            {
+                if (!addHtmlDir(webHelpFol[i])) continue;
+            }
+        }
+
+        private void lbHtmlList_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        private void tbOutputDir_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        // 「全てクリア」が押されたときの処理
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            tbSelectJoinList.Text = "";
+            chbChangeTitle.Checked = false;
+            tbChangeTitle.Text = "";
+            tbChangeTitle.Enabled = false;
+            chbAddTop.Checked = false;
+            tbAddTop.Text = "";
+            tbAddTop.Enabled = false;
+            while (lbHtmlList.Items.Count != 0)
+            {
+                lbHtmlList.Items.RemoveAt(0);
+            }
+            dataGridView1.DataSource = null;
+            bookInfo.Clear();
+            tbOutputDir.Text = "";
+            chbListOutput.Checked = false;
         }
     }
 }
