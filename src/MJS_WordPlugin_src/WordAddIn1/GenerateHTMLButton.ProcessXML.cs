@@ -46,15 +46,6 @@ namespace WordAddIn1
             }
 
             // 見出しで箇条書きタグを削除
-            //foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
-            //{
-            //    foreach (XmlElement childSpan in toc.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
-            //        childSpan.ParentNode.RemoveChild(childSpan);
-            //    foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
-            //        brotherSpan.ParentNode.RemoveChild(brotherSpan);
-            //}
-
-            // 見出しで箇条書きタグを削除
             foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
             {
                 foreach (XmlElement childSpan in toc.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
@@ -62,13 +53,12 @@ namespace WordAddIn1
                 foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
                     brotherSpan.ParentNode.RemoveChild(brotherSpan);
 
-                // 追加: 目次テキスト先頭の「・」や「・　」を除去
+                // 目次テキスト先頭の「・」や「・　」を除去
                 if (!string.IsNullOrEmpty(toc.InnerText))
                 {
                     toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･]\s*", "");
                 }
             }
-
 
             // objToc と objBody の初期化
             objToc = new XmlDocument();
