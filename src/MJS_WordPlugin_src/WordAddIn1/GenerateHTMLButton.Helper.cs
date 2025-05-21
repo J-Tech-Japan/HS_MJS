@@ -37,33 +37,6 @@ namespace WordAddIn1
             }
         }
 
-        // 改善前のコード(2025,05.02)
-        //public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
-        //{
-        //    using (StreamReader sr = new StreamReader(
-        //            documentPath + "\\headerFile\\" + Regex.Replace(documentName, "^(.{3}).+$", "$1") + @".txt", Encoding.Default))
-        //    {
-        //        while (sr.Peek() >= 0)
-        //        {
-        //            string strBuffer = sr.ReadLine();
-        //            string[] info = strBuffer.Split('\t');
-
-        //            if (info.Length == 4)
-        //            {
-        //                if (!info[3].Equals(""))
-        //                {
-        //                    info[3] = info[3].Replace("(", "").Replace(")", "");
-        //                    if (!mergeScript.Any(x => x.Key == info[2] && x.Value == info[3]))
-        //                    {
-        //                        mergeScript.Add(info[2], info[3]);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        // 改善済のコード
         // 指定されたパスにある書誌情報を読み込み、mergeScript にデータを追加
         public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
         {
@@ -114,47 +87,6 @@ namespace WordAddIn1
             }
         }
 
-        // 改善前のコード(2025,05.02)
-        //public void PrepareHtmlTemplates(System.Reflection.Assembly assembly, string rootPath, string exportDir)
-        //{
-        //    // アセンブリからリソースを取得し、テンプレートZIPファイルを作成
-        //    using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
-        //    {
-        //        FileStream fs = File.Create(rootPath + "\\htmlTemplates.zip");
-        //        stream.Seek(0, SeekOrigin.Begin);
-        //        stream.CopyTo(fs);
-        //        fs.Close();
-        //    }
-
-        //    // 既存のテンプレートフォルダを削除
-        //    if (Directory.Exists(rootPath + "\\htmlTemplates"))
-        //    {
-        //        Directory.Delete(rootPath + "\\htmlTemplates", true);
-        //    }
-
-        //    // ZIPファイルを解凍
-        //    ZipFile.ExtractToDirectory(rootPath + "\\htmlTemplates.zip", rootPath);
-
-        //    // 出力ディレクトリを削除
-        //    if (Directory.Exists(rootPath + "\\" + exportDir))
-        //    {
-        //        Directory.Delete(rootPath + "\\" + exportDir, true);
-        //    }
-
-        //    // 一時的なカバーピクチャフォルダを削除
-        //    if (Directory.Exists(rootPath + "\\tmpcoverpic"))
-        //    {
-        //        Directory.Delete(rootPath + "\\tmpcoverpic", true);
-        //    }
-
-        //    // テンプレートフォルダを出力ディレクトリに移動
-        //    Directory.Move(rootPath + "\\htmlTemplates", rootPath + "\\" + exportDir);
-
-        //    // ZIPファイルを削除
-        //    File.Delete(rootPath + "\\htmlTemplates.zip");
-        //}
-
-        // 改善済のコード
         // テンプレートZIPファイルをアセンブリから取得し、指定されたパスに解凍
         public void PrepareHtmlTemplates(System.Reflection.Assembly assembly, string rootPath, string exportDir)
         {
@@ -279,54 +211,6 @@ namespace WordAddIn1
             }
         }
 
-        // 改善前のコード(2025,05.02)
-        // 商標情報と著作権情報を収集
-        //public void CollectTrademarkAndCopyrightDetails(
-        //    Document docCopy,
-        //    int lastSectionIdx,
-        //    StreamWriter log,
-        //    ref string trademarkTitle,
-        //    ref List<string> trademarkTextList,
-        //    ref string trademarkRight
-        //    )
-        //{
-        //    bool isTradeMarksDetected = false;
-        //    bool isRightDetected = false;
-
-        //    foreach (Paragraph wp in docCopy.Sections[lastSectionIdx].Range.Paragraphs)
-        //    {
-        //        log.WriteLine(wp.Range.Text);
-
-        //        string wpTextTrim = wp.Range.Text.Trim();
-        //        string wpStyleName = wp.get_Style().NameLocal;
-
-        //        if (string.IsNullOrEmpty(wpTextTrim) || wpTextTrim == "/")
-        //        {
-        //            continue;
-        //        }
-
-        //        if (wpTextTrim.Contains("商標")
-        //            && (wpStyleName.Contains("MJS_見出し 4") || wpStyleName.Contains("MJS_見出し 5")))
-        //        {
-        //            trademarkTitle = wp.Range.Text + "<br/>";
-        //            isTradeMarksDetected = true;
-        //        }
-        //        else if (isTradeMarksDetected && (!isRightDetected)
-        //            && (wpStyleName.Contains("MJS_箇条書き")
-        //                || wpStyleName.Contains("MJS_箇条書き2")))
-        //        {
-        //            trademarkTextList.Add(wp.Range.Text + "<br/>");
-        //        }
-        //        else if (wpTextTrim.Contains("All rights reserved")
-        //            && (wpStyleName.Contains("MJS_リード文")))
-        //        {
-        //            trademarkRight = wp.Range.Text + "<br/>";
-        //            isRightDetected = true;
-        //        }
-        //    }
-        //}
-
-        // 改善済のコード
         // 商標情報と著作権情報を収集
         public void CollectTrademarkAndCopyrightDetails(
             Document docCopy,
@@ -384,13 +268,11 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                // エラー発生時のログとメッセージ表示
                 log.WriteLine($"エラー: {ex.Message}");
                 MessageBox.Show($"商標および著作権情報の収集中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // 改善の必要なし
         // 表紙選択ダイアログを表示し、選択されたテンプレートに応じてフラグを設定
         public bool HandleCoverSelection(loader load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2)
         {

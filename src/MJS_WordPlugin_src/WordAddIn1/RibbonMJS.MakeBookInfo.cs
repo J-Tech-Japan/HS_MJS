@@ -97,7 +97,7 @@ namespace WordAddIn1
                     DeleteAllBookmarks(thisDocument);
 
                     // 書誌情報入力フォームを表示
-                    using (var bookInfoForm = new bookInfo())
+                    using (var bookInfoForm = new BookInfo())
                     {
                         var dialogResult = bookInfoForm.ShowDialog();
                         if (dialogResult == DialogResult.OK)

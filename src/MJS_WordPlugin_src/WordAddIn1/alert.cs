@@ -2,9 +2,9 @@
 
 namespace WordAddIn1
 {
-    public partial class alert : Form
+    public partial class Alert : Form
     {
-        public alert()
+        public Alert()
         {
             InitializeComponent();
             pictureBox1.WaitOnLoad = false;

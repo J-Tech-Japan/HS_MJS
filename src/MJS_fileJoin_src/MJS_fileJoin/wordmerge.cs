@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using Word = Microsoft.Office.Interop.Word;
-using System.Drawing;
 using System.Windows.Forms;
 using MJS_fileJoin;
-using System;
 using System.Text.RegularExpressions;
 using System.Linq;
 
 namespace DocMergerComponent
 {
-    public class DocMerger
+    public partial class DocMerger
     {
         public void Merge(string strOrgDoc, string[] arrCopies, string strOutDoc, MainForm form, bool check1, bool check2, bool check3, object nothing)
         {
@@ -23,6 +21,7 @@ namespace DocMergerComponent
             object objDetectFromChanges = Word.WdRevisionType.wdNoRevision;
 
             int chapCnt;
+
             try
             {
                 objApp = new Word.Application();
@@ -62,74 +61,22 @@ namespace DocMergerComponent
                 fm.progressBar1.Maximum = arrCopies.Length + 1;
                 fm.progressBar1.Value = 1;
                 int chapCntLast = 0;
+
                 foreach (string strCopy in arrCopies)
                 {
-                    //int addCnt = 0;
-                    //object E = "";
-                    //for (int retryCount = 0; retryCount <= 5; retryCount++)
-                    //{
-                    //    try
-                    //    {
-                    //        E = (Array)(object)objDocLast.GetCrossReferenceItems(Word.WdReferenceType.wdRefTypeHeading);
-                    //        break;
-                    //    }
-                    //    catch { }
-                    //}
-
-                    //foreach (var gcri in (Array)E)
-                    //{
-                    //    if (Regex.IsMatch(gcri.ToString(), @"^[\d\.]+"))
-                    //        if (addCnt < Convert.ToInt16(Regex.Replace(gcri.ToString(), @"^(\d+).*?$", "$1"))) addCnt = Convert.ToInt16(Regex.Replace(gcri.ToString(), @"^(\d+).*?$", "$1"));
-                    //}
-                    //dic1.Add(addCnt, Regex.Replace(strCopy, @"^.*?@([^\\]*?)\\.*?$", "$1"));
-                    //dic2.Add(objDocLast.Sections.Count, addCnt);
-
                     objApp.Selection.EndKey(Word.WdUnits.wdStory);
                     objApp.Selection.HomeKey(Word.WdUnits.wdStory);
                     objApp.Selection.EndKey(Word.WdUnits.wdStory);
-                    System.Windows.Forms.Application.DoEvents();
+                    Application.DoEvents();
 
                     objApp.Selection.InsertBreak(Word.WdBreakType.wdSectionBreakNextPage);
-                    System.Windows.Forms.Application.DoEvents();
+                    Application.DoEvents();
 
                     chapCntLast = objDocLast.Sections.Count;
                     objApp.Selection.InsertFile(strCopy, ref objMissing, objMissing, objMissing, objMissing);
 
-                    //Debug.WriteLine("Merging file " + strCopy);
-                    //objDocLast.Merge(
-                    //  strCopy,                //FileName    
-                    //  ref objTarget,          //MergeTarget
-                    //  ref objDetectFromChanges,         //DetectFormatChanges
-                    //  ref objUseFormatFrom,   //UseFormattingFrom
-                    //  ref objMissing          //AddToRecentFiles
-                    //  );
-                    //System.Windows.Forms.Application.DoEvents();
-                    //objDocBeforeLast = objDocLast;
-                    //objDocLast = objApp.ActiveDocument;
-                    //Debug.WriteLine("The active document is " + objDocLast.Name);
-
-                    //if (objDocBeforeLast != null)
-                    //{
-                    //    Debug.WriteLine("Closing " + objDocBeforeLast.Name);
-                    //    objDocBeforeLast.Close(
-                    //      ref objFalse,     //SaveChanges
-                    //      ref objMissing,   //OriginalFormat
-                    //      ref objMissing    //RouteDocument
-                    //      );
-                    //}
                     fm.progressBar1.Increment(1);
                 }
-
-
-                //foreach(var q in dic1)
-                //{
-                //    MessageBox.Show(q.Key + " " + q.Value);
-                //}
-                //foreach (var q in dic2)
-                //{
-                //    MessageBox.Show(q.Key + " " + q.Value);
-                //}
-
 
                 object objOutDoc = strOutDoc;
 
@@ -262,88 +209,74 @@ namespace DocMergerComponent
                     styleNames.Add("見出し 2,MJS_見出し 2");
                     styleNames.Add("見出し 3,MJS_見出し 3");
 
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].NumberFormat = "第%1章";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].NumberPosition = objApp.MillimetersToPoints(0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].TextPosition = objApp.MillimetersToPoints(5.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingNone;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].ResetOnHigher = 0;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].StartAt = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Bold = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Italic = 0;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Color = Word.WdColor.wdColorAutomatic;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Size = 60;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Name = "メイリオ";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].LinkedStyle = "MJS_章扉-タイトル";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].NumberFormat = "第%1章";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].NumberPosition = objApp.MillimetersToPoints(0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].TextPosition = objApp.MillimetersToPoints(5.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingNone;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].ResetOnHigher = 0;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].StartAt = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Bold = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Italic = 0;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Color = Word.WdColor.wdColorAutomatic;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Size = 60;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].Font.Name = "メイリオ";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[1].LinkedStyle = "MJS_章扉-タイトル";
 
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].NumberFormat = "%1.%2";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].NumberPosition = objApp.MillimetersToPoints(1.5F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].TextPosition = objApp.MillimetersToPoints(20.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].TabPosition = objApp.MillimetersToPoints(20.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].ResetOnHigher = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].StartAt = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Bold = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Italic = 0;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Color = Word.WdColor.wdColorAutomatic;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Size = 16;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Name = "メイリオ";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].LinkedStyle = "見出し 1";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].NumberFormat = "%1.%2";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].NumberPosition = objApp.MillimetersToPoints(1.5F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].TextPosition = objApp.MillimetersToPoints(20.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].TabPosition = objApp.MillimetersToPoints(20.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].ResetOnHigher = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].StartAt = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Bold = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Italic = 0;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Color = Word.WdColor.wdColorAutomatic;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Size = 16;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].Font.Name = "メイリオ";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[2].LinkedStyle = "見出し 1";
 
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].NumberFormat = "%1.%2.%3";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].NumberPosition = objApp.MillimetersToPoints(0.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].TextPosition = objApp.MillimetersToPoints(20.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].TabPosition = objApp.MillimetersToPoints(20.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].ResetOnHigher = 2;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].StartAt = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Bold = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Italic = 0;
-                    Color mycolor = Color.FromArgb(31, 73, 125);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Color = (Word.WdColor)(mycolor.R + 0x100 * mycolor.G + 0x10000 * mycolor.B);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Size = 14;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Name = "メイリオ";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].LinkedStyle = "見出し 2";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].NumberFormat = "%1.%2.%3";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].NumberPosition = objApp.MillimetersToPoints(0.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].TextPosition = objApp.MillimetersToPoints(20.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].TabPosition = objApp.MillimetersToPoints(20.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].ResetOnHigher = 2;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].StartAt = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Bold = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Italic = 0;
+                    //Color mycolor = Color.FromArgb(31, 73, 125);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Color = (Word.WdColor)(mycolor.R + 0x100 * mycolor.G + 0x10000 * mycolor.B);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Size = 14;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].Font.Name = "メイリオ";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[3].LinkedStyle = "見出し 2";
 
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].NumberFormat = "%1.%2.%3.%4";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].NumberPosition = objApp.MillimetersToPoints(7.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].TextPosition = objApp.MillimetersToPoints(28.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].TabPosition = objApp.MillimetersToPoints(28.0F);
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].ResetOnHigher = 3;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].StartAt = 1;
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].Font.Name = "メイリオ";
-                    objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].LinkedStyle = "見出し 3";
-                    //foreach (string styleName in styleNames)
-                    //{
-                    //    object styleObject3 = styleName;
-                    //    objApp.Selection.Find.ClearFormatting();
-                    //    objApp.Selection.Find.set_Style(styleObject3);
-                    //    objApp.Selection.Find.Wrap = Word.WdFindWrap.wdFindContinue;
-                    //    objApp.Selection.Find.Execute();
-                    //    while (objApp.Selection.Find.Found)
-                    //    {
-                    //        objApp.Selection.Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
-                    //        Application.DoEvents();
-                    //        objApp.Selection.Find.Execute();
-                    //    }
-                    //}
-                    fm.label10.Text = "見出し番号修正中...";
-                    fm.progressBar1.Maximum = objDocLast.ListParagraphs.Count;
-                    fm.progressBar1.Value = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].NumberFormat = "%1.%2.%3.%4";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].TrailingCharacter = Word.WdTrailingCharacter.wdTrailingTab;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].NumberStyle = Word.WdListNumberStyle.wdListNumberStyleArabic;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].NumberPosition = objApp.MillimetersToPoints(7.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].Alignment = Word.WdListLevelAlignment.wdListLevelAlignLeft;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].TextPosition = objApp.MillimetersToPoints(28.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].TabPosition = objApp.MillimetersToPoints(28.0F);
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].ResetOnHigher = 3;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].StartAt = 1;
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].Font.Name = "メイリオ";
+                    //objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels[4].LinkedStyle = "見出し 3";
+
+                    SetOutlineNumberingFormat(objApp, objDocLast, fm);
 
                     int first = 0;
                     int second = 0;
                     int third = 0;
                     int fourth = 0;
+
                     for (int i = 1; i <= objDocLast.ListParagraphs.Count; i++)
                     {
                         fm.progressBar1.Increment(1);
@@ -380,37 +313,11 @@ namespace DocMergerComponent
                         }
                     }
 
-                    //List<int> li = new List<int>();
-                    //for (int ln = 1; ln <= objDocLast.ListParagraphs.Count; ln++)
-                    //{
-                    //    if (Regex.IsMatch(objDocLast.ListParagraphs[ln].Range.ListFormat.ListString, @"第.*?章") ||
-                    //        Regex.IsMatch(objDocLast.ListParagraphs[ln].Range.ListFormat.ListString, @"\d+\.\d+"))
-                    //    {
-                    //        li.Add(ln);
-                    //    }
-                    //}
-                    //foreach(int i in li)
-                    //{
-                    //    objDocLast.ListParagraphs[i].Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
-                    //}
-                    //foreach (Word.Paragraph wp in objDocLast.ListParagraphs)
-                    //{
-
-                    //    try
-                    //    {
-                    //        if (styleNames.Contains(wp.Range.get_Style().NameLocal))
-                    //        {
-                    //            wp.Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
-                    //        }
-                    //    }
-                    //    catch { }
-                    //    fm.progressBar1.Increment(1);
-                    //}
-
                     fm.label10.Text = "索引更新中...";
                     object styleObject3 = "索引見出し";
                     bool bl3 = false;
                     int secCnt3 = objDocLast.Sections.Count;
+
                     for (int i = secCnt3; i > 0; i--)
                     {
                         Word.Range wr = objDocLast.Sections[i].Range;
@@ -430,46 +337,6 @@ namespace DocMergerComponent
                         }
                     }
 
-                    //fm.label10.Text = "参照更新中...";
-                    //object styleObject6 = "MJS_参照先";
-                    //for (int i = 1; i <= objDocLast.Sections.Count; i++)
-                    //{
-                    //    int addSec = 0;
-                    //    foreach(var s in dic2)
-                    //    {
-                    //        if (s.Key <= i)
-                    //        {
-                    //            addSec = s.Value;
-                    //            MessageBox.Show(addSec + " " + i);
-                    //        }
-                    //    }
-                    //    Word.Range wr = objDocLast.Sections[i].Range;
-                    //    fm.progressBar1.Value = 1;
-                    //    fm.progressBar1.Maximum = wr.Paragraphs.Count;
-
-                    //    for (int p = 1; p <= wr.Paragraphs.Count; p++)
-                    //    {
-                    //        fm.progressBar1.Increment(1);
-                    //        if (wr.Paragraphs[p].get_Style().NameLocal == "MJS_参照先")
-                    //        {
-                    //            if(Regex.IsMatch(wr.Paragraphs[p].Range.Text, @"⇒「[\d\.]+"))
-                    //            {
-                    //                wr.Paragraphs[p].Range.Text = Regex.Replace(wr.Paragraphs[p].Range.Text, @"(?<=⇒「)\d+", Convert.ToString(Convert.ToInt16(Regex.Replace(wr.Paragraphs[p].Range.Text, @"^.*?⇒「(\d+).*?$", "$1")) + addSec), RegexOptions.Singleline);
-                    //                wr.Paragraphs[p].set_Style(styleObject6);
-                    //            }
-                    //            else if (Regex.IsMatch(wr.Paragraphs[p].Range.Text, @"⇒「[^\s　]*?[\s　][\d\.]+"))
-                    //            {
-                    //                if(dic1.ContainsValue(Regex.Replace(wr.Paragraphs[p].Range.Text, @"^.*?⇒「([^\s　]*?)[\s　][\d\.]+.*?$", "$1")))
-                    //                {
-                    //                    var y = dic1.First(x => x.Value == Regex.Replace(wr.Paragraphs[p].Range.Text, @"^.*?⇒「([^\s　]*?)[\s　][\d\.]+.*?$", "$1"));
-                    //                    wr.Paragraphs[p].Range.Text = Regex.Replace(wr.Paragraphs[p].Range.Text, @"(?<=⇒「)[^\s　]*?[\s　]\d+", Convert.ToString(Convert.ToInt16(Regex.Replace(wr.Paragraphs[p].Range.Text, @"^.*?⇒「[^\s　]*?[\s　](\d+).*?$", "$1")) + y.Key), RegexOptions.Singleline);
-                    //                    wr.Paragraphs[p].set_Style(styleObject6);
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
-
                     fm.label10.Text = "目次更新中...";
                     fm.progressBar1.Value = 0;
                     fm.progressBar1.Maximum = 1;
@@ -488,11 +355,13 @@ namespace DocMergerComponent
 
                 fm.label10.Text = "ハイパーリンク更新中...";
                 List<string> ls = new List<string>();
+
                 foreach (Word.Bookmark wb in objDocLast.Bookmarks)
                     ls.Add(wb.Name);
 
                 fm.progressBar1.Value = 0;
                 fm.progressBar1.Maximum = objDocLast.Fields.Count;
+
                 foreach (Word.Field wf in objDocLast.Fields)
                 {
                     fm.progressBar1.Increment(1);
@@ -532,27 +401,6 @@ namespace DocMergerComponent
                 if (check2)
                 {
                     fm.label10.Text = "PDF出力中...";
-
-                    //object styleName = "MJS_章扉-目次1";
-                    //objApp.Selection.Find.ClearFormatting();
-                    //objApp.Selection.Find.set_Style(ref styleName);
-                    //objApp.Selection.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                    //objApp.Selection.HomeKey();
-
-                    //while (objApp.Selection.Find.Execute())
-                    //{
-                    //    {
-                    //        try
-                    //        {
-                    //            objApp.Selection.Range.Paragraphs[1].Range.Text = Regex.Replace(objApp.Selection.Range.Paragraphs[1].Range.Text, @"^\d+\.\d+[ 　\t]", "");
-                    //            objApp.Selection.Range.Paragraphs[1].Range.set_Style(ref styleName);
-                    //        }
-                    //        catch { }
-                    //    }
-                    //    objApp.Selection.GoToNext(Word.WdGoToItem.wdGoToLine);
-                    //}
-
-                    
 
                     objDocLast.ExportAsFixedFormat(
                         strOutDoc.Replace(".doc", ".pdf"),
@@ -615,6 +463,7 @@ namespace DocMergerComponent
                 objApp = null;
             }
         }
+
         public void Merge(string strOrgDoc, List<string> strCopyFolder, string strOutDoc, MainForm fm, bool check1, bool check2, bool check3)
         {
             MainForm form = fm;

@@ -12,13 +12,13 @@ namespace MJS_fileJoin
     // UIから独立して動作する処理（ファイル操作、データ変換、HTML生成など）
     public partial class MainForm
     {
-        private void CopyDirectory(string sourceDir, string destDir)
+        private void CopyDirectory(string sourceDir, string destinationDir)
         {
-            Directory.CreateDirectory(destDir);
+            Directory.CreateDirectory(destinationDir);
 
             foreach (string file in Directory.GetFiles(sourceDir))
             {
-                string destFile = Path.Combine(destDir, Path.GetFileName(file));
+                string destinationFile = Path.Combine(destinationDir, Path.GetFileName(file));
                 if (Path.GetFileName(file).ToLower().Contains("image"))
                 {
 
@@ -29,124 +29,227 @@ namespace MJS_fileJoin
                 }
                 else
                 {
-                    File.Copy(file, destFile, true);
+                    File.Copy(file, destinationFile, true);
                 }
             }
 
             foreach (string subDir in Directory.GetDirectories(sourceDir))
             {
-                string destSubDir = Path.Combine(destDir, Path.GetFileName(subDir));
+                string destSubDir = Path.Combine(destinationDir, Path.GetFileName(subDir));
                 CopyDirectory(subDir, destSubDir);
             }
         }
 
-        public static void CopyDirectory(string stSourcePath, string stDestPath, bool bOverwrite)
+
+        public static void CopyDirectory(string sourceDir, string destinationDir, bool overwrite)
         {
             // コピー先のディレクトリがなければ作成する
-            if (!Directory.Exists(stDestPath))
+            if (!Directory.Exists(destinationDir))
             {
-                Directory.CreateDirectory(stDestPath);
-                File.SetAttributes(stDestPath, File.GetAttributes(stSourcePath));
-                bOverwrite = true;
+                Directory.CreateDirectory(destinationDir);
+                File.SetAttributes(destinationDir, File.GetAttributes(sourceDir));
+                overwrite = true;
             }
 
             // コピー元のディレクトリにあるすべてのファイルをコピーする
-            if (bOverwrite)
+            if (overwrite)
             {
-                foreach (string stCopyFrom in Directory.GetFiles(stSourcePath))
+                foreach (string copyFrom in Directory.GetFiles(sourceDir))
                 {
-                    string stCopyTo = Path.Combine(stDestPath, Path.GetFileName(stCopyFrom));
-                    File.Copy(stCopyFrom, stCopyTo, true);
+                    string copyTo = Path.Combine(destinationDir, Path.GetFileName(copyFrom));
+                    File.Copy(copyFrom, copyTo, true);
                 }
-
-                // 上書き不可能な場合は存在しない時のみコピーする
             }
             else
             {
-                foreach (string stCopyFrom in Directory.GetFiles(stSourcePath))
+                foreach (string copyFrom in Directory.GetFiles(sourceDir))
                 {
-                    string stCopyTo = Path.Combine(stDestPath, Path.GetFileName(stCopyFrom));
-
-                    if (!File.Exists(stCopyTo))
+                    string copyTo = Path.Combine(destinationDir, Path.GetFileName(copyFrom));
+                    if (!File.Exists(copyTo))
                     {
-                        File.Copy(stCopyFrom, stCopyTo, false);
+                        File.Copy(copyFrom, copyTo, false);
                     }
                 }
             }
 
             // コピー元のディレクトリをすべてコピーする (再帰)
-            foreach (string stCopyFrom in Directory.GetDirectories(stSourcePath))
+            foreach (string copyFrom in Directory.GetDirectories(sourceDir))
             {
-                string stCopyTo = Path.Combine(stDestPath, Path.GetFileName(stCopyFrom));
-                CopyDirectory(stCopyFrom, stCopyTo, bOverwrite);
+                string copyTo = Path.Combine(destinationDir, Path.GetFileName(copyFrom));
+                CopyDirectory(copyFrom, copyTo, overwrite);
             }
         }
+        //public static void CopyDirectory(string stSourcePath, string stDestPath, bool bOverwrite)
+        //{
+        //    // コピー先のディレクトリがなければ作成する
+        //    if (!Directory.Exists(stDestPath))
+        //    {
+        //        Directory.CreateDirectory(stDestPath);
+        //        File.SetAttributes(stDestPath, File.GetAttributes(stSourcePath));
+        //        bOverwrite = true;
+        //    }
+
+        //    // コピー元のディレクトリにあるすべてのファイルをコピーする
+        //    if (bOverwrite)
+        //    {
+        //        foreach (string stCopyFrom in Directory.GetFiles(stSourcePath))
+        //        {
+        //            string stCopyTo = Path.Combine(stDestPath, Path.GetFileName(stCopyFrom));
+        //            File.Copy(stCopyFrom, stCopyTo, true);
+        //        }
+
+        //        // 上書き不可能な場合は存在しない時のみコピーする
+        //    }
+        //    else
+        //    {
+        //        foreach (string stCopyFrom in Directory.GetFiles(stSourcePath))
+        //        {
+        //            string stCopyTo = Path.Combine(stDestPath, Path.GetFileName(stCopyFrom));
+
+        //            if (!File.Exists(stCopyTo))
+        //            {
+        //                File.Copy(stCopyFrom, stCopyTo, false);
+        //            }
+        //        }
+        //    }
+
+        //    // コピー元のディレクトリをすべてコピーする (再帰)
+        //    foreach (string stCopyFrom in Directory.GetDirectories(stSourcePath))
+        //    {
+        //        string stCopyTo = Path.Combine(stDestPath, Path.GetFileName(stCopyFrom));
+        //        CopyDirectory(stCopyFrom, stCopyTo, bOverwrite);
+        //    }
+        //}
+
+        //private bool addHtmlDir(string dirPath)
+        //{
+        //    if (Directory.Exists(Path.Combine(Path.GetDirectoryName(dirPath), "headerFile")))
+        //    {
+        //        string[] listFile = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(dirPath), "headerFile"), "???.txt");
+        //        if (listFile.Length == 0)
+        //        {
+        //            MessageBox.Show("「" + Path.Combine(Path.GetDirectoryName(dirPath), "headerFile") + "」に書誌情報ファイルが存在しません。");
+        //        }
+        //        else
+        //        {
+        //            bookInfo[dirPath] = new System.Data.DataTable();
+        //            bookInfo[dirPath].Columns.Add("Column1", typeof(bool));
+        //            bookInfo[dirPath].Columns.Add("Column2", typeof(string));
+        //            bookInfo[dirPath].Columns.Add("Column3", typeof(string));
+        //            bookInfo[dirPath].Columns.Add("Column4", typeof(string));
+        //            bookInfo[dirPath].Columns.Add("Column5", typeof(string));
+
+        //            bool isHtmlDir = false;
+        //            using (StreamReader sr = new StreamReader(listFile[0]))
+        //            {
+        //                while (!sr.EndOfStream)
+        //                {
+        //                    string[] lineStr = (sr.ReadLine()).Split('\t');
+        //                    string htmlName = "";
+        //                    if (lineStr[2].Contains("#"))
+        //                        continue;
+        //                    else
+        //                        htmlName = Path.Combine(dirPath, lineStr[2] + ".html");
+        //                    if (lineStr.Length > 3 && !String.IsNullOrEmpty(lineStr[3]))
+        //                    {
+        //                        bookInfo[dirPath].Rows.Add(true, lineStr[0], lineStr[1], lineStr[2], lineStr[3]);
+        //                    }
+        //                    else
+        //                    {
+        //                        bookInfo[dirPath].Rows.Add(true, lineStr[0], lineStr[1], lineStr[2]);
+
+        //                    }
+
+        //                    if (!isHtmlDir &&
+        //                        File.Exists(htmlName))
+        //                    {
+        //                        isHtmlDir = true;
+        //                    }
+        //                    if (!File.Exists(htmlName)) MessageBox.Show(htmlName + "が存在しません。\r\nwebHelpフォルダ内にHTMLを配置後、結合を実行してください。");
+        //                }
+        //            }
+        //            if (!isHtmlDir)
+        //            {
+        //                MessageBox.Show("書誌情報ファイルに紐づくHTMLファイルが見つかりません。\nフォルダをご確認ください。");
+        //                bookInfo.Remove(dirPath);
+        //            }
+        //            else
+        //            {
+        //                lbHtmlList.Items.Add(dirPath);
+        //                lbHtmlList.SelectedIndex = lbHtmlList.Items.Count - 1;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("「" + Path.Combine(Path.GetDirectoryName(dirPath), "headerFile") + "」フォルダが存在しません。");
+        //    }
+        //    return false;
+        //}
 
         private bool addHtmlDir(string dirPath)
         {
-            if (Directory.Exists(Path.Combine(Path.GetDirectoryName(dirPath), "headerFile")))
+            string headerDir = Path.Combine(Path.GetDirectoryName(dirPath), "headerFile");
+            if (!Directory.Exists(headerDir))
             {
-                string[] listFile = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(dirPath), "headerFile"), "???.txt");
-                if (listFile.Length == 0)
+                MessageBox.Show($"「{headerDir}」フォルダが存在しません。");
+                return false;
+            }
+
+            string[] bibFiles = Directory.GetFiles(headerDir, "???.txt");
+            if (bibFiles.Length == 0)
+            {
+                MessageBox.Show($"「{headerDir}」に書誌情報ファイルが存在しません。");
+                return false;
+            }
+
+            var table = new System.Data.DataTable();
+            table.Columns.Add("Column1", typeof(bool));
+            table.Columns.Add("Column2", typeof(string));
+            table.Columns.Add("Column3", typeof(string));
+            table.Columns.Add("Column4", typeof(string));
+            table.Columns.Add("Column5", typeof(string));
+
+            bool hasHtml = false;
+            try
+            {
+                using (var sr = new StreamReader(bibFiles[0]))
                 {
-                    MessageBox.Show("「" + Path.Combine(Path.GetDirectoryName(dirPath), "headerFile") + "」に書誌情報ファイルが存在しません。");
-                }
-                else
-                {
-                    bookInfo[dirPath] = new System.Data.DataTable();
-                    bookInfo[dirPath].Columns.Add("Column1", typeof(bool));
-                    bookInfo[dirPath].Columns.Add("Column2", typeof(string));
-                    bookInfo[dirPath].Columns.Add("Column3", typeof(string));
-                    bookInfo[dirPath].Columns.Add("Column4", typeof(string));
-                    bookInfo[dirPath].Columns.Add("Column5", typeof(string));
-
-                    bool isHtmlDir = false;
-                    using (StreamReader sr = new StreamReader(listFile[0]))
+                    while (!sr.EndOfStream)
                     {
-                        while (!sr.EndOfStream)
-                        {
-                            string[] lineStr = (sr.ReadLine()).Split('\t');
-                            string htmlName = "";
-                            if (lineStr[2].Contains("#"))
-                                continue;
-                            else
-                                htmlName = Path.Combine(dirPath, lineStr[2] + ".html");
-                            if (lineStr.Length > 3 && !String.IsNullOrEmpty(lineStr[3]))
-                            {
-                                bookInfo[dirPath].Rows.Add(true, lineStr[0], lineStr[1], lineStr[2], lineStr[3]);
-                            }
-                            else
-                            {
-                                bookInfo[dirPath].Rows.Add(true, lineStr[0], lineStr[1], lineStr[2]);
+                        string[] fields = sr.ReadLine().Split('\t');
+                        if (fields.Length < 3) continue;
+                        if (fields[2].Contains("#")) continue;
 
-                            }
+                        string htmlPath = Path.Combine(dirPath, fields[2] + ".html");
+                        if (fields.Length > 3 && !string.IsNullOrEmpty(fields[3]))
+                            table.Rows.Add(true, fields[0], fields[1], fields[2], fields[3]);
+                        else
+                            table.Rows.Add(true, fields[0], fields[1], fields[2]);
 
-
-                            if (!isHtmlDir &&
-                                File.Exists(htmlName))
-                            {
-                                isHtmlDir = true;
-                            }
-                            if (!File.Exists(htmlName)) MessageBox.Show(htmlName + "が存在しません。\r\nwebHelpフォルダ内にHTMLを配置後、結合を実行してください。");
-                        }
-                    }
-                    if (!isHtmlDir)
-                    {
-                        MessageBox.Show("書誌情報ファイルに紐づくHTMLファイルが見つかりません。\nフォルダをご確認ください。");
-                        bookInfo.Remove(dirPath);
-                    }
-                    else
-                    {
-                        lbHtmlList.Items.Add(dirPath);
-                        lbHtmlList.SelectedIndex = lbHtmlList.Items.Count - 1;
+                        if (!hasHtml && File.Exists(htmlPath))
+                            hasHtml = true;
+                        if (!File.Exists(htmlPath))
+                            MessageBox.Show($"{htmlPath}が存在しません。\r\nwebHelpフォルダ内にHTMLを配置後、結合を実行してください。");
                     }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("「" + Path.Combine(Path.GetDirectoryName(dirPath), "headerFile") + "」フォルダが存在しません。");
+                MessageBox.Show("書誌情報ファイルの読み込み中にエラーが発生しました: " + ex.Message);
+                return false;
             }
-            return false;
+
+            if (!hasHtml)
+            {
+                MessageBox.Show("書誌情報ファイルに紐づくHTMLファイルが見つかりません。\nフォルダをご確認ください。");
+                return false;
+            }
+
+            bookInfo[dirPath] = table;
+            lbHtmlList.Items.Add(dirPath);
+            lbHtmlList.SelectedIndex = lbHtmlList.Items.Count - 1;
+            return true;
         }
 
         public static void ListViewToCSV(ListView listView, string filePath, bool includeHidden)

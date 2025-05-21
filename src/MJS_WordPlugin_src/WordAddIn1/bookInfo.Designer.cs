@@ -2,7 +2,7 @@
 
 namespace WordAddIn1
 {
-    partial class bookInfo
+    partial class BookInfo
     {
         /// <summary>
         /// Required designer variable.

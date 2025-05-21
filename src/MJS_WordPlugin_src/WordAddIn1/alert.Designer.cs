@@ -1,6 +1,6 @@
 ﻿namespace WordAddIn1
 {
-    partial class alert
+    partial class Alert
     {
         /// <summary>
         /// Required designer variable.
