@@ -2,16 +2,17 @@
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
+// リファクタリング済
 namespace WordAddIn1
 {
-    public partial class bookInfo : Form
+    public partial class BookInfo : Form
     {
         // 正規表現パターンを定数として定義
         private const string TwoDigitPattern = @"^\d{2}$";
         private const string SingleDigitPattern = @"^\d$";
         private const string FullWidthDigitPattern = "[０-９]";
 
-        public bookInfo()
+        public BookInfo()
         {
             InitializeComponent();
         }

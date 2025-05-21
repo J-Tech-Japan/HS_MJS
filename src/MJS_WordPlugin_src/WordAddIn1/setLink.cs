@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1

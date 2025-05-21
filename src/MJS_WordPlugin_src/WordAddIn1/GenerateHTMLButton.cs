@@ -9,9 +9,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-
 using Word = Microsoft.Office.Interop.Word;
 
+// リファクタリング済
 namespace WordAddIn1
 {
     public partial class RibbonMJS
