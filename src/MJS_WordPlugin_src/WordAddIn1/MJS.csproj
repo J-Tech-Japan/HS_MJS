@@ -354,6 +354,9 @@
     <Compile Include="StyleCheckButton.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="StyleCheckButton.HandleProcess.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="StyleCheckButton.NonInlineShape.cs">
       <SubType>Component</SubType>
     </Compile>
