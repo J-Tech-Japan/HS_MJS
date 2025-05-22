@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -13,9 +11,9 @@ namespace WordAddIn1
     public partial class CheckForm : Form
     {
         public RibbonMJS ribbon1;
-
         private List<CheckInfo> showResult;
 
+        // コンストラクタ
         public CheckForm(RibbonMJS _ribbon1)
         {
             InitializeComponent();
@@ -44,223 +42,7 @@ namespace WordAddIn1
 
         private void dataGridView1_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
-            setColor();
-        }
-
-        private void setColor()
-        {
-            for (int i = 0; i < dataGridView1.Rows.Count; i++)
-            {
-                CheckInfo check = showResult[i];
-                dataGridView1[0, i].Style.ForeColor = Color.DarkGray;
-                dataGridView1[1, i].Style.ForeColor = Color.DarkGray;
-                dataGridView1[2, i].Style.ForeColor = Color.DarkGray;
-                dataGridView1[3, i].Style.ForeColor = Color.DarkGray;
-                dataGridView1[4, i].Style.ForeColor = Color.DarkGray;
-                dataGridView1[5, i].Style.ForeColor = Color.DarkGray;
-                if (!String.IsNullOrEmpty(dataGridView1[0, i].Value.ToString()) &&
-                    !String.IsNullOrEmpty(dataGridView1[1, i].Value.ToString()) &&
-                    !String.IsNullOrEmpty(dataGridView1[2, i].Value.ToString()) &&
-                    dataGridView1[0, i].Value.ToString() == dataGridView1[3, i].Value.ToString() &&
-                    dataGridView1[1, i].Value.ToString() == dataGridView1[4, i].Value.ToString() &&
-                    dataGridView1[2, i].Value.ToString() == dataGridView1[5, i].Value.ToString())
-                {
-                    dataGridView1[0, i].Style.ForeColor = Color.DarkGray;
-                    dataGridView1[1, i].Style.ForeColor = Color.DarkGray;
-                    dataGridView1[2, i].Style.ForeColor = Color.DarkGray;
-                    dataGridView1[3, i].Style.ForeColor = Color.DarkGray;
-                    dataGridView1[4, i].Style.ForeColor = Color.DarkGray;
-                    dataGridView1[5, i].Style.ForeColor = Color.DarkGray;
-                }
-                if (!String.IsNullOrEmpty(dataGridView1[6, i].Value.ToString()) &&
-                    dataGridView1[5, i].Value.ToString() == dataGridView1[6, i].Value.ToString()
-                    )
-                {
-                    dataGridView1[6, i].Style.ForeColor = Color.DarkGray;
-                    dataGridView1[6, i].Style.BackColor = Color.LightYellow;
-                }
-                if (!String.IsNullOrEmpty(dataGridView1[5, i].Value.ToString()) &&
-                    !String.IsNullOrEmpty(dataGridView1[6, i].Value.ToString()) &&
-                    dataGridView1[5, i].Value.ToString() != dataGridView1[6, i].Value.ToString()
-                    )
-                {
-                    dataGridView1[6, i].Style.BackColor = Color.LightYellow;
-                }
-                if (dataGridView1[7, i].Value.ToString().Contains("●タイトル変更"))
-                {
-                    dataGridView1[7, i].Style.BackColor = Color.LightGray;
-                }
-                if (!String.IsNullOrEmpty(dataGridView1[0, i].Value.ToString()) &&
-                    !String.IsNullOrEmpty(dataGridView1[3, i].Value.ToString()) &&
-                    dataGridView1[0, i].Value.ToString() != dataGridView1[3, i].Value.ToString()
-                    )
-                {
-                    dataGridView1[0, i].Style.ForeColor = Color.Black;
-                    dataGridView1[3, i].Style.ForeColor = Color.Red;
-                }
-                if (dataGridView1[0, i].Value == null || "".Equals(dataGridView1[0, i].Value))
-                {
-                    dataGridView1[0, i].Style.BackColor = Color.LightGray;
-                }
-                if (dataGridView1[1, i].Value == null || "".Equals(dataGridView1[1, i].Value))
-                {
-                    dataGridView1[1, i].Style.BackColor = Color.LightGray;
-                }
-                if (dataGridView1[2, i].Value == null || "".Equals(dataGridView1[2, i].Value))
-                {
-                    dataGridView1[2, i].Style.BackColor = Color.LightGray;
-                }
-
-                if (dataGridView1[3, i].Value == null || "".Equals(dataGridView1[3, i].Value))
-                {
-                    dataGridView1[3, i].Style.BackColor = Color.LightGray;
-                    if (!String.IsNullOrEmpty(dataGridView1[0, i].Value.ToString()))
-                        dataGridView1[0, i].Style.ForeColor = Color.Black;
-                }
-                if (dataGridView1[4, i].Value == null || "".Equals(dataGridView1[4, i].Value))
-                {
-                    dataGridView1[4, i].Style.BackColor = Color.LightGray;
-                    if (!String.IsNullOrEmpty(dataGridView1[1, i].Value.ToString()))
-                        dataGridView1[1, i].Style.ForeColor = Color.Black;
-                }
-                if (dataGridView1[5, i].Value == null || "".Equals(dataGridView1[5, i].Value))
-                {
-                    dataGridView1[5, i].Style.BackColor = Color.LightGray;
-                    if (!String.IsNullOrEmpty(dataGridView1[2, i].Value.ToString()))
-                        dataGridView1[2, i].Style.ForeColor = Color.Black;
-                }
-                if (dataGridView1[6, i].Value == null || "".Equals(dataGridView1[6, i].Value))
-                {
-                    dataGridView1[6, i].Style.BackColor = Color.LightGray;
-                }
-
-                if ("red".Equals(check.new_num_color))
-                {
-                    dataGridView1[3, i].Style.ForeColor = Color.Red;
-                    dataGridView1[0, i].Style.ForeColor = Color.Black;
-                }
-                else if ("blue".Equals(check.new_num_color))
-                {
-                    dataGridView1[3, i].Style.ForeColor = Color.Blue;
-                }
-                else
-                {
-                    //dataGridView1[3, i].Style.ForeColor = Color.Black;
-                }
-                if ("red".Equals(check.new_title_color))
-                {
-                    dataGridView1[4, i].Style.ForeColor = Color.Red;
-                    dataGridView1[1, i].Style.ForeColor = Color.Black;
-                }
-                else if ("blue".Equals(check.new_title_color))
-                {
-                    dataGridView1[4, i].Style.ForeColor = Color.Blue;
-                }
-                else
-                {
-                    //dataGridView1[4, i].Style.ForeColor = Color.Black;
-                }
-                if ("red".Equals(check.new_id_color))
-                {
-                    dataGridView1[5, i].Style.ForeColor = Color.Red;
-                    dataGridView1[2, i].Style.ForeColor = Color.Black;
-                }
-                else if ("blue".Equals(check.new_id_color))
-                {
-                    dataGridView1[5, i].Style.ForeColor = Color.Blue;
-                }
-                else
-                {
-                    //dataGridView1[5, i].Style.ForeColor = Color.Black;
-                }
-
-                if (check.new_id != null && check.new_id_show != null
-                    && !check.new_id.Equals(check.new_id_show))
-                {
-                    dataGridView1[6, i].Style.ForeColor = Color.Red;
-                }
-                else
-                {
-                    //dataGridView1[6, i].Style.ForeColor = Color.Black;
-                }
-
-                if ("red".Equals(check.diff_color))
-                {
-                    dataGridView1[7, i].Style.ForeColor = Color.Red;
-                }
-                else if ("blue".Equals(check.diff_color))
-                {
-                    dataGridView1[7, i].Style.ForeColor = Color.Blue;
-                }
-                if ("タイトル変更".Equals(dataGridView1[7, i].Value))
-                {
-                    dataGridView1[7, i].Style.ForeColor = Color.Blue;
-                    dataGridView1[7, i].Style.Font = new Font("Ariel", 8, FontStyle.Underline);
-                }
-
-                if ("red".Equals(check.edit_color))
-                {
-                    dataGridView1[9, i].Style.ForeColor = Color.Red;
-                }
-                else if ("blue".Equals(check.edit_color))
-                {
-                    dataGridView1[9, i].Style.ForeColor = Color.Blue;
-                }
-
-                if (!string.IsNullOrEmpty(check.new_id_show))
-                {
-                    var checklist = showResult.Where(p => p.new_id_show.Equals(check.new_id_show)).ToList();
-                    if (checklist != null && checklist.Count > 1)
-                    {
-                        dataGridView1[6, i].Style.BackColor = Color.LightPink;
-                    }
-                    //    else
-                    //    {
-                    //        dataGridView1[6, i].Style.BackColor = Color.White;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    dataGridView1[6, i].Style.BackColor = Color.White;
-                }
-            }
-
-            string idBook = "";
-            string idNum = "";
-            for (int i = 1; i < dataGridView1.Rows.Count; i++)
-            {
-                idBook = Regex.Replace(dataGridView1[2, i].Value.ToString(), @"^([A-Z]{3}).*?$", "$1");
-                idNum = Regex.Replace(dataGridView1[2, i].Value.ToString(), @"^[A-Z]{3}(\d{2}).*?$", "$1");
-                if (!String.IsNullOrEmpty(idBook) && !String.IsNullOrEmpty(idNum)) break;
-            }
-
-            for (int i = 1; i < dataGridView1.Rows.Count; i++)
-            {
-                if (!String.IsNullOrEmpty(dataGridView1[6, i].Value.ToString()) &&
-                    !String.IsNullOrEmpty(idBook) && !String.IsNullOrEmpty(idNum) &&
-                    !Regex.IsMatch(dataGridView1[6, i].Value.ToString().Split(new char[] { '(' })[0].Trim(), @"^" + idBook + idNum + @"\d{3}$") &&
-                    !Regex.IsMatch(dataGridView1[6, i].Value.ToString().Split(new char[] { '(' })[0].Trim(), @"^" + idBook + idNum + @"\d{3}" + "#" + idBook + idNum + @"\d{3}$"))
-                    dataGridView1[6, i].Style.BackColor = Color.LightPink;
-
-                if (i == 0 && dataGridView1[6, i].Value.ToString().Contains("#"))
-                {
-                    dataGridView1[6, i].Style.BackColor = Color.LightPink;
-                }
-                if (i > 0 && dataGridView1[6, i].Value.ToString().Contains("#"))
-                {
-                    for (int l = i; l >= 0; l--)
-                    {
-                        if (!String.IsNullOrEmpty(dataGridView1[6, l].Value.ToString()) && !dataGridView1[6, l].Value.ToString().Contains("#"))
-                        {
-                            if (Regex.Replace(dataGridView1[6, i].Value.ToString(), "#.*$", "") != Regex.Replace(dataGridView1[6, l].Value.ToString(), " *\\(.*\\)", ""))
-                            {
-                                dataGridView1[6, i].Style.BackColor = Color.LightPink;
-                            }
-                            else break;
-                        }
-                    }
-                }
-            }
+            SetColor();
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -547,7 +329,7 @@ namespace WordAddIn1
             dataGridView1.DataSource = showResult;
             dataGridView1.Refresh();
 
-            setColor();
+            SetColor();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -669,7 +451,7 @@ namespace WordAddIn1
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            setColor();
+            SetColor();
         }
     }
 }

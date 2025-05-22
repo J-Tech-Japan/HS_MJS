@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 using Word = Microsoft.Office.Interop.Word;
 
+// リファクタリング済
 namespace WordAddIn1
 {
     public partial class RibbonMJS
@@ -78,7 +79,6 @@ namespace WordAddIn1
                 }
                 catch (Exception ex)
                 {
-                    // Shape 処理中の例外をログに記録
                     Debug.WriteLine($"Shape 処理中に例外が発生しました: {ex.Message}");
                 }
             }

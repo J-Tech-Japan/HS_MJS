@@ -256,6 +256,9 @@
     <Compile Include="CheckForm.Designer.cs">
       <DependentUpon>CheckForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CheckForm.SetColor.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="CheckInfo.cs" />
     <Compile Include="CoverSelectionForm.cs">
       <SubType>Form</SubType>
@@ -355,6 +358,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="StyleCheckButton.HandleProcess.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="StyleCheckButton.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="StyleCheckButton.NonInlineShape.cs">
