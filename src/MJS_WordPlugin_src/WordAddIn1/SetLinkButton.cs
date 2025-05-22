@@ -6,7 +6,8 @@ namespace WordAddIn1
     {
         private void SetLinkButton(object sender, RibbonControlEventArgs e)
         {
-            setLink stLink = new setLink();
+            // 「リンク設定」のフォームを表示
+            SetLink stLink = new SetLink();
             stLink.Show();
         }
     }
