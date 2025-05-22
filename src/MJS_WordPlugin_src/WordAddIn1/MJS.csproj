@@ -317,8 +317,8 @@
     <EmbeddedResource Include="RibbonMJS.resx">
       <DependentUpon>RibbonMJS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="setLink.resx">
-      <DependentUpon>setLink.cs</DependentUpon>
+    <EmbeddedResource Include="SetLink.resx">
+      <DependentUpon>SetLink.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
@@ -414,11 +414,11 @@
     <Compile Include="RibbonMJS.MakeBookInfo.Helper.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="setLink.cs">
+    <Compile Include="SetLink.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="setLink.Designer.cs">
-      <DependentUpon>setLink.cs</DependentUpon>
+    <Compile Include="SetLink.Designer.cs">
+      <DependentUpon>SetLink.cs</DependentUpon>
     </Compile>
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>

@@ -1,6 +1,6 @@
 ﻿namespace WordAddIn1
 {
-    partial class setLink
+    partial class SetLink
     {
         /// <summary>
         /// Required designer variable.
