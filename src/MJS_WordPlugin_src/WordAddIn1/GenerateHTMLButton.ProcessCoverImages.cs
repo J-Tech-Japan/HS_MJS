@@ -56,6 +56,7 @@ using System.Windows.Forms;
 
 using Word = Microsoft.Office.Interop.Word;
 
+// リファクタリング済
 namespace WordAddIn1
 {
     public partial class RibbonMJS
@@ -124,6 +125,7 @@ namespace WordAddIn1
             } while (repeatUngroup);
         }
 
+        // キャンバス内のコンテンツを抽出
         private void ExtractCanvasContent(
             Word.Document docCopy,
             Word.Application application,

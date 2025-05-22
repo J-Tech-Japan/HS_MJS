@@ -1,12 +1,11 @@
 ﻿using Microsoft.Office.Interop.Word;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-
 using Word = Microsoft.Office.Interop.Word;
 
+// リファクタリング済
 namespace WordAddIn1
 {
     public partial class RibbonMJS
@@ -97,7 +96,7 @@ namespace WordAddIn1
         }
 
         // ヘルパーメソッド: コメントを追加
-        private void AddComment(Word.Range range, string commentText)
+        private void AddComment(Range range, string commentText)
         {
             range.Comments.Add(range, commentText);
         }
