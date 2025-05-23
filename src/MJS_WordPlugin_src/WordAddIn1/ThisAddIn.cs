@@ -7,19 +7,19 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            try
-            {
-                string version = Globals.ThisAddIn.Application.Version; // メジャーバージョン
-                string buildNumber = Globals.ThisAddIn.Application.Build.ToString(); // ビルド番号
-                string fullVersion = $"{version}.{buildNumber}";
+            //try
+            //{
+            //    string version = Globals.ThisAddIn.Application.Version; // メジャーバージョン
+            //    string buildNumber = Globals.ThisAddIn.Application.Build.ToString(); // ビルド番号
+            //    string fullVersion = $"{version}.{buildNumber}";
 
-                //Globals.ThisAddIn.Application.Caption = $"Word Add-In - Version: {fullVersion}";
-                Globals.ThisAddIn.Application.Caption = $"Word Add-In - Version: {buildNumber}";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"アドインの初期化中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //    //Globals.ThisAddIn.Application.Caption = $"Word Add-In - Version: {fullVersion}";
+            //    Globals.ThisAddIn.Application.Caption = $"Word Add-In - Version: {buildNumber}";
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"アドインの初期化中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
         }
 
         /*
