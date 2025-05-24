@@ -1,7 +1,7 @@
-﻿
-using System;
+﻿using System;
 using System.Windows.Forms;
 
+// リファクタリング済
 namespace WordAddIn1
 {
     public partial class CoverSelectionForm : Form

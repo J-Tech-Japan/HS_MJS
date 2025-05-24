@@ -1,4 +1,6 @@
-﻿namespace WordAddIn1
+﻿// リファクタリング済
+
+namespace WordAddIn1
 {
     // 比較結果
     public class CheckInfo
