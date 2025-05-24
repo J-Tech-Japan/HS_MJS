@@ -1,9 +1,42 @@
-﻿using Word = Microsoft.Office.Interop.Word;
+﻿using System;
+using System.IO;
+using System.Text.RegularExpressions;
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        // HTML出力用パス一覧
+        private (string rootPath,
+            string docName,
+            string docFullName,
+            string exportDir,
+            string headerDir,
+            string exportDirPath,
+            string logPath,
+            string tmpHtmlPath,
+            string indexHtmlPath,
+            string tmpFolderForImagesSavedBySaveAs2Method,
+            string docid, string docTitle, string zipDirPath)
+            PreparePaths(Word.Document activeDocument, string webHelpFolderName)
+        {
+            string rootPath = activeDocument.Path;
+            string docName = activeDocument.Name;
+            string docFullName = activeDocument.FullName;
+            string exportDir = string.IsNullOrEmpty(webHelpFolderName) ? "webHelp" : webHelpFolderName;
+            string headerDir = "headerFile";
+            string exportDirPath = Path.Combine(rootPath, exportDir);
+            string logPath = Path.Combine(rootPath, "log.txt");
+            string tmpHtmlPath = Path.Combine(rootPath, "tmp.html");
+            string indexHtmlPath = Path.Combine(rootPath, exportDir, "index.html");
+            string tmpFolderForImagesSavedBySaveAs2Method = Path.Combine(rootPath, "tmp.files");
+            string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
+            string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
+            string zipDirPath = Path.Combine(rootPath, $"{docid}_{exportDir}_{DateTime.Today:yyyyMMdd}");
+            return (rootPath, docName, docFullName, exportDir, headerDir, exportDirPath, logPath, tmpHtmlPath, indexHtmlPath, tmpFolderForImagesSavedBySaveAs2Method, docid, docTitle, zipDirPath);
+        }
+
         // ファイル名形式の規定
         private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
 
@@ -28,7 +61,6 @@ namespace WordAddIn1
         // HTML出力が失敗した場合に表示するメッセージ
         private const string ErrMsgHtmlOutputFailure1 = "HTMLの出力に失敗しました。";
         private const string ErrMsgHtmlOutputFailure2 = "HTML出力失敗。";
-
 
         // ヘルパーメソッド: ドキュメントの表示設定
         private void ConfigDocumentDisplay()

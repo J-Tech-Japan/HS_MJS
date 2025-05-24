@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+// リファクタリング済
 namespace WordAddIn1
 {
     public partial class RibbonMJS

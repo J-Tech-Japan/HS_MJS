@@ -1,16 +1,21 @@
-﻿using Microsoft.Office.Interop.Word;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using System.Xml;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        private (XmlDocument objXml, XmlDocument objToc, XmlDocument objBody) LoadAndProcessXml(string htmlStr, string docTitle)
+        {
+            XmlDocument objXml = new XmlDocument();
+            objXml.LoadXml(htmlStr);
+            ProcessXmlDocuments(objXml, docTitle, out XmlDocument objToc, out XmlDocument objBody);
+            return (objXml, objToc, objBody);
+        }
+
         public void ProcessXmlDocuments(XmlDocument objXml, string docTitle, out XmlDocument objToc, out XmlDocument objBody)
         {
             // img ノードの height と width 属性を削除

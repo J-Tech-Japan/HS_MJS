@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -14,9 +13,11 @@ namespace WordAddIn1
     {
         private bool makeBookInfo(loader load, StreamWriter swLog = null)
         {
+            var application = Globals.ThisAddIn.Application;
+
             // 画面更新を無効化して処理を高速化
-            Globals.ThisAddIn.Application.ScreenUpdating = false;
-            Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
+            application.ScreenUpdating = false;
+            Word.Document thisDocument = application.ActiveDocument;
 
             // 命名規則に違反している場合
             if (!Regex.IsMatch(thisDocument.Name, FileNamePattern))
@@ -25,26 +26,26 @@ namespace WordAddIn1
                 load.Visible = false;
                 MessageBox.Show(ErrMsgInvalidFileName, ErrMsgFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.DoEvents();
-                Globals.ThisAddIn.Application.ScreenUpdating = true;
+                application.ScreenUpdating = true;
                 return false;
             }
 
             // 現在の選択範囲の開始位置と終了位置を保存
-            int selStart = Globals.ThisAddIn.Application.Selection.Start;
-            int selEnd = Globals.ThisAddIn.Application.Selection.End;
+            int selStart = application.Selection.Start;
+            int selEnd = application.Selection.End;
 
             // ドキュメント全体を選択
-            Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
-            Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+            application.Selection.EndKey(Word.WdUnits.wdStory);
+            application.Selection.HomeKey(Word.WdUnits.wdStory);
 
             // 選択範囲が図形の場合、カーソルを左に移動
-            if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
-                Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
-                Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
+            if (application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
+                application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
+                application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
 
             // 書誌情報の初期化
             bookInfoDef = "";
-            Word.Document Doc = Globals.ThisAddIn.Application.ActiveDocument;
+            Word.Document Doc = application.ActiveDocument;
 
             int bibNum = 0;  // 現在の書誌情報番号
             int bibMaxNum = 0;  // 書誌情報番号の最大値
@@ -96,28 +97,33 @@ namespace WordAddIn1
                     // ドキュメント内のすべてのブックマークを削除
                     DeleteAllBookmarks(thisDocument);
 
-                    // 書誌情報入力フォームを表示
-                    using (var bookInfoForm = new BookInfo())
+                    if (!ShowBookInfoInputForm(ref bookInfoDef, log, logPath))
                     {
-                        var dialogResult = bookInfoForm.ShowDialog();
-                        if (dialogResult == DialogResult.OK)
-                        {
-                            // ユーザーが入力したデフォルト値を取得
-                            bookInfoDef = bookInfoForm.tbxDefaultValue.Text;
-                        }
-                        else
-                        {
-                            // キャンセルされた場合、ログを閉じてファイルを削除して処理を終了
-                            log?.Close();
-                            if (File.Exists(logPath))
-                            {
-                                File.Delete(logPath);
-                            }
-
-                            button4.Enabled = true;
-                            return false;
-                        }
+                        return false;
                     }
+
+                    // 書誌情報入力フォームを表示（しばらくこのコードを保留）
+                    //using (var bookInfoForm = new BookInfo())
+                    //{
+                    //    var dialogResult = bookInfoForm.ShowDialog();
+                    //    if (dialogResult == DialogResult.OK)
+                    //    {
+                    //        // ユーザーが入力したデフォルト値を取得
+                    //        bookInfoDef = bookInfoForm.tbxDefaultValue.Text;
+                    //    }
+                    //    else
+                    //    {
+                    //        // キャンセルされた場合、ログを閉じてファイルを削除して処理を終了
+                    //        log?.Close();
+                    //        if (File.Exists(logPath))
+                    //        {
+                    //            File.Delete(logPath);
+                    //        }
+
+                    //        button4.Enabled = true;
+                    //        return false;
+                    //    }
+                    //}
                 }
 
                 // 旧書誌情報を格納する辞書と一時的なセットを初期化
@@ -246,7 +252,7 @@ namespace WordAddIn1
                         {
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             // ブックマークIDを初期化
@@ -318,7 +324,7 @@ namespace WordAddIn1
                             {
                                 // 段落の行末尾を選択状態にする
                                 tgtPara.Range.Select();
-                                Word.Selection sel = Globals.ThisAddIn.Application.Selection;
+                                Word.Selection sel = application.Selection;
                                 sel.EndKey(Word.WdUnits.wdLine);
 
                                 string setid = "";
@@ -404,7 +410,7 @@ namespace WordAddIn1
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -487,7 +493,7 @@ namespace WordAddIn1
 
                             // 段落の行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -676,8 +682,8 @@ namespace WordAddIn1
             finally
             {
                 // ドキュメントのカーソル位置を先頭に戻して画面更新を再有効化
-                Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
-                Globals.ThisAddIn.Application.ScreenUpdating = true;
+                application.Selection.HomeKey(Word.WdUnits.wdStory);
+                application.ScreenUpdating = true;
             }
         }
     }

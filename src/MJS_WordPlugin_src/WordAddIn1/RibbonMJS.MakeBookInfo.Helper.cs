@@ -6,13 +6,39 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        // 書誌情報入力フォームを表示し、結果を処理するメソッド
+        private bool ShowBookInfoInputForm(ref string bookInfoDef, StreamWriter log, string logPath)
+        {
+            using (var bookInfoForm = new BookInfo())
+            {
+                var dialogResult = bookInfoForm.ShowDialog();
+                if (dialogResult == DialogResult.OK)
+                {
+                    // ユーザーが入力したデフォルト値を取得
+                    bookInfoDef = bookInfoForm.tbxDefaultValue.Text;
+                    return true;
+                }
+                else
+                {
+                    // キャンセルされた場合、ログを閉じてファイルを削除して処理を終了
+                    log?.Close();
+                    if (File.Exists(logPath))
+                    {
+                        File.Delete(logPath);
+                    }
+
+                    button4.Enabled = true;
+                    return false;
+                }
+            }
+        }
+
         public void AddReferenceFieldBookmarks(Word.Paragraph paragraph)
         {
             foreach (Word.Field fld in paragraph.Range.Fields)

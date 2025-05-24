@@ -1,10 +1,42 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        // Word文書からHTML出力に必要な表紙・商標・画像情報をまとめて返す
+        private (string className, Dictionary<string, string> styleName, string chapterSplitClass) ProcessCssStyles(XmlDocument objXml)
+        {
+            string className = objXml.SelectSingleNode("/html/head/style[contains(comment(), 'mso-style-name')]").OuterXml;
+            className = Regex.Replace(className, "[\r\n\t ]+", "");
+            className = Regex.Replace(className, "}", "}\n");
+            Dictionary<string, string> styleName = new Dictionary<string, string>();
+            string chapterSplitClass = "";
+            ProcessStyles(className, ref chapterSplitClass, styleName);
+            return (className, styleName, chapterSplitClass);
+        }
+
+        // CSSスタイル定義全体を解析し、スタイル名や章分割クラスを抽出
+        public void ProcessStyles(string className, ref string chapterSplitClass, Dictionary<string, string> styleName)
+        {
+            // スタイル定義を改行で分割して個別に処理
+            foreach (string clsName in className.Split('\n'))
+            {
+                // "mso-style-name" を含むスタイル定義を処理
+                if (clsName.Contains("mso-style-name:"))
+                {
+                    ProcessStyleBlock(clsName, "mso-style-name", ref chapterSplitClass, styleName);
+                }
+                // "mso-style-link" を含むスタイル定義を処理
+                else if (clsName.Contains("mso-style-link:"))
+                {
+                    ProcessStyleBlock(clsName, "mso-style-link", ref chapterSplitClass, styleName);
+                }
+            }
+        }
+
         // 指定されたCSSスタイル定義を解析し、条件に基づいてスタイル名を抽出・処理
         private void ProcessStyleBlock(string clsName, string pattern, ref string chapterSplitClass, Dictionary<string, string> styleName)
         {
@@ -37,25 +69,5 @@ namespace WordAddIn1
                 }
             }
         }
-
-        // CSSスタイル定義全体を解析し、スタイル名や章分割クラスを抽出
-        public void ProcessStyles(string className, ref string chapterSplitClass, Dictionary<string, string> styleName)
-        {
-            // スタイル定義を改行で分割して個別に処理
-            foreach (string clsName in className.Split('\n'))
-            {
-                // "mso-style-name" を含むスタイル定義を処理
-                if (clsName.Contains("mso-style-name:"))
-                {
-                    ProcessStyleBlock(clsName, "mso-style-name", ref chapterSplitClass, styleName);
-                }
-                // "mso-style-link" を含むスタイル定義を処理
-                else if (clsName.Contains("mso-style-link:"))
-                {
-                    ProcessStyleBlock(clsName, "mso-style-link", ref chapterSplitClass, styleName);
-                }
-            }
-        }
-
     }
 }

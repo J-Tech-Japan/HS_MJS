@@ -1,9 +1,21 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        private string ReadAndProcessHtml(string tmpHtmlPath, bool isTmpDot)
+        {
+            string htmlStr;
+            using (StreamReader sr = new StreamReader(tmpHtmlPath, Encoding.UTF8))
+            {
+                htmlStr = sr.ReadToEnd();
+            }
+            return ProcessHtmlString(htmlStr, isTmpDot);
+        }
+
         // HTML 文字列を処理する   
         public string ProcessHtmlString(string htmlStr, bool isTmpDot)
         {
@@ -24,6 +36,7 @@ namespace WordAddIn1
             htmlStr = isTmpDot
                 ? Regex.Replace(htmlStr, @"src=""tmp\.files/", @"src=""pict/")
                 : Regex.Replace(htmlStr, @"src=""tmp_files/", @"src=""pict/");
+
             htmlStr = Regex.Replace(htmlStr, @"<a name=""_Toc\d+?""></a>", "");
             htmlStr = Regex.Replace(htmlStr, @"<span lang=""[^""]+?"">([^<]+?)</span>", "$1");
             htmlStr = Regex.Replace(htmlStr, @"(<hr(?: [^/>]*)?)(>)", "$1/$2");
