@@ -1,11 +1,7 @@
 ﻿using Microsoft.Office.Tools.Ribbon;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 using Word = Microsoft.Office.Interop.Word;
@@ -41,7 +37,7 @@ namespace WordAddIn1
                         PrepareHtmlTemplates(assembly, paths.rootPath, paths.exportDir);
                         Application.DoEvents();
                         var docCopy = CopyDocumentToHtml(application, paths.tmpHtmlPath, log);
-                        var coverInfo = CollectCoverAndTrademarkInfo(docCopy, application, paths, isPattern1, isPattern2, log);
+                        var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
                         var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, coverInfo.isTmpDot);
                         var (objXml, objToc, objBody) = LoadAndProcessXml(htmlStr, coverInfo.docTitle);
                         var (className, styleName, chapterSplitClass) = ProcessCssStyles(objXml);
@@ -81,34 +77,6 @@ namespace WordAddIn1
             }
         }
 
-        // --- 以下、分割したプライベートメソッド群 ---
-        private bool PreProcess(Word.Application application, Word.Document activeDocument, loader load)
-        {
-            application.WindowSelectionChange -= Application_WindowSelectionChange;
-            button3.Enabled = false;
-            application.DocumentChange -= Application_DocumentChange;
-            if (!Regex.IsMatch(activeDocument.Name, FileNamePattern))
-            {
-                load.Close();
-                load.Dispose();
-                MessageBox.Show(ErrMsgInvalidFileName, ErrMsgFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
-        }
-        private string GetWebHelpFolderName(Word.Document activeDocument)
-        {
-            var properties = (Microsoft.Office.Core.DocumentProperties)activeDocument.CustomDocumentProperties;
-            return properties.Cast<Microsoft.Office.Core.DocumentProperty>()
-                .FirstOrDefault(x => x.Name == "webHelpFolderName")?.Value;
-        }
-        private Dictionary<string, string> CollectMergeScriptDict(Word.Document activeDocument)
-        {
-            var mergeScript = new Dictionary<string, string>();
-            CollectMergeScript(activeDocument.Path, activeDocument.Name, mergeScript);
-            return mergeScript;
-        }
-
         private Word.Document CopyDocumentToHtml(Word.Application application, string tmpHtmlPath, StreamWriter log)
         {
             ClearClipboardSafely();
@@ -129,92 +97,6 @@ namespace WordAddIn1
             ClearClipboardSafely();
             log.WriteLine("Number of sections: " + docCopy.Sections.Count);
             return docCopy;
-        }
-
-        private (bool coverExist, string subTitle, int biCount, List<List<string>> productSubLogoGroups, string docTitle, string docid, bool isTmpDot) CollectCoverAndTrademarkInfo(Word.Document docCopy, Word.Application application, (string rootPath, string docName, string docFullName, string exportDir, string headerDir, string exportDirPath, string logPath, string tmpHtmlPath, string indexHtmlPath, string tmpFolderForImagesSavedBySaveAs2Method, string docid, string docTitle, string zipDirPath) paths, bool isPattern1, bool isPattern2, StreamWriter log)
-        {
-            int biCount = 0;
-            bool coverExist = false;
-            string subTitle = "";
-            string manualTitle = "";
-            string manualSubTitle = "";
-            string manualVersion = "";
-            string manualTitleCenter = "";
-            string manualSubTitleCenter = "";
-            string manualVersionCenter = "";
-            string trademarkTitle = "";
-            List<string> trademarkTextList = new List<string>();
-            string trademarkRight = "";
-            int lastSectionIdx = docCopy.Sections.Count;
-            CollectCoverParagraphs(docCopy, ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter, ref coverExist);
-            CollectTrademarkAndCopyrightDetails(docCopy, lastSectionIdx, log, ref trademarkTitle, ref trademarkTextList, ref trademarkRight);
-            CleanUpManualTitles(ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter);
-            List<List<string>> productSubLogoGroups = new List<List<string>>();
-            if (coverExist)
-            {
-                ProcessCoverImages(docCopy, application, paths.rootPath, paths.exportDir, ref subTitle, ref biCount, ref productSubLogoGroups, isPattern1, isPattern2, log);
-            }
-            application.Selection.EndKey(Word.WdUnits.wdStory);
-            object selectionRange = application.Selection.Range;
-            Word.Shape temporaryCanvas = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
-            temporaryCanvas.WrapFormat.Type = Word.WdWrapType.wdWrapInline;
-            AdjustCanvasShapes(docCopy);
-            temporaryCanvas.Delete();
-            foreach (Word.Table wt in docCopy.Tables)
-            {
-                if (wt.PreferredWidthType == Word.WdPreferredWidthType.wdPreferredWidthPoints)
-                    wt.AllowAutoFit = true;
-            }
-            foreach (Word.Style ws in docCopy.Styles)
-                if (ws.NameLocal == "奥付タイトル")
-                    ws.NameLocal = "titledef";
-            docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
-            docCopy.SaveAs2(paths.tmpHtmlPath, Word.WdSaveFormat.wdFormatFilteredHTML);
-            docCopy.Close();
-            log.WriteLine("画像フォルダ コピー");
-            bool isTmpDot = true;
-            CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir, log);
-            return (coverExist, subTitle, biCount, productSubLogoGroups, paths.docTitle, paths.docid, isTmpDot);
-        }
-        
-        private void WriteIndexHtml(string indexHtmlPath, string docTitle, string docid, Dictionary<string, string> mergeScript)
-        {
-            string idxHtmlTemplate = BuildIdxHtmlTemplate(docTitle, docid, mergeScript);
-            using (StreamWriter sw = new StreamWriter(indexHtmlPath, false, Encoding.UTF8))
-            {
-                sw.Write(idxHtmlTemplate);
-            }
-        }
-        
-        private void SetDefaultBodyId(XmlDocument objBody, string docid)
-        {
-            if (((XmlElement)objBody.DocumentElement.FirstChild).GetAttribute("id") == "")
-            {
-                ((XmlElement)objBody.DocumentElement.FirstChild).SetAttribute("id", docid + "00000");
-            }
-        }
-
-        private void ShowHtmlOutputDialog(string exportDirPath, string indexHtmlPath)
-        {
-            DialogResult selectMsg = MessageBox.Show(exportDirPath + MsgHtmlOutputSuccess1, MsgHtmlOutputSuccess2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (selectMsg == DialogResult.Yes)
-            {
-                try { Process.Start(indexHtmlPath); }
-                catch { MessageBox.Show(ErrMsgHtmlOutputFailure1, ErrMsgHtmlOutputFailure2, MessageBoxButtons.OK, MessageBoxIcon.Error); }
-            }
-        }
-
-        private void HandleException(Exception ex, StreamWriter log, loader load)
-        {
-            load.Close();
-            load.Dispose();
-            StackTrace stackTrace = new StackTrace(ex, true);
-            log.WriteLine("[Error] Exception Details:");
-            log.WriteLine($"  Source: {ex.Source ?? "Unknown Source"}");
-            log.WriteLine($"  TargetSite: {ex.TargetSite}");
-            log.WriteLine($"  Message: {ex.Message}");
-            log.WriteLine($"  StackTrace: {stackTrace}");
-            MessageBox.Show(ErrMsg);
         }
     }
 }
