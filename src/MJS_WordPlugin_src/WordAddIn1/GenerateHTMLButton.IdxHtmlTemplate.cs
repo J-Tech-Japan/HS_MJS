@@ -1,9 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        private void WriteIndexHtml(string indexHtmlPath, string docTitle, string docid, Dictionary<string, string> mergeScript)
+        {
+            string idxHtmlTemplate = BuildIdxHtmlTemplate(docTitle, docid, mergeScript);
+            using (StreamWriter sw = new StreamWriter(indexHtmlPath, false, Encoding.UTF8))
+            {
+                sw.Write(idxHtmlTemplate);
+            }
+        }
+
         private static string BuildIdxHtmlTemplate(string docTitle, string docid, Dictionary<string, string> mergeScript)
         {
             string idxHtmlTemplate = "";
