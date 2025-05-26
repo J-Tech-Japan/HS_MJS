@@ -287,6 +287,12 @@
     <Compile Include="GenerateHTMLButton.ProcessHTML.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GenerateHTMLButton.XMLBuildTocBody.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GenerateHTMLButton.XMLExportTocAsJsFiles.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="HeadingInfo.cs" />
     <Compile Include="loader.cs">
       <SubType>Form</SubType>
@@ -338,7 +344,6 @@
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="MJS.pfx" />
-    <None Include="MJS_1_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -390,7 +395,7 @@
     <Compile Include="GenerateHTMLButton.IdxHtmlTemplate.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GenerateHTMLButton.ProcessXML.cs">
+    <Compile Include="GenerateHTMLButton.XMLProcessDocument.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.ProcessCoverImages.cs">
