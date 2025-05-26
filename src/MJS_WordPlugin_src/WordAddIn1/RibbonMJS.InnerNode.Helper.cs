@@ -213,40 +213,97 @@ namespace WordAddIn1
         }
 
         // 「選択肢」関連のノードを適切なclassで追加する
+        //private void AppendChoiceElement(XmlNode objTargetNode, XmlNode seekNode, string thisStyleName)
+        //{
+        //    if (Regex.IsMatch(thisStyleName, "選択肢等[2２]"))
+        //    {
+        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
+        //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choice2");
+        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+        //    }
+        //    else if (Regex.IsMatch(thisStyleName, "選択肢等"))
+        //    {
+        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
+        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+        //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choice");
+        //    }
+        //    else if (Regex.IsMatch(thisStyleName, "選択肢-説明等[2２]"))
+        //    {
+        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
+        //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choiceDesc2");
+        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+        //    }
+        //    else if (Regex.IsMatch(thisStyleName, "選択肢.*説明等"))
+        //    {
+        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
+        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+
+        //        if (Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "")
+        //        {
+        //            ((XmlElement)objTargetNode.LastChild).RemoveAttribute("class");
+        //        }
+
+        //        if ((Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") != "") && (objTargetNode.SelectNodes("ancestor-or-self::*[@class = 'MJS_choiceDesc']").Count == 0))
+        //        {
+        //            ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choiceDesc");
+        //        }
+        //    }
+        //}
+
         private void AppendChoiceElement(XmlNode objTargetNode, XmlNode seekNode, string thisStyleName)
         {
+            // ノードをインポートして追加
+            var importedNode = objTargetNode.OwnerDocument.ImportNode(seekNode, false);
+            objTargetNode.AppendChild(importedNode);
+            var elem = importedNode as XmlElement;
+            if (elem == null) return;
+
+            // 空白ノード判定
+            bool isEmpty = Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "";
+
             if (Regex.IsMatch(thisStyleName, "選択肢等[2２]"))
             {
-                objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-                ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choice2");
-                ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+                elem.SetAttribute("class", "MJS_choice2");
+                elem.RemoveAttribute("style");
             }
             else if (Regex.IsMatch(thisStyleName, "選択肢等"))
             {
-                objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-                ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-                ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choice");
+                elem.RemoveAttribute("style");
+                elem.SetAttribute("class", "MJS_choice");
             }
             else if (Regex.IsMatch(thisStyleName, "選択肢-説明等[2２]"))
             {
-                objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-                ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choiceDesc2");
-                ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+                elem.SetAttribute("class", "MJS_choiceDesc2");
+                elem.RemoveAttribute("style");
             }
             else if (Regex.IsMatch(thisStyleName, "選択肢.*説明等"))
             {
-                objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-                ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-
-                if (Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "")
+                elem.RemoveAttribute("style");
+                if (isEmpty)
                 {
-                    ((XmlElement)objTargetNode.LastChild).RemoveAttribute("class");
+                    elem.RemoveAttribute("class");
                 }
-
-                if ((Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") != "") && (objTargetNode.SelectNodes("ancestor-or-self::*[@class = 'MJS_choiceDesc']").Count == 0))
+                else if (objTargetNode.SelectNodes("ancestor-or-self::*[@class = 'MJS_choiceDesc']").Count == 0)
                 {
-                    ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choiceDesc");
+                    elem.SetAttribute("class", "MJS_choiceDesc");
                 }
+            }
+        }
+
+        // 追加: 箇条書き要素の処理を共通化したメソッド
+        private void AppendListItemElement(XmlNode objTargetNode, XmlNode seekNode, string className)
+        {
+            objTargetNode.AppendChild(objTargetNode.OwnerDocument.CreateElement("p"));
+            ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
+            if (Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "")
+            {
+                ((XmlElement)objTargetNode.LastChild).RemoveAttribute("class");
+            }
+
+            if ((Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") != "") && (objTargetNode.SelectNodes($"ancestor-or-self::*[@class = '{className}']").Count == 0))
+            {
+                seekNode.InnerText = Regex.Replace(seekNode.InnerText, @"^\S{0,3}[ 　]+", "");
+                ((XmlElement)objTargetNode.LastChild).SetAttribute("class", className);
             }
         }
 

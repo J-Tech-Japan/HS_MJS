@@ -96,13 +96,13 @@ namespace WordAddIn1
                         XmlNode objBodyCurrent = objBody.DocumentElement;
                         
                         // 目次・本文の生成
-                        GenerateTocAndBody(objXml, objBody, objToc, chapterSplitClass, styleName, coverInfo.docid, bookInfoDef, ref objBodyCurrent, ref objTocCurrent, load);
+                        BuildTocBodyFromXml(objXml, objBody, objToc, chapterSplitClass, styleName, coverInfo.docid, bookInfoDef, ref objBodyCurrent, ref objTocCurrent, load);
                         
                         // 本文IDの設定
                         SetDefaultBodyId(objBody, coverInfo.docid);
                         
                         // 目次ファイルの生成
-                        GenerateTocFiles(objToc, paths.rootPath, paths.exportDir, mergeScript);
+                        ExportTocAsJsFiles(objToc, paths.rootPath, paths.exportDir, mergeScript);
                         
                         // 一時XMLの解放
                         objXml = null;
