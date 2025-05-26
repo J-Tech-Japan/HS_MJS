@@ -1,13 +1,13 @@
-﻿using Microsoft.Office.Tools.Ribbon;
-using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
 
-
-// リファクタリング済
+// リファクタリング完了
 namespace WordAddIn1
 {
     public partial class RibbonMJS
@@ -22,7 +22,7 @@ namespace WordAddIn1
             application.DocumentChange -= new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
             application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
 
-            // スタイル名を格納するリストを初期化
+            // スタイル名を格納するリスト
             List<string> styleList = new List<string>();
 
             // 現在の選択範囲の開始位置と終了位置を取得
@@ -50,10 +50,7 @@ namespace WordAddIn1
                 log.WriteLine("Attached template file: " + attachedTemplateFile);
             }
 
-            // スタイルのリストを初期化
             button3.Enabled = false;
-
-            // 画面更新を停止
             application.ScreenUpdating = false;
 
             // テンプレート内のスタイルを確認し、"MJS"を含むスタイル名をリストに追加
@@ -100,12 +97,9 @@ namespace WordAddIn1
             // 図形が行内配置になっていない場合は校閲コメントを追加
             AddCommentForNonInlineShape(activeDocument, ref hasInvalidStyles);
 
-            // 画面更新を再開
             application.ScreenUpdating = true;
 
             Application.DoEvents();
-
-            // プログレスバーを表示
             ProgressBar.Show();
 
             // プログレスバーの最大値を設定（段落数）
@@ -148,9 +142,37 @@ namespace WordAddIn1
                 HandleProcessFailure();
             }
 
-            // プログレスバーを閉じる
             ProgressBar.Close();
             ProgressBar.mInstance = null;
+        }
+
+        // ヘルパーメソッド: 無効なコメントを削除
+        private void DeleteInvalidComments(Word.Comments comments)
+        {
+            var invalidTexts = new List<string>
+                {
+                    "使用できない書式です。",
+                    "使用できない文字列です。",
+                    "描画キャンバス外に行内配置でない画像があります。",
+                    "上の段落に【MJS_手順番号リセット用】スタイルを挿入してください。",
+                    "描画キャンバスが行内配置ではありません。"
+                };
+
+            foreach (Word.Comment comment in comments)
+            {
+                if (invalidTexts.Any(text => comment.Range.Text.Contains(text)))
+                {
+                    comment.Delete();
+                }
+            }
+        }
+
+        // ヘルパーメソッド: 選択範囲を元に戻す
+        private void RestoreSelection(int start, int end)
+        {
+            var selection = Globals.ThisAddIn.Application.Selection;
+            selection.Start = start;
+            selection.End = end;
         }
     }
 }

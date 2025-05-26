@@ -10,7 +10,16 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
-        private (bool coverExist, string subTitle, int biCount, List<List<string>> productSubLogoGroups, string docTitle, string docid, bool isTmpDot) CollectInfo(Document docCopy, Word.Application application, (string rootPath, string docName, string docFullName, string exportDir, string headerDir, string exportDirPath, string logPath, string tmpHtmlPath, string indexHtmlPath, string tmpFolderForImagesSavedBySaveAs2Method, string docid, string docTitle, string zipDirPath) paths, bool isPattern1, bool isPattern2, StreamWriter log)
+        private (bool coverExist,
+            string subTitle,
+            int biCount,
+            List<List<string>> productSubLogoGroups,
+            string docTitle,
+            string docid,
+            bool isTmpDot)
+            CollectInfo(Document docCopy,
+            Word.Application application,
+            (string rootPath, string docName, string docFullName, string exportDir, string headerDir, string exportDirPath, string logPath, string tmpHtmlPath, string indexHtmlPath, string tmpFolderForImagesSavedBySaveAs2Method, string docid, string docTitle, string zipDirPath) paths,bool isPattern1, bool isPattern2, StreamWriter log)
         {
             int biCount = 0;
             bool coverExist = false;
@@ -25,32 +34,60 @@ namespace WordAddIn1
             List<string> trademarkTextList = new List<string>();
             string trademarkRight = "";
             int lastSectionIdx = docCopy.Sections.Count;
+
+            // 表紙情報（タイトル・サブタイトル等）の収集
             CollectCoverParagraphs(docCopy, ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter, ref coverExist);
+            
+            // 商標・著作権情報の収集
             CollectTrademarkAndCopyrightDetails(docCopy, lastSectionIdx, log, ref trademarkTitle, ref trademarkTextList, ref trademarkRight);
+            
+            // タイトル・サブタイトル等の整形
             CleanUpManualTitles(ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter);
+            
             List<List<string>> productSubLogoGroups = new List<List<string>>();
+            
             if (coverExist)
             {
+                // 表紙画像やロゴの処理
                 ProcessCoverImages(docCopy, application, paths.rootPath, paths.exportDir, ref subTitle, ref biCount, ref productSubLogoGroups, isPattern1, isPattern2, log);
             }
-            application.Selection.EndKey(Word.WdUnits.wdStory);
+            
+            // ドキュメント末尾に移動し、一時キャンバスを追加
+            application.Selection.EndKey(WdUnits.wdStory);
             object selectionRange = application.Selection.Range;
-            Word.Shape temporaryCanvas = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
-            temporaryCanvas.WrapFormat.Type = Word.WdWrapType.wdWrapInline;
+            Shape temporaryCanvas = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
+            temporaryCanvas.WrapFormat.Type = WdWrapType.wdWrapInline;
+            
+            // キャンバス内の図形調整
             AdjustCanvasShapes(docCopy);
+            
+            // 一時キャンバス削除
             temporaryCanvas.Delete();
-            foreach (Word.Table wt in docCopy.Tables)
+            
+            // テーブル幅の自動調整
+            foreach (Table wt in docCopy.Tables)
             {
                 if (wt.PreferredWidthType == Word.WdPreferredWidthType.wdPreferredWidthPoints)
                     wt.AllowAutoFit = true;
             }
-            foreach (Word.Style ws in docCopy.Styles)
+            
+            // スタイル名の置換
+            foreach (Style ws in docCopy.Styles)
                 if (ws.NameLocal == "奥付タイトル")
                     ws.NameLocal = "titledef";
+            
+            // HTML保存時のエンコーディング設定
             docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
-            docCopy.SaveAs2(paths.tmpHtmlPath, Word.WdSaveFormat.wdFormatFilteredHTML);
+            
+            // 一時HTMLとして保存
+            docCopy.SaveAs2(paths.tmpHtmlPath, WdSaveFormat.wdFormatFilteredHTML);
+            
+            // ドキュメントを閉じる
             docCopy.Close();
+            
+            // 画像フォルダのコピー処理
             log.WriteLine("画像フォルダ コピー");
+            
             bool isTmpDot = true;
             CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir, log);
             return (coverExist, subTitle, biCount, productSubLogoGroups, paths.docTitle, paths.docid, isTmpDot);
@@ -63,59 +100,37 @@ namespace WordAddIn1
         {
             foreach (Paragraph wp in docCopy.Sections[1].Range.Paragraphs)
             {
-                if (wp.get_Style().NameLocal == "MJS_マニュアルタイトル")
-                {
-                    if (!string.IsNullOrEmpty(wp.Range.Text.Trim()) && wp.Range.Text.Trim() != "/")
-                    {
-                        manualTitle += wp.Range.Text + "<br/>";
-                        coverExist = true;
-                    }
+                string styleName = wp.get_Style().NameLocal;
+                string text = wp.Range.Text.Trim();
+                if (string.IsNullOrEmpty(text) || text == "/")
                     continue;
-                }
-                else if (wp.get_Style().NameLocal == "MJS_マニュアルサブタイトル")
+
+                switch (styleName)
                 {
-                    if (!string.IsNullOrEmpty(wp.Range.Text.Trim()) && wp.Range.Text.Trim() != "/")
-                    {
-                        manualSubTitle += wp.Range.Text + "<br/>";
+                    case "MJS_マニュアルタイトル":
+                        manualTitle += text + "<br/>";
                         coverExist = true;
-                    }
-                    continue;
-                }
-                else if (wp.get_Style().NameLocal == "MJS_マニュアルバージョン")
-                {
-                    if (!string.IsNullOrEmpty(wp.Range.Text.Trim()) && wp.Range.Text.Trim() != "/")
-                    {
-                        manualVersion += wp.Range.Text + "<br/>";
+                        break;
+                    case "MJS_マニュアルサブタイトル":
+                        manualSubTitle += text + "<br/>";
                         coverExist = true;
-                    }
-                    continue;
-                }
-                else if (wp.get_Style().NameLocal == "MJS_マニュアルタイトル（中央）")
-                {
-                    if (!string.IsNullOrEmpty(wp.Range.Text.Trim()) && wp.Range.Text.Trim() != "/")
-                    {
-                        manualTitleCenter += wp.Range.Text + "<br/>";
+                        break;
+                    case "MJS_マニュアルバージョン":
+                        manualVersion += text + "<br/>";
                         coverExist = true;
-                    }
-                    continue;
-                }
-                else if (wp.get_Style().NameLocal == "MJS_マニュアルサブタイトル（中央）")
-                {
-                    if (!string.IsNullOrEmpty(wp.Range.Text.Trim()) && wp.Range.Text.Trim() != "/")
-                    {
-                        manualSubTitleCenter += wp.Range.Text + "<br/>";
+                        break;
+                    case "MJS_マニュアルタイトル（中央）":
+                        manualTitleCenter += text + "<br/>";
                         coverExist = true;
-                    }
-                    continue;
-                }
-                else if (wp.get_Style().NameLocal == "MJS_マニュアルバージョン（中央）")
-                {
-                    if (!string.IsNullOrEmpty(wp.Range.Text.Trim()) && wp.Range.Text.Trim() != "/")
-                    {
-                        manualVersionCenter += wp.Range.Text + "<br/>";
+                        break;
+                    case "MJS_マニュアルサブタイトル（中央）":
+                        manualSubTitleCenter += text + "<br/>";
                         coverExist = true;
-                    }
-                    continue;
+                        break;
+                    case "MJS_マニュアルバージョン（中央）":
+                        manualVersionCenter += text + "<br/>";
+                        coverExist = true;
+                        break;
                 }
             }
         }

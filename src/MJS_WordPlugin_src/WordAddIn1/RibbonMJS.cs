@@ -1,11 +1,8 @@
 ﻿using Microsoft.Office.Tools.Ribbon;
-
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
-
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -45,22 +42,6 @@ namespace WordAddIn1
             return mergeData.ContainsKey(id)
                 ? mergeData[id] + ".html#" + id
                 : id + ".html";
-        }
-
-        // ヘッダー行の出力
-        private static void makeHeaderLine(StreamWriter docinfo, Dictionary<string, string> mergeSetId, string num, string title, string id)
-        {
-            string newId = id;
-            if (mergeSetId != null && mergeSetId.ContainsKey(id))
-            {
-                // "♯"が含まれていれば最初の部分だけ取得
-                if (mergeSetId[id].Contains("♯"))
-                {
-                    mergeSetId[id] = mergeSetId[id].Split(new char[] { '♯' })[0];
-                }
-                newId = mergeSetId[id] + "♯" + id;
-            }
-            docinfo.WriteLine($"{num}\t{title}\t{id}\t{(mergeSetId != null && mergeSetId.ContainsKey(id) ? "(" + mergeSetId[id] + ")" : "")}");
         }
 
         // ドキュメント切替時の処理
@@ -297,53 +278,6 @@ namespace WordAddIn1
                 button3.Enabled = false;
                 return;
             }
-        }
-
-        // 指定ノードのスタイル名をディクショナリから取得する。
-        // class属性や子要素のclass属性も考慮する。
-        private string getStyleName(Dictionary<string, string> styleName, System.Xml.XmlNode seekNode)
-        {
-            if (styleName == null || seekNode == null)
-                return string.Empty;
-
-            // 1.ノード自身のclass属性を確認
-            var classAttr = seekNode.SelectSingleNode("@class");
-            if (classAttr != null)
-            {
-                string key = seekNode.Name + "." + classAttr.InnerText;
-                if (styleName.TryGetValue(key, out string value))
-                    return value;
-            }
-            else
-            {
-                // class属性がなければノード名のみで検索
-                if (styleName.TryGetValue(seekNode.Name, out string value))
-                    return value;
-            }
-
-            // 2.子ノードでclass属性を持つものを探す
-            var childWithClass = seekNode.SelectSingleNode("*[@class != '']");
-            if (childWithClass != null)
-            {
-                var childClassAttr = childWithClass.SelectSingleNode("@class");
-                if (childClassAttr != null)
-                {
-                    string key = childWithClass.Name + "." + childClassAttr.InnerText;
-                    if (styleName.TryGetValue(key, out string value))
-                        return value;
-                }
-            }
-
-            // 3.子ノードで名前がh*（h1, h2, ...）のものを探す
-            var headingNode = seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']");
-            if (headingNode != null)
-            {
-                if (styleName.TryGetValue(headingNode.Name, out string value))
-                    return value;
-            }
-
-            // どれにも該当しない場合は空文字列
-            return string.Empty;
         }
 
         //private string getStyleName(Dictionary<string, string> styleName, System.Xml.XmlNode seekNode)
