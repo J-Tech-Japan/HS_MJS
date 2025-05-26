@@ -612,7 +612,7 @@ namespace WordAddIn1
                         {
                             foreach (HeadingInfo info in newInfo)
                             {
-                                makeHeaderLine(docinfo, mergeSetId, info.num, info.title, info.id);
+                                MakeHeaderLine(docinfo, mergeSetId, info.num, info.title, info.id);
                             }
                         }
 

@@ -11,6 +11,45 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        // ヘッダー行を作成してファイルに書き込む
+        private void CreateHeaderFile(string headerFilePath, List<CheckInfo> checkResult, Dictionary<string, string> mergeSetId)
+        {
+            using (StreamWriter docinfo = new StreamWriter(headerFilePath, false, Encoding.UTF8))
+            {
+                // 比較結果リストをループ処理
+                foreach (CheckInfo info in checkResult)
+                {
+                    // 新しいIDが空の場合はスキップ
+                    if (string.IsNullOrEmpty(info.new_id))
+                    {
+                        continue;
+                    }
+
+                    // 修正候補IDを取得
+                    string newIdTrimmed = info.new_id_show.Split('(')[0].Trim();
+
+                    // ヘッダー行を作成してファイルに書き込む
+                    MakeHeaderLine(docinfo, mergeSetId, info.new_num, info.new_title, newIdTrimmed);
+                }
+            }
+        }
+
+        // ヘッダー行の出力
+        private static void MakeHeaderLine(StreamWriter docinfo, Dictionary<string, string> mergeSetId, string num, string title, string id)
+        {
+            string newId = id;
+            if (mergeSetId != null && mergeSetId.ContainsKey(id))
+            {
+                // "♯"が含まれていれば最初の部分だけ取得
+                if (mergeSetId[id].Contains("♯"))
+                {
+                    mergeSetId[id] = mergeSetId[id].Split(new char[] { '♯' })[0];
+                }
+                newId = mergeSetId[id] + "♯" + id;
+            }
+            docinfo.WriteLine($"{num}\t{title}\t{id}\t{(mergeSetId != null && mergeSetId.ContainsKey(id) ? "(" + mergeSetId[id] + ")" : "")}");
+        }
+
         // ヘッダーファイルの確認と読み込み
         public bool CheckAndLoadHeaderFile(Word.Document doc, loader load, int bibNum, int bibMaxNum)
         {

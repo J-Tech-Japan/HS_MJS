@@ -199,30 +199,6 @@ namespace WordAddIn1
             }
         }
 
-
-        // ヘッダー行を作成してファイルに書き込む
-        private void CreateHeaderFile(string headerFilePath, List<CheckInfo> checkResult, Dictionary<string, string> mergeSetId)
-        {
-            using (StreamWriter docinfo = new StreamWriter(headerFilePath, false, Encoding.UTF8))
-            {
-                // 比較結果リストをループ処理
-                foreach (CheckInfo info in checkResult)
-                {
-                    // 新しいIDが空の場合はスキップ
-                    if (string.IsNullOrEmpty(info.new_id))
-                    {
-                        continue;
-                    }
-
-                    // 修正候補IDを取得
-                    string newIdTrimmed = info.new_id_show.Split('(')[0].Trim();
-
-                    // ヘッダー行を作成してファイルに書き込む
-                    makeHeaderLine(docinfo, mergeSetId, info.new_num, info.new_title, newIdTrimmed);
-                }
-            }
-        }
-
         public bool LogAndDisplayError(Exception ex, StreamWriter log, StreamWriter swLog, loader load)
         {
             // スタックトレースを取得（例外の発生箇所を特定するための情報）
@@ -291,7 +267,7 @@ namespace WordAddIn1
                     if (mergeSetId.ContainsKey(headingInfo.id))
                     {
                         headingInfo.mergeto = mergeSetId[headingInfo.id].Split(new char[] { '♯', '#' })[0];
-                        makeHeaderLine(docinfo, mergeSetId, headingInfo.num, headingInfo.title, headingInfo.id);
+                        MakeHeaderLine(docinfo, mergeSetId, headingInfo.num, headingInfo.title, headingInfo.id);
                     }
                     else
                     {

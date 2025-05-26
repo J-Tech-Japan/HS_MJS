@@ -182,6 +182,7 @@ namespace WordAddIn1
                             ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_listItem");
                         }
                     }
+
                     else if (Regex.IsMatch(thisStyleName, "表内-項目_センタリング"))
                     {
                         objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
