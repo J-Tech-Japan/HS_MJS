@@ -64,7 +64,7 @@ namespace WordAddIn1
                         Application.DoEvents();
                         
                         // ドキュメントを一時HTML用にコピー
-                        var docCopy = CopyDocumentToHtml(application, paths.tmpHtmlPath, log);
+                        var docCopy = CopyDocumentToHtml(application, log);
                         
                         // カバー情報の収集
                         var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
@@ -146,7 +146,8 @@ namespace WordAddIn1
             }
         }
 
-        private Word.Document CopyDocumentToHtml(Word.Application application, string tmpHtmlPath, StreamWriter log)
+        // ドキュメントを一時 HTML 用にコピー
+        private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
         {
             ClearClipboardSafely();
             Application.DoEvents();
