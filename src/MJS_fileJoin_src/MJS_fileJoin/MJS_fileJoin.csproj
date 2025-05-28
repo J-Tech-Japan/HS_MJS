@@ -64,10 +64,16 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainForm.TabLink.LinkCheck.AddLink.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.TabLink.LinkCheck.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.TabLink.LinkCheck.GetTitleFromFile.cs">
+    <Compile Include="MainForm.TabLink.LinkCheck.GetTitle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.TabLink.LinkCheck.ParseLink.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.TabWord.cs">

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -67,6 +65,7 @@ namespace MJS_fileJoin
                                 if (mcMergePage != null && mcMergePage.Count > 0)
                                 {
                                     linkPage = GetLinkPage(mcMergePage, parts);
+                                    MessageBox.Show(linkPage);
                                 }
 
                                 if (File.Exists(Path.GetFullPath(Path.GetDirectoryName(file)) + "/" + $"{parts[0].Trim().Replace("'", "")}.html"))
@@ -116,26 +115,7 @@ namespace MJS_fileJoin
                     }
                     else if (m.Groups[1].Value.Contains("#"))
                     {
-                        // check link
-                        string[] parts = m.Groups[1].Value.Split('#');
-
-                        if (parts.Length >= 2 && parts[0].Contains(".html") == false)
-                        {
-                            // targetURL need concat with extension .html => pass check with extension
-                            targetURL = Path.GetFullPath(Path.GetDirectoryName(file)) + "/" + parts[0] + ".html";
-                        }
-                        else
-                        {
-                            targetURL = Path.GetFullPath(Path.GetDirectoryName(file)) + "/" + m.Groups[1].Value.Split('#')[0];
-
-                        }
-
-                        anchor = m.Groups[1].Value.Split('#')[1];
-                        // check anchor have extension .html
-                        if (anchor.Contains(".html"))
-                        {
-                            anchor = anchor.Replace(".html", "");
-                        }
+                        ParseLink(file, m, out targetURL, out anchor);
                     }
 
                     else
@@ -147,32 +127,15 @@ namespace MJS_fileJoin
 
                     if (Regex.IsMatch(m.Groups[1].Value, "^http", RegexOptions.Singleline | RegexOptions.IgnoreCase))
                     {
-                        ListViewItem lvi = listView1.Items.Add(file);
-                        lvi.SubItems.Add(m.Groups[1].Value);
-                        try
-                        {
-                            lvi.SubItems.Add(GetStatusCode(m.Groups[1].Value).ToString());
-                        }
-                        catch
-                        {
-                            lvi.SubItems.Add("取得に失敗しました。");
-                        }
-                        lvi.SubItems.Add("");
-                        lvi.SubItems.Add("");
-                        lvi.SubItems.Add("");
-                        lvi.BackColor = Color.Red;
+                        AddHttpLinkErrorResult(file, m);
                         continue;
                     }
 
                     if (File.Exists(targetURL))
                     {
                         titleName = GetTitleFromFile(targetURL, anchor, file, m);
-
-                        // using regex clear tag <span> </span> in titleName
                         titleName = Regex.Replace(titleName, @"<span[^>]*?>", "");
                         titleName = Regex.Replace(titleName, @"</span>", "");
-
-                        // check title same with title in link
                         AddLinkCheckResult(file, m, titleName);
                     }
 
@@ -190,13 +153,7 @@ namespace MJS_fileJoin
 
                     else
                     {
-                        ListViewItem lvi = listView1.Items.Add(file);
-                        lvi.SubItems.Add(m.Groups[1].Value);
-                        lvi.SubItems.Add(m.Groups[2].Value);
-                        lvi.SubItems.Add("false");
-                        lvi.SubItems.Add("none");
-                        lvi.SubItems.Add("false");
-                        lvi.BackColor = Color.Red;
+                        AddInvalidLinkResult(file, m);
                     }
                 }
 
@@ -205,13 +162,6 @@ namespace MJS_fileJoin
                 foreach (ListViewItem lvi in listView1.Items)
                     logen.Add(lvi);
             }
-            //using (StreamWriter sw = new StreamWriter("./kekka.csv", false, Encoding.UTF8))
-            //{
-            //    sw.Write(allCheck);
-            //}
-            //Assembly myAssembly = Assembly.GetEntryAssembly();
-            //string path = Path.GetDirectoryName(myAssembly.Location) + "/";
-            //Process.Start(path + "./kekka.csv");
         }
     }
 }
