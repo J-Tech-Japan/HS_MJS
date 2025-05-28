@@ -67,6 +67,9 @@
     <Compile Include="MainForm.TabLink.LinkCheck.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm.TabLink.LinkCheck.GetTitleFromFile.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.TabWord.cs">
       <SubType>Form</SubType>
     </Compile>
