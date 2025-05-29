@@ -1,9 +1,10 @@
-﻿using Microsoft.Office.Tools.Ribbon;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
+using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -115,7 +116,10 @@ namespace WordAddIn1
                         
                         // 検索用ファイルの生成
                         GenerateSearchFiles(objBody, paths.rootPath, paths.exportDir, coverInfo.docid, htmlTemplate1, htmlTemplate2, htmlCoverTemplate1, htmlCoverTemplate2, objToc, mergeScript, searchJs);
-                        
+
+                        // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
+                        CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
+
                         // Zipファイル作成ログ
                         log.WriteLine("Zipファイル作成");
                         
