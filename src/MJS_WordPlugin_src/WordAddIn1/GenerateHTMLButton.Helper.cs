@@ -265,5 +265,62 @@ namespace WordAddIn1
                 catch { MessageBox.Show(ErrMsgHtmlOutputFailure1, ErrMsgHtmlOutputFailure2, MessageBoxButtons.OK, MessageBoxIcon.Error); }
             }
         }
+
+        private void CopyImagesFromAppDataLocalTemp(string activeDocumentPath)
+        {
+            // 1. アクティブドキュメントと同じ階層にwebhelpフォルダがあるか確認
+            var docDir = Path.GetDirectoryName(activeDocumentPath);
+            var webhelpDir = Path.Combine(docDir, "webhelp");
+            if (!Directory.Exists(webhelpDir)) return;
+
+            // 4. ImgFromTempフォルダのパスを決定
+            var imgFromTempDir = Path.Combine(webhelpDir, "ImgFromTemp");
+            if (!Directory.Exists(imgFromTempDir))
+            {
+                Directory.CreateDirectory(imgFromTempDir);
+            }
+
+            // 2. webhelpフォルダ内の.htmlファイルをすべて取得
+            var htmlFiles = Directory.GetFiles(webhelpDir, "*.html", SearchOption.TopDirectoryOnly);
+
+            // 3. imgタグのsrc属性にAppData/Local/Tempを含むものを抽出
+            var imgTagRegex = new Regex("<img[^>]+src=[\"']([^\"']+AppData/Local/Temp[^\"']+)[\"'][^>]*>", RegexOptions.IgnoreCase);
+
+            foreach (var htmlFile in htmlFiles)
+            {
+                var htmlContent = File.ReadAllText(htmlFile);
+                var matches = imgTagRegex.Matches(htmlContent);
+
+                foreach (Match match in matches)
+                {
+                    var src = match.Groups[1].Value;
+                    string filePath = src;
+
+                    // file:/// 形式の場合はローカルパスに変換
+                    if (filePath.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                    {
+                        filePath = filePath.Substring("file:///".Length);
+                        filePath = filePath.Replace('/', '\\');
+                    }
+
+                    // デコード（スペースや日本語などのエンコード対応）
+                    filePath = Uri.UnescapeDataString(filePath);
+
+                    if (!File.Exists(filePath)) continue;
+
+                    var fileName = Path.GetFileName(filePath);
+                    var destPath = Path.Combine(imgFromTempDir, fileName);
+
+                    try
+                    {
+                        File.Copy(filePath, destPath, true);
+                    }
+                    catch (Exception)
+                    {
+                        // 必要に応じてログ出力
+                    }
+                }
+            }
+        }
     }
 }

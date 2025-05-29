@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,11 +30,28 @@ namespace MJS_fileJoin
                     allText = sr.ReadToEnd();
                 }
 
+                // <a href=" の直後、http で始まり、次の " までの文字列をすべて抽出
                 Regex r = new Regex(@"(?<=<a href="")http[^""]*?(?="")");
                 MatchCollection mc = r.Matches(allText);
-                
+
+                /*
+                <a href="page1.html">ページ1</a>
+                <a href="http://example.com">外部サイト</a>
+                <a href="#section2">セクション2</a>
+                の場合、mc2 には以下の3つの Match が入り、それぞれ
+                •m.Groups[1].Value → "page1.html"、"http://example.com"、"#section2"
+                •m.Groups[2].Value → "ページ1"、"外部サイト"、"セクション2"
+                 */
                 Regex r2 = new Regex(@"(?<=<a href="")([^""]*?)"">([^<]*?)(?=</a>)");
                 MatchCollection mc2 = r2.Matches(allText);
+
+
+                // mc2に入っているデータをデバッグ出力
+                //foreach (Match m in mc2)
+                //{
+                //    Debug.WriteLine(
+                //        $"Groups[0]: {m.Groups[0].Value}, Groups[1]: {m.Groups[1].Value}, Groups[2]: {m.Groups[2].Value}");
+                //}
 
                 Regex r3 = new Regex(@"(?<=<p\sclass=""MJS_ref""><span\sname=""([^""]+)""\sclass=""ref""\s*/>([^<]*?)<\/p>)");
                 MatchCollection mc3 = r3.Matches(allText);
@@ -98,9 +116,7 @@ namespace MJS_fileJoin
                             foreach (ListViewItem lvi in listView1.Items)
                                 logen.Add(lvi);
                         }
-
                     }
-
                 }
                 
                 foreach (Match m in mc2)

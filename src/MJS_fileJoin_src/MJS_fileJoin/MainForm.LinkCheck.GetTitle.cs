@@ -7,35 +7,37 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
-        // リンク元のページ名から、実際に参照すべきマージ後のページ名を特定する
+        // リンク元のページ名から、実際に参照すべきマージ後のページ名を特定する（リファクタリング版）
         private string GetLinkPage(MatchCollection mcMergePage, string[] parts)
         {
-            string linkPage = "";
-            if (mcMergePage != null && mcMergePage.Count > 0)
+            // parts[0]のクリーンな値を取得
+            string target = parts[0].Trim().Replace("'", "");
+
+            if (mcMergePage == null || mcMergePage.Count == 0)
             {
-                var mergePage = mcMergePage[0].Groups[1].Value.Trim().Split(',');
-                foreach (var key in mergePage)
+                return target;
+            }
+
+            var mergePages = mcMergePage[0].Groups[1].Value.Trim().Split(',');
+            foreach (var key in mergePages)
+            {
+                string trimmedKey = key.Trim();
+                int colonIndex = trimmedKey.IndexOf(':');
+                if (colonIndex < 0) continue;
+
+                // コロンで分割し、各要素を比較
+                var linkParts = trimmedKey.Split(':');
+                foreach (var linkPart in linkParts)
                 {
-                    string[] link = key.Trim().Split(':');
-                    foreach (var itemLink in link)
+                    if (linkPart.Trim().Replace("'", "") == target)
                     {
-                        if (itemLink.Trim().Replace("'", "") == parts[0].Trim().Replace("'", ""))
-                        {
-                            int colonIndex = key.IndexOf(':');
-                            linkPage = key.Substring(0, colonIndex).Trim();
-                        }
+                        // コロンの前の部分を返す
+                        return trimmedKey.Substring(0, colonIndex).Trim();
                     }
                 }
-                if (linkPage == "")
-                {
-                    linkPage = parts[0].Trim().Replace("'", "");
-                }
             }
-            else
-            {
-                linkPage = parts[0].Trim().Replace("'", "");
-            }
-            return linkPage;
+            // 一致しない場合はデフォルトでtargetを返す
+            return target;
         }
 
         private string GetTitleFromFile(string targetURL, string anchor, string file, Match m)
