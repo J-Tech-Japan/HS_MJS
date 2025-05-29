@@ -266,34 +266,44 @@ namespace WordAddIn1
             }
         }
 
+        /*
+        1. アクティブドキュメントと同じ階層に webhelpフォルダがあるか確認する
+        2. webhelpフォルダの中にある .htmlファイルをすべて調べる
+        3. AppData/Local/Temp を参照するimgタグがあれば webhelp に ImgFromTemp フォルダを作成する
+        4. AppData/Local/Temp にある参照先の画像をすべて ImgFromTemp にコピーする
+        5. imgタグの src 属性を新しい参照先に書き換える
+        */
+
         private void CopyImagesFromAppDataLocalTemp(string activeDocumentPath)
         {
-            // 1. アクティブドキュメントと同じ階層にwebhelpフォルダがあるか確認
+            // アクティブドキュメントと同じ階層にwebhelpフォルダがあるか確認
             var docDir = Path.GetDirectoryName(activeDocumentPath);
             var webhelpDir = Path.Combine(docDir, "webhelp");
             if (!Directory.Exists(webhelpDir)) return;
 
-            // 4. ImgFromTempフォルダのパスを決定
+            // ImgFromTempフォルダのパスを決定
             var imgFromTempDir = Path.Combine(webhelpDir, "ImgFromTemp");
             if (!Directory.Exists(imgFromTempDir))
             {
                 Directory.CreateDirectory(imgFromTempDir);
             }
 
-            // 2. webhelpフォルダ内の.htmlファイルをすべて取得
+            // webhelpフォルダ内の.htmlファイルをすべて取得
             var htmlFiles = Directory.GetFiles(webhelpDir, "*.html", SearchOption.TopDirectoryOnly);
 
-            // 3. imgタグのsrc属性にAppData/Local/Tempを含むものを抽出
-            var imgTagRegex = new Regex("<img[^>]+src=[\"']([^\"']+AppData/Local/Temp[^\"']+)[\"'][^>]*>", RegexOptions.IgnoreCase);
+            // imgタグのsrc属性にAppData/Local/Tempを含むものを抽出
+            var imgTagRegex = new Regex("<img([^>]+)src=[\"']([^\"']+AppData/Local/Temp[^\"']+)[\"']([^>]*)>", RegexOptions.IgnoreCase);
 
             foreach (var htmlFile in htmlFiles)
             {
                 var htmlContent = File.ReadAllText(htmlFile);
                 var matches = imgTagRegex.Matches(htmlContent);
+                bool changed = false;
 
-                foreach (Match match in matches)
+                // 画像コピーとsrc書き換え
+                string replaced = imgTagRegex.Replace(htmlContent, match =>
                 {
-                    var src = match.Groups[1].Value;
+                    var src = match.Groups[2].Value;
                     string filePath = src;
 
                     // file:/// 形式の場合はローカルパスに変換
@@ -306,19 +316,32 @@ namespace WordAddIn1
                     // デコード（スペースや日本語などのエンコード対応）
                     filePath = Uri.UnescapeDataString(filePath);
 
-                    if (!File.Exists(filePath)) continue;
-
-                    var fileName = Path.GetFileName(filePath);
+                    string fileName = Path.GetFileName(filePath);
                     var destPath = Path.Combine(imgFromTempDir, fileName);
 
+                    // 画像をImgFromTempにコピー
                     try
                     {
-                        File.Copy(filePath, destPath, true);
+                        if (File.Exists(filePath))
+                        {
+                            File.Copy(filePath, destPath, true);
+                        }
                     }
                     catch (Exception)
                     {
-                        // 必要に応じてログ出力
                     }
+
+                    // imgタグのsrcを書き換え
+                    changed = true;
+                    string attr1 = match.Groups[1].Value;
+                    string attr2 = match.Groups[3].Value;
+                    string newSrc = $"ImgFromTemp/{fileName}";
+                    return $"<img{attr1}src=\"{newSrc}\"{attr2}>";
+                });
+
+                if (changed)
+                {
+                    File.WriteAllText(htmlFile, replaced, Encoding.UTF8);
                 }
             }
         }
