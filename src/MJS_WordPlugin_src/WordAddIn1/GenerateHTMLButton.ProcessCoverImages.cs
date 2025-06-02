@@ -419,23 +419,23 @@ namespace WordAddIn1
         }
 
         // 画像をリサイズして保存（幅をピクセル単位で指定、アスペクト比維持）テスト用
-        //private void ResizeAndSaveImage(string sourcePath, string destPath, int width)
-        //{
-        //    using (Bitmap src = new Bitmap(sourcePath))
-        //    {
-        //        int height = (int)(src.Height * (width / (double)src.Width));
-        //        using (Bitmap dst = new Bitmap(width, height))
-        //        {
-        //            using (Graphics g = Graphics.FromImage(dst))
-        //            {
-        //                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-        //                g.DrawImage(src, 0, 0, width, height);
-        //            }
+        private void ResizeAndSaveImageByPixel(string sourcePath, string destPath, int width)
+        {
+            using (Bitmap src = new Bitmap(sourcePath))
+            {
+                int height = (int)(src.Height * (width / (double)src.Width));
+                using (Bitmap dst = new Bitmap(width, height))
+                {
+                    using (Graphics g = Graphics.FromImage(dst))
+                    {
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(src, 0, 0, width, height);
+                    }
 
-        //            dst.Save(destPath, ImageFormat.Png);
-        //        }
-        //    }
-        //}
+                    dst.Save(destPath, ImageFormat.Png);
+                }
+            }
+        }
 
         private void CleanupTemporaryDirectory(string tempDir)
         {

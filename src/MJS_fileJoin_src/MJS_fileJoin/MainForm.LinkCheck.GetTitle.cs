@@ -7,7 +7,7 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
-        // リンク元のページ名から、実際に参照すべきマージ後のページ名を特定する（リファクタリング版）
+        // リンク元のページ名から参照すべきマージ後のページ名を特定する（リファクタリング版）
         private string GetLinkPage(MatchCollection mcMergePage, string[] parts)
         {
             // parts[0]のクリーンな値を取得
