@@ -83,7 +83,7 @@ namespace WordAddIn1
             docCopy.SaveAs2(paths.tmpHtmlPath, WdSaveFormat.wdFormatFilteredHTML);
             
             // ドキュメントを閉じる
-            docCopy.Close();
+            docCopy.Close(false);
             
             // 画像フォルダのコピー処理
             log.WriteLine("画像フォルダ コピー");
