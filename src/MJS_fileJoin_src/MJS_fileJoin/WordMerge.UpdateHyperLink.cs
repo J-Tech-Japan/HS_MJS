@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using MJS_fileJoin;
 using System.Text.RegularExpressions;
 using Word = Microsoft.Office.Interop.Word;
-
 
 namespace DocMergerComponent
 {
