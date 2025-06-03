@@ -75,72 +75,75 @@ namespace DocMergerComponent
                     UpdateIndexAndToc(objDocLast, fm);
                 }
 
-                fm.label10.Text = "ハイパーリンク更新中...";
-                List<string> ls = new List<string>();
+                // ハイパーリンクの更新処理
+                UpdateHyperlinks(objDocLast, fm);
 
-                foreach (Word.Bookmark wb in objDocLast.Bookmarks)
-                    ls.Add(wb.Name);
+                //fm.label10.Text = "ハイパーリンク更新中...";
+                //List<string> ls = new List<string>();
 
-                fm.progressBar1.Value = 0;
-                fm.progressBar1.Maximum = objDocLast.Fields.Count;
+                //foreach (Word.Bookmark wb in objDocLast.Bookmarks)
+                //    ls.Add(wb.Name);
 
-                foreach (Word.Field wf in objDocLast.Fields)
-                {
-                    fm.progressBar1.Increment(1);
-                    if (wf.Type == Word.WdFieldType.wdFieldHyperlink)
-                    {
-                        if (wf.Code.Text.Contains("\"http")) continue;
-                        string text = "";
-                        if (!wf.Code.Text.Contains(@"\l"))
-                            text = Regex.Replace(wf.Code.Text, @".*?""([^""]*?)"".*?", "$1");
-                        else
-                        {
-                            if (!Regex.IsMatch(wf.Code.Text, @".*?""[^""]*?"".*?""[^""]*?"".*?")) continue;
-                            text = Regex.Replace(wf.Code.Text, @".*?""([^""]*?)"".*?""([^""]*?)"".*?", "$1#$2");
-                        }
+                //fm.progressBar1.Value = 0;
+                //fm.progressBar1.Maximum = objDocLast.Fields.Count;
 
-                        string[] subtext = text.Split('\\');
-                        text = subtext[subtext.Count() - 1];
-                        subtext = text.Split('/');
-                        text = subtext[subtext.Count() - 1];
-                        if (ls.Contains(text.Replace(".html", "").Replace("#", "♯").Trim()))
-                        {
-                            wf.Code.Text = @"HYPERLINK \l """ + text.Replace(".html", "").Replace("#", "♯").Trim() + @"""";
-                            wf.Update();
-                        }
-                        else
-                            wf.Unlink();
-                    }
-                }
+                //foreach (Word.Field wf in objDocLast.Fields)
+                //{
+                //    fm.progressBar1.Increment(1);
+                //    if (wf.Type == Word.WdFieldType.wdFieldHyperlink)
+                //    {
+                //        if (wf.Code.Text.Contains("\"http")) continue;
+                //        string text = "";
+                //        if (!wf.Code.Text.Contains(@"\l"))
+                //            text = Regex.Replace(wf.Code.Text, @".*?""([^""]*?)"".*?", "$1");
+                //        else
+                //        {
+                //            if (!Regex.IsMatch(wf.Code.Text, @".*?""[^""]*?"".*?""[^""]*?"".*?")) continue;
+                //            text = Regex.Replace(wf.Code.Text, @".*?""([^""]*?)"".*?""([^""]*?)"".*?", "$1#$2");
+                //        }
 
-                foreach (Word.Hyperlink wh in objDocLast.Hyperlinks)
-                {
-                    if (Regex.IsMatch(wh.Name.Trim(), @"^\w{3}\d{5}") ||
-                        Regex.IsMatch(wh.Name.Trim(), @"^\w{3}\d{5}♯\w{3}\d{5}"))
-                        wh.TextToDisplay = Regex.Replace(wh.TextToDisplay, @".*(\d+\.)+\d+[\s　\t]", "");
-                }
+                //        string[] subtext = text.Split('\\');
+                //        text = subtext[subtext.Count() - 1];
+                //        subtext = text.Split('/');
+                //        text = subtext[subtext.Count() - 1];
+                //        if (ls.Contains(text.Replace(".html", "").Replace("#", "♯").Trim()))
+                //        {
+                //            wf.Code.Text = @"HYPERLINK \l """ + text.Replace(".html", "").Replace("#", "♯").Trim() + @"""";
+                //            wf.Update();
+                //        }
+                //        else
+                //            wf.Unlink();
+                //    }
+                //}
 
-                if (check2)
-                {
-                    fm.label10.Text = "PDF出力中...";
+                //foreach (Word.Hyperlink wh in objDocLast.Hyperlinks)
+                //{
+                //    if (Regex.IsMatch(wh.Name.Trim(), @"^\w{3}\d{5}") ||
+                //        Regex.IsMatch(wh.Name.Trim(), @"^\w{3}\d{5}♯\w{3}\d{5}"))
+                //        wh.TextToDisplay = Regex.Replace(wh.TextToDisplay, @".*(\d+\.)+\d+[\s　\t]", "");
+                //}
 
-                    objDocLast.ExportAsFixedFormat(
-                        strOutDoc.Replace(".doc", ".pdf"),
-                        Word.WdExportFormat.wdExportFormatPDF,
-                        false,
-                        Word.WdExportOptimizeFor.wdExportOptimizeForPrint,
-                        Word.WdExportRange.wdExportAllDocument,
-                        1,
-                        1,
-                        Word.WdExportItem.wdExportDocumentContent,
-                        false,
-                        true,
-                        Word.WdExportCreateBookmarks.wdExportCreateHeadingBookmarks,
-                        false,
-                        true,
-                        false
-                        );
-                }
+                //if (check2)
+                //{
+                //    fm.label10.Text = "PDF出力中...";
+
+                //    objDocLast.ExportAsFixedFormat(
+                //        strOutDoc.Replace(".doc", ".pdf"),
+                //        Word.WdExportFormat.wdExportFormatPDF,
+                //        false,
+                //        Word.WdExportOptimizeFor.wdExportOptimizeForPrint,
+                //        Word.WdExportRange.wdExportAllDocument,
+                //        1,
+                //        1,
+                //        Word.WdExportItem.wdExportDocumentContent,
+                //        false,
+                //        true,
+                //        Word.WdExportCreateBookmarks.wdExportCreateHeadingBookmarks,
+                //        false,
+                //        true,
+                //        false
+                //        );
+                //}
 
                 if (check1)
                 {
