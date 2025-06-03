@@ -175,8 +175,11 @@ namespace MJS_fileJoin
             DocMerger objMerger = new DocMerger();
             bool cntItems = false;
             if (listBox1.Items.Count == 1) cntItems = true;
-            objMerger.Merge(strOrigFile, strCopiesDir, strOutputDir, this, checkBox4.Checked, checkBox5.Checked, cntItems);
+
+            objMerger.MergeFromFolders(strOrigFile, strCopiesDir, strOutputDir, this, checkBox4.Checked, checkBox5.Checked, cntItems);
+            
             groupBox1.Visible = false;
+            
             if (checkBox4.Checked)
             {
                 MessageBox.Show("Wordの結合が完了しました。");

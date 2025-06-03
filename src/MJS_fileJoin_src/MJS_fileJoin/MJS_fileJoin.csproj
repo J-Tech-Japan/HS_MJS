@@ -87,8 +87,10 @@
     <Compile Include="RemoveSections.cs" />
     <Compile Include="WordMerge.CreateWordDocument.cs" />
     <Compile Include="WordMerge.cs" />
-    <Compile Include="WordMerge.UpdateHyperLink.cs" />
+    <Compile Include="WordMerge.UpdateChapterFrontNumbers.cs" />
+    <Compile Include="WordMerge.UpdateHyperlinks.cs" />
     <Compile Include="WordMerge.OutlineNumbering.cs" />
+    <Compile Include="WordMerge.UpdateIndexAndToc.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
