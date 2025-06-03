@@ -1,4 +1,6 @@
-﻿using Microsoft.Office.Interop.Word;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Microsoft.Office.Interop.Word;
 using MJS_fileJoin;
 using Word = Microsoft.Office.Interop.Word;
 
@@ -6,38 +8,57 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
-        // Word.Application、Document の生成・初期設定
-        private (Application, Document) CreateAndOpenWordDocument(string filePath, object objMissing)
+        private void ApplyOutlineNumbering(Word.Application objApp, Word.Document objDocLast, MainForm fm)
         {
-            var app = new Application();
-            app.DisplayAlerts = WdAlertLevel.wdAlertsNone;
-            app.Options.CheckGrammarAsYouType = false;
-            app.Options.CheckGrammarWithSpelling = false;
-            app.Options.CheckSpellingAsYouType = false;
-            app.Options.ShowReadabilityStatistics = false;
-            app.Visible = false;
+            List<string> styleNames = new List<string>();
+            styleNames.Add("MJS_章扉-タイトル");
+            styleNames.Add("見出し 1,MJS_見出し 1");
+            styleNames.Add("見出し 2,MJS_見出し 2");
+            styleNames.Add("見出し 3,MJS_見出し 3");
 
-            object objFilePath = filePath;
-            var doc = app.Documents.Open(
-                ref objFilePath,    // FileName
-                ref objMissing,     // ConfirmVersions
-                ref objMissing,     // ReadOnly
-                ref objMissing,     // AddToRecentFiles
-                ref objMissing,     // PasswordDocument
-                ref objMissing,     // PasswordTemplate
-                ref objMissing,     // Revert
-                ref objMissing,     // WritePasswordDocument
-                ref objMissing,     // WritePasswordTemplate
-                ref objMissing,     // Format
-                ref objMissing,     // Encoding
-                ref objMissing,     // Visible
-                ref objMissing,     // OpenAndRepair
-                ref objMissing,     // DocumentDirection
-                ref objMissing,     // NoEncodingDialog
-                ref objMissing      // XMLTransform
-            );
+            // スタイルのアウトライン番号を設定
+            SetOutlineNumberingFormat(objApp, objDocLast, fm);
 
-            return (app, doc);
+            int first = 0;
+            int second = 0;
+            int third = 0;
+            int fourth = 0;
+
+            for (int i = 1; i <= objDocLast.ListParagraphs.Count; i++)
+            {
+                fm.progressBar1.Increment(1);
+                if (!Regex.IsMatch(objDocLast.ListParagraphs[i].Range.ListFormat.ListString, @"第.*?章") && !Regex.IsMatch(objDocLast.ListParagraphs[i].Range.ListFormat.ListString, @"\d\.\d")) continue;
+                if (Regex.IsMatch(objDocLast.ListParagraphs[i].Range.ListFormat.ListString, @"第.*?章"))
+                {
+                    first++;
+                    second = 0;
+                    third = 0;
+                    fourth = 0;
+                    if (objDocLast.ListParagraphs[i].Range.ListFormat.ListValue != first)
+                        objDocLast.ListParagraphs[i].Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
+                }
+                else if (objDocLast.ListParagraphs[i].Range.ListFormat.ListLevelNumber == 2)
+                {
+                    second++;
+                    third = 0;
+                    fourth = 0;
+                    if (objDocLast.ListParagraphs[i].Range.ListFormat.ListValue != second)
+                        objDocLast.ListParagraphs[i].Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
+                }
+                else if (objDocLast.ListParagraphs[i].Range.ListFormat.ListLevelNumber == 3)
+                {
+                    third++;
+                    fourth = 0;
+                    if (objDocLast.ListParagraphs[i].Range.ListFormat.ListValue != third)
+                        objDocLast.ListParagraphs[i].Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
+                }
+                else if (objDocLast.ListParagraphs[i].Range.ListFormat.ListLevelNumber == 4)
+                {
+                    fourth++;
+                    if (objDocLast.ListParagraphs[i].Range.ListFormat.ListValue != fourth)
+                        objDocLast.ListParagraphs[i].Range.ListFormat.ApplyListTemplateWithLevel(objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7], true, Word.WdListApplyTo.wdListApplyToWholeList, Word.WdDefaultListBehavior.wdWord10ListBehavior);
+                }
+            }
         }
 
         // Word文書のアウトライン番号（章番号や見出し番号）の書式やスタイルを設定
