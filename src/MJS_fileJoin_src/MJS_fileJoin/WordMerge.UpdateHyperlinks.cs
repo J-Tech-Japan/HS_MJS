@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
-using MJS_fileJoin;
 using System.Text.RegularExpressions;
+using MJS_fileJoin;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace DocMergerComponent
 {
     public partial class DocMerger
     {
+        // ハイパーリンクの更新
         private void UpdateHyperlinks(Word.Document objDocLast, MainForm fm)
         {
             fm.label10.Text = "ハイパーリンク更新中...";
@@ -44,6 +45,7 @@ namespace DocMergerComponent
             UpdateHyperlinkDisplayText(objDocLast);
         }
 
+        // ヘルパーメソッド：ドキュメント内のブックマーク名を取得
         private List<string> GetBookmarkNames(Word.Document objDocLast)
         {
             List<string> names = new List<string>();
@@ -52,6 +54,7 @@ namespace DocMergerComponent
             return names;
         }
 
+        // ヘルパーメソッド：ハイパーリンクのテキストを抽出
         private string ExtractHyperlinkText(string codeText)
         {
             if (!codeText.Contains(@"\l"))
@@ -65,6 +68,7 @@ namespace DocMergerComponent
             }
         }
 
+        // ヘルパーメソッド：ハイパーリンクの表示テキストを更新
         private void UpdateHyperlinkDisplayText(Word.Document objDocLast)
         {
             foreach (Word.Hyperlink wh in objDocLast.Hyperlinks)

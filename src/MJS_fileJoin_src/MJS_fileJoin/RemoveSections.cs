@@ -90,5 +90,36 @@ namespace DocMergerComponent
                 fm.progressBar1.Increment(1);
             }
         }
+
+        // 指定スタイルのセクションを後方から検索し、2つ目以降を削除
+        private void RemoveDuplicateIndexSections(Word.Document doc, string styleName)
+        {
+            object styleObject = styleName;
+            bool foundFirst = false;
+            int sectionCount = doc.Sections.Count;
+            for (int i = sectionCount; i > 0; i--)
+            {
+                Word.Range wr = doc.Sections[i].Range;
+                wr.Find.ClearFormatting();
+                if (doc.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+                {
+                    wr.Find.set_Style(ref styleObject);
+                }
+                wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                wr.Find.Execute();
+                if (wr.Find.Found)
+                {
+                    if (foundFirst)
+                    {
+                        doc.Sections[i].Range.Delete();
+                        i--; // セクション削除後はインデックスを1つ戻す
+                    }
+                    else
+                    {
+                        foundFirst = true;
+                    }
+                }
+            }
+        }
     }
 }
