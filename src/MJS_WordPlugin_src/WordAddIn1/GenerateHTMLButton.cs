@@ -68,8 +68,6 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
-                        ExtractImagesFromWord(docCopy, @"C:\TempImages");
-
                         // カバー情報の収集
                         var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
                         
@@ -174,58 +172,6 @@ namespace WordAddIn1
             ClearClipboardSafely();
             log.WriteLine("Number of sections: " + docCopy.Sections.Count);
             return docCopy;
-        }
-
-        public void ExtractImagesFromWord(Word.Document document, string outputFolder)
-        {
-            if (!Directory.Exists(outputFolder))
-                Directory.CreateDirectory(outputFolder);
-
-            int imageIndex = 1;
-
-            // 本文の画像
-            imageIndex = ExtractImagesFromShapes(document.InlineShapes, document.Application, outputFolder, imageIndex);
-            imageIndex = ExtractImagesFromShapes(document.Shapes, document.Application, outputFolder, imageIndex);
-
-        }
-
-        // InlineShapes/Shapes 共通で画像抽出
-        private int ExtractImagesFromShapes(dynamic shapes, Word.Application app, string outputFolder, int imageIndex)
-        {
-            foreach (var shape in shapes)
-            {
-                // グループ化された図形の場合は再帰
-                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
-                {
-                    imageIndex = ExtractImagesFromShapes(shape.GroupItems, app, outputFolder, imageIndex);
-                }
-                // 通常の画像
-                else if (
-                    (shape is Word.InlineShape &&
-                        (shape.Type == Word.WdInlineShapeType.wdInlineShapePicture ||
-                         shape.Type == Word.WdInlineShapeType.wdInlineShapeLinkedPicture)) ||
-                    (shape is Word.Shape && shape.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
-                )
-                {
-                    try
-                    {
-                        shape.Select();
-                        app.Selection.CopyAsPicture();
-                        string ext = ".png";
-                        string filePath = Path.Combine(outputFolder, $"Image_{imageIndex}{ext}");
-                        using (var img = Clipboard.GetImage())
-                        {
-                            if (img != null)
-                            {
-                                img.Save(filePath, ImageFormat.Png);
-                                imageIndex++;
-                            }
-                        }
-                    }
-                    catch { /* 画像でなければ無視 */ }
-                }
-            }
-            return imageIndex;
         }
     }
 }
