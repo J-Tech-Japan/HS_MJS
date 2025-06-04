@@ -4,7 +4,6 @@ using Word = Microsoft.Office.Interop.Word;
 using System.Windows.Forms;
 using MJS_fileJoin;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace DocMergerComponent
 {
@@ -132,7 +131,6 @@ namespace DocMergerComponent
                       ref objMissing    //RouteDocument
                       );
                 }
-
             }
             finally
             {
@@ -146,46 +144,12 @@ namespace DocMergerComponent
         }
 
         // Merge をラップするメソッド
-        // List<string> 型のフォルダ（またはファイル）リストを string[] 配列に変換し、
-        // その他の引数とともに Merge に渡す
+        // List<string> 型のフォルダ（またはファイル）リストを配列に変換し、他の引数とともに Merge に渡す
         public void MergeFromFolders(string strOrgDoc, List<string> strCopyFolder, string strOutDoc, MainForm fm, bool check1, bool check2, bool check3)
         {
             MainForm form = fm;
             string[] arrFiles = strCopyFolder.ToArray();
             Merge(strOrgDoc, arrFiles, strOutDoc, form, check1, check2, check3, null);
-        }
-
-        private bool CheckIndexSection(Word.Document objDocLast, MainForm fm, int chapCntLast)
-        {
-            bool last = false;
-            string[] indexItems = { "索引見出し" };
-            foreach (string styleName in indexItems)
-            {
-                object styleObject = styleName;
-                int allChap = objDocLast.Sections.Count;
-                for (int i = allChap; i > chapCntLast; i--)
-                {
-                    Word.Range wr = objDocLast.Sections[i].Range;
-                    wr.Find.ClearFormatting();
-                    if (objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
-                    {
-                        wr.Find.set_Style(ref styleObject);
-                    }
-                    else
-                    {
-                        // スタイルがなければスキップやログ出力
-                    }
-                    //wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                    wr.Find.Execute();
-                    if (wr.Find.Found)
-                    {
-                        last = true;
-                        break;
-                    }
-                }
-                fm.progressBar1.Increment(1);
-            }
-            return last;
         }
     }
 }
