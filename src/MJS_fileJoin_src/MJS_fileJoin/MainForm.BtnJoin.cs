@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -14,54 +13,21 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
-        // webHelp を結合し、指定した出力ディレクトリに統合 HTML コンテンツを生成する
+        // webHelpを結合し、指定した出力ディレクトリに統合HTMLコンテンツを生成する
         private void btnJoin_Click(object sender, EventArgs e)
         {
             Cursor prevCursor = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
 
+            // バリデーション
+            if (!ValidateInput())
+            {
+                Cursor.Current = prevCursor;
+                return;
+            }
+
             StreamReader sr = null;
             StreamWriter sw = null;
-
-            if (tbOutputDir.Text == "")
-            {
-                MessageBox.Show("出力ディレクトリをご指定ください。");
-                return;
-            }
-            if (!Directory.Exists(tbOutputDir.Text))
-            {
-                MessageBox.Show("出力ディレクトリが存在しません。");
-                return;
-            }
-            if (String.IsNullOrEmpty(textBox2.Text))
-            {
-                MessageBox.Show("格納フォルダをご指定ください。");
-                return;
-            }
-            else exportDir = textBox2.Text;
-            if (lbHtmlList.Items.Count == 0)
-            {
-                MessageBox.Show("変換したHTMLファイルが格納されているフォルダーが登録されていません。");
-                return;
-            }
-            int fileCount = 0;
-            foreach (string htmlDir in lbHtmlList.Items)
-            {
-                fileCount += bookInfo[htmlDir].Select("Column1 = true").Count();
-            }
-            if (fileCount == 0)
-            {
-                MessageBox.Show("コンテンツが選択されていません。");
-                return;
-            }
-            foreach (string htmlDir in lbHtmlList.Items)
-            {
-                if (!Directory.Exists(htmlDir))
-                {
-                    MessageBox.Show("「" + htmlDir + "」は削除されたか、名前が変更されています。");
-                    return;
-                }
-            }
 
             List<string> errorList = new List<string>();
 
@@ -92,6 +58,7 @@ namespace MJS_fileJoin
             //File.Delete(tbOutputDir.Text + "\\htmlTemplates.zip");
 
             //' Ver - 2023.16.08 - VyNL - ↑ - 追加'
+
             if (Directory.Exists(tbOutputDir.Text + "\\" + exportDir))
             {
                 Directory.Delete(tbOutputDir.Text + "\\" + exportDir, true);

@@ -251,22 +251,22 @@ namespace MJS_fileJoin
         private void lbHtmlList_DragDrop(object sender, DragEventArgs e)
         {
             string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            List<string> webHelpFol = new List<string>();
+            List<string> webHelpFolder = new List<string>();
             foreach (string folder in s)
             {
                 if (File.Exists(folder)) continue;
                 if (Path.GetFileName(folder) == "webHelp")
-                    webHelpFol.Add(folder);
+                    webHelpFolder.Add(folder);
                 else
                 {
                     string[] fol = Directory.GetDirectories(folder, "webHelp", SearchOption.AllDirectories);
-                    foreach (string webhelp in fol) webHelpFol.Add(webhelp);
+                    foreach (string webhelp in fol) webHelpFolder.Add(webhelp);
                 }
             }
 
-            for (int i = 0; i < webHelpFol.Count; i++)
+            for (int i = 0; i < webHelpFolder.Count; i++)
             {
-                if (!addHtmlDir(webHelpFol[i])) continue;
+                if (!addHtmlDir(webHelpFolder[i])) continue;
             }
         }
 
