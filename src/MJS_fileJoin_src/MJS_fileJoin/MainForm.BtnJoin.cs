@@ -59,14 +59,17 @@ namespace MJS_fileJoin
 
             //' Ver - 2023.16.08 - VyNL - ↑ - 追加'
 
-            if (Directory.Exists(tbOutputDir.Text + "\\" + exportDir))
-            {
-                Directory.Delete(tbOutputDir.Text + "\\" + exportDir, true);
-            }
+            // 出力ディレクトリの準備
+            PrepareOutputDirectory();
 
-            Directory.CreateDirectory(tbOutputDir.Text + "\\" + exportDir);
+            //if (Directory.Exists(tbOutputDir.Text + "\\" + exportDir))
+            //{
+            //    Directory.Delete(tbOutputDir.Text + "\\" + exportDir, true);
+            //}
 
-            CopyDirectory(lbHtmlList.Items[0].ToString(), tbOutputDir.Text + "\\" + exportDir);
+            //Directory.CreateDirectory(tbOutputDir.Text + "\\" + exportDir);
+
+            //CopyDirectory(lbHtmlList.Items[0].ToString(), tbOutputDir.Text + "\\" + exportDir);
 
             XmlDocument objToc = new XmlDocument();
             XmlNode objTocRoot = null;
@@ -79,10 +82,13 @@ namespace MJS_fileJoin
 
             //各webHelpフォルダ処理
 
-            List<string> lsfiles = new List<string>();
-            foreach (string htmlDir in lbHtmlList.Items)
-                foreach (DataRow selRow in bookInfo[htmlDir].Select("Column1 = true"))
-                    lsfiles.Add(selRow["Column4"].ToString() + ".html");
+            // HTMLファイルリストの作成
+            List<string> lsfiles = CreateHtmlFileList();
+
+            //List<string> lsfiles = new List<string>();
+            //foreach (string htmlDir in lbHtmlList.Items)
+            //    foreach (DataRow selRow in bookInfo[htmlDir].Select("Column1 = true"))
+            //        lsfiles.Add(selRow["Column4"].ToString() + ".html");
 
             int picCount = 0;
             foreach (string htmlDir in lbHtmlList.Items)
@@ -460,50 +466,53 @@ namespace MJS_fileJoin
             //目次出力
             createToc(objToc.DocumentElement);
 
-            if (chbListOutput.Checked)
-            {
-                XmlDocument list = new XmlDocument();
-                list.PreserveWhitespace = true;
-                list.LoadXml("<joinList></joinList>");
-                if (tbChangeTitle.Enabled)
-                {
-                    list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
-                    list.DocumentElement.AppendChild(list.CreateElement("changeTitle"));
-                    list.DocumentElement.LastChild.InnerText = tbChangeTitle.Text;
-                }
-                if (tbAddTop.Enabled)
-                {
-                    list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
-                    list.DocumentElement.AppendChild(list.CreateElement("addTopLevel"));
-                    list.DocumentElement.LastChild.InnerText = tbAddTop.Text;
-                }
+            // chbListOutputがチェックされている場合にjoinList.xmlを出力する
+            OutputJoinListXml();
 
-                list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
-                XmlNode htmllist = list.DocumentElement.AppendChild(list.CreateElement("htmlList"));
+            //if (chbListOutput.Checked)
+            //{
+            //    XmlDocument list = new XmlDocument();
+            //    list.PreserveWhitespace = true;
+            //    list.LoadXml("<joinList></joinList>");
+            //    if (tbChangeTitle.Enabled)
+            //    {
+            //        list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
+            //        list.DocumentElement.AppendChild(list.CreateElement("changeTitle"));
+            //        list.DocumentElement.LastChild.InnerText = tbChangeTitle.Text;
+            //    }
+            //    if (tbAddTop.Enabled)
+            //    {
+            //        list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
+            //        list.DocumentElement.AppendChild(list.CreateElement("addTopLevel"));
+            //        list.DocumentElement.LastChild.InnerText = tbAddTop.Text;
+            //    }
 
-                foreach (string htmlDir in lbHtmlList.Items)
-                {
-                    htmllist.AppendChild(list.CreateWhitespace("\n\t\t"));
-                    XmlNode htmlitem = htmllist.AppendChild(list.CreateElement("item"));
-                    ((XmlElement)htmlitem).SetAttribute("src", htmlDir);
+            //    list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
+            //    XmlNode htmllist = list.DocumentElement.AppendChild(list.CreateElement("htmlList"));
 
-                    foreach (DataRow selRow in bookInfo[htmlDir].Select("Column1 = true"))
-                    {
-                        htmlitem.AppendChild(list.CreateWhitespace("\n\t\t\t"));
-                        XmlNode checkedNode = htmlitem.AppendChild(list.CreateElement("checked"));
-                        ((XmlElement)checkedNode).SetAttribute("id", selRow["Column4"].ToString());
-                    }
-                    htmlitem.AppendChild(list.CreateWhitespace("\n\t\t"));
-                }
-                htmllist.AppendChild(list.CreateWhitespace("\n\t"));
+            //    foreach (string htmlDir in lbHtmlList.Items)
+            //    {
+            //        htmllist.AppendChild(list.CreateWhitespace("\n\t\t"));
+            //        XmlNode htmlitem = htmllist.AppendChild(list.CreateElement("item"));
+            //        ((XmlElement)htmlitem).SetAttribute("src", htmlDir);
 
-                list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
-                list.DocumentElement.AppendChild(list.CreateElement("outputDir"));
-                ((XmlElement)list.DocumentElement.LastChild).SetAttribute("src", tbOutputDir.Text);
-                list.DocumentElement.AppendChild(list.CreateWhitespace("\n"));
+            //        foreach (DataRow selRow in bookInfo[htmlDir].Select("Column1 = true"))
+            //        {
+            //            htmlitem.AppendChild(list.CreateWhitespace("\n\t\t\t"));
+            //            XmlNode checkedNode = htmlitem.AppendChild(list.CreateElement("checked"));
+            //            ((XmlElement)checkedNode).SetAttribute("id", selRow["Column4"].ToString());
+            //        }
+            //        htmlitem.AppendChild(list.CreateWhitespace("\n\t\t"));
+            //    }
+            //    htmllist.AppendChild(list.CreateWhitespace("\n\t"));
 
-                list.Save(Path.Combine(tbOutputDir.Text, "joinList.xml"));
-            }
+            //    list.DocumentElement.AppendChild(list.CreateWhitespace("\n\t"));
+            //    list.DocumentElement.AppendChild(list.CreateElement("outputDir"));
+            //    ((XmlElement)list.DocumentElement.LastChild).SetAttribute("src", tbOutputDir.Text);
+            //    list.DocumentElement.AppendChild(list.CreateWhitespace("\n"));
+
+            //    list.Save(Path.Combine(tbOutputDir.Text, "joinList.xml"));
+            //}
 
             //書誌情報ファイルのマージ
             mergeHeaderFile();

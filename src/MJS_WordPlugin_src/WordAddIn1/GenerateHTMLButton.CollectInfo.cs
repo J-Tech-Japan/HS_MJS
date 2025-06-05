@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml;
 using Microsoft.Office.Interop.Word;
+using OpenXmlPowerTools;
+using Table = Microsoft.Office.Interop.Word.Table;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -67,7 +70,7 @@ namespace WordAddIn1
             // テーブル幅の自動調整
             foreach (Table wt in docCopy.Tables)
             {
-                if (wt.PreferredWidthType == Word.WdPreferredWidthType.wdPreferredWidthPoints)
+                if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
                     wt.AllowAutoFit = true;
             }
             
@@ -80,8 +83,14 @@ namespace WordAddIn1
             docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
             
             // 一時HTMLとして保存
-            docCopy.SaveAs2(paths.tmpHtmlPath, WdSaveFormat.wdFormatFilteredHTML);
-            
+            //docCopy.SaveAs2(paths.tmpHtmlPath, WdSaveFormat.wdFormatFilteredHTML);
+
+            docCopy.SaveAs2(
+                paths.tmpHtmlPath,
+                WdSaveFormat.wdFormatFilteredHTML,
+                SaveNativePictureFormat: true
+            );
+
             // ドキュメントを閉じる
             docCopy.Close();
             
