@@ -202,7 +202,7 @@ namespace MJS_fileJoin
             return statusCode;
         }
 
-        private void mergeHeaderFile()
+        private void MergeHeaderFile()
         {
             string mergeText = "";
             string headerFilePath = "";
