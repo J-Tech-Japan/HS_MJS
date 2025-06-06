@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -76,7 +77,7 @@ namespace MJS_fileJoin
         private void PrepareOutputDirectory()
         {
             // 新しいフォルダ名をタイムスタンプで生成（例: export_20240605_153045）
-            string newExportDir = "export_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            string newExportDir = textBox2.Text + DateTime.Now.ToString("yyyyMMdd_HHmmss");
             string outputPath = Path.Combine(tbOutputDir.Text, newExportDir);
 
             // 新しいディレクトリを作成
@@ -150,6 +151,58 @@ namespace MJS_fileJoin
             list.DocumentElement.AppendChild(list.CreateWhitespace("\n"));
 
             list.Save(Path.Combine(tbOutputDir.Text, "joinList.xml"));
+        }
+
+        // インデックスページの準備処理
+        private XmlNode PrepareIndexPage(
+            string htmlDir,
+            string outputDir,
+            XmlNode objTocRoot,
+            XmlDocument objToc,
+            TextBox tbChangeTitle,
+            TextBox tbAddTop)
+        {
+            // index.htmlが未作成かつ元フォルダに存在する場合
+            if (!File.Exists(Path.Combine(outputDir, "index.html")) && File.Exists(Path.Combine(htmlDir, "index.html")))
+            {
+                string indexHtml;
+                using (var sr = new StreamReader(Path.Combine(htmlDir, "index.html")))
+                {
+                    indexHtml = sr.ReadToEnd();
+                }
+
+                if (tbChangeTitle.Enabled)
+                {
+                    indexHtml = Regex.Replace(indexHtml, "<title>.+</title>", "<title>" + tbChangeTitle.Text + "</title>", RegexOptions.IgnoreCase);
+                }
+                else if (tbAddTop.Enabled)
+                {
+                    indexHtml = Regex.Replace(indexHtml, "<title>.+</title>", "<title>" + tbAddTop.Text + "</title>", RegexOptions.IgnoreCase);
+                }
+
+                using (var sw = new StreamWriter(Path.Combine(outputDir, "index.html"), false, Encoding.UTF8))
+                {
+                    sw.Write(indexHtml);
+                }
+
+                string coverPage = Regex.Match(indexHtml, @"gDefaultTopic = ""#(.+?)"";").Groups[1].Value;
+                File.Copy(Path.Combine(htmlDir, coverPage), Path.Combine(outputDir, coverPage));
+
+                if (coverPage.Contains("00000"))
+                {
+                    CopyDirectory(
+                        Path.Combine(Path.Combine(htmlDir, "template"), "images"),
+                        Path.Combine(Path.Combine(outputDir, "template"), "images"),
+                        true);
+                }
+
+                if (tbAddTop.Enabled)
+                {
+                    objTocRoot.InnerXml = @"<item title=""" + tbAddTop.Text + @"""/>";
+                    objTocRoot = objTocRoot.LastChild;
+                }
+            }
+            return objTocRoot;
         }
     }
 }
