@@ -243,7 +243,7 @@ namespace MJS_fileJoin
             }
         }
 
-        private void createToc(XmlNode objToc)
+        private void CreateToc(XmlNode objToc)
         {
             string htmlToc = "";
             foreach (XmlNode toc in objToc.SelectNodes("item"))
@@ -280,7 +280,7 @@ namespace MJS_fileJoin
 
                 if (toc.SelectNodes("item").Count != 0)
                 {
-                    createToc(toc);
+                    CreateToc(toc);
                 }
             }
 

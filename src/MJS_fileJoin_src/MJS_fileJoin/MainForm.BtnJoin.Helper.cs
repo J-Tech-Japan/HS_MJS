@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -74,6 +75,8 @@ namespace MJS_fileJoin
         //}
 
         // 出力ディレクトリを準備
+        // 暫定的に実装しているメソッド
+        // タイムスタンプ付きの新しいフォルダを作成してHTMLフォルダの内容をコピー
         private void PrepareOutputDirectory()
         {
             // 新しいフォルダ名をタイムスタンプで生成（例: export_20240605_153045）
@@ -203,6 +206,91 @@ namespace MJS_fileJoin
                 }
             }
             return objTocRoot;
+        }
+
+        // 目次アイテムごとのHTMLファイルを処理し、gTopicIdを書き換えて保存
+        private void UpdateHtmlFilesWithTocId(XmlDocument objToc, string outputDir, string exportDir)
+        {
+            foreach (XmlElement tocItem in objToc.SelectNodes(".//item[boolean(@href)]"))
+            {
+                StreamReader sr = null;
+                StreamWriter sw = null;
+                string htmlFileName;
+                if (tocItem.GetAttribute("href").Contains("#"))
+                {
+                    string[] parts = tocItem.GetAttribute("href").Split('#');
+                    if (parts.Length >= 2)
+                    {
+                        string result = parts[1];
+                        htmlFileName = result + ".html";
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    htmlFileName = tocItem.GetAttribute("href") + ".html";
+                }
+
+                string htmlFilePath = Path.Combine(tbOutputDir.Text, exportDir, htmlFileName);
+                sr = new StreamReader(htmlFilePath);
+                string selHtml = sr.ReadToEnd();
+                sr.Close();
+
+                string tocId = "";
+                foreach (XmlElement objTocItem in tocItem.SelectNodes("ancestor-or-self::item"))
+                {
+                    if (tocId != "")
+                    {
+                        tocId += ".";
+                    }
+                    int precedingItemCount = objTocItem.SelectNodes("preceding-sibling::item[boolean(item)]|self::item[boolean(item)]").Count;
+                    tocId += precedingItemCount.ToString();
+                    if (objTocItem.SelectSingleNode("item") == null)
+                    {
+                        tocId += "_";
+                        tocId += (objTocItem.SelectNodes("preceding-sibling::item[not(boolean(item)) and (count(preceding-sibling::item[boolean(item)]) = " + precedingItemCount + ")]").Count + 1).ToString();
+                    }
+                }
+
+                selHtml = Regex.Replace(selHtml, @"(?<=gTopicId[\s]*=[\s]*"")[^""]*(?="")", tocId);
+
+                // 書き込み
+                sw = new StreamWriter(htmlFilePath, false, Encoding.UTF8);
+                sw.Write(selHtml);
+                sw.Close();
+            }
+        }
+
+        // HTML出力後の処理をメソッド化
+        private void AfterHtmlOutput(string outputDirPath)
+        {
+            DialogResult selectMess = MessageBox.Show(
+                outputDirPath + "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？",
+                "HTML出力成功",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (selectMess == DialogResult.Yes)
+            {
+                try
+                {
+                    Process.Start(Path.Combine(outputDirPath, "index.html"));
+                }
+                catch
+                {
+                    MessageBox.Show("HTMLの出力に失敗しました。", "HTML出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            if (checkBox2.Checked)
+            {
+                tabControl1.SelectedIndex = 1;
+                listBox2.Items.Clear();
+                listBox2.Items.Add(outputDirPath);
+                button12.PerformClick();
+            }
         }
     }
 }
