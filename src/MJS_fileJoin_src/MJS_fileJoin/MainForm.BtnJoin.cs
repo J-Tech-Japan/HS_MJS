@@ -92,6 +92,7 @@ namespace MJS_fileJoin
             //        lsfiles.Add(selRow["Column4"].ToString() + ".html");
 
             int picCount = 0;
+
             foreach (string htmlDir in lbHtmlList.Items)
             {
                 picCount++;
@@ -113,117 +114,22 @@ namespace MJS_fileJoin
             //            sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2"), @"(?<=>)([^<]*?)'([^<]*?)(?=<)", "$1&apos;$2")));
             sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;")));
             sw.Close();
-            //Dictionary<string, string> mergeScript = new Dictionary<string, string>();
-            foreach (XmlElement tocItem in objToc.SelectNodes(".//item[boolean(@href)]"))
-            {
-                if (tocItem.GetAttribute("href").Contains("#"))
-                {
-                    string[] parts = tocItem.GetAttribute("href").Split('#');
 
-                    if (parts.Length >= 2)
-                    {
-                        string result = parts[1];
-                        sr = new StreamReader(Path.Combine(tbOutputDir.Text, exportDir, result + ".html"));
-
-                    }
-
-                }
-                else
-                {
-                    sr = new StreamReader(Path.Combine(tbOutputDir.Text, exportDir, tocItem.GetAttribute("href") + ".html"));
-                }
-                string selHtml = sr.ReadToEnd();
-                sr.Close();
-
-                string tocId = "";
-                foreach (XmlElement objTocItem in tocItem.SelectNodes("ancestor-or-self::item"))
-                {
-                    if (tocId != "")
-                    {
-                        tocId += ".";
-                    }
-                    int precedingItemCount = objTocItem.SelectNodes("preceding-sibling::item[boolean(item)]|self::item[boolean(item)]").Count;
-                    tocId += precedingItemCount.ToString();
-                    if (objTocItem.SelectSingleNode("item") == null)
-                    {
-                        tocId += "_";
-                        tocId += (objTocItem.SelectNodes("preceding-sibling::item[not(boolean(item)) and (count(preceding-sibling::item[boolean(item)]) = " + precedingItemCount + ")]").Count + 1).ToString();
-                    }
-                }
-
-                selHtml = Regex.Replace(selHtml, @"(?<=gTopicId[\s]*=[\s]*"")[^""]*(?="")", tocId);
-                if (tocItem.GetAttribute("href").Contains("#"))
-                {
-                    string[] parts = tocItem.GetAttribute("href").Split('#');
-
-                    if (parts.Length >= 2)
-                    {
-                        string result = parts[1];
-                        sw = new StreamWriter(Path.Combine(tbOutputDir.Text, exportDir, result + ".html"), false, Encoding.UTF8);
-                    }
-
-                }
-                else
-                {
-                    sw = new StreamWriter(Path.Combine(tbOutputDir.Text, exportDir, tocItem.GetAttribute("href") + ".html"), false, Encoding.UTF8);
-                }
-
-                //string pattern = @"mergePage = {(.*?)};";
-                //Match match = Regex.Match(selHtml, pattern, RegexOptions.Singleline);
-
-                //if (match.Success)
-                //{
-                //    string mergePageData = match.Groups[1].Value;
-
-                //    // Extract key-value pairs from mergePageData
-                //    pattern = @"(\w+):'(\w+)'";
-                //    MatchCollection matches = Regex.Matches(mergePageData, pattern);
-
-                //    // Output the extracted key-value pairs
-                //    foreach (Match m in matches)
-                //    {
-                //        string key = m.Groups[1].Value;
-                //        string value = m.Groups[2].Value;
-                //        if (!String.IsNullOrEmpty(key) && !String.IsNullOrEmpty(key)&& !mergeScript.Any(x => x.Key == key && x.Value == value))
-                //            mergeScript.Add(key, value);
-                //    }
-                //}
-                sw.Write(selHtml);
-                sw.Close();
-            }
+            // 目次アイテムごとのHTMLファイルを処理し、gTopicIdを書き換えて保存
+            UpdateHtmlFilesWithTocId(objToc, tbOutputDir.Text, exportDir);
 
             //目次出力
-            createToc(objToc.DocumentElement);
+            CreateToc(objToc.DocumentElement);
 
             // chbListOutputがチェックされている場合にjoinList.xmlを出力する
             OutputJoinListXml();
-
-            
 
             //書誌情報ファイルのマージ
             mergeHeaderFile();
 
             Cursor.Current = prevCursor;
 
-            DialogResult selectMess = MessageBox.Show(tbOutputDir.Text + "\\" + exportDir + "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？", "HTML出力成功", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (selectMess == DialogResult.Yes)
-            {
-                try
-                {
-                    Process.Start(tbOutputDir.Text + "\\" + exportDir + @"\index.html");
-                }
-                catch
-                {
-                    MessageBox.Show("HTMLの出力に失敗しました。", "HTML出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            if (checkBox2.Checked)
-            {
-                tabControl1.SelectedIndex = 1;
-                listBox2.Items.Clear();
-                listBox2.Items.Add(tbOutputDir.Text + "\\" + exportDir);
-                button12.PerformClick();
-            }
+            AfterHtmlOutput(Path.Combine(tbOutputDir.Text, exportDir));
         }
     }
 }
