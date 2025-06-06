@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,58 +18,20 @@ namespace MJS_fileJoin
             Cursor prevCursor = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
 
-            // バリデーション
+            // 入力バリデーション
             if (!ValidateInput())
             {
                 Cursor.Current = prevCursor;
                 return;
             }
 
-            StreamReader sr = null;
             StreamWriter sw = null;
 
             List<string> errorList = new List<string>();
 
-            //テンプレート展開
-            //System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            //using (Stream stream = assembly.GetManifestResourceStream("MJS_fileJoin.htmlTemplates.zip"))
-            //{
-            //    FileStream fs = File.Create(tbOutputDir.Text + "\\htmlTemplates.zip");
-            //    stream.Seek(0, SeekOrigin.Begin);
-            //    stream.CopyTo(fs);
-            //    fs.Close();
-            //}
-
-
-            //if (Directory.Exists(tbOutputDir.Text + "\\htmlTemplates"))
-            //{
-            //    Directory.Delete(tbOutputDir.Text + "\\htmlTemplates", true);
-            //}
-
-            //ZipFile.ExtractToDirectory(tbOutputDir.Text + "\\htmlTemplates.zip", tbOutputDir.Text);
-
-            //if (Directory.Exists(tbOutputDir.Text + "\\" + exportDir))
-            //{
-            //    Directory.Delete(tbOutputDir.Text + "\\" + exportDir, true);
-            //}
-            //Directory.Move(tbOutputDir.Text + "\\htmlTemplates", tbOutputDir.Text + "\\" + exportDir);
-
-            //File.Delete(tbOutputDir.Text + "\\htmlTemplates.zip");
-
-            //' Ver - 2023.16.08 - VyNL - ↑ - 追加'
-
             // 出力ディレクトリの準備
-            // ここでexportDir変数に新しいフォルダ名が格納される
+            // exportDir変数に新しいフォルダ名が格納される
             PrepareOutputDirectory();
-
-            //if (Directory.Exists(tbOutputDir.Text + "\\" + exportDir))
-            //{
-            //    Directory.Delete(tbOutputDir.Text + "\\" + exportDir, true);
-            //}
-
-            //Directory.CreateDirectory(tbOutputDir.Text + "\\" + exportDir);
-
-            //CopyDirectory(lbHtmlList.Items[0].ToString(), tbOutputDir.Text + "\\" + exportDir);
 
             XmlDocument objToc = new XmlDocument();
             XmlNode objTocRoot = null;
@@ -81,24 +42,20 @@ namespace MJS_fileJoin
             objToc.LoadXml(@"<result></result>");
             objTocRoot = objToc.DocumentElement;
 
-            //各webHelpフォルダ処理
-
             // HTMLファイルリストの作成
             List<string> lsfiles = CreateHtmlFileList();
-
-            //List<string> lsfiles = new List<string>();
-            //foreach (string htmlDir in lbHtmlList.Items)
-            //    foreach (DataRow selRow in bookInfo[htmlDir].Select("Column1 = true"))
-            //        lsfiles.Add(selRow["Column4"].ToString() + ".html");
 
             int picCount = 0;
 
             foreach (string htmlDir in lbHtmlList.Items)
             {
                 picCount++;
-                List<string> pics = new List<string>();
-                foreach (string file in Directory.GetFiles(htmlDir + "\\pict", "*.*", SearchOption.AllDirectories))
-                    pics.Add(Path.GetFileName(file));
+                var pictDir = Path.Combine(htmlDir, "pict");
+                List<string> pics = Directory.Exists(pictDir)
+                    ? Directory.GetFiles(pictDir, "*.*", SearchOption.AllDirectories)
+                        .Select(Path.GetFileName)
+                        .ToList()
+                    : new List<string>();
 
                 string outputDir = Path.Combine(tbOutputDir.Text, exportDir);
 
@@ -111,7 +68,7 @@ namespace MJS_fileJoin
 
             //全文検索ファイル出力
             sw = new StreamWriter(Path.Combine(tbOutputDir.Text, exportDir, "search.js"), false, Encoding.UTF8);
-            //            sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2"), @"(?<=>)([^<]*?)'([^<]*?)(?=<)", "$1&apos;$2")));
+            // sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2"), @"(?<=>)([^<]*?)'([^<]*?)(?=<)", "$1&apos;$2")));
             sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;")));
             sw.Close();
 
@@ -125,7 +82,7 @@ namespace MJS_fileJoin
             OutputJoinListXml();
 
             //書誌情報ファイルのマージ
-            mergeHeaderFile();
+            MergeHeaderFile();
 
             Cursor.Current = prevCursor;
 
