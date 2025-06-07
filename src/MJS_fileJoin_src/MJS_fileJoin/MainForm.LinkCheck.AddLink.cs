@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -72,6 +73,33 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");
             lvi.BackColor = Color.Red;
+        }
+
+        public static HttpStatusCode GetStatusCode(string url)
+        {
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse res = null;
+            HttpStatusCode statusCode;
+
+            try
+            {
+                res = (HttpWebResponse)req.GetResponse();
+                statusCode = res.StatusCode;
+            }
+            catch (WebException ex)
+            {
+                res = (HttpWebResponse)ex.Response;
+                if (res != null)
+                    statusCode = res.StatusCode;
+                else
+                    throw; // サーバ接続不可などの場合は再スロー
+            }
+            finally
+            {
+                if (res != null)
+                    res.Close();
+            }
+            return statusCode;
         }
     }
 }

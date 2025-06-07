@@ -51,7 +51,7 @@ namespace WordAddIn1
             MessageBox.Show(ErrMsg);
         }
 
-        // 画像をコピーして一時フォルダを削除
+        // 画像をコピーして一時フォルダを削除（元のコード）
         //public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)
         //{
         //    if (Directory.Exists(tmpFolder))

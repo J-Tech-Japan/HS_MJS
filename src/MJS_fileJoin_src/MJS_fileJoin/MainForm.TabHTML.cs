@@ -20,7 +20,7 @@ namespace MJS_fileJoin
                     openFileDialog1.InitialDirectory = Path.GetDirectoryName(tbSelectJoinList.Text);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
             openFileDialog1.ShowDialog();
@@ -112,7 +112,7 @@ namespace MJS_fileJoin
                         tbOutputDir.Text = list.SelectSingleNode(".//outputDir/@src").InnerText;
                     }
                 }
-                catch (XmlException xmlex)
+                catch (XmlException)
                 {
                     if (Regex.IsMatch(tbSelectJoinList.Text, @"\.xml$"))
                     {
@@ -124,7 +124,7 @@ namespace MJS_fileJoin
                     }
                     tbSelectJoinList.Text = "";
                 }
-                catch (XPathException xpathex)
+                catch (XPathException)
                 {
                     MessageBox.Show("結合リストが破損しています。");
                     tbSelectJoinList.Text = "";
@@ -244,7 +244,7 @@ namespace MJS_fileJoin
         {
             if ((folderBrowserDialog1.ShowDialog() == DialogResult.OK) && !lbHtmlList.Items.Contains(folderBrowserDialog1.SelectedPath))
             {
-                addHtmlDir(folderBrowserDialog1.SelectedPath);
+                AddHtmlDir(folderBrowserDialog1.SelectedPath);
             }
         }
 
@@ -266,7 +266,7 @@ namespace MJS_fileJoin
 
             for (int i = 0; i < webHelpFolder.Count; i++)
             {
-                if (!addHtmlDir(webHelpFolder[i])) continue;
+                if (!AddHtmlDir(webHelpFolder[i])) continue;
             }
         }
 
@@ -304,6 +304,71 @@ namespace MJS_fileJoin
             bookInfo.Clear();
             tbOutputDir.Text = "";
             chbListOutput.Checked = false;
+        }
+
+        private bool AddHtmlDir(string dirPath)
+        {
+            string headerDir = Path.Combine(Path.GetDirectoryName(dirPath), "headerFile");
+            if (!Directory.Exists(headerDir))
+            {
+                MessageBox.Show($"「{headerDir}」フォルダが存在しません。");
+                return false;
+            }
+
+            string[] bibFiles = Directory.GetFiles(headerDir, "???.txt");
+            if (bibFiles.Length == 0)
+            {
+                MessageBox.Show($"「{headerDir}」に書誌情報ファイルが存在しません。");
+                return false;
+            }
+
+            var table = new System.Data.DataTable();
+            table.Columns.Add("Column1", typeof(bool));
+            table.Columns.Add("Column2", typeof(string));
+            table.Columns.Add("Column3", typeof(string));
+            table.Columns.Add("Column4", typeof(string));
+            table.Columns.Add("Column5", typeof(string));
+
+            bool hasHtml = false;
+            try
+            {
+                using (var sr = new StreamReader(bibFiles[0]))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        string[] fields = sr.ReadLine().Split('\t');
+                        if (fields.Length < 3) continue;
+                        if (fields[2].Contains("#")) continue;
+
+                        string htmlPath = Path.Combine(dirPath, fields[2] + ".html");
+                        if (fields.Length > 3 && !string.IsNullOrEmpty(fields[3]))
+                            table.Rows.Add(true, fields[0], fields[1], fields[2], fields[3]);
+                        else
+                            table.Rows.Add(true, fields[0], fields[1], fields[2]);
+
+                        if (!hasHtml && File.Exists(htmlPath))
+                            hasHtml = true;
+                        if (!File.Exists(htmlPath))
+                            MessageBox.Show($"{htmlPath}が存在しません。\r\nwebHelpフォルダ内にHTMLを配置後、結合を実行してください。");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("書誌情報ファイルの読み込み中にエラーが発生しました: " + ex.Message);
+                return false;
+            }
+
+            if (!hasHtml)
+            {
+                MessageBox.Show("書誌情報ファイルに紐づくHTMLファイルが見つかりません。\nフォルダをご確認ください。");
+                return false;
+            }
+
+            bookInfo[dirPath] = table;
+            lbHtmlList.Items.Add(dirPath);
+            lbHtmlList.SelectedIndex = lbHtmlList.Items.Count - 1;
+            return true;
         }
     }
 }

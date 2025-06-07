@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -77,6 +76,7 @@ namespace MJS_fileJoin
         // 出力ディレクトリを準備
         // 暫定的に実装しているメソッド
         // タイムスタンプ付きの新しいフォルダを作成してHTMLフォルダの内容をコピー
+
         private void PrepareOutputDirectory()
         {
             // 新しいフォルダ名をタイムスタンプで生成（例: export_20240605_153045）
@@ -87,7 +87,7 @@ namespace MJS_fileJoin
             Directory.CreateDirectory(outputPath);
 
             // 最初のHTMLフォルダの内容をコピー
-            CopyDirectory(lbHtmlList.Items[0].ToString(), outputPath);
+            CopyDirectoryRecursive(lbHtmlList.Items[0].ToString(), outputPath);
 
             // exportDir変数を新しいフォルダ名に更新（他の処理で利用する場合）
             exportDir = newExportDir;
@@ -193,7 +193,7 @@ namespace MJS_fileJoin
 
                 if (coverPage.Contains("00000"))
                 {
-                    CopyDirectory(
+                    CopyDirectoryWithOverwriteOption(
                         Path.Combine(Path.Combine(htmlDir, "template"), "images"),
                         Path.Combine(Path.Combine(outputDir, "template"), "images"),
                         true);
@@ -290,6 +290,112 @@ namespace MJS_fileJoin
                 listBox2.Items.Clear();
                 listBox2.Items.Add(outputDirPath);
                 button12.PerformClick();
+            }
+        }
+
+        private void CreateToc(XmlNode objToc)
+        {
+            string htmlToc = "";
+            foreach (XmlNode toc in objToc.SelectNodes("item"))
+            {
+                if (htmlToc != "")
+                {
+                    htmlToc = htmlToc + ",";
+                }
+
+                htmlToc = htmlToc + @"{""type"":""";
+
+                if (toc.SelectNodes("item").Count != 0)
+                {
+                    htmlToc = htmlToc + "book";
+                }
+                else
+                {
+                    htmlToc = htmlToc + "item";
+                }
+
+                htmlToc += @""",""name"":""" + ((XmlElement)toc).GetAttribute("title") + @"""";
+
+                if (toc.SelectNodes("item").Count != 0)
+                {
+                    htmlToc += @",""key"":""toc" + (toc.SelectNodes("preceding::item[boolean(item)]").Count + toc.SelectNodes("ancestor-or-self::item").Count) + @"""";
+                }
+
+                if (((XmlElement)toc).GetAttribute("href") != "")
+                {
+                    htmlToc += @",""url"":""" + ((XmlElement)toc).GetAttribute("href") + @".html""";
+                }
+
+                htmlToc += "}";
+
+                if (toc.SelectNodes("item").Count != 0)
+                {
+                    CreateToc(toc);
+                }
+            }
+
+            if (htmlToc != "")
+            {
+
+                if (Regex.IsMatch(htmlToc, @"""url""\s*:\s*""([^""]*)#([^""]*)"""))
+                {
+                    htmlToc = Regex.Replace(htmlToc, @"""url""\s*:\s*""([^""]*)#([^""]*)""", match =>
+                    {
+                        string url = match.Groups[1].Value;
+                        string hash = match.Groups[2].Value;
+
+                        return $@"""url"": ""{url}.html#{hash}""";
+                    });
+                }
+
+                int itemCount = objToc.SelectNodes("preceding::item[boolean(item)]").Count + objToc.SelectNodes("ancestor-or-self::item").Count;
+                StreamWriter sw = new StreamWriter(tbOutputDir.Text + "\\" + exportDir + "\\whxdata\\toc" + ((itemCount != 0) ? itemCount.ToString() : "") + ".new.js", false, Encoding.UTF8);
+                sw.WriteLine("(function() {");
+                sw.WriteLine("var toc =  [" + htmlToc + "];");
+                sw.WriteLine("window.rh.model.publish(rh.consts('KEY_TEMP_DATA'), toc, { sync:true });");
+                sw.WriteLine("})();");
+                sw.Close();
+            }
+        }
+
+        private void MergeHeaderFile()
+        {
+            string mergeText = "";
+            string headerFilePath = "";
+            foreach (string file in lbHtmlList.Items)
+            {
+                string[] files = Directory.GetFiles(file, "*.html");
+                string pathName = "";
+
+                foreach (string f in files)
+                {
+                    if (Regex.IsMatch(Path.GetFileName(f), @"^[A-Z]{3}\d+\.html$"))
+                    {
+                        pathName = Regex.Replace(Path.GetFileName(f), @"\d+\.html$", "");
+                        break;
+                    }
+                }
+                using (StreamReader sr = new StreamReader(Path.Combine(Path.Combine(Path.GetDirectoryName(file), "headerFile"), pathName + ".txt")))
+                {
+                    mergeText += sr.ReadToEnd();
+                }
+                if (!headerFilePath.Contains(pathName + "_")) headerFilePath += pathName + "_";
+            }
+            List<string> ls = new List<string>();
+
+            if (!Directory.Exists(Path.Combine(tbOutputDir.Text, "headerFile"))) Directory.CreateDirectory(Path.Combine(tbOutputDir.Text, "headerFile"));
+            using (StreamWriter sw = new StreamWriter(Path.Combine(tbOutputDir.Text, "headerFile\\" + Regex.Replace(headerFilePath, @"_$", "")) + ".txt"))
+            using (StringReader sr = new StringReader(mergeText))
+            {
+                while (sr.Peek() > 0)
+                {
+                    string lineText = sr.ReadLine();
+                    if (!ls.Contains(Regex.Replace(lineText, @"^.*?\t.*?\t(.*?)$", "$1")))
+                    {
+                        ls.Add(Regex.Replace(lineText, @"^.*?\t.*?\t(.*?)$", "$1"));
+                        sw.WriteLine(lineText);
+                    }
+                }
             }
         }
     }

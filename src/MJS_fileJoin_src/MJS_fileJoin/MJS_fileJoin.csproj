@@ -49,6 +49,9 @@
     <Compile Include="define.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainForm.BtnJoin.CopyDirectory.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.BtnJoin.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,9 +86,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.TabWord.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainForm.Utils.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Program.cs" />
