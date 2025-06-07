@@ -8,6 +8,7 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
+        // HTMLファイルのリンクチェック
         private void LinkCheck(string folder)
         {
             string[] files = Directory.GetFiles(folder, "*.html", SearchOption.AllDirectories);
@@ -39,6 +40,7 @@ namespace MJS_fileJoin
             }
         }
 
+        // 進捗バーの初期化
         private void ShowProgressStart(int fileCount)
         {
             progressBar2.Visible = true;
@@ -47,6 +49,7 @@ namespace MJS_fileJoin
             label14.Visible = true;
         }
 
+        // 進捗バーとラベルを更新
         private void UpdateProgress(string file, string folder)
         {
             label14.Text = Path.GetFileName(file) + " / " + Path.GetFileName(folder);
@@ -54,6 +57,7 @@ namespace MJS_fileJoin
             progressBar2.Increment(1);
         }
 
+        // 指定ファイルの全テキストをUTF-8で読み込む
         private string ReadAllText(string file)
         {
             using (StreamReader sr = new StreamReader(file, Encoding.UTF8))
@@ -62,30 +66,35 @@ namespace MJS_fileJoin
             }
         }
 
+        // HTML内のアンカーリンク（<a href="">）を抽出
         private MatchCollection GetAnchorMatches(string allText)
         {
             Regex r2 = new Regex(@"(?<=<a href="")([^""]*?)"">([^<]*?)(?=</a>)");
             return r2.Matches(allText);
         }
 
+        // MJS_refクラスの参照を抽出
         private MatchCollection GetMjsRefMatches(string allText)
         {
             Regex r3 = new Regex(@"(?<=<p\sclass=""MJS_ref""><span\sname=""([^""]+)""\sclass=""ref""\s*/>([^<]*?)</p>)");
             return r3.Matches(allText);
         }
 
+        // refPage定義部分を抽出
         private MatchCollection GetRefPageMatches(string allText)
         {
             Regex r4 = new Regex(@"refPage\s*=\s*{([\s\S]*?)}");
             return r4.Matches(allText);
         }
 
+        // mergePage定義部分を抽出
         private MatchCollection GetMergePageMatches(string allText)
         {
             Regex r5 = new Regex(@"mergePage\s*=\s*{([\s\S]*?)}");
             return r5.Matches(allText);
         }
 
+        // refPageリンクの検証
         private void HandleRefPageLinks(string file, MatchCollection mc3, MatchCollection mcRefPage, MatchCollection mcMergePage)
         {
             var refPage = mcRefPage[0].Groups[1].Value;
@@ -126,6 +135,7 @@ namespace MJS_fileJoin
             }
         }
 
+        // アンカーリンクの検証
         private void HandleAnchorLink(string file, Match m)
         {
             string targetURL = "";

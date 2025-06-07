@@ -5,15 +5,6 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
-        /// <summary>
-        /// リンク先の文字列（例: "page#section" や "page.html#section.html"）から、
-        /// 対象HTMLファイルの絶対パス（targetURL）とアンカー名（anchor）を抽出・整形する。
-        /// </summary>
-        /// <param name="file">現在処理中のHTMLファイルのパス</param>
-        /// <param name="m">リンク先を含むMatchオブジェクト（m.Groups[1].Valueがリンク先）</param>
-        /// <param name="targetURL">抽出されたリンク先HTMLファイルの絶対パス（out）</param>
-        /// <param name="anchor">抽出されたアンカー名（out）</param>
-        
         private void ParseLink(string file, Match m, out string targetURL, out string anchor)
         {
             // リンク先を # で分割し、ページ部分とアンカー部分に分ける
