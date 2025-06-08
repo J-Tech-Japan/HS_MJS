@@ -6,6 +6,7 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
+        // 指定スタイルの章扉・章節項番号を後方から検索し、2つ目以降を削除（リファクタリング版）
         private void RemoveLastSectionsByStyle(Word.Document objDocLast, MainForm fm, int chapCntLast, ref bool last)
         {
             fm.label10.Text = "章扉章節項番号修正中...";
@@ -15,44 +16,48 @@ namespace DocMergerComponent
             string[] lastItems = { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）", "MJS_マニュアルタイトル", "MJS_目次" };
             foreach (string styleName in lastItems)
             {
-                object styleObject = styleName;
-                int allChap = objDocLast.Sections.Count;
-                for (int i = allChap; i > chapCntLast; i--)
+                // スタイルが存在しない場合はスキップ
+                if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
                 {
-                    try
+                    // スタイルがなければスキップやログ出力
+                    continue;
+                }
+                object styleObject = styleName;
+                int i = objDocLast.Sections.Count;
+                while (i > chapCntLast)
+                {
+                    Word.Range wr = objDocLast.Sections[i].Range;
+                    wr.Find.ClearFormatting();
+                    wr.Find.set_Style(ref styleObject);
+                    //wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                    bool found = wr.Find.Execute();
+                    if (found && wr.Find.Found)
                     {
-                        Word.Range wr = objDocLast.Sections[i].Range;
-                        wr.Find.ClearFormatting();
-                        if (objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+                        if (last)
                         {
-                            wr.Find.set_Style(ref styleObject);
+                            last = false;
                         }
                         else
                         {
-                            // スタイルがなければスキップやログ出力
-                        }
-                        //wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                        wr.Find.Execute();
-                        if (wr.Find.Found)
-                        {
-                            if (last)
-                                last = false;
-                            else
-                            {
-                                objDocLast.Sections[i].Range.Delete();
-                                i--;
-                                chapCntLast--;
-                            }
+                            wr.Delete();
+                            // セクション削除後はインデックスを1つ戻す
+                            i--;
+                            chapCntLast--;
                         }
                     }
-                    catch
+                    else
                     {
-                        break;
+                        // 見つからなければ次のセクションへ
+                        i--;
                     }
+                    // 進捗バーを更新
+                    if (fm.progressBar1.Value < fm.progressBar1.Maximum)
+                        fm.progressBar1.Value++;
                 }
             }
         }
 
+        // 指定スタイルの重複セクションを削除（リファクタリング版）
         private void RemoveDuplicateSectionsByStyle(Word.Document objDocLast, MainForm fm, int chapCnt, ref int chapCntLast)
         {
             fm.label10.Text = "重複箇所削除中...";
@@ -62,38 +67,46 @@ namespace DocMergerComponent
             string[] lsStyleName = { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）", "MJS_マニュアルタイトル", "MJS_目次", "奥付タイトル", "索引見出し" };
             foreach (string styleName in lsStyleName)
             {
+                // スタイルが存在しない場合はスキップ
+                if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+                {
+                    continue;
+                }
                 object styleObject = styleName;
-                for (int i = chapCnt + 1; i <= chapCntLast; i++)
+                int i = chapCnt + 1;
+                while (i <= chapCntLast)
                 {
                     Word.Range wr = objDocLast.Sections[i].Range;
                     wr.Find.ClearFormatting();
-
-                    if (objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+                    wr.Find.set_Style(ref styleObject);
+                    //wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                    bool found = wr.Find.Execute();
+                    if (found && wr.Find.Found)
                     {
-                        wr.Find.set_Style(ref styleObject);
+                        wr.Delete();
+                        chapCntLast--;
+                        // セクション削除後は同じインデックスで再チェック
                     }
                     else
                     {
-                        // スタイルがなければスキップやログ出力
+                        i++;
                     }
-
-                    //wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                    wr.Find.Execute();
-
-                    if (wr.Find.Found)
-                    {
-                        objDocLast.Sections[i].Range.Delete();
-                        i--;
-                        chapCntLast--;
-                    }
+                    // 進捗バーを更新
+                    if (fm.progressBar1.Value < fm.progressBar1.Maximum)
+                        fm.progressBar1.Value++;
                 }
                 fm.progressBar1.Increment(1);
             }
         }
 
-        // 指定スタイルのセクションを後方から検索し、2つ目以降を削除
+        // 指定スタイルのセクションを後方から検索し、2つ目以降を削除（リファクタリング版）
         private void RemoveDuplicateIndexSections(Word.Document doc, string styleName)
         {
+            // スタイルが存在しない場合はスキップ
+            if (!doc.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+            {
+                return;
+            }
             object styleObject = styleName;
             bool foundFirst = false;
             int sectionCount = doc.Sections.Count;
@@ -101,17 +114,14 @@ namespace DocMergerComponent
             {
                 Word.Range wr = doc.Sections[i].Range;
                 wr.Find.ClearFormatting();
-                if (doc.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
-                {
-                    wr.Find.set_Style(ref styleObject);
-                }
+                wr.Find.set_Style(ref styleObject);
                 wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                wr.Find.Execute();
-                if (wr.Find.Found)
+                bool found = wr.Find.Execute();
+                if (found && wr.Find.Found)
                 {
                     if (foundFirst)
                     {
-                        doc.Sections[i].Range.Delete();
+                        wr.Delete();
                         i--; // セクション削除後はインデックスを1つ戻す
                     }
                     else
