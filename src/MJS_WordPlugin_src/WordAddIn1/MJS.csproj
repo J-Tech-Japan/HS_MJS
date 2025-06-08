@@ -285,6 +285,9 @@
     <Compile Include="GenerateHTMLButton.CollectMergeScript.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GenerateHTMLButton.CopyImagesFromAppDataLocalTemp.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="GenerateHTMLButton.ProcessHTML.cs">
       <SubType>Component</SubType>
     </Compile>
