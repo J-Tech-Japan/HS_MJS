@@ -49,10 +49,13 @@
             this.button2 = this.Factory.CreateRibbonButton();
             this.button10 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
+            this.group3 = this.Factory.CreateRibbonGroup();
+            this.versionFileJoin = this.Factory.CreateRibbonLabel();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group4.SuspendLayout();
+            this.group3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -61,6 +64,7 @@
             this.tab1.Groups.Add(this.group1);
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group4);
+            this.tab1.Groups.Add(this.group3);
             this.tab1.Label = "MJSワードプラグイン";
             this.tab1.Name = "tab1";
             // 
@@ -188,12 +192,22 @@
             this.button3.ShowImage = true;
             this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateHTMLButton);
             // 
+            // group3
+            // 
+            this.group3.Items.Add(this.versionFileJoin);
+            this.group3.Name = "group3";
+            // 
+            // versionFileJoin
+            // 
+            this.versionFileJoin.Label = "label1";
+            this.versionFileJoin.Name = "versionFileJoin";
+            // 
             // RibbonMJS
             // 
             this.Name = "RibbonMJS";
             this.RibbonType = "Microsoft.Word.Document";
             this.Tabs.Add(this.tab1);
-            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.Ribbon1_Load);
+            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.RibbonMJS_Load);
             this.tab1.ResumeLayout(false);
             this.tab1.PerformLayout();
             this.group1.ResumeLayout(false);
@@ -202,6 +216,8 @@
             this.group2.PerformLayout();
             this.group4.ResumeLayout(false);
             this.group4.PerformLayout();
+            this.group3.ResumeLayout(false);
+            this.group3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -223,6 +239,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button8;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button9;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button10;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel versionFileJoin;
         //internal Microsoft.Office.Tools.Ribbon.RibbonButton button11;
     }
 

@@ -19,7 +19,6 @@ namespace DocMergerComponent
                 // スタイルが存在しない場合はスキップ
                 if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
                 {
-                    // スタイルがなければスキップやログ出力
                     continue;
                 }
                 object styleObject = styleName;
