@@ -65,6 +65,7 @@ namespace WordAddIn1
                         if (File.Exists(filePath))
                         {
                             File.Copy(filePath, destPath, true);
+                            File.Delete(filePath); // コピー後に削除
                         }
                     }
                     catch (Exception)
