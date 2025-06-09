@@ -10,9 +10,8 @@ namespace WordAddIn1
         /*
         1. アクティブドキュメントと同じ階層に webhelpフォルダがあるか確認
         2. webhelpフォルダの中にある .htmlファイルをすべて調べる
-        3. AppData/Local/Temp を参照するimgタグがあれば webhelp に ImgFromTemp フォルダを作成
-        4. AppData/Local/Temp にある参照先の画像をすべて pict フォルダにコピー
-        5. imgタグの src 属性を新しい参照先に書き換える
+        3. AppData/Local/Temp にある参照先の画像をすべて pict フォルダにコピー
+        4. imgタグの src 属性を新しい参照先に書き換える
         */
 
         private void CopyImagesFromAppDataLocalTemp(string activeDocumentPath)
