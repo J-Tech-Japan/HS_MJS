@@ -1,8 +1,9 @@
-﻿using Microsoft.Office.Tools.Ribbon;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -26,6 +27,13 @@ namespace WordAddIn1
 
             Globals.ThisAddIn.Application.DocumentChange +=
                 new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
+
+            // アセンブリのバージョンを取得
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            string versionText = version.ToString(3); // "1.0.0" 形式で取得
+
+            // labelVersion はリボンデザイナで追加したラベルの名前
+            versionFileJoin.Label = $"\n\nバージョン\n{versionText}";
         }
 
         // KeyValuePairのValueで比較
