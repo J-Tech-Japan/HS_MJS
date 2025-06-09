@@ -347,6 +347,7 @@
     </EmbeddedResource>
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
+    <None Include="IncrementMinorVersion.ps1" />
     <None Include="MJS.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -741,4 +742,7 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

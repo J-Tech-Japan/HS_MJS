@@ -254,7 +254,9 @@ namespace WordAddIn1
             htmlTemplate1 += @"        		        	// 外部リンク" + "\n";
             htmlTemplate1 += @"        		        } else if (currentUri.match(/^#[A-Z]{3}[0-9]{5}$/)) {" + "\n";
             htmlTemplate1 += @"        		        	// 内部リンク" + "\n";
-            htmlTemplate1 += @"        		        } else if (!areDirectoriesEqual(currentUri) && checkFileName(currentUri)) {" + "\n";
+            htmlTemplate1 += @"                     } else if (currentUri.startsWith(""template/resource"")) {" + "\n";
+            htmlTemplate1 += @"	        	            // テンプレート用URL" + "\n";
+            htmlTemplate1 += @"                     } else if (!areDirectoriesEqual(currentUri) && checkFileName(currentUri)) {" + "\n";
             htmlTemplate1 += @"        		    	    // 外部参照" + "\n";
             htmlTemplate1 += @"        		    	    $(this).attr('href', changeFileNameWithHash(currentUri));" + "\n";
             htmlTemplate1 += @"        		        } else " + "\n";
