@@ -928,7 +928,7 @@
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "MainForm";
-            this.Text = "MJSワンソースマルチユース　ファイル結合ツール V2";
+            //this.Text = "MJSワンソースマルチユース　ファイル結合ツール V2";
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
