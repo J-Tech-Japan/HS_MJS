@@ -743,6 +743,6 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1"</PreBuildEvent>
+    <PreBuildEvent>if "$(ConfigurationName)"=="Release" powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1</PreBuildEvent>
   </PropertyGroup>
 </Project>
