@@ -602,7 +602,7 @@ namespace WordAddIn1
                     ParseBookInfo(bookInfoDic, mergeSetId, newInfo);
 
                     // 新旧比較処理
-                    int ret = checkDocInfo(oldInfo, newInfo, out checkResult);
+                    int ret = CheckDocInfo(oldInfo, newInfo, out checkResult);
 
                     // 処理結果が0:正常の場合
                     if (ret == 0)

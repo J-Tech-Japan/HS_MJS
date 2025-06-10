@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace MJS_fileJoin
@@ -13,6 +14,9 @@ namespace MJS_fileJoin
         public MainForm()
         {
             InitializeComponent();
+
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            this.Text = $"MJSファイル結合ツール [V{version.Major}.{version.Minor}.{version.Build}]";
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)

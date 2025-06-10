@@ -418,10 +418,10 @@
     <Compile Include="SetLinkButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="RibbonMJS.CheckDocInfomation.cs">
+    <Compile Include="RibbonMJS.CheckDocInfo.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="RibbonMJS.CheckSortInfomation.cs">
+    <Compile Include="RibbonMJS.CheckSortInfo.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="RibbonMJS.cs">
