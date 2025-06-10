@@ -1,37 +1,42 @@
-ï»¿using System.Reflection;
+using System.Management.Automation;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using Microsoft.PowerShell;
 
-// ã‚¢ã‚»ãƒ³ãƒ–ãƒªã«é–¢ã™ã‚‹ä¸€èˆ¬æƒ…å ±ã¯ã€ä»¥ä¸‹ã®å±æ€§ã‚»ãƒƒãƒˆã«ã‚ˆã£ã¦
-// åˆ¶å¾¡ã•ã‚Œã¾ã™ã€‚ã‚¢ã‚»ãƒ³ãƒ–ãƒªã«é–¢é€£ä»˜ã‘ã‚‰ã‚Œã¦ã„ã‚‹æƒ…å ±ã‚’å¤‰æ›´ã™ã‚‹ã«ã¯ã€
-// ã“ã‚Œã‚‰ã®å±æ€§å€¤ã‚’å¤‰æ›´ã—ã¾ã™ã€‚
-[assembly: AssemblyTitle("MJSãƒ¯ãƒ¼ãƒ‰ãƒ—ãƒ©ã‚°ã‚¤ãƒ³")]
+// ƒAƒZƒ“ƒuƒŠ‚ÉŠÖ‚·‚éˆê”Êî•ñ‚ÍAˆÈ‰º‚Ì‘®«ƒZƒbƒg‚É‚æ‚Á‚Ä
+// §Œä‚³‚ê‚Ü‚·BƒAƒZƒ“ƒuƒŠ‚ÉŠÖ˜A•t‚¯‚ç‚ê‚Ä‚¢‚éî•ñ‚ğ•ÏX‚·‚é‚É‚ÍA
+// ‚±‚ê‚ç‚Ì‘®«’l‚ğ•ÏX‚µ‚Ü‚·B
+[assembly: AssemblyTitle("MJSƒ[ƒhƒvƒ‰ƒOƒCƒ“")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MJSãƒ¯ãƒ¼ãƒ‰ãƒ—ãƒ©ã‚°ã‚¤ãƒ³")]
-[assembly: AssemblyCopyright("Copyright Â©  2017")]
+[assembly: AssemblyProduct("MJSƒ[ƒhƒvƒ‰ƒOƒCƒ“")]
+[assembly: AssemblyCopyright("Copyright c  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// ComVisible ã‚’ false ã«è¨­å®šã™ã‚‹ã¨ã€ãã®å‹ã¯ã“ã®ã‚¢ã‚»ãƒ³ãƒ–ãƒªå†…ã§ COM ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‹ã‚‰
-// å‚ç…§ä¸å¯èƒ½ã«ãªã‚Šã¾ã™ã€‚COM ã‹ã‚‰ã“ã®ã‚¢ã‚»ãƒ³ãƒ–ãƒªå†…ã®å‹ã«ã‚¢ã‚¯ã‚»ã‚¹ã™ã‚‹å ´åˆã¯ã€
-// ãã®å‹ã® ComVisible å±æ€§ã‚’ true ã«è¨­å®šã—ã¦ãã ã•ã„ã€‚
+// ComVisible ‚ğ false ‚Éİ’è‚·‚é‚ÆA‚»‚ÌŒ^‚Í‚±‚ÌƒAƒZƒ“ƒuƒŠ“à‚Å COM ƒRƒ“ƒ|[ƒlƒ“ƒg‚©‚ç
+// QÆ•s‰Â”\‚É‚È‚è‚Ü‚·BCOM ‚©‚ç‚±‚ÌƒAƒZƒ“ƒuƒŠ“à‚ÌŒ^‚ÉƒAƒNƒZƒX‚·‚éê‡‚ÍA
+// ‚»‚ÌŒ^‚Ì ComVisible ‘®«‚ğ true ‚Éİ’è‚µ‚Ä‚­‚¾‚³‚¢B
 [assembly: ComVisible(false)]
 
-// ã“ã®ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆãŒ COM ã«å…¬é–‹ã•ã‚Œã‚‹å ´åˆã€æ¬¡ã® GUID ãŒ typelib ã® ID ã«ãªã‚Šã¾ã™
+// ‚±‚ÌƒvƒƒWƒFƒNƒg‚ª COM ‚ÉŒöŠJ‚³‚ê‚éê‡AŸ‚Ì GUID ‚ª typelib ‚Ì ID ‚É‚È‚è‚Ü‚·
 [assembly: Guid("efcb7755-f1d8-4bb1-b051-137af1a308da")]
 
-// ã‚¢ã‚»ãƒ³ãƒ–ãƒªã®ãƒãƒ¼ã‚¸ãƒ§ãƒ³æƒ…å ±ã¯æ¬¡ã® 4 ã¤ã®å€¤ã§æ§‹æˆã•ã‚Œã¦ã„ã¾ã™:
-//
-//      ãƒ¡ã‚¸ãƒ£ãƒ¼ ãƒãƒ¼ã‚¸ãƒ§ãƒ³
-//      ãƒã‚¤ãƒŠãƒ¼ ãƒãƒ¼ã‚¸ãƒ§ãƒ³ 
-//      ãƒ“ãƒ«ãƒ‰ç•ªå·
-//      ãƒªãƒ“ã‚¸ãƒ§ãƒ³
-//
-// ã™ã¹ã¦ã®å€¤ã‚’æŒ‡å®šã™ã‚‹ã‹ã€ä»¥ä¸‹ã®ã‚ˆã†ã« '*' ã‚’ä½¿ã£ã¦ãƒ“ãƒ«ãƒ‰ãŠã‚ˆã³ãƒªãƒ“ã‚¸ãƒ§ãƒ³ç•ªå·ã‚’
-// æ—¢å®šå€¤ã«ã™ã‚‹ã“ã¨ãŒã§ãã¾ã™ã€‚
-//[assembly: AssemblyVersion("3.1.*")]
-//[assembly: AssemblyFileVersion("3.1.*")]
+// Word‚ÌƒŠƒ{ƒ“‚É‚ÍƒŠƒrƒWƒ‡ƒ“‚ğœ‚­3‚Â‚Ì”š‚Åƒo[ƒWƒ‡ƒ“‚ğ•\¦‚µ‚Ü‚·
+// [ƒƒWƒƒ[ ƒo[ƒWƒ‡ƒ“.ƒ}ƒCƒi[ ƒo[ƒWƒ‡ƒ“.ƒrƒ‹ƒh”Ô†]
+// ‰Šú’l‚Í 3.1.0 ‚Å‚·B
+// ˆÈ‰º‚Ì”š‚Íƒrƒ‹ƒh‚·‚é“x‚É©“®“I‚ÉƒCƒ“ƒNƒŠƒƒ“ƒg‚³‚ê‚Ü‚·B
+// (PowerShellƒXƒNƒŠƒvƒg IncrementMinorVersion.ps1 ‚ÅŠÇ—‚³‚ê‚Ü‚·B
+// ––”ö‚Ì”š‚ÍƒŠƒrƒWƒ‡ƒ“”Ô†‚Å‚·BWord‚É‚Í•\¦‚³‚ê‚Ü‚¹‚ñB
 [assembly: AssemblyVersion("3.1.0.0")]
 [assembly: AssemblyFileVersion("3.1.0.0")]
 
+// ’Êí‚Íƒrƒ‹ƒh‘OƒCƒxƒ“ƒgƒRƒ}ƒ“ƒhƒ‰ƒCƒ“‚ÉˆÈ‰º‚ÌƒRƒ}ƒ“ƒh‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚·iƒŠƒŠ[ƒXƒrƒ‹ƒh–ˆ‚ÉƒCƒ“ƒNƒŠƒƒ“ƒgjB
+// if "$(ConfigurationName)"=="Release" powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1"
+
+// ƒfƒoƒbƒOƒrƒ‹ƒh‚Å‚àƒCƒ“ƒNƒŠƒƒ“ƒg‚µ‚½‚¢ê‡‚ÍAˆÈ‰º‚ÌƒR[ƒh‚É‘‚«Š·‚¦‚Ü‚·B
+// powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1"
+
+// ƒo[ƒWƒ‡ƒ“‚ğ3.1.0‚ÉƒŠƒZƒbƒg‚·‚éê‡‚ÍAˆÈ‰º‚Ì‚æ‚¤‚É‘‚«Š·‚¦‚Ü‚·B
+// powershell - ExecutionPolicy Bypass - File "$(ProjectDir)IncrementMinorVersion.ps1" reset

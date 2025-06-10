@@ -1,11 +1,32 @@
-﻿# WordAddIn1\Properties\AssemblyInfo.cs のビルド番号（3桁目）を+1する
-$path = "WordAddIn1\Properties\AssemblyInfo.cs"
-$pattern = '(\[assembly: Assembly(File)?Version\("3\.1\.)(\d+)(\.0"\)\])'
-(Get-Content $path) | ForEach-Object {
-    if ($_ -match $pattern) {
-        $newBuild = [int]$matches[3] + 1
-        $_ -replace "3\.1\.\d+\.0", "3.1.$newBuild.0"
-    } else {
-        $_
-    }
-} | Set-Content $path
+﻿param(
+    [string]$Action = ""
+)
+
+$path = Join-Path $PSScriptRoot "Properties\AssemblyInfo.cs"
+$pattern = '(\[assembly: AssemblyVersion\(")(\d+)\.(\d+)\.(\d+)\.0("\)\])'
+$filePattern = '(\[assembly: AssemblyFileVersion\(")(\d+)\.(\d+)\.(\d+)\.0("\)\])'
+
+if ($Action -eq "reset") {
+    (Get-Content $path) | ForEach-Object {
+        if ($_ -match $pattern) {
+            '[assembly: AssemblyVersion("3.1.0.0")]'
+        } elseif ($_ -match $filePattern) {
+            '[assembly: AssemblyFileVersion("3.1.0.0")]'
+        } else {
+            $_
+        }
+    } | Set-Content $path
+    Write-Host "バージョンを 3.1.0.0 にリセットしました。"
+} else {
+    # 通常のインクリメント（従来通り）
+    $incPattern = '(\[assembly: Assembly(File)?Version\("(\d+)\.(\d+)\.)(\d+)(\.0"\)\])'
+    (Get-Content $path) | ForEach-Object {
+        if ($_ -match $incPattern) {
+            $majorMinor = "$($matches[3]).$($matches[4])"
+            $build = [int]$matches[5] + 1
+            $_ -replace "(\d+)\.(\d+)\.\d+\.0", "$majorMinor.$build.0"
+        } else {
+            $_
+        }
+    } | Set-Content $path
+}
