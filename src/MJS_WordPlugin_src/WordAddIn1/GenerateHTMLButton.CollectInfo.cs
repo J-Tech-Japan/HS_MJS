@@ -92,8 +92,11 @@ namespace WordAddIn1
             );
 
             // ドキュメントを閉じる
-            docCopy.Close();
-            
+            docCopy.Close(false);
+
+            // ファイル解放待ち（100ms程度の遅延を入れる）
+            System.Threading.Thread.Sleep(100);
+
             // 画像フォルダのコピー処理
             log.WriteLine("画像フォルダ コピー");
             
