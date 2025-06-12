@@ -348,7 +348,7 @@
     <None Include="app.config" />
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="IncrementMinorVersion.ps1" />
-    <None Include="MJS.pfx" />
+    <None Include="MJSKEY.snk" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -713,10 +713,11 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MJS_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>F46E1B0597CB92D31483AB15C8BE65B1E8698FD4</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>17362CE56AC3AB7ADB58AA8848433B28E741E545</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -725,7 +726,7 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>MJS.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>MJSKEY.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

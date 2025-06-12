@@ -188,7 +188,6 @@ namespace WordAddIn1
             }
         }
 
-
         // 「リード文」スタイルのノードを適切なclassで追加する
         private void AppendLeadSentenceElement(XmlNode objTargetNode, XmlNode seekNode, string thisStyleName)
         {
@@ -211,44 +210,6 @@ namespace WordAddIn1
                 ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
             }
         }
-
-        // 「選択肢」関連のノードを適切なclassで追加する
-        //private void AppendChoiceElement(XmlNode objTargetNode, XmlNode seekNode, string thisStyleName)
-        //{
-        //    if (Regex.IsMatch(thisStyleName, "選択肢等[2２]"))
-        //    {
-        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-        //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choice2");
-        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-        //    }
-        //    else if (Regex.IsMatch(thisStyleName, "選択肢等"))
-        //    {
-        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-        //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choice");
-        //    }
-        //    else if (Regex.IsMatch(thisStyleName, "選択肢-説明等[2２]"))
-        //    {
-        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-        //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choiceDesc2");
-        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-        //    }
-        //    else if (Regex.IsMatch(thisStyleName, "選択肢.*説明等"))
-        //    {
-        //        objTargetNode.AppendChild(objTargetNode.OwnerDocument.ImportNode(seekNode, false));
-        //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-
-        //        if (Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "")
-        //        {
-        //            ((XmlElement)objTargetNode.LastChild).RemoveAttribute("class");
-        //        }
-
-        //        if ((Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") != "") && (objTargetNode.SelectNodes("ancestor-or-self::*[@class = 'MJS_choiceDesc']").Count == 0))
-        //        {
-        //            ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_choiceDesc");
-        //        }
-        //    }
-        //}
 
         private void AppendChoiceElement(XmlNode objTargetNode, XmlNode seekNode, string thisStyleName)
         {
