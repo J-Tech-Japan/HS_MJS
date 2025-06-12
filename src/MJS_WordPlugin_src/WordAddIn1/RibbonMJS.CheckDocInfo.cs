@@ -7,60 +7,47 @@ namespace WordAddIn1
     {
         private int CheckDocInfo(List<HeadingInfo> oldInfos, List<HeadingInfo> newInfos, out List<CheckInfo> checkResult)
         {
+            // 比較結果リスト初期化する
             checkResult = new List<CheckInfo>();
-            var syoriList = new List<CheckInfo>();
-            var deleteList = new List<CheckInfo>();
+            List<CheckInfo> syoriList = new List<CheckInfo>();
+            List<CheckInfo> deleteList = new List<CheckInfo>();
             int returnCode = 0;
 
-            // 一致・削除判定
-            ProcessMatchAndDelete(oldInfos, newInfos, syoriList, deleteList, ref returnCode);
-            // 新規追加判定
-            ProcessAdditions(oldInfos, newInfos, syoriList);
-            // ID不一致・構成変更・見出しレベル変更
-            ProcessIdMismatch(oldInfos, newInfos, syoriList, ref returnCode);
-            // タイトル変更
-            ProcessTitleChange(oldInfos, newInfos, syoriList, ref returnCode);
-            // 削除再判定
-            ProcessDeleteRecheck(oldInfos, syoriList, deleteList);
-
-            // ソート
-            deleteList = deleteList.OrderBy(rec => rec.old1).ThenBy(rec => rec.old2).ThenBy(rec => rec.old3).ThenBy(rec => rec.old4).ToList();
-            syoriList = syoriList.OrderBy(rec => rec.new1).ThenBy(rec => rec.new2).ThenBy(rec => rec.new3).ThenBy(rec => rec.new4).ToList();
-
-            MergeResultLists(deleteList, syoriList, out checkResult);
-
-            // 完全一致チェック
-            if (newInfos.Count == oldInfos.Count)
-            {
-                foreach (var newInfo in newInfos)
-                {
-                    var checkHeadingInfo = oldInfos.Where(x => x.id == newInfo.id && x.num == newInfo.num && x.mergeto == newInfo.mergeto && x.title == newInfo.title);
-                    if (!checkHeadingInfo.Any())
-                    {
-                        returnCode = 1;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                returnCode = 1;
-            }
-            return returnCode;
-        }
-
-        // 一致・削除判定
-        private void ProcessMatchAndDelete(List<HeadingInfo> oldInfos, List<HeadingInfo> newInfos, List<CheckInfo> syoriList, List<CheckInfo> deleteList, ref int returnCode)
-        {
-            foreach (var oldInfo in oldInfos)
+            // 一致判定と削除判定
+            foreach (HeadingInfo oldInfo in oldInfos)
             {
                 bool oldTitleExist = false;
                 bool oldIdExist = false;
-                foreach (var newInfo in newInfos)
+
+                foreach (HeadingInfo newInfo in newInfos)
                 {
+                    // 書誌情報（新）.タイトル＝書誌情報（旧）.タイトルかつ書誌情報（新）.ID＝書誌情報（旧）.IDが存在する場合
                     if (oldInfo.title.Equals(newInfo.title) && oldInfo.id.Equals(newInfo.id))
                     {
-                        var checkInfo = CreateCheckInfoMatch(oldInfo, newInfo);
+                        // 比較結果（一致）を作成する
+                        CheckInfo checkInfo = new CheckInfo();
+                        // 旧.項番
+                        checkInfo.old_num = oldInfo.num;
+                        // 旧.タイトル
+                        checkInfo.old_title = oldInfo.title;
+                        // 旧.ID
+                        checkInfo.old_id = oldInfo.id;
+                        // 旧.ID結合済
+                        if (!oldInfo.mergeto.Equals("")) { checkInfo.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                        // 新.項番
+                        checkInfo.new_num = newInfo.num;
+                        // 新.タイトル
+                        checkInfo.new_title = newInfo.title;
+                        // 新.ID
+                        checkInfo.new_id = newInfo.id;
+                        // 新.ID結合済
+                        if (!newInfo.mergeto.Equals("")) { checkInfo.new_id = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                        // 新.ID（修正候補）
+                        checkInfo.new_id_show = newInfo.id;
+                        // 新.ID（修正候補）結合済
+                        if (!newInfo.mergeto.Equals("")) { checkInfo.new_id_show = newInfo.id + " (" + newInfo.mergeto + ")"; }
+
+                        // check merge 
                         if (oldInfo.mergeto.Equals("") && !newInfo.mergeto.Equals(""))
                         {
                             checkInfo.diff = "結合追加";
@@ -73,130 +60,412 @@ namespace WordAddIn1
                             checkInfo.new_id_color = "red";
                             returnCode = 1;
                         }
+
                         syoriList.Add(checkInfo);
                     }
-                    if (oldInfo.title.Equals(newInfo.title)) oldTitleExist = true;
-                    if (oldInfo.id.Equals(newInfo.id)) oldIdExist = true;
+
+                    // 書誌情報（新）.タイトル＝書誌情報（旧）.タイトル
+                    if (oldInfo.title.Equals(newInfo.title))
+                    {
+                        oldTitleExist = true;
+                    }
+
+                    // 書誌情報（新）.ID＝書誌情報（旧）.IDが存在する場合
+                    if (oldInfo.id.Equals(newInfo.id))
+                    {
+                        oldIdExist = true;
+                    }
                 }
+
+                // 書誌情報（旧）.タイトルと書誌情報（旧）.IDが書誌情報（新）に存在しない場合
                 if (!oldTitleExist && !oldIdExist)
                 {
-                    var checkInfo = CreateCheckInfoDelete(oldInfo);
+                    // 比較結果（削除）を作成する
+                    CheckInfo checkInfo = new CheckInfo();
+                    // 旧.項番
+                    checkInfo.old_num = oldInfo.num;
+                    // 旧.タイトル
+                    checkInfo.old_title = oldInfo.title;
+                    // 旧.ID
+                    checkInfo.old_id = oldInfo.id;
+                    // 旧.ID結合済
+                    if (!oldInfo.mergeto.Equals("")) { checkInfo.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                    // 差異内容
+                    checkInfo.diff = "削除";
+
                     deleteList.Add(checkInfo);
                 }
             }
-        }
 
-        // 新規追加判定
-        private void ProcessAdditions(List<HeadingInfo> oldInfos, List<HeadingInfo> newInfos, List<CheckInfo> syoriList)
-        {
-            foreach (var newInfo in newInfos)
+            // 新規判定
+            foreach (HeadingInfo newInfo in newInfos)
             {
                 bool newTitleExist = false;
                 bool newIdExist = false;
-                foreach (var oldInfo in oldInfos)
+
+                foreach (HeadingInfo oldInfo in oldInfos)
                 {
-                    if (oldInfo.id.Equals(newInfo.id)) newIdExist = true;
-                    if (oldInfo.title.Equals(newInfo.title)) newTitleExist = true;
+                    // 書誌情報（新）.ID＝書誌情報（旧）.IDが存在する場合
+                    if (oldInfo.id.Equals(newInfo.id))
+                    {
+                        newIdExist = true;
+                    }
+
+                    // 書誌情報（新）.タイトル＝書誌情報（旧）.タイトル
+                    if (oldInfo.title.Equals(newInfo.title))
+                    {
+                        newTitleExist = true;
+                    }
                 }
+
+                // 書誌情報（新）.タイトルと書誌情報（新）.IDが書誌情報（旧）に存在しない場合
                 if (!newTitleExist && !newIdExist)
                 {
-                    var checkInfo = CreateCheckInfoAdd(newInfo);
+                    // 比較結果（新規）を作成する
+                    CheckInfo checkInfo = new CheckInfo();
+                    // 新.項番
+                    checkInfo.new_num = newInfo.num;
+                    // 新.項番（色）
+                    checkInfo.new_num_color = "blue";
+                    // 新.タイトル
+                    checkInfo.new_title = newInfo.title;
+                    // 新.タイトル（色）
+                    checkInfo.new_title_color = "blue";
+                    // 新.ID
+                    checkInfo.new_id = newInfo.id;
+                    // 新.ID結合済
+                    if (!newInfo.mergeto.Equals("")) { checkInfo.new_id = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                    // 新.ID（修正候補）
+                    checkInfo.new_id_show = newInfo.id;
+                    // 新.ID（修正候補）結合済
+                    if (!newInfo.mergeto.Equals("")) { checkInfo.new_id_show = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                    // 新.ID（色）
+                    checkInfo.new_id_color = "blue";
+
+                    // 差異内容
+                    checkInfo.diff = "新規追加";
+
+                    // ＋結合追加
+                    if (!newInfo.mergeto.Equals(""))
+                    {
+                        checkInfo.diff = "新規追加・結合追加";
+
+                    }
+
                     syoriList.Add(checkInfo);
                 }
             }
-        }
 
-        // ID不一致・構成変更・見出しレベル変更
-        private void ProcessIdMismatch(List<HeadingInfo> oldInfos, List<HeadingInfo> newInfos, List<CheckInfo> syoriList, ref int returnCode)
-        {
-            foreach (var newInfo in newInfos)
+            // ID不一致判定
+            foreach (HeadingInfo newInfo in newInfos)
             {
-                foreach (var oldInfo in oldInfos)
+                foreach (HeadingInfo oldInfo in oldInfos)
                 {
-                    if (syoriList.Any(p => p.new_id.Equals(newInfo.id))) break;
-                    if (oldInfo.title.Equals(newInfo.title) && !oldInfo.id.Equals(newInfo.id))
+                    // リストに存在するか
+                    CheckInfo hasOne = syoriList.Where(p => p.new_id.Equals(newInfo.id)).FirstOrDefault();
+                    if (hasOne != null)
                     {
-                        int oldNumKaisou = oldInfo.num.Split('.').Length;
-                        int newNumKaisou = newInfo.num.Split('.').Length;
-                        if ((oldNumKaisou == 3 && newNumKaisou == 4) || (oldNumKaisou == 4 && newNumKaisou == 3))
+                        break;
+                    }
+
+                    // 書誌情報（新）.タイトル＝書誌情報（旧）.タイトル
+                    if (oldInfo.title.Equals(newInfo.title))
+                    {
+                        // 書誌情報（新）.ID<>書誌情報（旧）.ID
+                        if (!oldInfo.id.Equals(newInfo.id))
                         {
-                            var checkInfo = CreateCheckInfoLevelChange(oldInfo, newInfo);
-                            syoriList.Add(checkInfo);
-                        }
-                        else
-                        {
-                            bool isHenko = false;
-                            if (oldNumKaisou == 4 && newNumKaisou == 4)
+                            // 項番階層
+                            string oldNum = oldInfo.num;
+                            string newNum = newInfo.num;
+                            int oldNumKaisou = oldNum.Split('.').Length;
+                            int newNumKaisou = newNum.Split('.').Length;
+
+                            // (旧.見出しレベルが3 階層かつ新.見出しレベルが４階層) 
+                            // または　(旧.見出しレベルが4 階層かつ新.見出しレベルが3階層) )の場合
+                            if ((oldNumKaisou == 3 && newNumKaisou == 4)
+                                || (oldNumKaisou == 4 && newNumKaisou == 3))
                             {
-                                string[] oldids = oldInfo.id.Split('#');
-                                string[] newids = newInfo.id.Split('#');
-                                if (oldids.Length == 2 && newids.Length == 2 && oldids[1].Equals(newids[1]))
+                                // 比較結果（見出しレベル変更）を作成する
+                                CheckInfo checkInfo = new CheckInfo();
+                                // 旧.項番
+                                checkInfo.old_num = oldInfo.num;
+                                // 旧.タイトル
+                                checkInfo.old_title = oldInfo.title;
+                                // 旧.ID
+                                checkInfo.old_id = oldInfo.id;
+                                // 旧.ID結合済
+                                if (!oldInfo.mergeto.Equals("")) { checkInfo.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                                // 新.項番
+                                checkInfo.new_num = newInfo.num;
+                                // 新.項番（色）
+                                checkInfo.new_num_color = "red";
+                                // 新.タイトル
+                                checkInfo.new_title = newInfo.title;
+                                // 新.ID
+                                checkInfo.new_id = newInfo.id;
+                                // 新.ID結合済
+                                if (!newInfo.mergeto.Equals("")) { checkInfo.new_id = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                                // 新.ID（修正候補）
+                                checkInfo.new_id_show = newInfo.id;
+                                // 新.ID（修正候補）結合済
+                                if (!newInfo.mergeto.Equals("")) { checkInfo.new_id_show = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                                // 新.ID（色）
+                                checkInfo.new_id_color = "red";
+                                // 差異内容
+                                checkInfo.diff = "見出しレベル変更";
+
+                                syoriList.Add(checkInfo);
+                            }
+                            else
+                            {
+                                // 構成変更に伴うID変更
+                                bool isHenko = false;
+                                if (oldNumKaisou == 4 && newNumKaisou == 4)
                                 {
-                                    var checkInfo2 = CreateCheckInfoStructureChange(oldInfo, newInfo);
-                                    syoriList.Add(checkInfo2);
-                                    isHenko = true;
+                                    string[] oldids = oldInfo.id.Split('#');
+                                    string[] newids = newInfo.id.Split('#');
+
+                                    if (oldids.Length == 2 && newids.Length == 2
+                                        && oldids[1].Equals(newids[1]))
+                                    {
+
+                                        // 比較結果（構成変更に伴うID変更）を作成する
+                                        CheckInfo checkInfo2 = new CheckInfo();
+                                        // 旧.項番
+                                        checkInfo2.old_num = oldInfo.num;
+                                        // 旧.タイトル
+                                        checkInfo2.old_title = oldInfo.title;
+                                        // 旧.ID
+                                        checkInfo2.old_id = oldInfo.id;
+                                        // 旧.ID結合済
+                                        if (!oldInfo.mergeto.Equals("")) { checkInfo2.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                                        // 新.項番
+                                        checkInfo2.new_num = newInfo.num;
+                                        // 新.項番（色）
+                                        checkInfo2.new_num_color = "red";
+                                        // 新.タイトル
+                                        checkInfo2.new_title = newInfo.title;
+                                        // 新.ID
+                                        checkInfo2.new_id = newInfo.id;
+                                        // 新.ID結合済
+                                        if (!newInfo.mergeto.Equals("")) { checkInfo2.new_id = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                                        // 新.ID（修正候補）
+                                        checkInfo2.new_id_show = newInfo.id;
+                                        // 新.ID（修正候補）結合済
+                                        if (!newInfo.mergeto.Equals("")) { checkInfo2.new_id_show = newInfo.id + " (" + newInfo.mergeto + ")"; }
+
+                                        // 新.ID（色）
+                                        checkInfo2.new_id_color = "red";
+                                        // 差異内容
+                                        checkInfo2.diff = "構成変更に伴うID変更";
+
+                                        syoriList.Add(checkInfo2);
+
+                                        isHenko = true;
+                                    }
+
+                                }
+
+                                if (!isHenko)
+                                {
+                                    // 比較結果（ID不一致）を作成する
+                                    CheckInfo checkInfo = new CheckInfo();
+                                    // 旧.項番
+                                    checkInfo.old_num = oldInfo.num;
+                                    // 旧.タイトル
+                                    checkInfo.old_title = oldInfo.title;
+                                    // 旧.ID
+                                    checkInfo.old_id = oldInfo.id;
+                                    // 旧.ID結合済
+                                    if (!oldInfo.mergeto.Equals("")) { checkInfo.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                                    // 新.項番
+                                    checkInfo.new_num = newInfo.num;
+                                    // 新.項番（色）
+                                    // 旧.項番<>新.項番の場合、赤
+                                    if (!oldInfo.num.Equals(newInfo.num))
+                                    {
+                                        checkInfo.new_num_color = "red";
+                                    }
+                                    // 新.タイトル
+                                    checkInfo.new_title = newInfo.title;
+                                    // 新.ID
+                                    checkInfo.new_id = newInfo.id;
+                                    // 新.ID結合済
+                                    if (!newInfo.mergeto.Equals("")) { checkInfo.new_id = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                                    // 新.ID（色）
+                                    checkInfo.new_id_color = "red";
+                                    // 新.ID（修正候補）
+                                    checkInfo.new_id_show = oldInfo.id;
+                                    // 新/ID（修正候補）結合済
+                                    if (!newInfo.mergeto.Equals("")) { checkInfo.new_id_show = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                                    // 差異内容
+                                    checkInfo.diff = "ID不一致？";
+                                    // 差異内容（色）
+                                    checkInfo.diff_color = "red";
+
+                                    // 修正処理（候補）
+                                    checkInfo.editshow = "旧IDに戻す";
+
+                                    // check merge 
+                                    if (oldInfo.mergeto.Equals("") && !newInfo.mergeto.Equals(""))
+                                    {
+                                        checkInfo.diff = "ID不一致？・結合追加";
+                                    }
+                                    else if (!oldInfo.mergeto.Equals("") && newInfo.mergeto.Equals(""))
+                                    {
+                                        checkInfo.diff = "ID不一致？・結合解除";
+                                    }
+
+                                    syoriList.Add(checkInfo);
+
+                                    returnCode = 1;
                                 }
                             }
-                            if (!isHenko)
-                            {
-                                var checkInfo = CreateCheckInfoIdMismatch(oldInfo, newInfo);
-                                syoriList.Add(checkInfo);
-                                returnCode = 1;
-                            }
                         }
                     }
                 }
             }
-        }
 
-        // タイトル変更
-        private void ProcessTitleChange(List<HeadingInfo> oldInfos, List<HeadingInfo> newInfos, List<CheckInfo> syoriList, ref int returnCode)
-        {
-            foreach (var newInfo in newInfos)
+            // タイトル変更判定
+            foreach (HeadingInfo newInfo in newInfos)
             {
-                if (syoriList.Any(p => p.new_id.Equals(newInfo.id))) continue;
-                foreach (var oldInfo in oldInfos)
+                // リストに存在するか
+                CheckInfo hasOne = syoriList.Where(p => p.new_id.Equals(newInfo.id)).FirstOrDefault();
+                if (hasOne != null)
                 {
-                    if (oldInfo.id.Equals(newInfo.id) && !oldInfo.title.Equals(newInfo.title))
+                    continue;
+                }
+
+                foreach (HeadingInfo oldInfo in oldInfos)
+                {
+                    // 書誌情報（新）.ID＝書誌情報（旧）.IDが存在する場合
+                    if (oldInfo.id.Equals(newInfo.id))
                     {
-                        var checkInfo = CreateCheckInfoTitleChange(oldInfo, newInfo);
-                        syoriList.Add(checkInfo);
-                        returnCode = 1;
+                        // 書誌情報（新）.タイトル<>書誌情報（旧）.タイトル
+                        if (!oldInfo.title.Equals(newInfo.title))
+                        {
+                            // 比較結果（タイトル変更）を作成する
+                            CheckInfo checkInfo = new CheckInfo();
+                            // 旧.項番
+                            checkInfo.old_num = oldInfo.num;
+                            // 旧.タイトル
+                            checkInfo.old_title = oldInfo.title;
+                            // 旧.ID
+                            checkInfo.old_id = oldInfo.id;
+                            // 旧・ID結合済
+                            if (!oldInfo.mergeto.Equals("")) { checkInfo.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                            // 新.項番
+                            checkInfo.new_num = newInfo.num;
+
+                            // 新.項番（色）
+                            // 旧.項番<>新.項番の場合、赤
+                            if (!oldInfo.num.Equals(newInfo.num))
+                            {
+                                checkInfo.new_num_color = "red";
+                            }
+
+                            // 新.タイトル
+                            checkInfo.new_title = newInfo.title;
+                            // 新.タイトル（色）
+                            checkInfo.new_title_color = "red";
+                            // 新.ID
+                            checkInfo.new_id = newInfo.id;
+                            // 新.ID結合済
+                            if (!newInfo.mergeto.Equals("")) { checkInfo.new_id = newInfo.id + " (" + newInfo.mergeto + ")"; }
+                            // 新.ID（修正候補）
+                            checkInfo.new_id_show = newInfo.id;
+                            // 新.ID（修正候補）結合済
+                            if (!newInfo.mergeto.Equals("")) { checkInfo.new_id_show = newInfo.id + " (" + newInfo.mergeto + ")"; }
+
+                            // 差異内容
+                            checkInfo.diff = "●タイトル変更";
+
+                            // 新規追加
+                            checkInfo.edit = "○新規追加";
+
+                            // 新規追加（色）
+                            checkInfo.edit_color = "blue";
+
+                            // check merge 
+                            if (oldInfo.mergeto.Equals("") && !newInfo.mergeto.Equals(""))
+                            {
+                                checkInfo.diff = "●タイトル変更・結合追加";
+                                checkInfo.new_id_color = "red";
+                            }
+                            else if (!oldInfo.mergeto.Equals("") && newInfo.mergeto.Equals(""))
+                            {
+                                checkInfo.diff = "●タイトル変更・結合解除";
+                                checkInfo.new_id_color = "red";
+                            }
+
+                            syoriList.Add(checkInfo);
+
+                            returnCode = 1;
+                        }
                     }
                 }
             }
-        }
 
-        // 削除再判定
-        private void ProcessDeleteRecheck(List<HeadingInfo> oldInfos, List<CheckInfo> syoriList, List<CheckInfo> deleteList)
-        {
-            foreach (var oldInfo in oldInfos)
+            // 削除再判定
+            foreach (HeadingInfo oldInfo in oldInfos)
             {
-                if (syoriList.Any(p => p.old_num.Equals(oldInfo.num))) continue;
-                if (deleteList.Any(p => p.old_num.Equals(oldInfo.num))) continue;
-                var checkInfo = CreateCheckInfoDelete(oldInfo);
+                var issyori = syoriList.Where(p => p.old_num.Equals(oldInfo.num)).ToList();
+                if (issyori != null && issyori.Count > 0)
+                {
+                    continue;
+                }
+
+                var isdelete = deleteList.Where(p => p.old_num.Equals(oldInfo.num)).ToList();
+                if (isdelete != null && isdelete.Count > 0)
+                {
+                    continue;
+                }
+
+                // 比較結果（削除）を作成する
+                CheckInfo checkInfo = new CheckInfo();
+                // 旧.項番
+                checkInfo.old_num = oldInfo.num;
+                // 旧.タイトル
+                checkInfo.old_title = oldInfo.title;
+                // 旧.ID
+                checkInfo.old_id = oldInfo.id;
+                // 旧・ID結合済
+                if (!oldInfo.mergeto.Equals("")) { checkInfo.old_id = oldInfo.id + " " + oldInfo.mergeto + ""; }
+                // 差異内容
+                checkInfo.diff = "削除";
+
                 deleteList.Add(checkInfo);
             }
-        }
 
-        // 結果リストのマージ
-        private void MergeResultLists(List<CheckInfo> deleteList, List<CheckInfo> syoriList, out List<CheckInfo> checkResult)
-        {
-            checkResult = new List<CheckInfo>();
+            // ソート
+            deleteList = deleteList.OrderBy(rec => rec.old1).ThenBy(rec =>
+            rec.old2).ThenBy(rec => rec.old3).ThenBy(rec => rec.old4).ToList();
+
+            // ソート
+            syoriList = syoriList.OrderBy(rec => rec.new1).ThenBy(rec =>
+                rec.new2).ThenBy(rec => rec.new3).ThenBy(rec => rec.new4).ToList();
+
             if (deleteList.Count > 0)
             {
                 int i = 0;
                 bool stopFlag = false;
+
                 for (int j = 0; j < syoriList.Count; j++)
                 {
                     while (!stopFlag && CheckSortInfo(deleteList[i], syoriList, j))
                     {
                         checkResult.Add(deleteList[i]);
                         i++;
-                        if (deleteList.Count == i) stopFlag = true;
+
+                        if (deleteList.Count == i)
+                        {
+                            stopFlag = true;
+                        }
                     }
+
                     checkResult.Add(syoriList[j]);
                 }
+
                 while (i < deleteList.Count)
                 {
                     checkResult.Add(deleteList[i]);
@@ -207,129 +476,26 @@ namespace WordAddIn1
             {
                 checkResult = syoriList;
             }
-        }
+            if (newInfos.Count == oldInfos.Count)
+            {
+                foreach (HeadingInfo newInfo in newInfos)
+                {
+                    var checkHeadingInfo = oldInfos.Where(x => x.id == newInfo.id && x.num == newInfo.num && x.mergeto == newInfo.mergeto && x.title == newInfo.title);
+                    if (checkHeadingInfo == null)
+                    {
+                        returnCode = 1;
+                        break;
+                    }
+                }
 
-        // --- CheckInfo生成ヘルパ ---
-        private CheckInfo CreateCheckInfoMatch(HeadingInfo oldInfo, HeadingInfo newInfo)
-        {
-            var checkInfo = new CheckInfo
-            {
-                old_num = oldInfo.num,
-                old_title = oldInfo.title,
-                old_id = !string.IsNullOrEmpty(oldInfo.mergeto) ? oldInfo.id + " " + oldInfo.mergeto : oldInfo.id,
-                new_num = newInfo.num,
-                new_title = newInfo.title,
-                new_id = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_show = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id
-            };
-            return checkInfo;
-        }
-        private CheckInfo CreateCheckInfoDelete(HeadingInfo oldInfo)
-        {
-            return new CheckInfo
-            {
-                old_num = oldInfo.num,
-                old_title = oldInfo.title,
-                old_id = !string.IsNullOrEmpty(oldInfo.mergeto) ? oldInfo.id + " " + oldInfo.mergeto : oldInfo.id,
-                diff = "削除"
-            };
-        }
-        private CheckInfo CreateCheckInfoAdd(HeadingInfo newInfo)
-        {
-            var merged = !string.IsNullOrEmpty(newInfo.mergeto);
-            return new CheckInfo
-            {
-                new_num = newInfo.num,
-                new_num_color = "blue",
-                new_title = newInfo.title,
-                new_title_color = "blue",
-                new_id = merged ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_show = merged ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_color = "blue",
-                diff = merged ? "新規追加・結合追加" : "新規追加"
-            };
-        }
-        private CheckInfo CreateCheckInfoLevelChange(HeadingInfo oldInfo, HeadingInfo newInfo)
-        {
-            return new CheckInfo
-            {
-                old_num = oldInfo.num,
-                old_title = oldInfo.title,
-                old_id = !string.IsNullOrEmpty(oldInfo.mergeto) ? oldInfo.id + " " + oldInfo.mergeto : oldInfo.id,
-                new_num = newInfo.num,
-                new_num_color = "red",
-                new_title = newInfo.title,
-                new_id = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_show = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_color = "red",
-                diff = "見出しレベル変更"
-            };
-        }
-        private CheckInfo CreateCheckInfoStructureChange(HeadingInfo oldInfo, HeadingInfo newInfo)
-        {
-            return new CheckInfo
-            {
-                old_num = oldInfo.num,
-                old_title = oldInfo.title,
-                old_id = !string.IsNullOrEmpty(oldInfo.mergeto) ? oldInfo.id + " " + oldInfo.mergeto : oldInfo.id,
-                new_num = newInfo.num,
-                new_num_color = "red",
-                new_title = newInfo.title,
-                new_id = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_show = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_color = "red",
-                diff = "構成変更に伴うID変更"
-            };
-        }
-        private CheckInfo CreateCheckInfoIdMismatch(HeadingInfo oldInfo, HeadingInfo newInfo)
-        {
-            var checkInfo = new CheckInfo
-            {
-                old_num = oldInfo.num,
-                old_title = oldInfo.title,
-                old_id = !string.IsNullOrEmpty(oldInfo.mergeto) ? oldInfo.id + " " + oldInfo.mergeto : oldInfo.id,
-                new_num = newInfo.num,
-                new_title = newInfo.title,
-                new_id = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_color = "red",
-                new_id_show = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : oldInfo.id,
-                diff = "ID不一致？",
-                diff_color = "red",
-                editshow = "旧IDに戻す"
-            };
-            if (!oldInfo.num.Equals(newInfo.num)) checkInfo.new_num_color = "red";
-            if (oldInfo.mergeto.Equals("") && !newInfo.mergeto.Equals("")) checkInfo.diff = "ID不一致？・結合追加";
-            else if (!oldInfo.mergeto.Equals("") && newInfo.mergeto.Equals("")) checkInfo.diff = "ID不一致？・結合解除";
-            return checkInfo;
-        }
-        private CheckInfo CreateCheckInfoTitleChange(HeadingInfo oldInfo, HeadingInfo newInfo)
-        {
-            var checkInfo = new CheckInfo
-            {
-                old_num = oldInfo.num,
-                old_title = oldInfo.title,
-                old_id = !string.IsNullOrEmpty(oldInfo.mergeto) ? oldInfo.id + " " + oldInfo.mergeto : oldInfo.id,
-                new_num = newInfo.num,
-                new_title = newInfo.title,
-                new_title_color = "red",
-                new_id = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                new_id_show = !string.IsNullOrEmpty(newInfo.mergeto) ? newInfo.id + " (" + newInfo.mergeto + ")" : newInfo.id,
-                diff = "●タイトル変更",
-                edit = "○新規追加",
-                edit_color = "blue"
-            };
-            if (!oldInfo.num.Equals(newInfo.num)) checkInfo.new_num_color = "red";
-            if (oldInfo.mergeto.Equals("") && !newInfo.mergeto.Equals(""))
-            {
-                checkInfo.diff = "●タイトル変更・結合追加";
-                checkInfo.new_id_color = "red";
             }
-            else if (!oldInfo.mergeto.Equals("") && newInfo.mergeto.Equals(""))
+            else
             {
-                checkInfo.diff = "●タイトル変更・結合解除";
-                checkInfo.new_id_color = "red";
+                returnCode = 1;
             }
-            return checkInfo;
+
+
+            return returnCode;
         }
     }
 }
