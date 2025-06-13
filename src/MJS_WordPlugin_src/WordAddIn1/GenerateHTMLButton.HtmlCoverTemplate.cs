@@ -8,25 +8,25 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
-        private (string htmlCoverTemplate1, string htmlCoverTemplate2) BuildCoverTemplates(System.Reflection.Assembly assembly, (string rootPath, string docName, string docFullName, string exportDir, string headerDir, string exportDirPath, string logPath, string tmpHtmlPath, string indexHtmlPath, string tmpFolderForImagesSavedBySaveAs2Method, string docid, string docTitle, string zipDirPath) paths, (bool coverExist, string subTitle, int biCount, List<List<string>> productSubLogoGroups, string docTitle, string docid, bool isTmpDot) coverInfo, bool isEasyCloud, bool isEdgeTracker, bool isPattern1, bool isPattern2)
+        private (string htmlCoverTemplate1, string htmlCoverTemplate2) BuildCoverTemplates(System.Reflection.Assembly assembly, (string rootPath, string docName, string docFullName, string exportDir, string headerDir, string exportDirPath, string logPath, string tmpHtmlPath, string indexHtmlPath, string tmpFolderForImagesSavedBySaveAs2Method, string docid, string docTitle, string zipDirPath) paths, (bool coverExist, string subTitle, int biCount, List<List<string>> productSubLogoGroups, string docTitle, string docid, bool isTmpDot, string trademarkTitle, List<string> trademarkTextList, string trademarkRight) coverInfo, bool isEasyCloud, bool isEdgeTracker, bool isPattern1, bool isPattern2)
         {
             string htmlCoverTemplate1 = BuildHtmlCoverTemplate1(isEdgeTracker);
             string htmlCoverTemplate2 = "";
             if (isEdgeTracker)
             {
-                BuildEdgeTrackerCoverTemplate(assembly, paths.rootPath, paths.exportDir, coverInfo.docTitle, "", new List<string>(), "", ref htmlCoverTemplate1);
+                BuildEdgeTrackerCoverTemplate(assembly, paths.rootPath, paths.exportDir, coverInfo.docTitle, coverInfo.trademarkTitle, coverInfo.trademarkTextList, coverInfo.trademarkRight, ref htmlCoverTemplate1);
             }
             else if (isEasyCloud)
             {
-                BuildEasyCloudCoverTemplate(paths.rootPath, paths.exportDir, coverInfo.docTitle, "", "", "", new List<string>(), "", coverInfo.subTitle, ref htmlCoverTemplate1, ref htmlCoverTemplate2);
+                BuildEasyCloudCoverTemplate(paths.rootPath, paths.exportDir, coverInfo.docTitle, "", "", coverInfo.trademarkTitle, coverInfo.trademarkTextList, coverInfo.trademarkRight, coverInfo.subTitle, ref htmlCoverTemplate1, ref htmlCoverTemplate2);
             }
             else if (isPattern1)
             {
-                BuildPattern1CoverTemplate(coverInfo.docTitle, "", "", "", "", new List<string>(), "", ref htmlCoverTemplate2);
+                BuildPattern1CoverTemplate(coverInfo.docTitle, "", "", "", coverInfo.trademarkTitle, coverInfo.trademarkTextList, coverInfo.trademarkRight, ref htmlCoverTemplate2);
             }
             else if (isPattern2)
             {
-                BuildPattern2CoverTemplate(coverInfo.productSubLogoGroups, "", coverInfo.docTitle, "", "", "", "", "", new List<string>(), "", ref htmlCoverTemplate2);
+                BuildPattern2CoverTemplate(coverInfo.productSubLogoGroups, "", coverInfo.docTitle, "", "", "", "", coverInfo.trademarkTitle, coverInfo.trademarkTextList, coverInfo.trademarkRight, ref htmlCoverTemplate2);
             }
             AppendHtmlCoverTemplate2(ref htmlCoverTemplate2);
             return (htmlCoverTemplate1, htmlCoverTemplate2);
