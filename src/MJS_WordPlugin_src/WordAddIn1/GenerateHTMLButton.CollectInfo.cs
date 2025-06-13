@@ -19,7 +19,10 @@ namespace WordAddIn1
             List<List<string>> productSubLogoGroups,
             string docTitle,
             string docid,
-            bool isTmpDot)
+            bool isTmpDot,
+            string trademarkTitle,
+            List<string> trademarkTextList,
+            string trademarkRight)
             CollectInfo(Document docCopy,
             Word.Application application,
             (string rootPath, string docName, string docFullName, string exportDir, string headerDir, string exportDirPath, string logPath, string tmpHtmlPath, string indexHtmlPath, string tmpFolderForImagesSavedBySaveAs2Method, string docid, string docTitle, string zipDirPath) paths,bool isPattern1, bool isPattern2, StreamWriter log)
@@ -102,7 +105,7 @@ namespace WordAddIn1
             
             bool isTmpDot = true;
             CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir, log);
-            return (coverExist, subTitle, biCount, productSubLogoGroups, paths.docTitle, paths.docid, isTmpDot);
+            return (coverExist, subTitle, biCount, productSubLogoGroups, paths.docTitle, paths.docid, isTmpDot, trademarkTitle, trademarkTextList, trademarkRight);
         }
 
         // 表紙に関連する段落を収集
