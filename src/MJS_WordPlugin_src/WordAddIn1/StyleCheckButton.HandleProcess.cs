@@ -1,7 +1,6 @@
 ﻿using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 
-// リファクタリング完了
 namespace WordAddIn1
 {
     public partial class RibbonMJS

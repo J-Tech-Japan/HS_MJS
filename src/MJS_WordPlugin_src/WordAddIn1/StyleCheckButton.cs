@@ -65,7 +65,9 @@ namespace WordAddIn1
 
             // ドキュメントの最初のページに移動し、すべての変更履歴を承認
             selection.GoTo(Word.WdGoToItem.wdGoToPage, Word.WdGoToDirection.wdGoToFirst);
-            activeDocument.Revisions.AcceptAll();
+
+            CheckAndRestoreRefFields(activeDocument);
+            //activeDocument.Revisions.AcceptAll();
 
             // ドキュメントの表示設定を変更（コメントや変更履歴の表示を制御）
             ConfigDocumentDisplay();
@@ -131,14 +133,17 @@ namespace WordAddIn1
             // 処理結果に応じた後処理
             if (isProcessHalted)
             {
+                // 処理停止時
                 HandleProcessHalt();
             }
             else if (!hasInvalidStyles)
             {
+                // 処理成功時
                 HandleProcessSuccess(activeDocument);
             }
             else
             {
+                // 処理失敗時
                 HandleProcessFailure();
             }
 
@@ -173,6 +178,44 @@ namespace WordAddIn1
             var selection = Globals.ThisAddIn.Application.Selection;
             selection.Start = start;
             selection.End = end;
+        }
+
+        // ヘルパーメソッド: AcceptAll()を呼ぶ前に相互参照フィールドの状態を確認・修正
+        private void CheckAndRestoreRefFields(Word.Document doc)
+        {
+            var refFieldInfoList = new List<(int Start, int End, string FieldCode)>();
+
+            // 1. すべてのフィールドを走査し、REFフィールドの位置とコードを記録
+            foreach (Word.Field field in doc.Fields)
+            {
+                if (field.Type == Word.WdFieldType.wdFieldRef)
+                {
+                    refFieldInfoList.Add((field.Code.Start, field.Code.End, field.Code.Text));
+                }
+            }
+
+            // 2. 変更履歴を承認
+            doc.Revisions.AcceptAll();
+
+            // 3. フィールドを再走査し、REFフィールドが消えている/変わっている箇所を修復
+            foreach (var info in refFieldInfoList)
+            {
+                bool found = false;
+                foreach (Word.Field field in doc.Range(info.Start, info.End).Fields)
+                {
+                    if (field.Type == Word.WdFieldType.wdFieldRef)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    // REFフィールドが消えていた場合、再挿入
+                    var range = doc.Range(info.Start, info.End);
+                    range.Fields.Add(range, Word.WdFieldType.wdFieldRef, info.FieldCode.Trim(), false);
+                }
+            }
         }
     }
 }
