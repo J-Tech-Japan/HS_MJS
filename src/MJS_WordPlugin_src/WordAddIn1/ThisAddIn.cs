@@ -9,7 +9,7 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            ConvertHyperlinkRefFieldsToRefFields();
+            //ConvertHyperlinkRefFieldsToRefFields();
             //ConvertAbsoluteHyperlinksToFilenameOnly();
             //try
             //{

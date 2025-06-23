@@ -38,7 +38,7 @@ namespace WordAddIn1
         }
 
         // 除去したい記号
-        public static readonly char[] removeSymbols = { 'Ø', '²' };
+        public static readonly char[] removeSymbols = { 'Ø', '²', '　' };
 
         // ファイル名形式の規定
         private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
