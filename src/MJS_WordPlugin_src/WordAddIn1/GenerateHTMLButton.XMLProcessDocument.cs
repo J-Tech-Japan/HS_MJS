@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace WordAddIn1
@@ -20,7 +21,6 @@ namespace WordAddIn1
             RemoveComments(objXml);
             NormalizeLinkText(objXml);
             CleanTocHeadings(objXml);
-            //RemoveSuperscriptTwoFromTocHeadings(objXml);
             InitializeTocAndBody(docTitle, out objToc, out objBody);
         }
 
@@ -69,23 +69,6 @@ namespace WordAddIn1
 
         // 目次の見出しを整理する
         // 行頭記号問題重要コード！
-        //private void CleanTocHeadings(XmlDocument objXml)
-        //{
-        //    foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
-        //    {
-        //        foreach (XmlElement childSpan in toc.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
-        //            childSpan.ParentNode.RemoveChild(childSpan);
-        //        foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
-        //            brotherSpan.ParentNode.RemoveChild(brotherSpan);
-        //        if (!string.IsNullOrEmpty(toc.InnerText))
-        //        {
-        //            toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･]\s*", "");
-        //        }
-        //    }
-        //}
-
-        // 目次の見出しを整理する
-        // 行頭記号問題の最新コード
         private void CleanTocHeadings(XmlDocument objXml)
         {
             foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
@@ -96,37 +79,10 @@ namespace WordAddIn1
                     brotherSpan.ParentNode.RemoveChild(brotherSpan);
                 if (!string.IsNullOrEmpty(toc.InnerText))
                 {
-                    // 行頭の「・」「･」「Ø」を削除
-                    var text = Regex.Replace(toc.InnerText, @"^[・･Ø]\s*", "");
-                    // ²を削除
-                    text = text.Replace("²", "");
-                    // 先頭の全角スペース（U+3000）を削除
-                    text = Regex.Replace(text, @"^[　]+", "");
-                    toc.InnerText = text;
+                    toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･]\s*", "");
                 }
             }
         }
-
-        // 目次の見出しから²と先頭の全角スペースを削除するテストコード
-        //private void RemoveSuperscriptTwoFromTocHeadings(XmlDocument objXml)
-        //{
-        //    foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
-        //    {
-        //        // Wingdingsのspan削除（CleanTocHeadingsと同じ構造）
-        //        foreach (XmlElement childSpan in toc.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
-        //            childSpan.ParentNode.RemoveChild(childSpan);
-        //        foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
-        //            brotherSpan.ParentNode.RemoveChild(brotherSpan);
-
-        //        // 目次テキストから²と先頭の全角スペース（U+3000）を削除
-        //        if (!string.IsNullOrEmpty(toc.InnerText))
-        //        {
-        //            var text = toc.InnerText.Replace("²", "");
-        //            text = Regex.Replace(text, @"^[　]+", ""); // 先頭の全角スペースを削除
-        //            toc.InnerText = text;
-        //        }
-        //    }
-        //}
 
         // 目次と本文の初期化
         private void InitializeTocAndBody(string docTitle, out XmlDocument objToc, out XmlDocument objBody)

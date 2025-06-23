@@ -1,6 +1,8 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using DocumentFormat.OpenXml.Drawing.Charts;
 
 namespace WordAddIn1
 {
@@ -16,7 +18,7 @@ namespace WordAddIn1
             return ProcessHtmlString(htmlStr, isTmpDot);
         }
 
-        // HTML 文字列を処理する   
+        // HTML 文字列を処理する
         public string ProcessHtmlString(string htmlStr, bool isTmpDot)
         {
             htmlStr = Regex.Replace(htmlStr, "\r\n", " ");
@@ -45,6 +47,12 @@ namespace WordAddIn1
             htmlStr = Regex.Replace(htmlStr, @"(<p[^>]*?(?<!/)>)([^<]*)(</(?!p))", @"$1$2</p>$3");
             htmlStr = htmlStr.Replace("MJS--", "MJSTT");
 
+            // "　Ø"、"　²"、"Ø　"、"²　"を除去
+            //htmlStr = Regex.Replace(htmlStr, "(　[Ø²]|[Ø²]　)", "");
+
+            // 混入記号を除去
+            string symbolPattern = string.Join("", removeSymbols.Select(c => Regex.Escape(c.ToString())));
+            htmlStr = Regex.Replace(htmlStr, $"(　[{symbolPattern}]|[{symbolPattern}]　)", "");
             return htmlStr;
         }
     }
