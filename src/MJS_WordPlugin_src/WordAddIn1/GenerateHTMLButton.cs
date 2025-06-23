@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -6,7 +8,6 @@ using System.Windows.Forms;
 using System.Xml;
 using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
-using System.Drawing.Imaging;
 
 namespace WordAddIn1
 {
@@ -152,56 +153,52 @@ namespace WordAddIn1
         }
 
         // ドキュメントを一時 HTML 用にコピー
-        private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
-        {
-            //CheckAndRestoreRefFields(application.ActiveDocument);
-            ClearClipboardSafely();
-            Application.DoEvents();
-            application.Selection.WholeStory();
-            application.Selection.Copy();
-            Application.DoEvents();
-            application.Selection.Collapse(Word.WdCollapseDirection.wdCollapseStart);
-            Application.DoEvents();
-            Word.Document docCopy = application.Documents.Add();
-            Application.DoEvents();
-            docCopy.TrackRevisions = false;
-            
-            docCopy.AcceptAllRevisions();
-            docCopy.Select();
-            Application.DoEvents();
-            application.Selection.PasteAndFormat(Word.WdRecoveryType.wdUseDestinationStylesRecovery);
-            Application.DoEvents();
-            ClearClipboardSafely();
-            log.WriteLine("Number of sections: " + docCopy.Sections.Count);
-            return docCopy;
-        }
-
-
         //private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
         //{
-        //    // 1. 元ドキュメントの全範囲を取得
-        //    Word.Document srcDoc = application.ActiveDocument;
-        //    Word.Range srcRange = srcDoc.Content;
-
-        //    // 2. 新規ドキュメントを作成
-        //    Word.Document docCopy = application.Documents.Add();
-        //    docCopy.TrackRevisions = false;
-
-        //    // 3. 元ドキュメントの全範囲をコピー＆ペースト（フィールドを保持）
-        //    srcRange.Copy();
-        //    Word.Range destRange = docCopy.Content;
-        //    destRange.Paste();
-
-        //    Application.DoEvents();
-
-        //    // 4. フィールドの復元チェック
-        //    CheckAndRestoreRefFields(docCopy);
-
-        //    // 5. クリップボードをクリア（任意）
+        //    //CheckAndRestoreRefFields(application.ActiveDocument);
         //    ClearClipboardSafely();
-
+        //    Application.DoEvents();
+        //    application.Selection.WholeStory();
+        //    application.Selection.Copy();
+        //    Application.DoEvents();
+        //    application.Selection.Collapse(Word.WdCollapseDirection.wdCollapseStart);
+        //    Application.DoEvents();
+        //    Word.Document docCopy = application.Documents.Add();
+        //    Application.DoEvents();
+        //    docCopy.TrackRevisions = false;
+        //    docCopy.AcceptAllRevisions();
+        //    docCopy.Select();
+        //    Application.DoEvents();
+        //    application.Selection.PasteAndFormat(Word.WdRecoveryType.wdUseDestinationStylesRecovery);
+        //    Application.DoEvents();
+        //    ClearClipboardSafely();
         //    log.WriteLine("Number of sections: " + docCopy.Sections.Count);
         //    return docCopy;
         //}
+
+
+        private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
+        {
+            // 元ドキュメントの全範囲を取得
+            Word.Document srcDoc = application.ActiveDocument;
+            Word.Range srcRange = srcDoc.Content;
+
+            // 新規ドキュメントを作成
+            Word.Document docCopy = application.Documents.Add();
+            docCopy.TrackRevisions = false;
+
+            // 元ドキュメントの全範囲をコピー＆ペースト（フィールドを保持）
+            srcRange.Copy();
+            Word.Range destRange = docCopy.Content;
+            destRange.Paste();
+
+            Application.DoEvents();
+
+            // クリップボードをクリア（任意）
+            ClearClipboardSafely();
+
+            log.WriteLine("Number of sections: " + docCopy.Sections.Count);
+            return docCopy;
+        }
     }
 }

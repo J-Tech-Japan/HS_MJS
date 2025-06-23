@@ -37,6 +37,9 @@ namespace WordAddIn1
             return (rootPath, docName, docFullName, exportDir, headerDir, exportDirPath, logPath, tmpHtmlPath, indexHtmlPath, tmpFolderForImagesSavedBySaveAs2Method, docid, docTitle, zipDirPath);
         }
 
+        // 除去したい記号
+        public static readonly char[] removeSymbols = { 'Ø', '²' };
+
         // ファイル名形式の規定
         private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
 
