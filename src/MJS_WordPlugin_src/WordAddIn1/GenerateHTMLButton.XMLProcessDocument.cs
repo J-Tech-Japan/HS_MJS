@@ -69,6 +69,21 @@ namespace WordAddIn1
 
         // 目次の見出しを整理する
         // 行頭記号問題重要コード！
+        //private void CleanTocHeadings(XmlDocument objXml)
+        //{
+        //    foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
+        //    {
+        //        foreach (XmlElement childSpan in toc.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
+        //            childSpan.ParentNode.RemoveChild(childSpan);
+        //        foreach (XmlElement brotherSpan in toc.ParentNode.SelectNodes(".//span[contains(@style, 'Wingdings')]"))
+        //            brotherSpan.ParentNode.RemoveChild(brotherSpan);
+        //        if (!string.IsNullOrEmpty(toc.InnerText))
+        //        {
+        //            toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･]\s*", "");
+        //        }
+        //    }
+        //}
+
         private void CleanTocHeadings(XmlDocument objXml)
         {
             foreach (XmlElement toc in objXml.SelectNodes("//a[starts-with(@name, '_Toc')]"))
@@ -79,7 +94,8 @@ namespace WordAddIn1
                     brotherSpan.ParentNode.RemoveChild(brotherSpan);
                 if (!string.IsNullOrEmpty(toc.InnerText))
                 {
-                    toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･]\s*", "");
+                    // 行頭の「・」「･」と半角/全角スペースをすべて削除
+                    toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･\s\u3000]+", "");
                 }
             }
         }
