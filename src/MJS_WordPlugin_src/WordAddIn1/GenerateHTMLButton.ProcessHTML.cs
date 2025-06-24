@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -51,8 +52,19 @@ namespace WordAddIn1
             //htmlStr = Regex.Replace(htmlStr, "(　[Ø²]|[Ø²]　)", "");
 
             // 混入記号を除去
-            string symbolPattern = string.Join("", removeSymbols.Select(c => Regex.Escape(c.ToString())));
-            htmlStr = Regex.Replace(htmlStr, $"(　[{symbolPattern}]|[{symbolPattern}]　)", "");
+            //string symbolPattern = string.Join("", removeSymbols.Select(c => Regex.Escape(c.ToString())));
+            //htmlStr = Regex.Replace(htmlStr, $"(　[{symbolPattern}]|[{symbolPattern}]　)", "");
+
+            // 混入記号を除去（Unicodeエスケープで全角スペースを明示）
+            string symbolPattern = string.Join("", removeSymbols.Select(c => $"\\u{((int)c):X4}"));
+            htmlStr = Regex.Replace(
+                htmlStr,
+                $"(\\u3000[{symbolPattern}]|[{symbolPattern}]\\u3000)",
+                "",
+                RegexOptions.None,
+                TimeSpan.FromSeconds(1)
+            );
+
             return htmlStr;
         }
     }
