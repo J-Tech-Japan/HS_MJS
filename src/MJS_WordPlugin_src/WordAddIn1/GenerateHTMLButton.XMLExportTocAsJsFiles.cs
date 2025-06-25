@@ -115,47 +115,5 @@ namespace WordAddIn1
                 sw.WriteLine("})();");
             }
         }
-
-        //private void WriteTocJsFile(string rootPath, string exportDir, string fileName, string tocContent)
-        //{
-        //    string cleaned = Regex.Replace(tocContent, "(　[Ø²]|[Ø²]　)", "");
-        //    string path = Path.Combine(rootPath, exportDir, "whxdata", fileName);
-        //    using (StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8))
-        //    {
-        //        sw.WriteLine("(function() {");
-        //        sw.WriteLine("var toc =  [" + cleaned + "];");
-        //        sw.WriteLine("window.rh.model.publish(rh.consts('KEY_TEMP_DATA'), toc, { sync:true });");
-        //        sw.WriteLine("})();");
-        //    }
-        //}
-
-        //// タイトル取得時に除去
-        //private string CleanTitle(string title)
-        //{
-        //    return Regex.Replace(title, "(　[Ø²]|[Ø²]　)", "");
-        //}
-
-        // タイトル取得時に除去
-        private string CleanTitle(string title)
-        {
-            // removeSymbolsの各記号の前後に全角スペースがある場合も含めて除去
-            string pattern = string.Join("|", removeSymbols.Select(s => $"(　?{Regex.Escape(s.ToString())}　?|　?{Regex.Escape(s.ToString())})"));
-            return Regex.Replace(title, pattern, "");
-        }
-
-        private void WriteTocJsFile(string rootPath, string exportDir, string fileName, string tocContent)
-        {
-            // removeSymbolsの各記号の前後に全角スペースがある場合も含めて除去
-            string pattern = string.Join("|", removeSymbols.Select(s => $"(　?{Regex.Escape(s.ToString())}　?|　?{Regex.Escape(s.ToString())})"));
-            string cleaned = Regex.Replace(tocContent, pattern, "");
-            string path = Path.Combine(rootPath, exportDir, "whxdata", fileName);
-            using (StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8))
-            {
-                sw.WriteLine("(function() {");
-                sw.WriteLine("var toc =  [" + cleaned + "];");
-                sw.WriteLine("window.rh.model.publish(rh.consts('KEY_TEMP_DATA'), toc, { sync:true });");
-                sw.WriteLine("})();");
-            }
-        }
     }
 }
