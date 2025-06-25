@@ -95,7 +95,13 @@ namespace WordAddIn1
                 if (!string.IsNullOrEmpty(toc.InnerText))
                 {
                     // 行頭の「・」「･」と半角/全角スペースをすべて削除
-                    toc.InnerText = Regex.Replace(toc.InnerText, @"^[・･\s\u3000]+", "");
+                    string cleaned = Regex.Replace(toc.InnerText, @"^[・･\s\u3000]+", "");
+                    // removeSymbolsに含まれる記号をすべて削除
+                    foreach (char c in RibbonMJS.removeSymbols)
+                    {
+                        cleaned = cleaned.Replace(c.ToString(), "");
+                    }
+                    toc.InnerText = cleaned;
                 }
             }
         }
