@@ -38,8 +38,6 @@ namespace WordAddIn1
         }
 
         // 除去したい記号
-        //public static readonly char[] removeSymbols = { '\u00D8', '\u00B2', '\u3000' };
-
         public static readonly char[] removeSymbols = { '\u00D8', '\u00B2', '\u00B3', '\u00B9'};
 
         // ファイル名形式の規定

@@ -48,15 +48,10 @@ namespace WordAddIn1
             htmlStr = Regex.Replace(htmlStr, @"(<p[^>]*?(?<!/)>)([^<]*)(</(?!p))", @"$1$2</p>$3");
             htmlStr = htmlStr.Replace("MJS--", "MJSTT");
 
-            // "　Ø"、"　²"、"Ø　"、"²　"を除去
-            //htmlStr = Regex.Replace(htmlStr, "(　[Ø²]|[Ø²]　)", "");
-
-            // 混入記号を除去
-            //string symbolPattern = string.Join("", removeSymbols.Select(c => Regex.Escape(c.ToString())));
-            //htmlStr = Regex.Replace(htmlStr, $"(　[{symbolPattern}]|[{symbolPattern}]　)", "");
-
-            // 混入記号を除去（Unicodeエスケープで全角スペースを明示）
+            // 全角スペースと除去したい記号を削除するための正規表現パターンを作成
             string symbolPattern = string.Join("", removeSymbols.Select(c => $"\\u{((int)c):X4}"));
+
+            // 全角スペースと除去したい記号の組み合わせを削除
             htmlStr = Regex.Replace(
                 htmlStr,
                 $"(\\u3000[{symbolPattern}]|[{symbolPattern}]\\u3000)",
