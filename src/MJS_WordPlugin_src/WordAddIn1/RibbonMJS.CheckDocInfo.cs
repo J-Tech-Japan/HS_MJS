@@ -497,5 +497,6 @@ namespace WordAddIn1
 
             return returnCode;
         }
+
     }
 }

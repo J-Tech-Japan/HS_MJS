@@ -9,7 +9,40 @@ namespace WordAddIn1
     public partial class ThisAddIn
     {
         // アクティブドキュメントのバックアップを保存（フォルダ名を引数で指定）
-        private void SaveBackupOfActiveDocument(string backupFolderName)
+        //private void SaveBackupOfActiveDocument()
+        //{
+        //    try
+        //    {
+        //        var doc = this.Application.ActiveDocument;
+        //        if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+        //        {
+        //            string originalPath = doc.FullName;
+        //            string dir = Path.GetDirectoryName(originalPath);
+        //            string name = Path.GetFileNameWithoutExtension(originalPath);
+        //            string ext = Path.GetExtension(originalPath);
+
+        //            // 末尾が "_backup" の場合は何もしない
+        //            if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
+        //                return;
+
+        //            string backupName = name + "_backup" + ext;
+        //            string backupPath = Path.Combine(dir, backupName);
+
+        //            // すでにバックアップファイルが存在する場合は何もしない
+        //            if (File.Exists(backupPath))
+        //                return;
+
+        //            // ファイルをコピーしてバックアップ作成
+        //            File.Copy(originalPath, backupPath);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"バックアップ保存時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //    }
+        //}
+
+        private void SaveBackupOfActiveDocument()
         {
             try
             {
@@ -21,22 +54,12 @@ namespace WordAddIn1
                     string name = Path.GetFileNameWithoutExtension(originalPath);
                     string ext = Path.GetExtension(originalPath);
 
-                    // 末尾が "_backup" または "_backupx" の場合は何もしない
-                    if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase) ||
-                        name.EndsWith("_backupx", StringComparison.OrdinalIgnoreCase))
+                    // 末尾が "_backup" の場合は何もしない
+                    if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
                         return;
 
-                    // backupフォルダのパスを作成（引数で指定されたフォルダ名を使用）
-                    string backupDir = Path.Combine(dir, backupFolderName);
-
-                    // backupフォルダがなければ作成
-                    if (!Directory.Exists(backupDir))
-                    {
-                        Directory.CreateDirectory(backupDir);
-                    }
-
                     string backupName = name + "_backup" + ext;
-                    string backupPath = Path.Combine(backupDir, backupName);
+                    string backupPath = Path.Combine(dir, backupName);
 
                     // すでにバックアップファイルが存在する場合は何もしない
                     if (File.Exists(backupPath))
@@ -44,6 +67,12 @@ namespace WordAddIn1
 
                     // ファイルをコピーしてバックアップ作成
                     File.Copy(originalPath, backupPath);
+
+                    // 現在のドキュメントを閉じてバックアップファイルを開く
+                    object saveChanges = false;
+                    object originalDoc = doc;
+                    this.Application.ActiveDocument.Close(ref saveChanges);
+                    this.Application.Documents.Open(backupPath);
                 }
             }
             catch (Exception ex)
@@ -126,13 +155,9 @@ namespace WordAddIn1
                 if (!name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
                     return;
 
-                // 一つ上のフォルダを取得
-                string parentDir = Directory.GetParent(dir)?.FullName;
-                if (string.IsNullOrEmpty(parentDir))
-                    return;
-
+                // 現在のフォルダを対象にする
                 string targetName = name.Substring(0, name.Length - "_backup".Length) + ext;
-                string targetPath = Path.Combine(parentDir, targetName);
+                string targetPath = Path.Combine(dir, targetName);
 
                 // sampleファイルが存在すれば削除
                 if (File.Exists(targetPath))
@@ -140,7 +165,7 @@ namespace WordAddIn1
                     File.Delete(targetPath);
                 }
 
-                // 自分自身を sampleファイルとしてコピー
+                // 自分自身をターゲットにコピー
                 File.Copy(originalPath, targetPath);
             }
             catch (Exception ex)

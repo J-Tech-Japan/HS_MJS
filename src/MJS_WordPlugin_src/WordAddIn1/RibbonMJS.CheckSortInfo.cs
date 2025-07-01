@@ -6,22 +6,54 @@ namespace WordAddIn1
     {
         private bool CheckSortInfo(CheckInfo old, List<CheckInfo> newInfos, int j)
         {
-            // newInfoとの比較
-            bool ret = old.CompareOldTo(newInfos[j]) < 0;
+            bool ret = false;
 
-            // newInfos[j+1]以降と比較
+            CheckInfo newInfo = newInfos[j];
+
+            if (old.old1 < newInfo.old1)
+            {
+                ret = true;
+            }
+            else if (old.old1 == newInfo.old1 && old.old2 < newInfo.old2)
+            {
+                ret = true;
+            }
+            else if (old.old1 == newInfo.old1 && old.old2 == newInfo.old2 && old.old3 < newInfo.old3)
+            {
+                ret = true;
+            }
+            else if (old.old1 == newInfo.old1 && old.old2 == newInfo.old2 && old.old3 == newInfo.old3 && old.old4 < newInfo.old4)
+            {
+                ret = true;
+            }
+
             for (int k = j + 1; k < newInfos.Count; k++)
             {
                 CheckInfo newInfoK = newInfos[k];
+
                 if (string.IsNullOrEmpty(newInfoK.old_id))
                 {
                     continue;
                 }
-                if (old.CompareOldTo(newInfoK) > 0)
+
+                if (old.old1 > newInfoK.old1)
+                {
+                    ret = false;
+                }
+                else if (old.old1 == newInfoK.old1 && old.old2 > newInfoK.old2)
+                {
+                    ret = false;
+                }
+                else if (old.old1 == newInfoK.old1 && old.old2 == newInfoK.old2 && old.old3 > newInfoK.old3)
+                {
+                    ret = false;
+                }
+                else if (old.old1 == newInfoK.old1 && old.old2 == newInfoK.old2 && old.old3 == newInfoK.old3 && old.old4 > newInfoK.old4)
                 {
                     ret = false;
                 }
             }
+
             return ret;
         }
     }
