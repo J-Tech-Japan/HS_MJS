@@ -398,5 +398,8 @@ FodyWeavers.xsd
 *.sln.iml
 
 # *.pfx
+*.md
+
+NoteBook
 
 github/

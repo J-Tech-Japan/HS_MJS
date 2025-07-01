@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Packaging;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using DocumentFormat.OpenXml;
@@ -40,6 +41,9 @@ namespace WordAddIn1
             List<string> trademarkTextList = new List<string>();
             string trademarkRight = "";
             int lastSectionIdx = docCopy.Sections.Count;
+
+            // HTML保存時のエンコーディング設定
+            docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
 
             // 表紙情報（タイトル・サブタイトル等）の収集
             CollectCoverParagraphs(docCopy, ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter, ref coverExist);
@@ -82,12 +86,7 @@ namespace WordAddIn1
                 if (ws.NameLocal == "奥付タイトル")
                     ws.NameLocal = "titledef";
             
-            // HTML保存時のエンコーディング設定
-            docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
             
-            // 一時HTMLとして保存
-            //docCopy.SaveAs2(paths.tmpHtmlPath, WdSaveFormat.wdFormatFilteredHTML);
-
             docCopy.SaveAs2(
                 paths.tmpHtmlPath,
                 WdSaveFormat.wdFormatFilteredHTML,

@@ -349,6 +349,7 @@
     <EmbeddedResource Include="htmlTemplates.zip" />
     <None Include="IncrementMinorVersion.ps1" />
     <None Include="MJS.pfx" />
+    <None Include="NoteBook\SaveBackupOfActiveDocument.md" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -448,6 +449,7 @@
     <Compile Include="SetLink.Designer.cs">
       <DependentUpon>SetLink.cs</DependentUpon>
     </Compile>
+    <Compile Include="ThisAddIn.Backup.cs" />
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>
     </Compile>
