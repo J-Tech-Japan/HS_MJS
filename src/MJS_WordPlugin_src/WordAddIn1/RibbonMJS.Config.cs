@@ -41,7 +41,9 @@ namespace WordAddIn1
         public static readonly char[] removeSymbols = { '\u00D8', '\u00B2', '\u00B3', '\u00B9'};
 
         // ファイル名形式の規定
-        private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
+        //private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
+
+        private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}(_backup)?\.docx*$";
 
         // 一般的なエラーメッセージ
         private const string ErrMsg = "エラーが発生しました。";

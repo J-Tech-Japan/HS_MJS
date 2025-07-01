@@ -27,7 +27,9 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            //SaveBackupOfActiveDocument("backup");
+            //SaveBackupOfActiveDocument();
+            //this.Application.DocumentBeforeClose += Application_DocumentBeforeClose;
+
             //SaveDocxBackupIfDoc("backup");
             //ShowBookInfoIdStatusDialog();
             //OverwriteDocument();
@@ -40,6 +42,8 @@ namespace WordAddIn1
         {
             try
             {
+                //DeleteBackupFilesOfActiveDocument();
+
                 // 必要に応じてリソースを解放
                 if (Globals.ThisAddIn.Application != null)
                 {
@@ -104,6 +108,73 @@ namespace WordAddIn1
                 MessageBox.Show("書誌情報IDが設定されていません。", "書誌情報チェック", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+        // ドキュメントを閉じる直前に呼ばれる
+        private void Application_DocumentBeforeClose(Word.Document doc, ref bool Cancel)
+        {
+            try
+            {
+                // バックアップファイル削除処理を追加
+                DeleteBackupFilesOfActiveDocument();
+
+                //if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+                //{
+                //    string name = Path.GetFileNameWithoutExtension(doc.FullName);
+                //    string dir = Path.GetDirectoryName(doc.FullName);
+                //    string ext = Path.GetExtension(doc.FullName);
+
+                //    if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
+                //    {
+                //        // 元ファイルのパスを生成
+                //        string originalName = name.Substring(0, name.Length - "_backup".Length);
+                //        string originalPath = Path.Combine(dir, originalName + ext);
+
+                //        // 元ファイルが存在すれば開く
+                //        if (File.Exists(originalPath))
+                //        {
+                //            this.Application.Documents.Open(originalPath);
+                //        }
+                //    }
+                //}
+            }
+            catch { /* 例外は無視 */ }
+        }
+
+        private void DeleteBackupFilesOfActiveDocument()
+        {
+            try
+            {
+                var doc = this.Application.ActiveDocument;
+                if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+                {
+                    string dir = Path.GetDirectoryName(doc.FullName);
+                    string ext = Path.GetExtension(doc.FullName);
+
+                    // 指定フォルダ内の同じ拡張子のファイルを取得
+                    var files = Directory.GetFiles(dir, "*" + ext);
+                    foreach (var file in files)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(file);
+                        if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                File.Delete(file);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"バックアップファイル削除時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"バックアップファイル削除処理でエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
 
         #region VSTO で生成されたコード
 
