@@ -3,33 +3,38 @@ using System.IO;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 
+/*
+COM（Component Object Model）は、Microsoft が開発した技術で、異なるプログラミング言語やプロセス間でオブジェクトを共有するための仕組みです。
+COM オブジェクトは、主に Windows アプリケーションや Office アドインの開発で使用されます。
+
+特徴：
+•プログラミング言語に依存しない。
+•バイナリレベルでの互換性を提供。
+•インターフェースを通じてオブジェクトにアクセス。
+
+NET と COM の関係：
+.NET はマネージコードを使用しますが、COM はアンマネージコードを使用します。
+.NET から COM オブジェクトを使用する際には、相互運用性（Interop） が必要です。
+        
+相互運用性の仕組み：
+•.NET では、Microsoft.Office.Interop 名前空間を使用して COM オブジェクトにアクセスします。
+•例: Microsoft.Office.Interop.Word.Application は Word アプリケーションの COM オブジェクトを表します。
+*/
+
 namespace WordAddIn1
 {
     public partial class ThisAddIn
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            SaveBackupOfActiveDocument();
-            OverwriteSampleIfNeeded();
+            //SaveBackupOfActiveDocument("backup");
+            //SaveDocxBackupIfDoc("backup");
+            //ShowBookInfoIdStatusDialog();
+            //OverwriteDocument();
+            //ConvertBackupxToZip("backup");
+            //UnzipBackupxZip("backup");
+            //MoveUnzippedMediaFolderToDocumentDirectory("backup");
         }
-
-        /*
-        COM（Component Object Model）は、Microsoft が開発した技術で、異なるプログラミング言語やプロセス間でオブジェクトを共有するための仕組みです。
-        COM オブジェクトは、主に Windows アプリケーションや Office アドインの開発で使用されます。
-
-        特徴：
-        •プログラミング言語に依存しない。
-        •バイナリレベルでの互換性を提供。
-        •インターフェースを通じてオブジェクトにアクセス。
-
-        NET と COM の関係：
-        .NET はマネージコードを使用しますが、COM はアンマネージコードを使用します。
-        .NET から COM オブジェクトを使用する際には、相互運用性（Interop） が必要です。
-        
-        相互運用性の仕組み：
-        •.NET では、Microsoft.Office.Interop 名前空間を使用して COM オブジェクトにアクセスします。
-        •例: Microsoft.Office.Interop.Word.Application は Word アプリケーションの COM オブジェクトを表します。
-        */
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
@@ -47,167 +52,63 @@ namespace WordAddIn1
             }
         }
 
-        private void SaveBackupOfActiveDocument()
+        /// 書誌情報IDが設定されている場合は true を返す
+        private bool IsBookInfoIdSet()
         {
             try
             {
                 var doc = this.Application.ActiveDocument;
-                if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+                if (doc != null)
                 {
-                    string originalPath = doc.FullName;
-                    string dir = Path.GetDirectoryName(originalPath);
-                    string name = Path.GetFileNameWithoutExtension(originalPath);
-                    string ext = Path.GetExtension(originalPath);
-
-                    // 末尾が "_backup" の場合は何もしない
-                    if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
-                        return;
-
-                    string backupName = name + "_backup" + ext;
-                    string backupPath = Path.Combine(dir, backupName);
-
-                    // すでにバックアップファイルが存在する場合は何もしない
-                    if (File.Exists(backupPath))
-                        return;
-
-                    // ファイルをコピーしてバックアップ作成
-                    File.Copy(originalPath, backupPath);
+                    foreach (Word.Bookmark bm in doc.Bookmarks)
+                    {
+                        // 書誌情報IDのパターン（例: 3文字+2桁+3桁）にマッチするか
+                        if (System.Text.RegularExpressions.Regex.IsMatch(bm.Name, @"^[A-Z0-9]{3}\d{2}\d{3}$"))
+                        {
+                            return true; // 設定されている
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"バックアップ保存時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"書誌情報ID判定時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // エラー時は「設定されていない」とみなす
             }
+            return false; // 設定されていない
         }
 
-        private void OverwriteSampleIfNeeded()
+        /// 書誌情報IDが設定されていない場合のみダイアログで通知する
+        private void ShowBookInfoIdStatusDialog()
         {
-            try
+            if (!IsBookInfoIdSet())
             {
-                var doc = this.Application.ActiveDocument;
-                if (doc == null || string.IsNullOrEmpty(doc.FullName))
-                    return;
-
-                string originalPath = doc.FullName;
-                string dir = Path.GetDirectoryName(originalPath);
-                string name = Path.GetFileNameWithoutExtension(originalPath);
-                string ext = Path.GetExtension(originalPath);
-
-                // ファイル名の末尾が "_backup" でなければ何もしない
-                if (!name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
-                    return;
-
-                string sampleName = name.Substring(0, name.Length - "_backup".Length) + ext;
-                string samplePath = Path.Combine(dir, sampleName);
-
-                // sampleファイルが存在すれば削除
-                if (File.Exists(samplePath))
+                try
                 {
-                    File.Delete(samplePath);
+                    var doc = this.Application.ActiveDocument;
+                    if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+                    {
+                        string dir = Path.GetDirectoryName(doc.FullName);
+                        string headerDir = Path.Combine(dir, "headerFile");
+                        if (Directory.Exists(headerDir))
+                        {
+                            Directory.Delete(headerDir, true);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"headerFileフォルダ削除時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
-                // 自分自身を sampleファイルとしてコピー
-                File.Copy(originalPath, samplePath);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"sampleファイルの上書き時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("書誌情報IDが設定されていません。", "書誌情報チェック", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
-        // HYPERLINKフィールドをREFフィールドに変換
-        //private void ConvertHyperlinkRefFieldsToRefFields()
-        //{
-        //    var doc = Globals.ThisAddIn.Application.ActiveDocument;
-        //    for (int i = doc.Fields.Count; i >= 1; i--)
-        //    {
-        //        var field = doc.Fields[i];
-        //        try
-        //        {
-        //            if (field.Type == Word.WdFieldType.wdFieldHyperlink)
-        //            {
-        //                string fieldCode = field.Code.Text;
-        //                var refIndex = fieldCode.IndexOf("_Ref", StringComparison.OrdinalIgnoreCase);
-        //                if (refIndex >= 0)
-        //                {
-        //                    var refStart = refIndex;
-        //                    var refEnd = refStart;
-        //                    while (refEnd < fieldCode.Length && (char.IsLetterOrDigit(fieldCode[refEnd]) || fieldCode[refEnd] == '_'))
-        //                        refEnd++;
-        //                    string refId = fieldCode.Substring(refStart, refEnd - refStart);
-
-        //                    // フィールド全体を選択して置換
-        //                    field.Select();
-        //                    var sel = doc.Application.Selection;
-        //                    // 既存フィールドの範囲を取得
-        //                    var rng = sel.Range;
-        //                    // 既存フィールドを削除
-        //                    field.Delete();
-        //                    // REFフィールドを挿入
-        //                    doc.Fields.Add(rng, Word.WdFieldType.wdFieldRef, $"{refId} \\h");
-        //                    // 選択を解除
-        //                    sel.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            System.Diagnostics.Debug.WriteLine($"フィールド変換エラー: {ex.Message}");
-        //        }
-        //    }
-        //    // 変換後にフィールドを更新
-        //    doc.Fields.Update();
-        //}
-
-        //private void ConvertAbsoluteHyperlinksToFilenameOnly()
-        //{
-        //    var doc = Globals.ThisAddIn.Application.ActiveDocument;
-
-        //    for (int i = doc.Fields.Count; i >= 1; i--)
-        //    {
-        //        var field = doc.Fields[i];
-        //        try
-        //        {
-        //            if (field.Type == Word.WdFieldType.wdFieldHyperlink)
-        //            {
-        //                string fieldCode = field.Code.Text.Trim();
-        //                // HYPERLINK "file:///C:\..." の形式を抽出
-        //                var match = System.Text.RegularExpressions.Regex.Match(
-        //                    fieldCode,
-        //                    @"HYPERLINK\s+""file:///([A-Za-z]:\\[^""]+)""",
-        //                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-        //                if (match.Success)
-        //                {
-        //                    string absPath = match.Groups[1].Value;
-        //                    string fileName = Path.GetFileName(absPath);
-
-        //                    // フィールド全体を選択して置換
-        //                    field.Select();
-        //                    var sel = doc.Application.Selection;
-        //                    var rng = sel.Range;
-        //                    field.Delete();
-        //                    // ファイル名のみでHYPERLINKフィールドを再挿入
-        //                    doc.Fields.Add(rng, Word.WdFieldType.wdFieldHyperlink, $"\"{fileName}\"");
-        //                    sel.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            System.Diagnostics.Debug.WriteLine($"HYPERLINK変換エラー: {ex.Message}");
-        //        }
-        //    }
-        //    doc.Fields.Update();
-        //}
-
 
         #region VSTO で生成されたコード
 
-        /// <summary>
         /// デザイナーのサポートに必要なメソッドです。
-        /// このメソッドの内容をコード エディターで変更しないでください。
-        /// </summary>
+        /// メソッドの内容をコードエディターで変更しないでください。
         private void InternalStartup()
         {
             Startup += new System.EventHandler(ThisAddIn_Startup);
