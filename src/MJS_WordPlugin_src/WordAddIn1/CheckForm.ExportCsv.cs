@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
-// リファクタリング済
 namespace WordAddIn1
 {
     public partial class CheckForm
