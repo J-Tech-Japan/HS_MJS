@@ -14,8 +14,8 @@ namespace WordAddIn1
     {
         private bool makeBookInfo(loader load, StreamWriter swLog = null)
         {
-            WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = false;
-            Word.Document thisDocument = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
+            Globals.ThisAddIn.Application.ScreenUpdating = false;
+            Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
 
             // ファイル命名規則チェック
             if (!Regex.IsMatch(thisDocument.Name, @"^[A-Z]{3}(_[^_]*?){2}\.docx*$"))
@@ -23,23 +23,23 @@ namespace WordAddIn1
                 load.Visible = false;
                 MessageBox.Show("開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」", "ファイル命名規則エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.DoEvents();
-                WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
+                Globals.ThisAddIn.Application.ScreenUpdating = true;
                 return false;
             }
 
-            int selStart = WordAddIn1.Globals.ThisAddIn.Application.Selection.Start;
-            int selEnd = WordAddIn1.Globals.ThisAddIn.Application.Selection.End;
-            WordAddIn1.Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
+            int selStart = Globals.ThisAddIn.Application.Selection.Start;
+            int selEnd = Globals.ThisAddIn.Application.Selection.End;
+            Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
             Application.DoEvents();
-            WordAddIn1.Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+            Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
             Application.DoEvents();
 
-            if (WordAddIn1.Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
-                WordAddIn1.Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
-                WordAddIn1.Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
+            if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
+                Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
+                Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
 
             bookInfoDef = "";
-            Word.Document Doc = WordAddIn1.Globals.ThisAddIn.Application.ActiveDocument;
+            Word.Document Doc = Globals.ThisAddIn.Application.ActiveDocument;
             // 書誌情報番号
             int bibNum = 0;
             // 書誌情報番号最大値
@@ -61,7 +61,7 @@ namespace WordAddIn1
                     MessageBox.Show(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt" + "が開かれています。\r\nファイルを閉じてから書誌情報出力を実行してください。",
                         "ファイルエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.DoEvents();
-                    WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
+                    Globals.ThisAddIn.Application.ScreenUpdating = true;
                     return false;
                 }
 
@@ -173,23 +173,6 @@ namespace WordAddIn1
                 {
                     Directory.CreateDirectory(rootPath + "\\" + headerDir);
                 }
-                //foreach (string docInfo in Directory.GetFiles(rootPath + "\\" + headerDir, "*.txt"))
-                //{
-                //    using (StreamReader sr = new StreamReader(docInfo))
-                //    {
-                //        while (!sr.EndOfStream)
-                //        {
-                //            string[] lineText = sr.ReadLine().Split('\t');
-
-                //            if ((lineText.Length == 3) && Regex.IsMatch(lineText[2], @"^[A-Z]{3}\d+$") || Regex.IsMatch(lineText[2], @"^[A-Z]{3}\d+#[A-Z]{3}\d+$"))
-                //            {
-                //                oldBookInfoDic.Add(lineText[2], lineText[1]);
-                //                try { ls.Add(lineText[2].Substring(lineText[2].Length - 3, 3)); }
-                //                catch { }
-                //            }
-                //        }
-                //    }
-                //}
 
                 foreach (Word.Bookmark wb in thisDocument.Bookmarks)
                 {
@@ -356,7 +339,7 @@ namespace WordAddIn1
 
                             // 行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -423,7 +406,7 @@ namespace WordAddIn1
                             {
                                 // 行末尾を選択状態にする
                                 tgtPara.Range.Select();
-                                Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                                Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                                 sel.EndKey(Word.WdUnits.wdLine);
 
                                 string setid = "";
@@ -502,7 +485,7 @@ namespace WordAddIn1
 
                             // 行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -585,7 +568,7 @@ namespace WordAddIn1
 
                             // 行末尾を選択状態にする
                             tgtPara.Range.Select();
-                            Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                            Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                             sel.EndKey(Word.WdUnits.wdLine);
 
                             string setid = "";
@@ -847,7 +830,7 @@ namespace WordAddIn1
 
                                         // 行末尾を選択状態にする
                                         tgtPara.Range.Select();
-                                        Word.Selection sel = WordAddIn1.Globals.ThisAddIn.Application.Selection;
+                                        Word.Selection sel = Globals.ThisAddIn.Application.Selection;
                                         sel.EndKey(Word.WdUnits.wdLine);
 
                                         string num = Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "");
@@ -921,15 +904,10 @@ namespace WordAddIn1
             }
             finally
             {
-                WordAddIn1.Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+                Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
                 Application.DoEvents();
-                WordAddIn1.Globals.ThisAddIn.Application.ScreenUpdating = true;
+                Globals.ThisAddIn.Application.ScreenUpdating = true;
             }
-
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.Start = selStart;
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.End = selEnd;
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.MoveRight(Unit: Word.WdUnits.wdCharacter, Count: 1);
-            //WordAddIn1.Globals.ThisAddIn.Application.Selection.MoveLeft(Unit: Word.WdUnits.wdCharacter, Count: 1);
         }
     }
 }
