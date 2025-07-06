@@ -17,125 +17,58 @@ namespace WordAddIn1
             Globals.ThisAddIn.Application.ScreenUpdating = false;
             Word.Document thisDocument = Globals.ThisAddIn.Application.ActiveDocument;
 
-            // ファイル命名規則チェック
-            if (!Regex.IsMatch(thisDocument.Name, @"^[A-Z]{3}(_[^_]*?){2}\.docx*$"))
+            if (!CheckFileName(thisDocument, load))
             {
-                load.Visible = false;
-                MessageBox.Show("開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」", "ファイル命名規則エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.DoEvents();
-                Globals.ThisAddIn.Application.ScreenUpdating = true;
                 return false;
             }
 
-            int selStart = Globals.ThisAddIn.Application.Selection.Start;
-            int selEnd = Globals.ThisAddIn.Application.Selection.End;
-            Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
-            Application.DoEvents();
-            Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+            //int selStart = Globals.ThisAddIn.Application.Selection.Start;
+            //int selEnd = Globals.ThisAddIn.Application.Selection.End;
+            //Globals.ThisAddIn.Application.Selection.EndKey(Word.WdUnits.wdStory);
+            //Application.DoEvents();
+            //Globals.ThisAddIn.Application.Selection.HomeKey(Word.WdUnits.wdStory);
+            //Application.DoEvents();
+
+            //if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
+            //    Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
+            //    Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
+
+            var selection = Globals.ThisAddIn.Application.Selection;
+            int selStart = selection.Start;
+            int selEnd = selection.End;
+            string rootPath = thisDocument.Path;
+            string docName = thisDocument.Name;
+            string headerDir = "headerFile";
+            string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
+            string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
+
+            selection.EndKey(Word.WdUnits.wdStory);
             Application.DoEvents();
 
-            if (Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
-                Globals.ThisAddIn.Application.Selection.Type == Word.WdSelectionType.wdSelectionShape)
-                Globals.ThisAddIn.Application.Selection.MoveLeft(Word.WdUnits.wdCharacter);
+            selection.HomeKey(Word.WdUnits.wdStory);
+            Application.DoEvents();
+
+            if (selection.Type == Word.WdSelectionType.wdSelectionInlineShape ||
+                selection.Type == Word.WdSelectionType.wdSelectionShape)
+            {
+                selection.MoveLeft(Word.WdUnits.wdCharacter);
+            }
 
             bookInfoDef = "";
             Word.Document Doc = Globals.ThisAddIn.Application.ActiveDocument;
-            // 書誌情報番号
+
+            // 書誌情報番号・書誌情報番号最大値
             int bibNum = 0;
-            // 書誌情報番号最大値
             int bibMaxNum = 0;
 
             bool checkBL = false;
 
-            if (File.Exists(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt"))
+            if (!CheckAndLoadHeaderFile(Doc, load, ref oldInfo, ref newInfo, ref checkResult, ref bibNum, ref bibMaxNum, ref bookInfoDef, ref checkBL))
             {
-                try
-                {
-                    using (Stream stream = new FileStream(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt", FileMode.Open))
-                    {
-                    }
-                }
-                catch
-                {
-                    load.Visible = false;
-                    MessageBox.Show(Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt" + "が開かれています。\r\nファイルを閉じてから書誌情報出力を実行してください。",
-                        "ファイルエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.DoEvents();
-                    Globals.ThisAddIn.Application.ScreenUpdating = true;
-                    return false;
-                }
-
-                // SOURCELINK追加==========================================================================START
-                // 書誌情報（旧）
-                oldInfo = new List<HeadingInfo>();
-                // 書誌情報（新）
-                newInfo = new List<HeadingInfo>();
-                // 比較結果
-                checkResult = new List<CheckInfo>();
-                // SOURCELINK追加==========================================================================END
-
-                using (StreamReader sr = new StreamReader(
-                    Path.GetDirectoryName(Doc.FullName) + "\\headerFile\\" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + @".txt", System.Text.Encoding.Default))
-                {
-                    // 書誌情報番号の最大値取得
-                    while (sr.Peek() >= 0)
-                    {
-                        string strBuffer = sr.ReadLine();
-
-                        // SOURCELINK追加==========================================================================START
-                        string[] info = strBuffer.Split('\t');
-
-                        HeadingInfo headingInfo = new HeadingInfo();
-                        headingInfo.num = info[0];
-                        headingInfo.title = info[1];
-                        if (info.Length == 4)
-                        {
-                            headingInfo.mergeto = info[3];
-                        }
-                        headingInfo.id = info[2];
-
-                        oldInfo.Add(headingInfo);
-
-                        // SOURCELINK追加==========================================================================END
-
-                        bibNum = int.Parse(info[2].Substring(info[2].Length - 3, 3));
-                        if (bibMaxNum < bibNum)
-                        {
-                            bibMaxNum = bibNum;
-                        }
-                    }
-                }
-
-                foreach (Word.Bookmark bm in Doc.Bookmarks)
-                {
-                    if (Regex.IsMatch(bm.Name, "^" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1")))
-                    {
-                        bookInfoDef = Regex.Replace(bm.Name, "^.{3}(.{2}).*$", "$1");
-                        break;
-                    }
-                }
-                //bookInfoDef = Regex.Replace(Doc.Name, "^(.{3}).+$", "$1");
-                button4.Enabled = true;
-                button2.Enabled = true;
-                button5.Enabled = true;
-            }
-            else
-            {
-                button3.Enabled = false;
-                button2.Enabled = false;
-                button5.Enabled = false;
-                checkBL = true;
+                return false;
             }
 
-            string rootPath = thisDocument.Path;
-            string docName = thisDocument.Name;
-            string headerDir = "headerFile";
-
-            string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
-            string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
             bookInfoDic.Clear();
-
-            //string headerFileName = docid + ".h";
 
             StreamWriter log = swLog;
 
@@ -146,24 +79,29 @@ namespace WordAddIn1
 
             try
             {
-                if (bookInfoDef == "")
-                {
+                //if (bookInfoDef == "")
+                //{
 
-                    foreach (Word.Bookmark wb in thisDocument.Bookmarks) wb.Delete();
-                    using (BookInfo bi = new BookInfo())
-                    {
-                        if (bi.ShowDialog() == DialogResult.OK)
-                        {
-                            bookInfoDef = bi.tbxDefaultValue.Text;
-                        }
-                        else
-                        {
-                            log.Close();
-                            if (File.Exists(rootPath + "\\log.txt")) File.Delete(rootPath + "\\log.txt");
-                            button4.Enabled = true;
-                            return false;
-                        }
-                    }
+                //    foreach (Word.Bookmark wb in thisDocument.Bookmarks) wb.Delete();
+                //    using (BookInfo bi = new BookInfo())
+                //    {
+                //        if (bi.ShowDialog() == DialogResult.OK)
+                //        {
+                //            bookInfoDef = bi.tbxDefaultValue.Text;
+                //        }
+                //        else
+                //        {
+                //            log.Close();
+                //            if (File.Exists(rootPath + "\\log.txt")) File.Delete(rootPath + "\\log.txt");
+                //            button4.Enabled = true;
+                //            return false;
+                //        }
+                //    }
+                //}
+
+                if (!EnsureBookInfoDef(thisDocument, ref bookInfoDef, log, rootPath))
+                {
+                    return false;
                 }
 
                 Dictionary<string, string> oldBookInfoDic = new Dictionary<string, string>();
@@ -174,53 +112,33 @@ namespace WordAddIn1
                     Directory.CreateDirectory(rootPath + "\\" + headerDir);
                 }
 
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    try
-                    {
-                        for (int w = 1; w < wb.Range.Bookmarks.Count; w++)
-                        {
-                            wb.Range.Bookmarks[w].Delete();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                }
+                //foreach (Word.Bookmark wb in thisDocument.Bookmarks)
+                //{
+                //    try
+                //    {
+                //        for (int w = 1; w < wb.Range.Bookmarks.Count; w++)
+                //        {
+                //            wb.Range.Bookmarks[w].Delete();
+                //        }
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        Console.WriteLine(e);
+                //    }
+                //}
 
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    foreach (Word.Bookmark wbInWb in wb.Range.Bookmarks)
-                    {
-                        if (!Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}$") && !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}♯" + docid + bookInfoDef + @"\d{3}$") &&
-                            !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}$") && !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}＃" + docid + bookInfoDef + @"\d{3}$"))
-                            wbInWb.Delete();
-                    }
-                }
+                // 既存のブックマークを削除
+                DeleteNestedBookmarks(thisDocument);
 
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    foreach (Word.Bookmark wbInWb in wb.Range.Bookmarks)
-                    {
-                        if (!Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}$") && !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}♯" + docid + bookInfoDef + @"\d{3}$") &&
-                            !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}$") && !Regex.IsMatch(wbInWb.Name, @"^" + docid + bookInfoDef + @"\d{3}＃" + docid + bookInfoDef + @"\d{3}$"))
-                            wbInWb.Delete();
-                    }
-                }
+                // 既存のブックマークのうち、書誌情報番号に該当しないものを削除
+                // 入れ子構造やコレクションの動的変化により、1回のループでは全ての不要なブックマークを削除できない場合がある
+                // 2回繰り返すことで、削除漏れを防ぎ、確実に不要なブックマークを全て削除する
 
-                foreach (Word.Bookmark wb in thisDocument.Bookmarks)
-                {
-                    if (!ls.Contains(wb.Name.Substring(wb.Name.Length - 3, 3)))
-                        ls.Add(wb.Name.Substring(wb.Name.Length - 3, 3));
-                    else
-                        wb.Delete();
-                }
-                if (ls.Count != 0)
-                {
-                    string maxResult = ls.Max(val => val);
-                    if (int.Parse(maxResult) > bibMaxNum) bibMaxNum = int.Parse(maxResult);
-                }
+                DeleteUnmatchedNestedBookmarks(thisDocument, docid, bookInfoDef);
+                DeleteUnmatchedNestedBookmarks(thisDocument, docid, bookInfoDef);
+
+                // ブックマークリストと最大番号を更新
+                UpdateBookmarkListAndMaxNum(thisDocument, ls, ref bibMaxNum);
 
                 maxNo = bibMaxNum;
 
@@ -255,18 +173,20 @@ namespace WordAddIn1
                     {
                         string styleName = tgtPara.get_Style().NameLocal;
 
-                        if (styleName.Equals("MJS_参照先"))
-                        {
-                            foreach (Word.Field fld in tgtPara.Range.Fields)
-                            {
-                                if (fld.Type == Word.WdFieldType.wdFieldRef)
-                                {
-                                    string bookmarkName = fld.Code.Text.Split(new char[] { ' ' })[2] + "_ref";
-                                    tgtPara.Range.Bookmarks.Add(bookmarkName);
-                                    fld.Code.Text = "HYPERLINK " + fld.Code.Text.Split(new char[] { ' ' })[2];
-                                }
-                            }
-                        }
+                        //if (styleName.Equals("MJS_参照先"))
+                        //{
+                        //    foreach (Word.Field fld in tgtPara.Range.Fields)
+                        //    {
+                        //        if (fld.Type == Word.WdFieldType.wdFieldRef)
+                        //        {
+                        //            string bookmarkName = fld.Code.Text.Split(new char[] { ' ' })[2] + "_ref";
+                        //            tgtPara.Range.Bookmarks.Add(bookmarkName);
+                        //            fld.Code.Text = "HYPERLINK " + fld.Code.Text.Split(new char[] { ' ' })[2];
+                        //        }
+                        //    }
+                        //}
+
+                        //AddReferenceBookmarks(tgtPara, styleName);
 
                         isMerge = false;
 
@@ -278,7 +198,7 @@ namespace WordAddIn1
                                 isMerge = true;
                             }
                         }
-                        catch (Exception ex) { }
+                        catch (Exception) { }
 
 
                         if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[４4](?![・用])")
@@ -301,25 +221,7 @@ namespace WordAddIn1
                             }
                             tgtPara.Range.Bookmarks.ShowHidden = false;
                         }
-                        //if (!Regex.IsMatch(styleName, @"(見出し|Heading)\s*[４4](?![・用])")
-                        //    && (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?![・用])")
-                        //    || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[２2](?![・用])")
-                        //    || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[３3](?![・用])")))
-                        //{
-                        //    tgtPara.Range.Bookmarks.ShowHidden = true;
-
-                        //    foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
-                        //    {
-                        //        if (!headerCollection.ContainsKey(bm.Name))
-                        //        {
-                        //            if (bm.Name.IndexOf("_Ref") == 0)
-                        //            {
-                        //                headerCollection.Add(bm.Name, new string[] { upperClassID, tgtPara.Range.Text.Replace("\r", "").Replace("\n", "").Replace("\"", "\"\"") });
-                        //            }
-                        //        }
-                        //    }
-                        //    tgtPara.Range.Bookmarks.ShowHidden = false;
-                        //}
+                        
 
                         if (!Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") && !styleName.Contains("見出し")) continue;
 
@@ -358,11 +260,6 @@ namespace WordAddIn1
 
                             if (setid == "")
                             {
-                                //while (bookInfoDic.ContainsKey(docid + bookInfoDef + splitCount.ToString("000")))
-                                //while (ls.Contains(splitCount.ToString("000")))
-                                //{
-                                //    splitCount++;
-                                //}
                                 bibMaxNum++;
                                 splitCount = bibMaxNum;
                                 ls.Add(splitCount.ToString("000"));
@@ -372,9 +269,8 @@ namespace WordAddIn1
                                 // 行末尾にブックマークを追加する
                                 sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
 
-                                //tgtPara.Range.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
-                                //splitCount++;
+                                
                                 if (isMerge)
                                 {
                                     mergeSetId.Add(setid, previousSetId);

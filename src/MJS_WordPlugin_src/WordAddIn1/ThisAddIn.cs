@@ -31,7 +31,7 @@ namespace WordAddIn1
             //this.Application.DocumentBeforeClose += Application_DocumentBeforeClose;
 
             //SaveDocxBackupIfDoc("backup");
-            //ShowBookInfoIdStatusDialog();
+            ShowBookInfoIdStatusDialog();
             //OverwriteDocument();
             //ConvertBackupxToZip("backup");
             //UnzipBackupxZip("backup");
