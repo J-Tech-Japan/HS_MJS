@@ -69,6 +69,16 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
+                        // コピー側の全段落に対してAddReferenceBookmarksを実行
+                        foreach (Word.Section tgtSect in docCopy.Sections)
+                        {
+                            foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
+                            {
+                                string styleName2 = tgtPara.get_Style().NameLocal;
+                                AddReferenceBookmarks(tgtPara, styleName2);
+                            }
+                        }
+
                         // カバー情報の収集
                         var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
                         

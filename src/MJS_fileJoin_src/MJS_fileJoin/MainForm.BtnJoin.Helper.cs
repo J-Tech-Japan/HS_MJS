@@ -58,40 +58,41 @@ namespace MJS_fileJoin
         }
 
         // 出力ディレクトリを準備
-        //private void PrepareOutputDirectory()
-        //{
-        //    string outputPath = Path.Combine(tbOutputDir.Text, exportDir);
+        private void PrepareOutputDirectory()
+        {
+            exportDir = textBox2.Text;
+            string outputPath = Path.Combine(tbOutputDir.Text, exportDir);
 
-        //    if (Directory.Exists(outputPath))
-        //    {
-        //        Directory.Delete(outputPath, true);
-        //    }
+            if (Directory.Exists(outputPath))
+            {
+                Directory.Delete(outputPath, true);
+            }
 
-        //    Directory.CreateDirectory(outputPath);
+            Directory.CreateDirectory(outputPath);
 
-        //    // 最初のHTMLフォルダの内容をコピー
-        //    CopyDirectory(lbHtmlList.Items[0].ToString(), outputPath);
-        //}
+            // 最初のHTMLフォルダの内容をコピー
+            CopyDirectoryRecursive(lbHtmlList.Items[0].ToString(), outputPath);
+        }
 
         // 出力ディレクトリを準備
         // 暫定的に実装しているメソッド
         // タイムスタンプ付きの新しいフォルダを作成してHTMLフォルダの内容をコピー
 
-        private void PrepareOutputDirectory()
-        {
-            // 新しいフォルダ名をタイムスタンプで生成（例: export_20240605_153045）
-            string newExportDir = textBox2.Text + DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            string outputPath = Path.Combine(tbOutputDir.Text, newExportDir);
+        //private void PrepareOutputDirectory()
+        //{
+        //    // 新しいフォルダ名をタイムスタンプで生成（例: export_20240605_153045）
+        //    string newExportDir = textBox2.Text + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        //    string outputPath = Path.Combine(tbOutputDir.Text, newExportDir);
 
-            // 新しいディレクトリを作成
-            Directory.CreateDirectory(outputPath);
+        //    // 新しいディレクトリを作成
+        //    Directory.CreateDirectory(outputPath);
 
-            // 最初のHTMLフォルダの内容をコピー
-            CopyDirectoryRecursive(lbHtmlList.Items[0].ToString(), outputPath);
+        //    // 最初のHTMLフォルダの内容をコピー
+        //    CopyDirectoryRecursive(lbHtmlList.Items[0].ToString(), outputPath);
 
-            // exportDir変数を新しいフォルダ名に更新（他の処理で利用する場合）
-            exportDir = newExportDir;
-        }
+        //    // exportDir変数を新しいフォルダ名に更新（他の処理で利用する場合）
+        //    exportDir = newExportDir;
+        //}
 
         // HTMLファイルリストの作成
         private List<string> CreateHtmlFileList()
