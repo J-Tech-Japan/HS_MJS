@@ -71,8 +71,6 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
-                        
-
                         // カバー情報の収集
                         var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
                         

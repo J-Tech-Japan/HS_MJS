@@ -382,16 +382,12 @@ namespace WordAddIn1
                                 if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}" + "♯" + docid + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(♯.*?)$", "$1");
-
-                                    // 行末尾にブックマークを追加する
                                     sel.Bookmarks.Add(setid);
                                     break;
                                 }
                                 if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}" + "＃" + docid + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(＃.*?)$", "$1");
-
-                                    // 行末尾にブックマークを追加する
                                     sel.Bookmarks.Add(setid);
                                     break;
                                 }
