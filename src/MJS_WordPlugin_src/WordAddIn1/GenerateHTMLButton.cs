@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
+using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
 
@@ -57,6 +58,7 @@ namespace WordAddIn1
                 // ログファイルの作成
                 using (StreamWriter log = new StreamWriter(paths.logPath, false, Encoding.UTF8))
                 {
+                    bool isError = false;
                     try
                     {
                         // アセンブリ取得
@@ -69,15 +71,7 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
-                        // コピー側の全段落に対してAddReferenceBookmarksを実行
-                        foreach (Word.Section tgtSect in docCopy.Sections)
-                        {
-                            foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
-                            {
-                                string styleName2 = tgtPara.get_Style().NameLocal;
-                                AddReferenceBookmarks(tgtPara, styleName2);
-                            }
-                        }
+                        
 
                         // カバー情報の収集
                         var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
@@ -140,9 +134,29 @@ namespace WordAddIn1
                     }
                     catch (Exception ex)
                     {
+                        isError = true;
                         HandleException(ex, log, load);
                         button3.Enabled = true;
                         return;
+                    }
+                    finally
+                    {
+                        log.Close();
+                        if (!isError && File.Exists(paths.logPath))
+                        {
+                            File.Delete(paths.logPath);
+                        }
+
+                        // ドキュメント変更イベントを再登録
+                        application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
+
+                        // tmpcoverpicのクリーンアップ
+                        var tmpCoverPicPath = Path.Combine(paths.rootPath, "tmpcoverpic");
+                        if (Directory.Exists(tmpCoverPicPath))
+                        {
+                            try { Directory.Delete(tmpCoverPicPath, true); }
+                            catch { /* ログ出力など必要に応じて */ }
+                        }
                     }
                 }
 
