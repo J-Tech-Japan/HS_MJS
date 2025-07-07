@@ -29,8 +29,8 @@ using Microsoft.PowerShell;
 // 以下の数字はビルドする度に自動的にインクリメントされます。
 // (PowerShellスクリプト IncrementMinorVersion.ps1 で管理されます。
 // 末尾の数字はリビジョン番号です。Wordには表示されません。
-[assembly: AssemblyVersion("3.1.5.0")]
-[assembly: AssemblyFileVersion("3.1.5.0")]
+[assembly: AssemblyVersion("3.1.6.0")]
+[assembly: AssemblyFileVersion("3.1.6.0")]
 
 // 通常はビルド前イベントコマンドラインに以下のコマンドが設定されています（リリースビルド毎にインクリメント）。
 // if "$(ConfigurationName)"=="Release" powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1"

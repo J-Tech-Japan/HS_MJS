@@ -74,6 +74,8 @@ namespace DocMergerComponent
                     UpdateIndexAndToc(objDocLast, fm);
                 }
 
+                ConvertH4HyperlinkToRef(objDocLast);
+
                 // ハイパーリンクの更新処理
                 UpdateHyperlinks(objDocLast, fm);
 

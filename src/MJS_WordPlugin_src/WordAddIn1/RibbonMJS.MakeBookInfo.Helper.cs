@@ -203,7 +203,6 @@ namespace WordAddIn1
         }
 
         // REFフィールドをHYPERLINKに変換し、ブックマークを追加するメソッド
-        // 元原稿に変更を加えないように、GenerateHTMLButton.csで呼び出す
         private void AddReferenceBookmarks(Word.Paragraph tgtPara, string styleName)
         {
             if (styleName.Equals("MJS_参照先"))
@@ -223,8 +222,6 @@ namespace WordAddIn1
                 }
             }
         }
-
-
 
         // Word文書内の段落（Word.Paragraph）が特定の「見出し」スタイルである場合に、
         // その段落に含まれるブックマークのうち、名前が"_Ref"で始まるものを title4Collection コレクションに追加

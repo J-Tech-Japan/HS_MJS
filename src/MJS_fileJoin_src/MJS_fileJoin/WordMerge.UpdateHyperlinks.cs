@@ -7,6 +7,55 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
+        // REF形式のハイパーリンクをHYPERLINK形式に変換
+        //public static void ConvertH4HyperlinkToRef(Word.Document doc)
+        //{
+        //    int count = 0;
+        //    foreach (Word.Field field in doc.Fields)
+        //    {
+        //        string code = field.Code.Text;
+        //        int pos = code.IndexOf("HYPERLINK _Ref");
+        //        if (pos >= 0)
+        //        {
+        //            // "_Ref"の直後からIDを抽出
+        //            string refId = code.Substring(pos + "HYPERLINK ".Length);
+        //            // 余分な部分を除去（スペースや改行など）
+        //            refId = refId.Trim().Split(' ')[0];
+        //            // フィールドコードをREF形式に書き換え
+        //            field.Code.Text = $" REF {refId} \\h ";
+        //            field.Update();
+        //            count++;
+        //        }
+        //    }
+        //}
+
+        // REF形式のハイパーリンクをHYPERLINK形式に変換（スタイル名が"MJS_参照先"に限定）
+        public static void ConvertH4HyperlinkToRef(Word.Document doc)
+        {
+            int count = 0;
+            foreach (Word.Field field in doc.Fields)
+            {
+                string code = field.Code.Text;
+                int pos = code.IndexOf("HYPERLINK _Ref");
+                if (pos >= 0)
+                {
+                    // スタイル名が"MJS_参照先"か判定
+                    Word.Range rng = field.Result;
+                    string styleName = rng.get_Style() is Word.Style style ? style.NameLocal : rng.get_Style().ToString();
+                    if (styleName != "MJS_参照先") continue;
+
+                    // "_Ref"の直後からIDを抽出
+                    string refId = code.Substring(pos + "HYPERLINK ".Length);
+                    // 余分な部分を除去（スペースや改行など）
+                    refId = refId.Trim().Split(' ')[0];
+                    // フィールドコードをREF形式に書き換え
+                    field.Code.Text = $" REF {refId} \\h ";
+                    field.Update();
+                    count++;
+                }
+            }
+        }
+
         // ハイパーリンクの更新
         private void UpdateHyperlinks(Word.Document objDocLast, MainForm fm)
         {
