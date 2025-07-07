@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -224,5 +223,251 @@ namespace WordAddIn1
                 }
             }
         }
+
+
+
+        // Word文書内の段落（Word.Paragraph）が特定の「見出し」スタイルである場合に、
+        // その段落に含まれるブックマークのうち、名前が"_Ref"で始まるものを title4Collection コレクションに追加
+        private void AddTitle4CollectionIfHeading(Word.Paragraph tgtPara, string styleName, string upperClassID, Dictionary<string, string[]> title4Collection)
+        {
+            if (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[４4](?![・用])")
+                || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[５5](?![・用])")
+                || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?![・用])")
+                || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[２2](?![・用])")
+                || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[３3](?![・用])"))
+            {
+                tgtPara.Range.Bookmarks.ShowHidden = true;
+
+                foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
+                {
+                    if (!title4Collection.ContainsKey(bm.Name))
+                    {
+                        if (bm.Name.IndexOf("_Ref") == 0)
+                        {
+                            title4Collection.Add(bm.Name, new string[] { upperClassID, tgtPara.Range.Text.Replace("\r", "").Replace("\n", "").Replace("\"", "\"\"") });
+                        }
+                    }
+                }
+                tgtPara.Range.Bookmarks.ShowHidden = false;
+            }
+        }
+
+
+        private void WriteBookInfoToFile(
+            string rootPath,
+            string headerDir,
+            string docid,
+            Dictionary<string, string> bookInfoDic,
+            Dictionary<string, string> mergeSetId,
+            Action<StreamWriter, Dictionary<string, string>, string, string, string> MakeHeaderLine)
+        {
+            string filePath = Path.Combine(rootPath, headerDir, docid + ".txt");
+            using (StreamWriter docinfo = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                foreach (string key in bookInfoDic.Keys)
+                {
+                    string[] secText = new string[2];
+                    if (bookInfoDic[key].Contains("♪"))
+                    {
+                        secText[0] = Regex.Replace(bookInfoDic[key], "^(.*?)♪.*?$", "$1");
+                        secText[1] = Regex.Replace(bookInfoDic[key], "^.*?♪(.*?)$", "$1");
+                    }
+                    else
+                    {
+                        secText[1] = bookInfoDic[key];
+                    }
+                    HeadingInfo headingInfo = new HeadingInfo();
+                    if (string.IsNullOrEmpty(secText[0]))
+                    {
+                        headingInfo.num = "";
+                    }
+                    else
+                    {
+                        headingInfo.num = secText[0];
+                    }
+                    if (string.IsNullOrEmpty(secText[1]))
+                    {
+                        headingInfo.title = "";
+                    }
+                    else
+                    {
+                        headingInfo.title = secText[1];
+                    }
+                    headingInfo.id = key.Replace("♯", "#");
+
+                    if (mergeSetId.ContainsKey(headingInfo.id))
+                    {
+                        headingInfo.mergeto = mergeSetId[headingInfo.id].Split(new char[] { '♯', '#' })[0];
+                        MakeHeaderLine(docinfo, mergeSetId, headingInfo.num, headingInfo.title, headingInfo.id);
+                    }
+                    else
+                    {
+                        docinfo.WriteLine(secText[0] + "\t" + secText[1] + "\t" + key.Replace("♯", "#") + "\t");
+                    }
+                }
+            }
+        }
+
+        private void AddHeadingInfoFromBookInfoDic(
+            Dictionary<string, string> bookInfoDic,
+            Dictionary<string, string> mergeSetId,
+            List<HeadingInfo> newInfo)
+        {
+            foreach (string key in bookInfoDic.Keys)
+            {
+                string[] secText = new string[2];
+                if (bookInfoDic[key].Contains("♪"))
+                {
+                    secText[0] = Regex.Replace(bookInfoDic[key], "^(.*?)♪.*?$", "$1");
+                    secText[1] = Regex.Replace(bookInfoDic[key], "^.*?♪(.*?)$", "$1");
+                }
+                else
+                {
+                    secText[1] = bookInfoDic[key];
+                }
+
+                HeadingInfo headingInfo = new HeadingInfo();
+                if (string.IsNullOrEmpty(secText[0]))
+                {
+                    headingInfo.num = "";
+                }
+                else
+                {
+                    headingInfo.num = secText[0];
+                }
+                if (string.IsNullOrEmpty(secText[1]))
+                {
+                    headingInfo.title = "";
+                }
+                else
+                {
+                    headingInfo.title = secText[1];
+                }
+                if (key.Contains("＃"))
+                {
+                    headingInfo.id = key.Replace("＃", "#");
+                }
+                else
+                {
+                    headingInfo.id = key.Replace("♯", "#");
+                }
+
+                if (mergeSetId.ContainsKey(headingInfo.id))
+                {
+                    headingInfo.mergeto = mergeSetId[headingInfo.id].Split(new char[] { '♯', '#' })[0];
+                }
+
+                newInfo.Add(headingInfo);
+            }
+        }
+
+        // Word ドキュメント内の各段落を走査し、
+        // 特定のスタイルや条件に一致する段落の行末に、
+        // 比較結果（checkResult）に基づいたブックマークを追加
+        private void AddBookmarksFromCheckResult(Word.Document thisDocument, List<CheckInfo> checkResult, ref bool breakFlg)
+        {
+            foreach (Word.Section tgtSect in thisDocument.Sections)
+            {
+                foreach (Word.Paragraph tgtPara in tgtSect.Range.Paragraphs)
+                {
+                    string styleName = tgtPara.get_Style().NameLocal;
+
+                    if (!Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") && !styleName.Contains("見出し")) continue;
+
+                    string innerText = tgtPara.Range.Text.Trim();
+
+                    if (tgtPara.Range.Text.Trim() == "") continue;
+
+                    if (Regex.IsMatch(innerText, @"^[\s　]*索[\s　]*引[\s　]*$") &&
+                        (Regex.IsMatch(styleName, "章[　 ]*扉.*タイトル") || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$")))
+                    {
+                        breakFlg = true;
+                        break;
+                    }
+
+                    if (Regex.IsMatch(styleName, @"章[　 ]*扉.*タイトル")
+                        || (Regex.IsMatch(styleName, @"(見出し|Heading)\s*[１1](?:[^・用]+|)$") && !Regex.IsMatch(innerText, @"目\s*次\s*$"))
+                        || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[２2](?![・用])")
+                        || Regex.IsMatch(styleName, @"(見出し|Heading)\s*[３3](?![・用])"))
+                    {
+                        Application.DoEvents();
+
+                        // 行末尾を選択状態にする
+                        tgtPara.Range.Select();
+                        Word.Selection sel = Globals.ThisAddIn.Application.Selection;
+                        sel.EndKey(Word.WdUnits.wdLine);
+
+                        string num = Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "");
+                        string title = tgtPara.Range.Text.Trim();
+
+                        CheckInfo info = checkResult
+                            .Where(p => ((string.IsNullOrEmpty(p.new_num) && string.IsNullOrEmpty(num)) || p.new_num.Equals(num))
+                                && p.new_title.Equals(title))
+                            .FirstOrDefault();
+
+                        if (info != null)
+                        {
+                            // 行末尾にブックマークを追加する
+                            sel.Bookmarks.Add(info.new_id_show.Split(new char[] { '(' })[0].Trim().Replace("#", "♯"));
+                        }
+                    }
+                }
+
+                if (breakFlg) break;
+            }
+        }
+
+        // 書誌情報をファイルに書き込む
+        private void WriteCheckInfoToFile(
+            string rootPath,
+            string headerDir,
+            string docid,
+            IEnumerable<CheckInfo> checkResult,
+            Dictionary<string, string> mergeSetId,
+            Action<StreamWriter, Dictionary<string, string>, string, string, string> MakeHeaderLine)
+        {
+            string filePath = Path.Combine(rootPath, headerDir, docid + ".txt");
+            using (StreamWriter docinfo = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                foreach (CheckInfo info in checkResult)
+                {
+                    if (string.IsNullOrEmpty(info.new_id))
+                    {
+                        continue;
+                    }
+                    MakeHeaderLine(docinfo, mergeSetId, info.new_num, info.new_title, info.new_id_show.Split(new char[] { '(' })[0].Trim());
+                }
+            }
+        }
+
+        private bool HandleMakeBookInfoException(
+            Exception ex,
+            StreamWriter log,
+            StreamWriter swLog,
+            loader load,
+            Button button4,
+            ref bool blHTMLPublish)
+        {
+            StackTrace stackTrace = new StackTrace(ex, true);
+
+            log.WriteLine(ex.Message);
+            log.WriteLine(ex.HelpLink);
+            log.WriteLine(ex.Source);
+            log.WriteLine(ex.StackTrace);
+            log.WriteLine(ex.TargetSite);
+
+            if (swLog == null)
+            {
+                log.Close();
+            }
+            load.Visible = false;
+            MessageBox.Show("エラーが発生しました");
+
+            button4.Enabled = true;
+            blHTMLPublish = false;
+            return false;
+        }
+
+
     }
 }
