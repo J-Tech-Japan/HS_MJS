@@ -94,9 +94,9 @@ namespace WordAddIn1
                 ProcessCoverImagesForExport(tempDir, rootPath, exportDir, isPattern1, isPattern2);
                 CleanupTemporaryDirectory(tempDir);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                log.WriteLine($"Error in ProcessCoverImages: {ex}");
+                //log.WriteLine($"Error in ProcessCoverImages: {ex}");
             }
         }
 

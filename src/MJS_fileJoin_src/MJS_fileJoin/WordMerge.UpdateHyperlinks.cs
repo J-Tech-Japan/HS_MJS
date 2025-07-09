@@ -29,8 +29,8 @@ namespace DocMergerComponent
         //    }
         //}
 
-        // REF形式のハイパーリンクをHYPERLINK形式に変換（スタイル名が"MJS_参照先"に限定）
-        public static void ConvertH4HyperlinkToRef(Word.Document doc)
+        // 特定のスタイル名を持つ「HYPERLINK _Ref...」形式のフィールドを「REF ... \h」形式に変換
+        public static void ConvertHyperlinkToRef(Word.Document doc, List<string> targetStyleNames)
         {
             int count = 0;
             foreach (Word.Field field in doc.Fields)
@@ -39,10 +39,11 @@ namespace DocMergerComponent
                 int pos = code.IndexOf("HYPERLINK _Ref");
                 if (pos >= 0)
                 {
-                    // スタイル名が"MJS_参照先"か判定
+                    // スタイル名を取得
                     Word.Range rng = field.Result;
                     string styleName = rng.get_Style() is Word.Style style ? style.NameLocal : rng.get_Style().ToString();
-                    if (styleName != "MJS_参照先") continue;
+                    // 指定リストに含まれていなければスキップ
+                    if (!targetStyleNames.Contains(styleName)) continue;
 
                     // "_Ref"の直後からIDを抽出
                     string refId = code.Substring(pos + "HYPERLINK ".Length);

@@ -169,7 +169,7 @@ namespace WordAddIn1
                     string wpStyleName = wp.get_Style().NameLocal;
 
                     // ログに段落の内容を記録
-                    log.WriteLine($"[Style: {wpStyleName}] {wpTextTrim}");
+                    //log.WriteLine($"[Style: {wpStyleName}] {wpTextTrim}");
 
                     // 空行や無効な行をスキップ
                     if (string.IsNullOrEmpty(wpTextTrim) || wpTextTrim == "/")
