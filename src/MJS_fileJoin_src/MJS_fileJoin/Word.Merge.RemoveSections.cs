@@ -17,10 +17,10 @@ namespace DocMergerComponent
             foreach (string styleName in lastItems)
             {
                 // スタイルが存在しない場合はスキップ
-                if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
-                {
-                    continue;
-                }
+                //if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+                //{
+                //    continue;
+                //}
                 object styleObject = styleName;
                 int i = objDocLast.Sections.Count;
                 while (i > chapCntLast)
@@ -67,10 +67,10 @@ namespace DocMergerComponent
             foreach (string styleName in lsStyleName)
             {
                 // スタイルが存在しない場合はスキップ
-                if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
-                {
-                    continue;
-                }
+                //if (!objDocLast.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+                //{
+                //    continue;
+                //}
                 object styleObject = styleName;
                 int i = chapCnt + 1;
                 while (i <= chapCntLast)
@@ -102,10 +102,10 @@ namespace DocMergerComponent
         private void RemoveDuplicateIndexSections(Word.Document doc, string styleName)
         {
             // スタイルが存在しない場合はスキップ
-            if (!doc.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
-            {
-                return;
-            }
+            //if (!doc.Styles.Cast<Word.Style>().Any(s => s.NameLocal == styleName))
+            //{
+            //    return;
+            //}
             object styleObject = styleName;
             bool foundFirst = false;
             int sectionCount = doc.Sections.Count;
