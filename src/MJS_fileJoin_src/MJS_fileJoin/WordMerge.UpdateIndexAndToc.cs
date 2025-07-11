@@ -5,7 +5,7 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
-        // 目次と索引の更新処理を行い、進捗バーとラベルも更新
+        // 目次と索引の更新処理
         private void UpdateTocAndIndex(Word.Document doc, MainForm fm)
         {
             // 目次の更新
