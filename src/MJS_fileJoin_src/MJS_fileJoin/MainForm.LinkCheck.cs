@@ -120,12 +120,12 @@ namespace MJS_fileJoin
                             else titleName = "";
                             if (titleName.Contains(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", "")))
                             {
-                                AddRefLinkCheckResult(file, linkPage, m4, content, indexOfComma, titleName);
+                                AddRefLinkValidOrMatchedResult(file, linkPage, m4, content, indexOfComma, titleName);
                             }
                         }
                         else
                         {
-                            AddRefLinkCheckErrorResult(file, linkPage, m4, content, indexOfComma);
+                            AddRefLinkBrokenOrIdMismatchResult(file, linkPage, m4, content, indexOfComma);
                         }
                     }
                     logen.Clear();
@@ -164,17 +164,17 @@ namespace MJS_fileJoin
                 titleName = GetTitleFromFile(targetURL, anchor, file, m);
                 titleName = Regex.Replace(titleName, @"<span[^>]*?>", "");
                 titleName = Regex.Replace(titleName, @"</span>", "");
-                AddLinkCheckResult(file, m, titleName);
+                AddLinkTitleMatchResult(file, m, titleName);
             }
             else if (File.Exists(Path.GetDirectoryName(Path.GetFullPath(file)) + "\\" + Regex.Replace(m.Groups[1].Value, @"#.*?$", "")))
             {
                 titleName = GetHeading3aTitle(file, m);
-                AddLinkCheckResult(file, m, titleName);
+                AddLinkTitleMatchResult(file, m, titleName);
             }
             else if (m.Groups[1].Value.StartsWith("_Ref"))
             {
                 titleName = GetRefLinkTitle(file, m);
-                AddLinkCheckResult(file, m, titleName);
+                AddLinkTitleMatchResult(file, m, titleName);
             }
             else
             {

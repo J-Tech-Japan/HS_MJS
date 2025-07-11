@@ -33,7 +33,6 @@ namespace DocMergerComponent
 
                 foreach (string strCopy in arrCopies)
                 {
-                    
                     objApp.Selection.EndKey(Word.WdUnits.wdStory);
                     objApp.Selection.HomeKey(Word.WdUnits.wdStory);
                     objApp.Selection.EndKey(Word.WdUnits.wdStory);
@@ -161,12 +160,15 @@ namespace DocMergerComponent
             }
             finally
             {
-                objApp.Quit(
-                  ref objMissing,     //SaveChanges
-                  ref objMissing,     //OriginalFormat
-                  ref objMissing      //RoutDocument
-                  );
-                objApp = null;
+                if (objApp != null)
+                {
+                    objApp.Quit(
+                        ref objMissing,
+                        ref objMissing,
+                        ref objMissing
+                    );
+                    objApp = null;
+                }
             }
         }
 
