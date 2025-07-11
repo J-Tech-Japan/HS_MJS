@@ -7,7 +7,8 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
-        private void AddLinkCheckResult(string file, Match m, string titleName)
+        // 指定されたリンクの検証結果をListViewに追加
+        private void AddLinkTitleMatchResult(string file, Match m, string titleName)
         {
             bool isMatch = titleName == m.Groups[2].Value;
             ListViewItem lvi = listView1.Items.Add(file);
@@ -18,14 +19,12 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("true");
             if (!isMatch)
             {
-                lvi.BackColor = Color.Red;
-                //lvi.BackColor = Color.FromArgb(255, 192, 203);//#ffc0cb pink
-                //allCheck += file + "," + m.Groups[1].Value + "," + m.Groups[2].Value + ",false," + titleName + ",true" + "\r\n";
-                //Console.WriteLine(file + "\r\n" + m.Groups[1].Value + "\r\n" + m.Groups[2].Value + "\r\nfalse\r\n" + titleName + "\r\ntrue" + "\r\n");
+                lvi.BackColor = Color.Orange;
             }
         }
 
-        private void AddRefLinkCheckErrorResult(string file, string linkPage, Match m4, string content, int indexOfComma)
+        // リンク切れやID不一致などがあった場合の結果をListViewに追加
+        private void AddRefLinkBrokenOrIdMismatchResult(string file, string linkPage, Match m4, string content, int indexOfComma)
         {
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add($"{linkPage}.html#{m4.Groups[1].Value.Replace("_ref", "")}");
@@ -36,7 +35,8 @@ namespace MJS_fileJoin
             lvi.BackColor = Color.Red;
         }
 
-        private void AddRefLinkCheckResult(string file, string linkPage, Match m4, string content, int indexOfComma, string titleName)
+        // 参照リンクの検証結果（正常）をListViewに追加
+        private void AddRefLinkValidOrMatchedResult(string file, string linkPage, Match m4, string content, int indexOfComma, string titleName)
         {
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add($"{linkPage}.html#{m4.Groups[1].Value.Replace("_ref", "")}");
@@ -46,6 +46,7 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("true");
         }
 
+        // HTTPリンクの検証でエラーがあった場合の結果をListViewに追加
         private void AddHttpLinkErrorResult(string file, Match m)
         {
             ListViewItem lvi = listView1.Items.Add(file);
@@ -61,9 +62,10 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("");
             lvi.SubItems.Add("");
             lvi.SubItems.Add("");
-            lvi.BackColor = Color.Red;
+            lvi.BackColor = Color.Orange;
         }
 
+        // 無効なリンクの検証結果をListViewに追加
         private void AddInvalidLinkResult(string file, Match m)
         {
             ListViewItem lvi = listView1.Items.Add(file);
@@ -75,6 +77,7 @@ namespace MJS_fileJoin
             lvi.BackColor = Color.Red;
         }
 
+        // 指定したURLのHTTPステータスコードを取得
         public static HttpStatusCode GetStatusCode(string url)
         {
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
@@ -101,5 +104,6 @@ namespace MJS_fileJoin
             }
             return statusCode;
         }
+
     }
 }
