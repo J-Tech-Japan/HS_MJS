@@ -29,7 +29,6 @@ namespace DocMergerComponent
                         {
                             // スタイルがなければスキップやログ出力
                         }
-                        //wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                         wr.Find.Execute();
                         if (wr.Find.Found)
                         {
