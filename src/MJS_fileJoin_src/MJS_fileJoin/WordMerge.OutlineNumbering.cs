@@ -7,7 +7,7 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
-        // Wordのアウトライン番号書式を設定するメソッド
+        // Wordのアウトライン番号書式を設定
         private void SetOutlineNumberingFormat(Word.Application objApp, Color mycolor)
         {
             var listLevels = objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7].ListLevels;
@@ -77,7 +77,7 @@ namespace DocMergerComponent
             listLevels[4].LinkedStyle = "見出し 3";
         }
 
-        // 段落のアウトライン番号を修正するメソッド
+        // 段落のアウトライン番号を修正
         private void FixOutlineNumbering(Word.Document objDocLast, Word.Application objApp, MainForm form)
         {
             form.label10.Text = "見出し番号修正中...";

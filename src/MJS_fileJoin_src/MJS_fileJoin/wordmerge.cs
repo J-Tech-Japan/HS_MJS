@@ -20,49 +20,7 @@ namespace DocMergerComponent
 
             try
             {
-                try
-                {
-                    objApp = new Word.Application
-                    {
-                        Visible = false,
-                        DisplayAlerts = Word.WdAlertLevel.wdAlertsNone
-                    };
-
-                    objApp.Options.CheckGrammarAsYouType = false;
-                    objApp.Options.CheckGrammarWithSpelling = false;
-                    objApp.Options.CheckSpellingAsYouType = false;
-                    objApp.Options.ShowReadabilityStatistics = false;
-
-                    objDocLast = objApp.Documents.Open(
-                        strOrgDoc,    // FileName
-                        Type.Missing, // ConfirmVersions
-                        Type.Missing, // ReadOnly
-                        Type.Missing, // AddToRecentFiles
-                        Type.Missing, // PasswordDocument
-                        Type.Missing, // PasswordTemplate
-                        Type.Missing, // Revert
-                        Type.Missing, // WritePasswordDocument
-                        Type.Missing, // WritePasswordTemplate
-                        Type.Missing, // Format
-                        Type.Missing, // Encoding
-                        Type.Missing, // Visible
-                        Type.Missing, // OpenAndRepair
-                        Type.Missing, // DocumentDirection
-                        Type.Missing, // NoEncodingDialog
-                        Type.Missing  // XMLTransform
-                    );
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Wordの起動またはファイルオープンに失敗しました: " + ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    // 必要に応じてリソース解放
-                    if (objApp != null)
-                    {
-                        objApp.Quit(Type.Missing, Type.Missing, Type.Missing);
-                        objApp = null;
-                    }
-                    throw;
-                }
+                InitializeWordAndOpenDocument(strOrgDoc, ref objApp, ref objDocLast);
 
                 chapCnt = objDocLast.Sections.Count;
                 Dictionary<int, string> dic1 = new Dictionary<int, string>();
@@ -123,21 +81,31 @@ namespace DocMergerComponent
 
                     Color mycolor = Color.FromArgb(31, 73, 125);
 
+                    // Wordのアウトライン番号書式を設定
                     SetOutlineNumberingFormat(objApp, mycolor);
 
+                    // 段落のアウトライン番号を修正
                     FixOutlineNumbering(objDocLast, objApp, form);
 
+                    // 指定したスタイル名のセクションを後方から1つだけ残して削除
                     RemoveSectionsByStyleKeepLast(objDocLast, "索引見出し", form);
 
+                    // 目次と索引の更新処理
                     UpdateTocAndIndex(objDocLast, form);
                 }
 
+                // 「HYPERLINK _Ref...」形式のフィールドを「REF ... \h」形式に変換
+                List<string> targetStyles = new List<string> { "MJS_参照先" };
+                ConvertHyperlinkToRef(objDocLast, targetStyles);
+
+                // ハイパーリンクの更新
                 UpdateHyperlinks(objDocLast, form);
 
                 if (check2)
                 {
                     form.label10.Text = "PDF出力中...";
 
+                    // PDFとして出力
                     objDocLast.ExportAsFixedFormat(
                         strOutDoc.Replace(".doc", ".pdf"),
                         Word.WdExportFormat.wdExportFormatPDF,
@@ -159,6 +127,8 @@ namespace DocMergerComponent
                 if (check1)
                 {
                     form.label10.Text = "Word保存中...";
+
+                    // Wordとして保存
                     objDocLast.SaveAs(
                       ref objOutDoc,      //FileName
                       ref objMissing,     //FileFormat
@@ -201,7 +171,8 @@ namespace DocMergerComponent
         }
 
         // Merge をラップするメソッド
-        // List<string> 型のフォルダ（またはファイル）リストを配列に変換し、他の引数とともに Merge に渡す
+        // List<string> 型のフォルダ（またはファイル）リストを配列に変換し、
+        // 他の引数とともに Merge に渡す
         public void MergeFromFolders(string strOrgDoc, List<string> strCopyFolder, string strOutDoc, MainForm fm, bool check1, bool check2, bool check3)
         {
             MainForm form = fm;

@@ -8,7 +8,8 @@ namespace DocMergerComponent
     public partial class DocMerger
     {
         // REF形式のハイパーリンクをHYPERLINK形式に変換
-        //public static void ConvertH4HyperlinkToRef(Word.Document doc)
+        // 【注意！】スタイルに関係なくすべてのHYPERLINKフィールドをREFに変換
+        //public static void ConvertH4HyperlinkToRefAll(Word.Document doc)
         //{
         //    int count = 0;
         //    foreach (Word.Field field in doc.Fields)
