@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -23,17 +24,63 @@ namespace MJS_fileJoin
             }
         }
 
+        // 内部参照かどうか判定するメソッド
+        private bool IsInternalReference(string sourceFile, string linkPage)
+        {
+            // 相対参照なら内部参照
+            if (linkPage.StartsWith("./") || linkPage.StartsWith(@".\"))
+                return true;
+
+            // sourceFileがパスの場合はファイル名だけを使う
+            string sourceFileName = Path.GetFileName(sourceFile);
+
+            // linkPageからフラグメント（#以降）を除去し、ファイル名だけを抽出
+            string linkPageWithoutFragment = linkPage.Split('#')[0];
+            string linkFileName = Path.GetFileName(linkPageWithoutFragment);
+
+            // ファイル名が「アルファベット3文字+5桁数字」形式か判定
+            var fileNamePattern = new Regex(@"^([A-Z]{3})(\d{5})\.html$", RegexOptions.IgnoreCase);
+
+            var sourceMatch = fileNamePattern.Match(sourceFileName);
+            var linkMatch = fileNamePattern.Match(linkFileName);
+
+            if (sourceMatch.Success && linkMatch.Success)
+            {
+                // 先頭2桁の数字が一致すれば内部参照
+                string sourcePrefix = sourceMatch.Groups[2].Value.Substring(0, 2);
+                string linkPrefix = linkMatch.Groups[2].Value.Substring(0, 2);
+                return sourcePrefix == linkPrefix;
+            }
+
+            return false;
+        }
+
         // リンク切れやID不一致などがあった場合の結果をListViewに追加
         private void AddRefLinkBrokenOrIdMismatchResult(string file, string linkPage, Match m4, string content, int indexOfComma)
         {
+            bool isInternal = IsInternalReference(file, linkPage);
+
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add($"{linkPage}.html#{m4.Groups[1].Value.Replace("_ref", "")}");
             lvi.SubItems.Add(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", ""));
             lvi.SubItems.Add("false");
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");
-            lvi.BackColor = Color.Red;
+            //lvi.BackColor = isInternal ? Color.Red : Color.Orange;
+            lvi.BackColor = isInternal ? Color.LightCoral : Color.Orange;
         }
+
+        // リンク切れやID不一致などがあった場合の結果をListViewに追加
+        //private void AddRefLinkBrokenOrIdMismatchResult(string file, string linkPage, Match m4, string content, int indexOfComma)
+        //{
+        //    ListViewItem lvi = listView1.Items.Add(file);
+        //    lvi.SubItems.Add($"{linkPage}.html#{m4.Groups[1].Value.Replace("_ref", "")}");
+        //    lvi.SubItems.Add(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", ""));
+        //    lvi.SubItems.Add("false");
+        //    lvi.SubItems.Add("none");
+        //    lvi.SubItems.Add("false");
+        //    lvi.BackColor = Color.Red;
+        //}
 
         // 参照リンクの検証結果（正常）をListViewに追加
         private void AddRefLinkValidOrMatchedResult(string file, string linkPage, Match m4, string content, int indexOfComma, string titleName)
@@ -66,15 +113,29 @@ namespace MJS_fileJoin
         }
 
         // 無効なリンクの検証結果をListViewに追加
+        //private void AddInvalidLinkResult(string file, Match m)
+        //{
+        //    ListViewItem lvi = listView1.Items.Add(file);
+        //    lvi.SubItems.Add(m.Groups[1].Value);
+        //    lvi.SubItems.Add(m.Groups[2].Value);
+        //    lvi.SubItems.Add("false");
+        //    lvi.SubItems.Add("none");
+        //    lvi.SubItems.Add("false");
+        //    //lvi.BackColor = Color.Red;
+        //    lvi.BackColor = Color.LightCoral;
+        //}
+
         private void AddInvalidLinkResult(string file, Match m)
         {
+            bool isInternal = IsInternalReference(file, m.Groups[1].Value);
+
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add(m.Groups[1].Value);
             lvi.SubItems.Add(m.Groups[2].Value);
             lvi.SubItems.Add("false");
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");
-            lvi.BackColor = Color.Red;
+            lvi.BackColor = isInternal ? Color.LightCoral : Color.Orange;
         }
 
         // 指定したURLのHTTPステータスコードを取得

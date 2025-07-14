@@ -70,8 +70,11 @@ namespace MJS_fileJoin
                 label14.Visible = false;
                 progressBar2.Visible = false;
             }
-            foreach (ListViewItem lvi in listView1.Items)
-                if (lvi.BackColor == Color.Red) button13.Enabled = true;
+            //foreach (ListViewItem lvi in listView1.Items)
+            //    if (lvi.BackColor == Color.Red) button13.Enabled = true;
+            // 色判定をやめ、アイテムが1件でもあれば有効化
+            if (listView1.Items.Count > 0)
+                button13.Enabled = true;
         }
 
         private void listView1_DoubleClick(object sender, EventArgs e)
