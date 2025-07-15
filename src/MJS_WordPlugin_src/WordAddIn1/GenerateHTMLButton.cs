@@ -9,6 +9,10 @@ using System.Xml;
 using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
+using Microsoft.Office.Interop.Word;
+using Table = Microsoft.Office.Interop.Word.Table;
+using System.Drawing;
+using Application = System.Windows.Forms.Application;
 
 namespace WordAddIn1
 {
@@ -99,26 +103,507 @@ namespace WordAddIn1
 
                         List<List<string>> productSubLogoGroups = new List<List<string>>();
 
+                        if (coverExist)
+                        {
+                            if (!Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.CreateDirectory(paths.rootPath + "\\tmpcoverpic");
+                            string strOutFileName = paths.rootPath + "\\tmpcoverpic";
 
+                            try
+                            {
+                                bool repeatUngroup = true;
+                                while (repeatUngroup)
+                                {
+                                    repeatUngroup = false;
+                                    foreach (Shape ws in docCopy.Shapes)
+                                    {
+                                        ws.Select();
+                                        if (Globals.ThisAddIn.Application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
+                                        {
+                                            if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
+                                            {
+                                                ws.Ungroup();
+                                                repeatUngroup = true;
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                                foreach (Shape ws in docCopy.Shapes)
+                                {
+                                    ws.Select();
+                                    if (WordAddIn1.Globals.ThisAddIn.Application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
+                                    {
+                                        if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
+                                        {
+                                            bool checkCanvas = true;
+                                            while (checkCanvas)
+                                            {
+                                                checkCanvas = false;
+                                                foreach (Word.Shape wsp in ws.CanvasItems)
+                                                {
+                                                    if (wsp.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
+                                                    {
+                                                        wsp.Ungroup();
+                                                        checkCanvas = true;
+                                                    }
+                                                }
+                                            }
+                                            foreach (Word.Shape wsp in ws.CanvasItems)
+                                            {
+                                                wsp.Select();
+                                                string tempSubTitle = "";
+                                                try
+                                                {
+                                                    tempSubTitle = wsp.TextFrame.TextRange.Text;
+                                                }
+                                                catch { }
+                                                if (!String.IsNullOrEmpty(tempSubTitle) && tempSubTitle != "/" && subTitle == "")
+                                                {
+                                                    subTitle = tempSubTitle;
+                                                    break;
+                                                }
+                                            }
+                                            if (String.IsNullOrEmpty(subTitle))
+                                            {
+                                                ws.Select();
+                                                if (!Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.CreateDirectory(paths.rootPath + "\\tmpcoverpic");
+
+                                                strOutFileName = paths.rootPath + "\\tmpcoverpic";
+                                                byte[] vData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
+                                                if (vData != null)
+                                                {
+                                                    MemoryStream ms = new MemoryStream(vData);
+                                                    Image temp = Image.FromStream(ms);
+                                                    float aspectTemp = (float)temp.Width / (float)temp.Height;
+                                                    if (aspectTemp > 2.683 || aspectTemp < 2.681)
+                                                    {
+                                                        biCount++;
+                                                        temp.Save(strOutFileName + "\\" + biCount + ".png", ImageFormat.Png);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
+                                        {
+                                            ws.ConvertToInlineShape();
+                                        }
+                                    }
+                                }
+
+                                foreach (Shape ws in docCopy.Shapes)
+                                {
+                                    ws.Select();
+                                    if (Globals.ThisAddIn.Application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
+                                    {
+                                        if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
+                                        {
+                                            ws.ConvertToInlineShape();
+                                        }
+                                    }
+                                }
+
+                                if (isPattern1 || isPattern2)
+                                {
+                                    int productSubLogoCount = 0;
+
+                                    foreach (Paragraph wp in docCopy.Sections[1].Range.Paragraphs)
+                                    {
+                                        if (wp.get_Style().NameLocal == "MJS_製品ロゴ（メイン）")
+                                        {
+                                            try
+                                            {
+                                                foreach (Word.InlineShape wis in wp.Range.InlineShapes)
+                                                {
+                                                    wis.Range.Select();
+                                                    Clipboard.Clear();
+                                                    WordAddIn1.Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    Image img = Clipboard.GetImage();
+                                                    img.Save(strOutFileName + "\\product_logo_main.png", ImageFormat.Png);
+
+                                                    break; //get first product main logo only
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（メイン）]: " + ex.ToString());
+                                            }
+                                        }
+                                        else if (wp.get_Style().NameLocal == "MJS_製品ロゴ（サブ）" && productSubLogoCount < 3)
+                                        {
+                                            try
+                                            {
+                                                List<string> productSubLogoFileNames = new List<string>();
+
+                                                foreach (InlineShape wis in wp.Range.InlineShapes)
+                                                {
+                                                    wis.Range.Select();
+                                                    Clipboard.Clear();
+                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    Image img = Clipboard.GetImage();
+
+                                                    productSubLogoCount++;
+                                                    string subLogoFileName = string.Format("product_logo_sub{0}.png", productSubLogoCount);
+                                                    img.Save(strOutFileName + "\\" + subLogoFileName, ImageFormat.Png);
+                                                    productSubLogoFileNames.Add(subLogoFileName);
+
+                                                    Clipboard.Clear();
+
+                                                    if (productSubLogoCount == 3)
+                                                    {
+                                                        break; //get first 3 sub logos only
+                                                    }
+                                                }
+
+                                                productSubLogoGroups.Add(productSubLogoFileNames);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（サブ）]: " + ex.ToString());
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (Word.InlineShape wis in docCopy.Sections[1].Range.InlineShapes)
+                                    {
+                                        byte[] vData = (byte[])wis.Range.EnhMetaFileBits;
+                                        //MessageBox.Show(vData.Length.ToString());
+
+                                        if (vData != null)
+                                        {
+                                            MemoryStream ms = new MemoryStream(vData);
+                                            Image temp = Image.FromStream(ms);
+                                            float aspectTemp = (float)temp.Width / (float)temp.Height;
+                                            if ((float)temp.Height < 360) continue;
+                                            if (aspectTemp > 12.225 && aspectTemp < 12.226) continue;
+                                            if (aspectTemp > 2.681 && aspectTemp < 2.683) continue;
+                                            biCount++;
+                                            temp.Save(strOutFileName + "\\" + biCount + ".png", ImageFormat.Png);
+                                        }
+                                    }
+                                }
+
+                                Dictionary<string, float> dicStrFlo = new Dictionary<string, float>();
+
+                                string[] coverPics = Directory.GetFiles(strOutFileName, "*.png", SearchOption.AllDirectories);
+
+                                foreach (string coverPic in coverPics)
+                                {
+                                    using (FileStream fs = new FileStream(coverPic, FileMode.Open, FileAccess.Read))
+                                    {
+                                        dicStrFlo.Add(coverPic, (float)Image.FromStream(fs).Width * (float)Image.FromStream(fs).Height);
+                                    }
+                                }
+
+                                List<KeyValuePair<string, float>> pairs = new List<KeyValuePair<string, float>>(dicStrFlo);
+                                pairs.Sort(CompareKeyValuePair);
+
+                                if (isPattern1 || isPattern2)
+                                {
+                                    for (int p = 0; p < pairs.Count; p++)
+                                    {
+                                        string destF = paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\" + Path.GetFileName(pairs[p].Key);
+
+                                        if (File.Exists(destF))
+                                        {
+                                            File.Delete(destF);
+                                        }
+
+                                        File.Move(pairs[p].Key, destF);
+                                    }
+                                }
+                                else
+                                {
+                                    for (int p = 0; p < pairs.Count; p++)
+                                    {
+
+                                        if (p == 0 || p + 1 != pairs.Count)
+                                        {
+                                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png")) File.Delete(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
+                                            File.Move(pairs[p].Key, paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
+                                        }
+                                        else
+                                        {
+                                            using (Bitmap src = new Bitmap(pairs[p].Key))
+                                            {
+                                                int w = src.Width / 5;
+                                                int h = src.Height / 5;
+                                                Bitmap dst = new Bitmap(w, h);
+                                                Graphics g = Graphics.FromImage(dst);
+                                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+                                                g.DrawImage(src, 0, 0, w, h);
+                                                dst.Save(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-background.png", ImageFormat.Png);
+                                            }
+                                            // Saves result.
+                                            File.Delete(pairs[p].Key);
+                                        }
+                                    }
+                                }
+
+                                if (Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.Delete(paths.rootPath + "\\tmpcoverpic", true);
+                            }
+                            catch (Exception ex)
+                            {
+                                log.WriteLine(ex.ToString());
+                            }
+                        }
+
+                        // ドキュメント末尾に移動し、一時キャンバスを追加
+                        application.Selection.EndKey(WdUnits.wdStory);
+                        object selectionRange = application.Selection.Range;
+                        Shape temporaryCanvas = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
+                        temporaryCanvas.WrapFormat.Type = WdWrapType.wdWrapInline;
+
+                        // キャンバス内の図形調整
+                        AdjustCanvasShapes(docCopy);
+
+                        // 一時キャンバス削除
+                        temporaryCanvas.Delete();
+
+                        // テーブル幅の自動調整
+                        foreach (Table wt in docCopy.Tables)
+                        {
+                            if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
+                                wt.AllowAutoFit = true;
+                        }
+
+                        // スタイル名の置換
+                        foreach (Style ws in docCopy.Styles)
+                            if (ws.NameLocal == "奥付タイトル")
+                                ws.NameLocal = "titledef";
+
+
+                        docCopy.SaveAs2(
+                            paths.tmpHtmlPath,
+                            WdSaveFormat.wdFormatFilteredHTML,
+                            SaveNativePictureFormat: true
+                        );
+
+                        // ドキュメントを閉じる
+                        docCopy.Close(false);
+
+                        // ファイル解放待ち（100ms程度の遅延を入れる）
+                        System.Threading.Thread.Sleep(100);
+
+                        // 画像フォルダのコピー処理
+                        log.WriteLine("画像フォルダ コピー");
+
+                        bool isTmpDot = true;
+                        CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir, log);
 
                         // カバー情報の収集
                         //var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
 
                         // HTMLファイルの読み込みと加工
-                        var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, coverInfo.isTmpDot);
+                        var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, isTmpDot);
                         
                         // XMLへの変換と各種ノード取得
-                        var (objXml, objToc, objBody) = LoadAndProcessXml(htmlStr, coverInfo.docTitle);
+                        var (objXml, objToc, objBody) = LoadAndProcessXml(htmlStr, paths.docTitle);
                         
                         // CSSスタイルの処理
                         var (className, styleName, chapterSplitClass) = ProcessCssStyles(objXml);
                         
                         // index.htmlの書き出し
-                        WriteIndexHtml(paths.indexHtmlPath, coverInfo.docTitle, coverInfo.docid, mergeScript);
-                        
+                        WriteIndexHtml(paths.indexHtmlPath, paths.docTitle, paths.docid, mergeScript);
+
                         // カバーテンプレートの生成
-                        var (htmlCoverTemplate1, htmlCoverTemplate2) = BuildCoverTemplates(assembly, paths, coverInfo, isEasyCloud, isEdgeTracker, isPattern1, isPattern2);
-                        
+                        //var (htmlCoverTemplate1, htmlCoverTemplate2) = BuildCoverTemplates(assembly, paths, coverInfo, isEasyCloud, isEdgeTracker, isPattern1, isPattern2);
+
+                        string htmlCoverTemplate1 = "";
+                        htmlCoverTemplate1 += @"<!DOCTYPE HTML>" + "\n";
+                        htmlCoverTemplate1 += @"<html>" + "\n";
+                        htmlCoverTemplate1 += @"<head>" + "\n";
+                        htmlCoverTemplate1 += @"<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />" + "\n";
+                        htmlCoverTemplate1 += @" <meta name=""generator"" content=""Adobe RoboHelp 2017"" />" + "\n";
+                        htmlCoverTemplate1 += @"<title>表紙</title>" + "\n";
+                        htmlCoverTemplate1 += @"<link rel=""stylesheet"" href=""cover.css"" type=""text/css"" />" + "\n";
+                        htmlCoverTemplate1 += @"<link rel=""stylesheet"" href=""font.css"" type=""text/css"" />" + "\n";
+                        htmlCoverTemplate1 += @"<link rel=""StyleSheet"" href=""resp.css"" type=""text/css"" />" + "\n";
+                        htmlCoverTemplate1 += @"<style type=""text/css"">" + "\n";
+                        htmlCoverTemplate1 += @"<!--" + "\n";
+                        htmlCoverTemplate1 += @"A:visited { color:#954F72; }" + "\n";
+                        htmlCoverTemplate1 += @"A:link { color:#000000; }" + "\n";
+                        htmlCoverTemplate1 += @"-->" + "\n";
+                        htmlCoverTemplate1 += @"</style>" + "\n";
+                        htmlCoverTemplate1 += @"<script type=""text/javascript"" language=""JavaScript"">" + "\n";
+                        htmlCoverTemplate1 += @"//<![CDATA[" + "\n";
+                        htmlCoverTemplate1 += @"function reDo() {" + "\n";
+                        htmlCoverTemplate1 += @"  if (innerWidth != origWidth || innerHeight != origHeight)" + "\n";
+                        htmlCoverTemplate1 += @"     location.reload();" + "\n";
+                        htmlCoverTemplate1 += @"}" + "\n";
+                        htmlCoverTemplate1 += @"if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == ""Netscape"")) {" + "\n";
+                        htmlCoverTemplate1 += @"   origWidth = innerWidth;" + "\n";
+                        htmlCoverTemplate1 += @"   origHeight = innerHeight;" + "\n";
+                        htmlCoverTemplate1 += @"   onresize = reDo;" + "\n";
+                        htmlCoverTemplate1 += @"}" + "\n";
+                        htmlCoverTemplate1 += @"onerror = null;" + "\n";
+                        htmlCoverTemplate1 += @"//]]>" + "\n";
+                        htmlCoverTemplate1 += @"</script>" + "\n";
+                        htmlCoverTemplate1 += @"<style type=""text/css"">" + "\n";
+                        htmlCoverTemplate1 += @"<!--" + "\n";
+                        htmlCoverTemplate1 += @"div.WebHelpPopupMenu { position:absolute;" + "\n";
+                        htmlCoverTemplate1 += @"left:0px;" + "\n";
+                        htmlCoverTemplate1 += @"top:0px;" + "\n";
+                        htmlCoverTemplate1 += @"z-index:4;" + "\n";
+                        htmlCoverTemplate1 += @"visibility:hidden; }" + "\n";
+                        htmlCoverTemplate1 += @"-->" + "\n";
+                        if (isEdgeTracker)
+                        {
+                            htmlCoverTemplate1 += "\n";
+                            htmlCoverTemplate1 += @"p.HyousiLogo {" + "\n";
+                            htmlCoverTemplate1 += @"text-align       : center;" + "\n";
+                            htmlCoverTemplate1 += @"margin-top       : 60pt;" + "\n";
+                            htmlCoverTemplate1 += @"margin-bottom    : 40pt;" + "\n";
+                            htmlCoverTemplate1 += @"margin-right     : 0mm;" + "\n";
+                            htmlCoverTemplate1 += @"line-height      : 15pt;" + "\n";
+                            htmlCoverTemplate1 += @"}" + "\n";
+                            htmlCoverTemplate1 += "\n";
+                            htmlCoverTemplate1 += @"div.HyousiBackground {" + "\n";
+                            htmlCoverTemplate1 += @"display : table;" + "\n";
+                            htmlCoverTemplate1 += @"width   : 100%;" + "\n";
+                            htmlCoverTemplate1 += @"height  : 65px;" + "\n";
+                            htmlCoverTemplate1 += @"}" + "\n";
+                            htmlCoverTemplate1 += "\n";
+                            htmlCoverTemplate1 += @"p.HyousiText {" + "\n";
+                            htmlCoverTemplate1 += @"display             : table-cell;" + "\n";
+                            htmlCoverTemplate1 += @"background-image    : url('pict/hyousi.png');" + "\n";
+                            htmlCoverTemplate1 += @"background-repeat   : no-repeat;" + "\n";
+                            htmlCoverTemplate1 += @"background-position : center;" + "\n";
+                            htmlCoverTemplate1 += @"text-align          : center;" + "\n";
+                            htmlCoverTemplate1 += @"vertical-align      : middle;" + "\n";
+                            htmlCoverTemplate1 += @"font-size           : 1.8em;" + "\n";
+                            htmlCoverTemplate1 += @"font-weight         : bold;" + "\n";
+                            htmlCoverTemplate1 += @"color               : #FFF;" + "\n";
+                            htmlCoverTemplate1 += @"letter-spacing      : 10px;" + "\n";
+                            htmlCoverTemplate1 += @"}" + "\n";
+                        }
+                        htmlCoverTemplate1 += @"</style>" + "\n";
+                        htmlCoverTemplate1 += @"</head>" + "\n";
+                        string htmlCoverTemplate2 = "";
+
+
+                        if (isEdgeTracker)
+                        {
+                            string[] hyousiGazo = { "EdgeTracker_logo50mm.png", "MJS_LOGO_255.gif", "hyousi.png" };
+                            foreach (var hyousi in hyousiGazo)
+                            {
+                                Bitmap bmp = new Bitmap(assembly.GetManifestResourceStream("WordAddIn1.Resources." + hyousi));
+                                bmp.Save(paths.rootPath + "\\" + paths.exportDir + "\\pict\\" + hyousi);
+                            }
+                            htmlCoverTemplate1 += @"<body>" + "\n";
+                            htmlCoverTemplate1 += @"<p class=""HyousiLogo""><img style=""border: currentColor; border-image: none; width: 100%; max-width: 553px;"" alt="""" src=""pict/EdgeTracker_logo50mm.png"" border=""0""></p>" + "\n";
+                            htmlCoverTemplate1 += @"<div class=""HyousiBackground"">" + "\n";
+                            htmlCoverTemplate1 += @"<p class=""HyousiText"">" + manualTitle + "</p>\n";
+                            htmlCoverTemplate1 += @"</div>" + "\n";
+                            htmlCoverTemplate1 += @"<div class=""product_trademarks"">" + "\n";
+                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
+                            foreach (string trademarkText in trademarkTextList)
+                            {
+                                htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
+                            }
+                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
+                            htmlCoverTemplate1 += @"</div>" + "\n";
+                            htmlCoverTemplate1 += @"<p style=""text-align: center; margin-top: 80pt;""><a href=""https://www.mjs.co.jp"" target=""_blank""><img style=""border: currentColor; border-image: none; width: 100%; max-width: 255px;"" alt="""" src=""pict/MJS_LOGO_255.gif"" border=""0""></a></p>" + "\n";
+                        }
+                        else if (isEasyCloud)
+                        {
+                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-background.png"))
+                                htmlCoverTemplate1 += @"<body style=""text-justify-trim: punctuation; background-image: url('template/images/cover-background.png');background-repeat: no-repeat; background-position: 0px 300px;"">" + "\n";
+                            else
+                                htmlCoverTemplate1 += @"<body>" + "\n";
+
+                            htmlCoverTemplate1 += @"<p class=""manual_title"" style=""line-height: 130%;"">" + manualTitle + "</p>" + "\n";
+                            htmlCoverTemplate1 += @"<p class=""manual_subtitle"">" + manualSubTitle + "</p>" + "\n";
+
+                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png"))
+                                htmlCoverTemplate1 += @"<p class=""manual_title"" style=""margin: 80px 0px 80px 100px; ""><img src=""template/images/cover-4.png"" width=""650"" /></p>" + "\n";
+                            else
+                                htmlCoverTemplate1 += @"<p class=""manual_title"" style=""margin: 80px 0px 80px 100px; ""></p>" + "\n";
+
+                            htmlCoverTemplate1 += @"<p class=""manual_version"">" + manualVersion + "</p>" + "\n";
+                            htmlCoverTemplate1 += @"<div class=""product_trademarks"">" + "\n";
+                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
+                            foreach (string trademarkText in trademarkTextList)
+                            {
+                                htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
+                            }
+                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
+                            htmlCoverTemplate1 += @"</div>" + "\n";
+                            if (!String.IsNullOrEmpty(subTitle))
+                            {
+                                htmlCoverTemplate2 += @"<p style=""margin-left: 700px; margin-top: 150px; font-size: 15pt; font-family: メイリオ;" + "\n";
+                                htmlCoverTemplate2 += @"    font-weight: bold;"">" + subTitle + "</p>" + "\n";
+                                htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
+                                htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 10px;""" + "\n";
+                                htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
+                            }
+                            else
+                            {
+                                htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
+                                htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 100px;""" + "\n";
+                                htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
+                            }
+                            htmlCoverTemplate2 += @" </p>" + "\n";
+                        }
+                        else if (isPattern1)
+                        {
+                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_title"" style=""line-height: 130%; "">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualTitle) ? manualTitle : manualTitleCenter);
+                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_subtitle"">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualSubTitle) ? manualSubTitle : manualSubTitleCenter);
+                            htmlCoverTemplate2 += @"<p class=""product_logo_main_nosub"">" + "\n";
+                            htmlCoverTemplate2 += @"  <img src = ""template/images/product_logo_main.png"" alt=""製品ロゴ（メイン）"">" + "\n";
+                            htmlCoverTemplate2 += @"</p>" + "\n";
+                            htmlCoverTemplate2 += @"<div class=""product_trademarks"">" + "\n";
+                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
+                            foreach (string trademarkText in trademarkTextList)
+                            {
+                                htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
+                            }
+                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
+                            htmlCoverTemplate2 += @"</div>" + "\n";
+                            htmlCoverTemplate2 += @"<p><a href = ""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）"" style=""margin-left: 700px; margin-top: 100px;"" width=""132"" height=""48"" /></a>" + "\n";
+                            htmlCoverTemplate2 += @"</p>" + "\n";
+                        }
+                        else if (isPattern2)
+                        {
+                            htmlCoverTemplate2 += @"<p class=""product_logo_main"">" + "\n";
+                            htmlCoverTemplate2 += @"  <img src = ""template/images/product_logo_main.png"" alt=""製品ロゴ（メイン）"">" + "\n";
+                            htmlCoverTemplate2 += @"</p>" + "\n";
+                            htmlCoverTemplate2 += @"<div class=""product_logo_sub"">" + "\n";
+                            foreach (List<string> subLogoGroup in productSubLogoGroups)
+                            {
+                                htmlCoverTemplate2 += @"<div>" + "\n";
+                                foreach (string subLogoFileName in subLogoGroup)
+                                {
+                                    htmlCoverTemplate2 += string.Format(@"  <img src = ""template/images/{0}"" alt=""製品ロゴ（サブ）"">" + "\n", subLogoFileName);
+                                }
+                                htmlCoverTemplate2 += @"</div>" + "\n";
+                            }
+                            htmlCoverTemplate2 += @"</div>" + "\n";
+                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_title_center"" style=""line-height: 130%; "">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualTitleCenter) ? manualTitleCenter : manualTitle);
+                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_subtitle_center"">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualSubTitleCenter) ? manualSubTitleCenter : manualSubTitle);
+                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_version_center"">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualVersionCenter) ? manualVersionCenter : manualVersion);
+                            htmlCoverTemplate2 += @"<div class=""product_trademarks"">" + "\n";
+                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
+                            foreach (string trademarkText in trademarkTextList)
+                            {
+                                htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
+                            }
+                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
+                            htmlCoverTemplate2 += @"</div>" + "\n";
+                            htmlCoverTemplate2 += @"<p><a href = ""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）"" style=""margin-left: 700px; margin-top: 100px;"" width=""132"" height=""48"" /></a>" + "\n";
+                            htmlCoverTemplate2 += @"</p>" + "\n";
+                        }
+
+                        htmlCoverTemplate2 += @"<script type=""text/javascript"" language=""javascript1.2"">//<![CDATA[" + "\n";
+                        htmlCoverTemplate2 += @"<!--" + "\n";
+                        htmlCoverTemplate2 += @"if (window.writeIntopicBar)" + "\n";
+                        htmlCoverTemplate2 += @"   writeIntopicBar(0);" + "\n";
+                        htmlCoverTemplate2 += @"//-->" + "\n";
+                        htmlCoverTemplate2 += @"//]]></script>" + "\n";
+                        htmlCoverTemplate2 += @"</body>" + "\n";
+                        htmlCoverTemplate2 += @"</html>" + "\n";
                         // HTMLテンプレートの生成
                         var htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript);
                         var htmlTemplate2 = "</body>\n</html>\n";
@@ -131,10 +616,10 @@ namespace WordAddIn1
                         XmlNode objBodyCurrent = objBody.DocumentElement;
                         
                         // 目次・本文の生成
-                        BuildTocBodyFromXml(objXml, objBody, objToc, chapterSplitClass, styleName, coverInfo.docid, bookInfoDef, ref objBodyCurrent, ref objTocCurrent, load);
+                        BuildTocBodyFromXml(objXml, objBody, objToc, chapterSplitClass, styleName, paths.docid, bookInfoDef, ref objBodyCurrent, ref objTocCurrent, load);
                         
                         // 本文IDの設定
-                        SetDefaultBodyId(objBody, coverInfo.docid);
+                        SetDefaultBodyId(objBody, paths.docid);
                         
                         // 目次ファイルの生成
                         ExportTocAsJsFiles(objToc, paths.rootPath, paths.exportDir, mergeScript);
@@ -149,7 +634,7 @@ namespace WordAddIn1
                         CleanUpXmlNodes(objBody);
                         
                         // 検索用ファイルの生成
-                        GenerateSearchFiles(objBody, paths.rootPath, paths.exportDir, coverInfo.docid, htmlTemplate1, htmlTemplate2, htmlCoverTemplate1, htmlCoverTemplate2, objToc, mergeScript, searchJs);
+                        GenerateSearchFiles(objBody, paths.rootPath, paths.exportDir, paths.docid, htmlTemplate1, htmlTemplate2, htmlCoverTemplate1, htmlCoverTemplate2, objToc, mergeScript, searchJs);
 
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
