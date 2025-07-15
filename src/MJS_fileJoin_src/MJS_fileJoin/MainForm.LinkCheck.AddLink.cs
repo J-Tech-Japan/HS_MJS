@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -8,10 +9,27 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
-        // 指定されたリンクの検証結果をListViewに追加
+        // タイトル名の一致判定
+        //private void AddLinkTitleMatchResult(string file, Match m, string titleName)
+        //{
+        //    bool isMatch = titleName == m.Groups[2].Value;
+        //    ListViewItem lvi = listView1.Items.Add(file);
+        //    lvi.SubItems.Add(m.Groups[1].Value);
+        //    lvi.SubItems.Add(m.Groups[2].Value);
+        //    lvi.SubItems.Add(isMatch ? "true" : "false");
+        //    lvi.SubItems.Add(titleName);
+        //    lvi.SubItems.Add("true");
+        //    if (!isMatch)
+        //    {
+        //        lvi.BackColor = Color.Orange;
+        //    }
+        //}
+
         private void AddLinkTitleMatchResult(string file, Match m, string titleName)
         {
             bool isMatch = titleName == m.Groups[2].Value;
+            bool isInternal = IsInternalReference(file, m.Groups[1].Value);
+
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add(m.Groups[1].Value);
             lvi.SubItems.Add(m.Groups[2].Value);
@@ -20,7 +38,7 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("true");
             if (!isMatch)
             {
-                lvi.BackColor = Color.Orange;
+                lvi.BackColor = isInternal ? Color.LightCoral : Color.Orange;
             }
         }
 
@@ -37,6 +55,10 @@ namespace MJS_fileJoin
             // linkPageからフラグメント（#以降）を除去し、ファイル名だけを抽出
             string linkPageWithoutFragment = linkPage.Split('#')[0];
             string linkFileName = Path.GetFileName(linkPageWithoutFragment);
+
+            // ファイル名が_Refで始まる場合は内部参照
+            if (linkFileName.StartsWith("_Ref", StringComparison.OrdinalIgnoreCase))
+                return true;
 
             // ファイル名が「アルファベット3文字+5桁数字」形式か判定
             var fileNamePattern = new Regex(@"^([A-Z]{3})(\d{5})\.html$", RegexOptions.IgnoreCase);

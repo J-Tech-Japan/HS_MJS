@@ -571,6 +571,7 @@
     <Content Include="htmlTemplates\parentdata.js" />
     <Content Include="htmlTemplates\pdf.js" />
     <Content Include="htmlTemplates\pict\arrow.png" />
+    <Content Include="htmlTemplates\pict\QAicon.png" />
     <Content Include="htmlTemplates\projectdata.js" />
     <Content Include="htmlTemplates\promise-6.1.0.min.js" />
     <Content Include="htmlTemplates\resp.css" />

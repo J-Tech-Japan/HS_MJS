@@ -71,9 +71,39 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
+                        int biCount = 0;
+                        bool coverExist = false;
+                        string subTitle = "";
+                        string manualTitle = "";
+                        string manualSubTitle = "";
+                        string manualVersion = "";
+                        string manualTitleCenter = "";
+                        string manualSubTitleCenter = "";
+                        string manualVersionCenter = "";
+                        string trademarkTitle = "";
+                        List<string> trademarkTextList = new List<string>();
+                        string trademarkRight = "";
+                        int lastSectionIdx = docCopy.Sections.Count;
+
+                        // HTML保存時のエンコーディング設定
+                        docCopy.WebOptions.Encoding = Microsoft.Office.Core.MsoEncoding.msoEncodingUTF8;
+
+                        // 表紙情報（タイトル・サブタイトル等）の収集
+                        CollectCoverParagraphs(docCopy, ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter, ref coverExist);
+
+                        // 商標・著作権情報の収集
+                        CollectTrademarkAndCopyrightDetails(docCopy, lastSectionIdx, log, ref trademarkTitle, ref trademarkTextList, ref trademarkRight);
+
+                        // タイトル・サブタイトル等の整形
+                        CleanUpManualTitles(ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter);
+
+                        List<List<string>> productSubLogoGroups = new List<List<string>>();
+
+
+
                         // カバー情報の収集
-                        var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
-                        
+                        //var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
+
                         // HTMLファイルの読み込みと加工
                         var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, coverInfo.isTmpDot);
                         
@@ -149,12 +179,12 @@ namespace WordAddIn1
                         application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
 
                         // tmpcoverpicのクリーンアップ
-                        var tmpCoverPicPath = Path.Combine(paths.rootPath, "tmpcoverpic");
-                        if (Directory.Exists(tmpCoverPicPath))
-                        {
-                            try { Directory.Delete(tmpCoverPicPath, true); }
-                            catch { /* ログ出力など必要に応じて */ }
-                        }
+                        //var tmpCoverPicPath = Path.Combine(paths.rootPath, "tmpcoverpic");
+                        //if (Directory.Exists(tmpCoverPicPath))
+                        //{
+                        //    try { Directory.Delete(tmpCoverPicPath, true); }
+                        //    catch { /* ログ出力など必要に応じて */ }
+                        //}
                     }
                 }
 

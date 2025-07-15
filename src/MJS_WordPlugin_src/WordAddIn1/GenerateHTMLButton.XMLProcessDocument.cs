@@ -106,11 +106,13 @@ namespace WordAddIn1
             }
         }
 
+        
         // 目次と本文の初期化
         private void InitializeTocAndBody(string docTitle, out XmlDocument objToc, out XmlDocument objBody)
         {
             objToc = new XmlDocument();
-            objToc.LoadXml("<result><item title=\"" + docTitle + "\"></item></result>");
+            string safeTitle = System.Security.SecurityElement.Escape(docTitle);
+            objToc.LoadXml("<result><item title=\"" + safeTitle + "\"></item></result>");
             objBody = new XmlDocument();
             objBody.LoadXml("<result></result>");
         }

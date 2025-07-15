@@ -137,7 +137,7 @@ namespace WordAddIn1
             {
                 if (IsInFirstSection(shape, application) && shape.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                 {
-                    UngroupCanvasItems(shape);
+                    //UngroupCanvasItems(shape);
                     ExtractTextFromCanvas(shape, ref subTitle);
 
                     if (string.IsNullOrEmpty(subTitle))
