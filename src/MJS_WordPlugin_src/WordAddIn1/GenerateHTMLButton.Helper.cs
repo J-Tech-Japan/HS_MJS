@@ -52,67 +52,67 @@ namespace WordAddIn1
         }
 
         // 画像をコピーして一時フォルダを削除（元のコード）
-        //public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)
-        //{
-        //    if (Directory.Exists(tmpFolder))
-        //    {
-        //        try
-        //        {
-        //            // 一時フォルダ内のすべての画像ファイルをコピー
-        //            foreach (string pict in Directory.GetFiles(tmpFolder))
-        //            {
-        //                File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
-        //            }
-
-        //            // 一時フォルダを削除
-        //            Directory.Delete(tmpFolder, true);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
-        //            throw;
-        //        }
-        //    }
-        //}
-
         public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)
         {
             if (Directory.Exists(tmpFolder))
             {
                 try
                 {
-                    // pict フォルダのパス
-                    string pictFolder = Path.Combine(Path.GetDirectoryName(tmpFolder), "pict");
-                    // 既存の pict フォルダがあれば削除
-                    if (Directory.Exists(pictFolder))
+                    // 一時フォルダ内のすべての画像ファイルをコピー
+                    foreach (string pict in Directory.GetFiles(tmpFolder))
                     {
-                        Directory.Delete(pictFolder, true);
+                        File.Copy(pict, Path.Combine(rootPath, exportDir, "pict", Path.GetFileName(pict)));
                     }
-                    // tmpFolder を pict にリネーム
-                    Directory.Move(tmpFolder, pictFolder);
 
-                    // pict を exportDir 配下に移動
-                    string exportPictDir = Path.Combine(rootPath, exportDir, "pict");
-                    // 既存の exportDir/pict があれば削除
-                    if (Directory.Exists(exportPictDir))
-                    {
-                        Directory.Delete(exportPictDir, true);
-                    }
-                    // exportDir がなければ作成
-                    string exportDirPath = Path.Combine(rootPath, exportDir);
-                    if (!Directory.Exists(exportDirPath))
-                    {
-                        Directory.CreateDirectory(exportDirPath);
-                    }
-                    Directory.Move(pictFolder, exportPictDir);
+                    // 一時フォルダを削除
+                    Directory.Delete(tmpFolder, true);
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine($"画像フォルダの移動中にエラーが発生しました: {ex.Message}");
+                    log.WriteLine($"画像フォルダのコピー中にエラーが発生しました: {ex.Message}");
                     throw;
                 }
             }
         }
+
+        //public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)
+        //{
+        //    if (Directory.Exists(tmpFolder))
+        //    {
+        //        try
+        //        {
+        //            // pict フォルダのパス
+        //            string pictFolder = Path.Combine(Path.GetDirectoryName(tmpFolder), "pict");
+        //            // 既存の pict フォルダがあれば削除
+        //            if (Directory.Exists(pictFolder))
+        //            {
+        //                Directory.Delete(pictFolder, true);
+        //            }
+        //            // tmpFolder を pict にリネーム
+        //            Directory.Move(tmpFolder, pictFolder);
+
+        //            // pict を exportDir 配下に移動
+        //            string exportPictDir = Path.Combine(rootPath, exportDir, "pict");
+        //            // 既存の exportDir/pict があれば削除
+        //            if (Directory.Exists(exportPictDir))
+        //            {
+        //                Directory.Delete(exportPictDir, true);
+        //            }
+        //            // exportDir がなければ作成
+        //            string exportDirPath = Path.Combine(rootPath, exportDir);
+        //            if (!Directory.Exists(exportDirPath))
+        //            {
+        //                Directory.CreateDirectory(exportDirPath);
+        //            }
+        //            Directory.Move(pictFolder, exportPictDir);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            log.WriteLine($"画像フォルダの移動中にエラーが発生しました: {ex.Message}");
+        //            throw;
+        //        }
+        //    }
+        //}
 
         // 指定されたパスにある書誌情報を読み込み、mergeScript にデータを追加
         
