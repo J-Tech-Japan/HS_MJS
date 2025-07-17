@@ -374,7 +374,7 @@ namespace WordAddIn1
                             if (ws.NameLocal == "奥付タイトル")
                                 ws.NameLocal = "titledef";
 
-
+                        // ドキュメントをHTML形式で保存
                         docCopy.SaveAs2(
                             paths.tmpHtmlPath,
                             WdSaveFormat.wdFormatFilteredHTML,
@@ -393,9 +393,6 @@ namespace WordAddIn1
                         bool isTmpDot = true;
                         CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir, log);
 
-                        // カバー情報の収集
-                        //var coverInfo = CollectInfo(docCopy, application, paths, isPattern1, isPattern2, log);
-
                         // HTMLファイルの読み込みと加工
                         var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, isTmpDot);
                         
@@ -409,201 +406,93 @@ namespace WordAddIn1
                         WriteIndexHtml(paths.indexHtmlPath, paths.docTitle, paths.docid, mergeScript);
 
                         // カバーテンプレートの生成
-                        //var (htmlCoverTemplate1, htmlCoverTemplate2) = BuildCoverTemplates(assembly, paths, coverInfo, isEasyCloud, isEdgeTracker, isPattern1, isPattern2);
+                        string htmlCoverTemplate1 = BuildHtmlCoverTemplate1Header();
 
-                        string htmlCoverTemplate1 = "";
-                        htmlCoverTemplate1 += @"<!DOCTYPE HTML>" + "\n";
-                        htmlCoverTemplate1 += @"<html>" + "\n";
-                        htmlCoverTemplate1 += @"<head>" + "\n";
-                        htmlCoverTemplate1 += @"<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />" + "\n";
-                        htmlCoverTemplate1 += @" <meta name=""generator"" content=""Adobe RoboHelp 2017"" />" + "\n";
-                        htmlCoverTemplate1 += @"<title>表紙</title>" + "\n";
-                        htmlCoverTemplate1 += @"<link rel=""stylesheet"" href=""cover.css"" type=""text/css"" />" + "\n";
-                        htmlCoverTemplate1 += @"<link rel=""stylesheet"" href=""font.css"" type=""text/css"" />" + "\n";
-                        htmlCoverTemplate1 += @"<link rel=""StyleSheet"" href=""resp.css"" type=""text/css"" />" + "\n";
-                        htmlCoverTemplate1 += @"<style type=""text/css"">" + "\n";
-                        htmlCoverTemplate1 += @"<!--" + "\n";
-                        htmlCoverTemplate1 += @"A:visited { color:#954F72; }" + "\n";
-                        htmlCoverTemplate1 += @"A:link { color:#000000; }" + "\n";
-                        htmlCoverTemplate1 += @"-->" + "\n";
-                        htmlCoverTemplate1 += @"</style>" + "\n";
-                        htmlCoverTemplate1 += @"<script type=""text/javascript"" language=""JavaScript"">" + "\n";
-                        htmlCoverTemplate1 += @"//<![CDATA[" + "\n";
-                        htmlCoverTemplate1 += @"function reDo() {" + "\n";
-                        htmlCoverTemplate1 += @"  if (innerWidth != origWidth || innerHeight != origHeight)" + "\n";
-                        htmlCoverTemplate1 += @"     location.reload();" + "\n";
-                        htmlCoverTemplate1 += @"}" + "\n";
-                        htmlCoverTemplate1 += @"if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == ""Netscape"")) {" + "\n";
-                        htmlCoverTemplate1 += @"   origWidth = innerWidth;" + "\n";
-                        htmlCoverTemplate1 += @"   origHeight = innerHeight;" + "\n";
-                        htmlCoverTemplate1 += @"   onresize = reDo;" + "\n";
-                        htmlCoverTemplate1 += @"}" + "\n";
-                        htmlCoverTemplate1 += @"onerror = null;" + "\n";
-                        htmlCoverTemplate1 += @"//]]>" + "\n";
-                        htmlCoverTemplate1 += @"</script>" + "\n";
-                        htmlCoverTemplate1 += @"<style type=""text/css"">" + "\n";
-                        htmlCoverTemplate1 += @"<!--" + "\n";
-                        htmlCoverTemplate1 += @"div.WebHelpPopupMenu { position:absolute;" + "\n";
-                        htmlCoverTemplate1 += @"left:0px;" + "\n";
-                        htmlCoverTemplate1 += @"top:0px;" + "\n";
-                        htmlCoverTemplate1 += @"z-index:4;" + "\n";
-                        htmlCoverTemplate1 += @"visibility:hidden; }" + "\n";
-                        htmlCoverTemplate1 += @"-->" + "\n";
                         if (isEdgeTracker)
                         {
-                            htmlCoverTemplate1 += "\n";
-                            htmlCoverTemplate1 += @"p.HyousiLogo {" + "\n";
-                            htmlCoverTemplate1 += @"text-align       : center;" + "\n";
-                            htmlCoverTemplate1 += @"margin-top       : 60pt;" + "\n";
-                            htmlCoverTemplate1 += @"margin-bottom    : 40pt;" + "\n";
-                            htmlCoverTemplate1 += @"margin-right     : 0mm;" + "\n";
-                            htmlCoverTemplate1 += @"line-height      : 15pt;" + "\n";
-                            htmlCoverTemplate1 += @"}" + "\n";
-                            htmlCoverTemplate1 += "\n";
-                            htmlCoverTemplate1 += @"div.HyousiBackground {" + "\n";
-                            htmlCoverTemplate1 += @"display : table;" + "\n";
-                            htmlCoverTemplate1 += @"width   : 100%;" + "\n";
-                            htmlCoverTemplate1 += @"height  : 65px;" + "\n";
-                            htmlCoverTemplate1 += @"}" + "\n";
-                            htmlCoverTemplate1 += "\n";
-                            htmlCoverTemplate1 += @"p.HyousiText {" + "\n";
-                            htmlCoverTemplate1 += @"display             : table-cell;" + "\n";
-                            htmlCoverTemplate1 += @"background-image    : url('pict/hyousi.png');" + "\n";
-                            htmlCoverTemplate1 += @"background-repeat   : no-repeat;" + "\n";
-                            htmlCoverTemplate1 += @"background-position : center;" + "\n";
-                            htmlCoverTemplate1 += @"text-align          : center;" + "\n";
-                            htmlCoverTemplate1 += @"vertical-align      : middle;" + "\n";
-                            htmlCoverTemplate1 += @"font-size           : 1.8em;" + "\n";
-                            htmlCoverTemplate1 += @"font-weight         : bold;" + "\n";
-                            htmlCoverTemplate1 += @"color               : #FFF;" + "\n";
-                            htmlCoverTemplate1 += @"letter-spacing      : 10px;" + "\n";
-                            htmlCoverTemplate1 += @"}" + "\n";
+                            htmlCoverTemplate1 += BuildEdgeTrackerCoverCss();
                         }
+
                         htmlCoverTemplate1 += @"</style>" + "\n";
                         htmlCoverTemplate1 += @"</head>" + "\n";
-                        string htmlCoverTemplate2 = "";
 
+                        string htmlCoverTemplate2 = "";
 
                         if (isEdgeTracker)
                         {
-                            string[] hyousiGazo = { "EdgeTracker_logo50mm.png", "MJS_LOGO_255.gif", "hyousi.png" };
-                            foreach (var hyousi in hyousiGazo)
-                            {
-                                Bitmap bmp = new Bitmap(assembly.GetManifestResourceStream("WordAddIn1.Resources." + hyousi));
-                                bmp.Save(paths.rootPath + "\\" + paths.exportDir + "\\pict\\" + hyousi);
-                            }
-                            htmlCoverTemplate1 += @"<body>" + "\n";
-                            htmlCoverTemplate1 += @"<p class=""HyousiLogo""><img style=""border: currentColor; border-image: none; width: 100%; max-width: 553px;"" alt="""" src=""pict/EdgeTracker_logo50mm.png"" border=""0""></p>" + "\n";
-                            htmlCoverTemplate1 += @"<div class=""HyousiBackground"">" + "\n";
-                            htmlCoverTemplate1 += @"<p class=""HyousiText"">" + manualTitle + "</p>\n";
-                            htmlCoverTemplate1 += @"</div>" + "\n";
-                            htmlCoverTemplate1 += @"<div class=""product_trademarks"">" + "\n";
-                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
-                            foreach (string trademarkText in trademarkTextList)
-                            {
-                                htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
-                            }
-                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
-                            htmlCoverTemplate1 += @"</div>" + "\n";
-                            htmlCoverTemplate1 += @"<p style=""text-align: center; margin-top: 80pt;""><a href=""https://www.mjs.co.jp"" target=""_blank""><img style=""border: currentColor; border-image: none; width: 100%; max-width: 255px;"" alt="""" src=""pict/MJS_LOGO_255.gif"" border=""0""></a></p>" + "\n";
+                            htmlCoverTemplate1 += BuildEdgeTrackerCoverHtml(
+                                assembly,
+                                paths.rootPath,
+                                paths.exportDir,
+                                manualTitle,
+                                trademarkTitle,
+                                trademarkTextList,
+                                trademarkRight
+                             );
                         }
                         else if (isEasyCloud)
                         {
-                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-background.png"))
-                                htmlCoverTemplate1 += @"<body style=""text-justify-trim: punctuation; background-image: url('template/images/cover-background.png');background-repeat: no-repeat; background-position: 0px 300px;"">" + "\n";
-                            else
-                                htmlCoverTemplate1 += @"<body>" + "\n";
+                            htmlCoverTemplate1 += BuildEasyCloudCoverHtml(
+                                paths.rootPath,
+                                paths.exportDir,
+                                manualTitle,
+                                manualSubTitle,
+                                manualVersion,
+                                trademarkTitle,
+                                trademarkTextList,
+                                trademarkRight
+                            );
 
-                            htmlCoverTemplate1 += @"<p class=""manual_title"" style=""line-height: 130%;"">" + manualTitle + "</p>" + "\n";
-                            htmlCoverTemplate1 += @"<p class=""manual_subtitle"">" + manualSubTitle + "</p>" + "\n";
+                            //if (!String.IsNullOrEmpty(subTitle))
+                            //{
+                            //    htmlCoverTemplate2 += @"<p style=""margin-left: 700px; margin-top: 150px; font-size: 15pt; font-family: メイリオ;" + "\n";
+                            //    htmlCoverTemplate2 += @"    font-weight: bold;"">" + subTitle + "</p>" + "\n";
+                            //    htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
+                            //    htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 10px;""" + "\n";
+                            //    htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
+                            //}
+                            //else
+                            //{
+                            //    htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
+                            //    htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 100px;""" + "\n";
+                            //    htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
+                            //}
 
-                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png"))
-                                htmlCoverTemplate1 += @"<p class=""manual_title"" style=""margin: 80px 0px 80px 100px; ""><img src=""template/images/cover-4.png"" width=""650"" /></p>" + "\n";
-                            else
-                                htmlCoverTemplate1 += @"<p class=""manual_title"" style=""margin: 80px 0px 80px 100px; ""></p>" + "\n";
+                            htmlCoverTemplate2 += BuildEasyCloudSubTitleSection(subTitle);
 
-                            htmlCoverTemplate1 += @"<p class=""manual_version"">" + manualVersion + "</p>" + "\n";
-                            htmlCoverTemplate1 += @"<div class=""product_trademarks"">" + "\n";
-                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
-                            foreach (string trademarkText in trademarkTextList)
-                            {
-                                htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
-                            }
-                            htmlCoverTemplate1 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
-                            htmlCoverTemplate1 += @"</div>" + "\n";
-                            if (!String.IsNullOrEmpty(subTitle))
-                            {
-                                htmlCoverTemplate2 += @"<p style=""margin-left: 700px; margin-top: 150px; font-size: 15pt; font-family: メイリオ;" + "\n";
-                                htmlCoverTemplate2 += @"    font-weight: bold;"">" + subTitle + "</p>" + "\n";
-                                htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
-                                htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 10px;""" + "\n";
-                                htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
-                            }
-                            else
-                            {
-                                htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
-                                htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 100px;""" + "\n";
-                                htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
-                            }
                             htmlCoverTemplate2 += @" </p>" + "\n";
                         }
                         else if (isPattern1)
                         {
-                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_title"" style=""line-height: 130%; "">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualTitle) ? manualTitle : manualTitleCenter);
-                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_subtitle"">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualSubTitle) ? manualSubTitle : manualSubTitleCenter);
-                            htmlCoverTemplate2 += @"<p class=""product_logo_main_nosub"">" + "\n";
-                            htmlCoverTemplate2 += @"  <img src = ""template/images/product_logo_main.png"" alt=""製品ロゴ（メイン）"">" + "\n";
-                            htmlCoverTemplate2 += @"</p>" + "\n";
-                            htmlCoverTemplate2 += @"<div class=""product_trademarks"">" + "\n";
-                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
-                            foreach (string trademarkText in trademarkTextList)
-                            {
-                                htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
-                            }
-                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
-                            htmlCoverTemplate2 += @"</div>" + "\n";
-                            htmlCoverTemplate2 += @"<p><a href = ""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）"" style=""margin-left: 700px; margin-top: 100px;"" width=""132"" height=""48"" /></a>" + "\n";
-                            htmlCoverTemplate2 += @"</p>" + "\n";
+                            htmlCoverTemplate2 += GeneratePattern1CoverHtml(
+                                manualTitle,
+                                manualTitleCenter,
+                                manualSubTitle,
+                                manualSubTitleCenter,
+                                trademarkTitle,
+                                trademarkTextList,
+                                trademarkRight
+                            );
                         }
                         else if (isPattern2)
                         {
-                            htmlCoverTemplate2 += @"<p class=""product_logo_main"">" + "\n";
-                            htmlCoverTemplate2 += @"  <img src = ""template/images/product_logo_main.png"" alt=""製品ロゴ（メイン）"">" + "\n";
-                            htmlCoverTemplate2 += @"</p>" + "\n";
-                            htmlCoverTemplate2 += @"<div class=""product_logo_sub"">" + "\n";
-                            foreach (List<string> subLogoGroup in productSubLogoGroups)
-                            {
-                                htmlCoverTemplate2 += @"<div>" + "\n";
-                                foreach (string subLogoFileName in subLogoGroup)
-                                {
-                                    htmlCoverTemplate2 += string.Format(@"  <img src = ""template/images/{0}"" alt=""製品ロゴ（サブ）"">" + "\n", subLogoFileName);
-                                }
-                                htmlCoverTemplate2 += @"</div>" + "\n";
-                            }
-                            htmlCoverTemplate2 += @"</div>" + "\n";
-                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_title_center"" style=""line-height: 130%; "">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualTitleCenter) ? manualTitleCenter : manualTitle);
-                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_subtitle_center"">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualSubTitleCenter) ? manualSubTitleCenter : manualSubTitle);
-                            htmlCoverTemplate2 += string.Format(@"<p class=""manual_version_center"">{0}</p>" + "\n", !string.IsNullOrWhiteSpace(manualVersionCenter) ? manualVersionCenter : manualVersion);
-                            htmlCoverTemplate2 += @"<div class=""product_trademarks"">" + "\n";
-                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
-                            foreach (string trademarkText in trademarkTextList)
-                            {
-                                htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
-                            }
-                            htmlCoverTemplate2 += string.Format(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
-                            htmlCoverTemplate2 += @"</div>" + "\n";
-                            htmlCoverTemplate2 += @"<p><a href = ""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）"" style=""margin-left: 700px; margin-top: 100px;"" width=""132"" height=""48"" /></a>" + "\n";
-                            htmlCoverTemplate2 += @"</p>" + "\n";
+                         
+                            htmlCoverTemplate2 += GeneratePattern2CoverHtml(
+                                productSubLogoGroups,
+                                manualTitleCenter,
+                                manualTitle,
+                                manualSubTitleCenter,
+                                manualSubTitle,
+                                manualVersionCenter,
+                                manualVersion,
+                                trademarkTitle,
+                                trademarkTextList,
+                                trademarkRight
+                            );
                         }
 
-                        htmlCoverTemplate2 += @"<script type=""text/javascript"" language=""javascript1.2"">//<![CDATA[" + "\n";
-                        htmlCoverTemplate2 += @"<!--" + "\n";
-                        htmlCoverTemplate2 += @"if (window.writeIntopicBar)" + "\n";
-                        htmlCoverTemplate2 += @"   writeIntopicBar(0);" + "\n";
-                        htmlCoverTemplate2 += @"//-->" + "\n";
-                        htmlCoverTemplate2 += @"//]]></script>" + "\n";
-                        htmlCoverTemplate2 += @"</body>" + "\n";
-                        htmlCoverTemplate2 += @"</html>" + "\n";
+                        htmlCoverTemplate2 += BuildHtmlCoverFooter();
+
                         // HTMLテンプレートの生成
                         var htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript);
                         var htmlTemplate2 = "</body>\n</html>\n";
@@ -663,7 +552,7 @@ namespace WordAddIn1
                         // ドキュメント変更イベントを再登録
                         application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
 
-                        // tmpcoverpicのクリーンアップ
+                        // tmpcoverpicのクリーンアップ（必要であれば）
                         //var tmpCoverPicPath = Path.Combine(paths.rootPath, "tmpcoverpic");
                         //if (Directory.Exists(tmpCoverPicPath))
                         //{
@@ -689,7 +578,7 @@ namespace WordAddIn1
             }
         }
 
-        // ドキュメントを一時 HTML 用にコピー
+        // ドキュメントを一時 HTML 用にコピー（旧版コード）
         //private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
         //{
         //    //CheckAndRestoreRefFields(application.ActiveDocument);
