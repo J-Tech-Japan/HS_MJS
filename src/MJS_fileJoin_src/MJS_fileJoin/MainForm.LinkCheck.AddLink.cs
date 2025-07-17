@@ -9,6 +9,12 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
+        // 薄いオレンジ色を定義
+        private static readonly Color LightOrange = Color.FromArgb(255, 255, 200, 120);
+
+        // 薄い赤色を定義
+        private static readonly Color LightRed = Color.FromArgb(255, 255, 180, 180);
+
         // タイトル名の一致判定
         //private void AddLinkTitleMatchResult(string file, Match m, string titleName)
         //{
@@ -38,7 +44,7 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("true");
             if (!isMatch)
             {
-                lvi.BackColor = isInternal ? Color.LightCoral : Color.Orange;
+                lvi.BackColor = isInternal ? LightRed : LightOrange;
             }
         }
 
@@ -88,8 +94,7 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("false");
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");
-            //lvi.BackColor = isInternal ? Color.Red : Color.Orange;
-            lvi.BackColor = isInternal ? Color.LightCoral : Color.Orange;
+            lvi.BackColor = isInternal ? LightRed : LightOrange;
         }
 
         // リンク切れやID不一致などがあった場合の結果をListViewに追加
@@ -131,7 +136,7 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("");
             lvi.SubItems.Add("");
             lvi.SubItems.Add("");
-            lvi.BackColor = Color.Orange;
+            lvi.BackColor = LightOrange;
         }
 
         // 無効なリンクの検証結果をListViewに追加
@@ -157,7 +162,7 @@ namespace MJS_fileJoin
             lvi.SubItems.Add("false");
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");
-            lvi.BackColor = isInternal ? Color.LightCoral : Color.Orange;
+            lvi.BackColor = isInternal ? LightRed : LightOrange;
         }
 
         // 指定したURLのHTTPステータスコードを取得
