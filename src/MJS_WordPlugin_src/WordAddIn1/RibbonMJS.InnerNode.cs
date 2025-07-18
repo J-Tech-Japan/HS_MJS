@@ -8,7 +8,6 @@ namespace WordAddIn1
     {
         private void InnerNode(Dictionary<string, string> styleName, System.Xml.XmlNode objTargetNode, System.Xml.XmlNode seekNode)
         {
-            //string baseStyle = "";
 
             if (seekNode.NodeType == XmlNodeType.Text)
             {
@@ -152,37 +151,6 @@ namespace WordAddIn1
                         AppendChoiceElement(objTargetNode, seekNode, thisStyleName);
                     }
 
-                    //else if (Regex.IsMatch(thisStyleName, "箇条書き[2２]"))
-                    //{
-                    //    objTargetNode.AppendChild(objTargetNode.OwnerDocument.CreateElement("p"));
-                    //    ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-                    //    if (Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "")
-                    //    {
-                    //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("class");
-                    //    }
-
-                    //    if ((Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") != "") && (objTargetNode.SelectNodes("ancestor-or-self::*[@class = 'MJS_listItem2']").Count == 0))
-                    //    {
-                    //        seekNode.InnerText = Regex.Replace(seekNode.InnerText, @"^\S{0,3}[ 　]+", "");
-                    //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_listItem2");
-                    //    }
-                    //}
-                    //else if (Regex.IsMatch(thisStyleName, "箇条書き"))
-                    //{
-                    //    objTargetNode.AppendChild(objTargetNode.OwnerDocument.CreateElement("p"));
-                    //    ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-                    //    if (Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") == "")
-                    //    {
-                    //        ((XmlElement)objTargetNode.LastChild).RemoveAttribute("class");
-                    //    }
-
-                    //    if ((Regex.Replace(seekNode.InnerText, @"[\s　\u00A0]", "") != "") && (objTargetNode.SelectNodes("ancestor-or-self::*[@class = 'MJS_listItem']").Count == 0))
-                    //    {
-                    //        seekNode.InnerText = Regex.Replace(seekNode.InnerText, @"^\S{0,3}[ 　]+", "");
-                    //        ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_listItem");
-                    //    }
-                    //}
-
                     else if (Regex.IsMatch(thisStyleName, "箇条書き[2２]"))
                     {
                         AppendListItemElement(objTargetNode, seekNode, "MJS_listItem2");
@@ -305,7 +273,6 @@ namespace WordAddIn1
                     {
                         objTargetNode.AppendChild(objTargetNode.OwnerDocument.CreateElement("p"));
                         ((XmlElement)objTargetNode.LastChild).RemoveAttribute("style");
-                        //((XmlElement)objTargetNode.LastChild).SetAttribute("style", "margin-left: 15mm;");
                         ((XmlElement)objTargetNode.LastChild).SetAttribute("class", "MJS_columnPict");
                     }
                     else if (Regex.IsMatch(thisStyleName, "画像.*手順内"))
