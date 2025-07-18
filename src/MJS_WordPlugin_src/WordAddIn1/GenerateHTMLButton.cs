@@ -67,9 +67,40 @@ namespace WordAddIn1
                     {
                         // アセンブリ取得
                         System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                        
+
                         // HTMLテンプレートの準備
-                        PrepareHtmlTemplates(assembly, paths.rootPath, paths.exportDir);
+                        //PrepareHtmlTemplates(assembly, paths.rootPath, paths.exportDir);
+
+                        log.WriteLine("テンプレートデータ準備");
+
+                        using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
+                        {
+                            FileStream fs = File.Create(paths.rootPath + "\\htmlTemplates.zip");
+                            stream.Seek(0, SeekOrigin.Begin);
+                            stream.CopyTo(fs);
+                            fs.Close();
+                        }
+
+                        if (Directory.Exists(paths.rootPath + "\\htmlTemplates"))
+                        {
+                            Directory.Delete(paths.rootPath + "\\htmlTemplates", true);
+                        }
+
+                        System.IO.Compression.ZipFile.ExtractToDirectory(paths.rootPath + "\\htmlTemplates.zip", paths.rootPath);
+
+                        if (Directory.Exists(paths.rootPath + "\\" + paths.exportDir))
+                        {
+                            Directory.Delete(paths.rootPath + "\\" + paths.exportDir, true);
+                        }
+                        if (Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.Delete(paths.rootPath + "\\tmpcoverpic", true);
+                        Directory.Move(paths.rootPath + "\\htmlTemplates", paths.rootPath + "\\" + paths.exportDir);
+
+                        File.Delete(paths.rootPath + "\\htmlTemplates.zip");
+
+                        string docid = Regex.Replace(paths.docName, "^(.{3}).+$", "$1");
+                        string docTitle = Regex.Replace(paths.docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
+
+                        string zipDirPath = paths.rootPath + "\\" + docid + "_" + paths.exportDir + "_" + DateTime.Today.ToString("yyyyMMdd");
                         Application.DoEvents();
                         
                         // ドキュメントを一時HTML用にコピー
@@ -321,7 +352,8 @@ namespace WordAddIn1
 
                                         if (p == 0 || p + 1 != pairs.Count)
                                         {
-                                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png")) File.Delete(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
+                                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png"))
+                                                File.Delete(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
                                             File.Move(pairs[p].Key, paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
                                         }
                                         else
