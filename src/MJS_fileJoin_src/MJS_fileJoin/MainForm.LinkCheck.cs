@@ -38,6 +38,26 @@ namespace MJS_fileJoin
                 foreach (ListViewItem lvi in listView1.Items)
                     logen.Add(lvi);
             }
+
+            // 外部参照の行を薄いオレンジに塗り直す
+            foreach (ListViewItem lvi in listView1.Items)
+            {
+                if (lvi.BackColor == LightRed)
+                {
+                    // ID不一致やリンク切れはスキップ
+                    // AddRefLinkBrokenOrIdMismatchResult, AddInvalidLinkResult では4番目のサブアイテムが "none" になっている
+                    if (lvi.SubItems.Count > 4 && lvi.SubItems[4].Text == "none")
+                        continue;
+
+                    string file = lvi.Text;
+                    string linkPage = lvi.SubItems.Count > 1 ? lvi.SubItems[1].Text : "";
+
+                    if (!IsInternalReference(file, linkPage))
+                    {
+                        lvi.BackColor = LightOrange;
+                    }
+                }
+            }
         }
 
         // 進捗バーの初期化

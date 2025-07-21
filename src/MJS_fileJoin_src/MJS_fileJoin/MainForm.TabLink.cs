@@ -94,26 +94,47 @@ namespace MJS_fileJoin
             }
         }
 
+        //private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    if (checkBox1.Checked)
+        //    {
+        //        List<ListViewItem> lo = new List<ListViewItem>();
+        //        foreach (ListViewItem lvi in listView1.Items)
+        //            if (lvi.BackColor == Color.Red || lvi.BackColor == Color.FromArgb(255, 192, 203))
+        //                lo.Add(lvi);
+        //        listView1.Items.Clear();
+        //        foreach (ListViewItem o in lo)
+        //            listView1.Items.Add(o);
+        //    }
+        //    else
+        //    {
+        //        if (logen.Count > 0)
+        //        {
+        //            listView1.Items.Clear();
+        //            foreach (ListViewItem lvi in logen)
+        //                listView1.Items.Add(lvi);
+        //        }
+        //    }
+        //}
+
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
+            listView1.Items.Clear();
             if (checkBox1.Checked)
             {
-                List<ListViewItem> lo = new List<ListViewItem>();
-                foreach (ListViewItem lvi in listView1.Items)
-                    if (lvi.BackColor == Color.Red || lvi.BackColor == Color.FromArgb(255, 192, 203))
-                        lo.Add(lvi);
-                listView1.Items.Clear();
-                foreach (ListViewItem o in lo)
-                    listView1.Items.Add(o);
+                // 白背景（Color.White, Color.Empty, SystemColors.Window）以外を表示
+                foreach (ListViewItem lvi in logen)
+                {
+                    var c = lvi.BackColor;
+                    if (c != Color.White && c != Color.Empty && c != SystemColors.Window)
+                        listView1.Items.Add(lvi);
+                }
             }
             else
             {
-                if (logen.Count > 0)
-                {
-                    listView1.Items.Clear();
-                    foreach (ListViewItem lvi in logen)
-                        listView1.Items.Add(lvi);
-                }
+                // 全件表示
+                foreach (ListViewItem lvi in logen)
+                    listView1.Items.Add(lvi);
             }
         }
 
