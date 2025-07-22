@@ -24,5 +24,13 @@ namespace MJS_fileJoin
             if (tabControl1.SelectedIndex == 1) this.Width = 800;
             else this.Width = 439;
         }
+
+        private void UpdateListViewColumnsWidth()
+        {
+            for (int i = 0; i < listView1.Columns.Count; i++)
+            {
+                listView1.AutoResizeColumn(i, ColumnHeaderAutoResizeStyle.ColumnContent);
+            }
+        }
     }
 }

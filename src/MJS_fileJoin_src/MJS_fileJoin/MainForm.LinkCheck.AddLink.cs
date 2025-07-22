@@ -118,18 +118,18 @@ namespace MJS_fileJoin
             // ------------------------------------------------------------
 
             // ファイル名が「アルファベット3文字+5桁数字」形式か判定
-            var fileNamePattern = new Regex(@"^([A-Z]{3})(\d{5})\.html$", RegexOptions.IgnoreCase);
+            //var fileNamePattern = new Regex(@"^([A-Z]{3})(\d{5})\.html$", RegexOptions.IgnoreCase);
 
-            var sourceMatch = fileNamePattern.Match(sourceFileName);
-            var linkMatch = fileNamePattern.Match(linkFileName);
+            //var sourceMatch = fileNamePattern.Match(sourceFileName);
+            //var linkMatch = fileNamePattern.Match(linkFileName);
 
-            if (sourceMatch.Success && linkMatch.Success)
-            {
-                // 先頭2桁の数字が一致すれば内部参照
-                string sourcePrefix = sourceMatch.Groups[2].Value.Substring(0, 2);
-                string linkPrefix = linkMatch.Groups[2].Value.Substring(0, 2);
-                return sourcePrefix == linkPrefix;
-            }
+            //if (sourceMatch.Success && linkMatch.Success)
+            //{
+            //    // 先頭2桁の数字が一致すれば内部参照
+            //    string sourcePrefix = sourceMatch.Groups[2].Value.Substring(0, 2);
+            //    string linkPrefix = linkMatch.Groups[2].Value.Substring(0, 2);
+            //    return sourcePrefix == linkPrefix;
+            //}
 
             return false;
         }

@@ -32,11 +32,12 @@ namespace WordAddIn1
             // ローダーフォームを表示
             loader load = new loader();
             load.Show();
-
-            var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
-
+            
             try
             {
+                // 指定スタイルの見出しを取得
+                var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
+
                 // 前処理（ドキュメントや環境のチェック）
                 if (!PreProcess(application, activeDocument, load)) return;
 
@@ -94,6 +95,7 @@ namespace WordAddIn1
                         {
                             Directory.Delete(paths.rootPath + "\\" + paths.exportDir, true);
                         }
+
                         if (Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.Delete(paths.rootPath + "\\tmpcoverpic", true);
                         Directory.Move(paths.rootPath + "\\htmlTemplates", paths.rootPath + "\\" + paths.exportDir);
 
@@ -667,84 +669,6 @@ namespace WordAddIn1
 
             log.WriteLine("Number of sections: " + docCopy.Sections.Count);
             return docCopy;
-        }
-
-        private List<string> GetHeadingsByStyles(List<string> styleNames)
-        {
-            var application = Globals.ThisAddIn.Application;
-            var activeDocument = application.ActiveDocument;
-            List<string> headings = new List<string>();
-
-            foreach (Paragraph para in activeDocument.Paragraphs)
-            {
-                string styleName = para.get_Style().NameLocal;
-                if (styleNames.Contains(styleName))
-                {
-                    string text = para.Range.Text.Trim();
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        headings.Add(text);
-                    }
-                }
-            }
-
-            return headings;
-        }
-
-        //private void RemoveSearchWordsByHeadings(List<string> headingList, string rootPath, string exportDir)
-        //{
-        //    string searchJsPath = Path.Combine(rootPath, exportDir, "search.js");
-        //    if (!File.Exists(searchJsPath)) return;
-
-        //    string content = File.ReadAllText(searchJsPath, Encoding.UTF8);
-
-        //    // 正規表現で <div class="search_word">...</div> を抽出
-        //    string pattern = @"<div\s+class=""search_word"">(.*?)</div>";
-        //    var regex = new Regex(pattern, RegexOptions.Singleline);
-        //    var matches = regex.Matches(content);
-
-        //    foreach (Match match in matches)
-        //    {
-        //        string innerText = match.Groups[1].Value.Trim();
-        //        // 先頭行を取得
-        //        string firstLine = innerText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
-        //        foreach (var heading in headingList)
-        //        {
-        //            if (firstLine.StartsWith(heading))
-        //            {
-        //                // 一致したら <div>...</div> 全体を削除
-        //                content = content.Replace(match.Value, "");
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    File.WriteAllText(searchJsPath, content, Encoding.UTF8);
-        //}
-
-        private void RemoveSearchBlockByTitle(string searchTitleText, string rootPath, string exportDir)
-        {
-            string searchJsPath = Path.Combine(rootPath, exportDir, "search.js");
-            if (!File.Exists(searchJsPath)) return;
-
-            string content = File.ReadAllText(searchJsPath, Encoding.UTF8);
-
-            // <div class="search_title">...</div><div class="displayText">...</div><div class="search_word">...</div> をまとめて抽出
-            string pattern = @"<div\s+class=""search_title"">(.*?)</div>\s*<div\s+class=""displayText"">(.*?)</div>\s*<div\s+class=""search_word"">(.*?)</div>";
-            var regex = new Regex(pattern, RegexOptions.Singleline);
-            var matches = regex.Matches(content);
-
-            foreach (Match match in matches)
-            {
-                string titleInner = match.Groups[1].Value.Trim();
-                if (titleInner == searchTitleText)
-                {
-                    // 一致したブロック全体を削除
-                    content = content.Replace(match.Value, "");
-                }
-            }
-
-            File.WriteAllText(searchJsPath, content, Encoding.UTF8);
         }
     }
 }
