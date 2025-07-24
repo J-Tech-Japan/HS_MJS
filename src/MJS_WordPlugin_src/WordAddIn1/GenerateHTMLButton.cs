@@ -6,7 +6,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
 using Microsoft.Office.Interop.Word;
@@ -37,6 +36,7 @@ namespace WordAddIn1
             {
                 // 指定スタイルの見出しを取得
                 var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
+                var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1,MJS_見出し 1" }, "##検索対象外トピック##");
 
                 // 前処理（ドキュメントや環境のチェック）
                 if (!PreProcess(application, activeDocument, load)) return;
@@ -152,7 +152,7 @@ namespace WordAddIn1
                                     foreach (Shape ws in docCopy.Shapes)
                                     {
                                         ws.Select();
-                                        if (Globals.ThisAddIn.Application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
+                                        if (Globals.ThisAddIn.Application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
                                         {
                                             if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
                                             {
@@ -163,11 +163,12 @@ namespace WordAddIn1
                                     }
                                 }
 
+                                //int floatingPictureCount = 0; // 追加: 浮動画像のカウント用
 
                                 foreach (Shape ws in docCopy.Shapes)
                                 {
                                     ws.Select();
-                                    if (WordAddIn1.Globals.ThisAddIn.Application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
+                                    if (Globals.ThisAddIn.Application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
                                     {
                                         if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                                         {
@@ -175,7 +176,7 @@ namespace WordAddIn1
                                             while (checkCanvas)
                                             {
                                                 checkCanvas = false;
-                                                foreach (Word.Shape wsp in ws.CanvasItems)
+                                                foreach (Shape wsp in ws.CanvasItems)
                                                 {
                                                     if (wsp.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
                                                     {
@@ -184,7 +185,7 @@ namespace WordAddIn1
                                                     }
                                                 }
                                             }
-                                            foreach (Word.Shape wsp in ws.CanvasItems)
+                                            foreach (Shape wsp in ws.CanvasItems)
                                             {
                                                 wsp.Select();
                                                 string tempSubTitle = "";
@@ -219,6 +220,7 @@ namespace WordAddIn1
                                                 }
                                             }
                                         }
+
                                         else if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
                                         {
                                             ws.ConvertToInlineShape();
@@ -248,11 +250,11 @@ namespace WordAddIn1
                                         {
                                             try
                                             {
-                                                foreach (Word.InlineShape wis in wp.Range.InlineShapes)
+                                                foreach (InlineShape wis in wp.Range.InlineShapes)
                                                 {
                                                     wis.Range.Select();
                                                     Clipboard.Clear();
-                                                    WordAddIn1.Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
                                                     Image img = Clipboard.GetImage();
                                                     img.Save(strOutFileName + "\\product_logo_main.png", ImageFormat.Png);
 
@@ -304,7 +306,6 @@ namespace WordAddIn1
                                     foreach (Word.InlineShape wis in docCopy.Sections[1].Range.InlineShapes)
                                     {
                                         byte[] vData = (byte[])wis.Range.EnhMetaFileBits;
-                                        //MessageBox.Show(vData.Length.ToString());
 
                                         if (vData != null)
                                         {
@@ -320,6 +321,9 @@ namespace WordAddIn1
                                     }
                                 }
 
+                                // 一時フォルダ内のPNG画像をすべて取得し、
+                                // 画像ごとの面積（幅×高さ）を計算し、
+                                // 面積順に並べたリスト（pairs）を作る
                                 Dictionary<string, float> dicStrFlo = new Dictionary<string, float>();
 
                                 string[] coverPics = Directory.GetFiles(strOutFileName, "*.png", SearchOption.AllDirectories);
@@ -351,17 +355,22 @@ namespace WordAddIn1
                                 }
                                 else
                                 {
+                                    // pairs（画像ファイルパスと面積のペアのリスト）をループし、
+                                    // 画像ファイルを用途別にコピー・リサイズ・リネームする
                                     for (int p = 0; p < pairs.Count; p++)
                                     {
-
+                                        // 先頭画像または最後以外の画像の場合
                                         if (p == 0 || p + 1 != pairs.Count)
                                         {
+                                            // cover-4.png として保存（既存なら削除してから移動）
                                             if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png"))
                                                 File.Delete(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
                                             File.Move(pairs[p].Key, paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
                                         }
                                         else
                                         {
+                                            // 最後の画像の場合
+                                            // 1/5サイズに縮小して cover-background.png として保存
                                             using (Bitmap src = new Bitmap(pairs[p].Key))
                                             {
                                                 int w = src.Width / 5;
@@ -372,11 +381,36 @@ namespace WordAddIn1
                                                 g.DrawImage(src, 0, 0, w, h);
                                                 dst.Save(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-background.png", ImageFormat.Png);
                                             }
-                                            // Saves result.
                                             File.Delete(pairs[p].Key);
                                         }
                                     }
                                 }
+
+                                // cover-4.pngが存在しない場合、セクション1の最初のShape画像をcover-4.pngとして保存
+                                //string cover4Path = paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png";
+                                //if (!File.Exists(cover4Path))
+                                //{
+                                //    var section1 = docCopy.Sections[1];
+                                //    foreach (Word.Shape shape in section1.Range.ShapeRange)
+                                //    {
+                                //        if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
+                                //        {
+                                //            try
+                                //            {
+                                //                shape.Select();
+                                //                Clipboard.Clear();
+                                //                Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                //                Image img = Clipboard.GetImage();
+                                //                if (img != null)
+                                //                {
+                                //                    img.Save(cover4Path, ImageFormat.Png);
+                                //                }
+                                //            }
+                                //            catch { }
+                                //            break; // 最初のShapeのみ
+                                //        }
+                                //    }
+                                //}
 
                                 if (Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.Delete(paths.rootPath + "\\tmpcoverpic", true);
                             }
@@ -564,13 +598,27 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
-                        foreach(string heading in headings)
-                        {
-                            RemoveSearchBlockByTitle(
-                            heading, // 見出しテキスト
-                            paths.rootPath,
-                            paths.exportDir);
-                        }
+                        // 検索ブロックの削除（必要に応じて）
+                        //foreach (string heading in headings)
+                        //{
+                        //    RemoveSearchBlockByTitle(
+                        //    heading, // 見出しテキスト
+                        //    paths.rootPath,
+                        //    paths.exportDir);
+                        //}
+
+                        //foreach (string heading in headingsWithComment)
+                        //{
+                        //    RemoveSearchBlockByTitle(
+                        //    heading, // 見出しテキスト
+                        //    paths.rootPath,
+                        //    paths.exportDir);
+                        //}
+
+                        //RemoveSearchBlockByTitle(
+                        //    "マニュアル内の記号・表記について",
+                        //    paths.rootPath,
+                        //    paths.exportDir);
 
                         // Zipファイル作成ログ
                         log.WriteLine("Zipファイル作成");
@@ -622,53 +670,53 @@ namespace WordAddIn1
             }
         }
 
-        // ドキュメントを一時 HTML 用にコピー（旧版コード）
-        //private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
-        //{
-        //    //CheckAndRestoreRefFields(application.ActiveDocument);
-        //    ClearClipboardSafely();
-        //    Application.DoEvents();
-        //    application.Selection.WholeStory();
-        //    application.Selection.Copy();
-        //    Application.DoEvents();
-        //    application.Selection.Collapse(Word.WdCollapseDirection.wdCollapseStart);
-        //    Application.DoEvents();
-        //    Word.Document docCopy = application.Documents.Add();
-        //    Application.DoEvents();
-        //    docCopy.TrackRevisions = false;
-        //    docCopy.AcceptAllRevisions();
-        //    docCopy.Select();
-        //    Application.DoEvents();
-        //    application.Selection.PasteAndFormat(Word.WdRecoveryType.wdUseDestinationStylesRecovery);
-        //    Application.DoEvents();
-        //    ClearClipboardSafely();
-        //    log.WriteLine("Number of sections: " + docCopy.Sections.Count);
-        //    return docCopy;
-        //}
-
-
+        //ドキュメントを一時 HTML 用にコピー（旧版コード）
         private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
         {
-            // 元ドキュメントの全範囲を取得
-            Word.Document srcDoc = application.ActiveDocument;
-            Word.Range srcRange = srcDoc.Content;
-
-            // 新規ドキュメントを作成
-            Word.Document docCopy = application.Documents.Add();
-            docCopy.TrackRevisions = false;
-
-            // 元ドキュメントの全範囲をコピー＆ペースト（フィールドを保持）
-            srcRange.Copy();
-            Word.Range destRange = docCopy.Content;
-            destRange.Paste();
-
-            Application.DoEvents();
-
-            // クリップボードをクリア（任意）
+            //CheckAndRestoreRefFields(application.ActiveDocument);
             ClearClipboardSafely();
-
+            Application.DoEvents();
+            application.Selection.WholeStory();
+            application.Selection.Copy();
+            Application.DoEvents();
+            application.Selection.Collapse(Word.WdCollapseDirection.wdCollapseStart);
+            Application.DoEvents();
+            Word.Document docCopy = application.Documents.Add();
+            Application.DoEvents();
+            docCopy.TrackRevisions = false;
+            docCopy.AcceptAllRevisions();
+            docCopy.Select();
+            Application.DoEvents();
+            application.Selection.PasteAndFormat(Word.WdRecoveryType.wdUseDestinationStylesRecovery);
+            Application.DoEvents();
+            ClearClipboardSafely();
             log.WriteLine("Number of sections: " + docCopy.Sections.Count);
             return docCopy;
         }
+
+
+        //private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
+        //{
+        //    // 元ドキュメントの全範囲を取得
+        //    Document srcDoc = application.ActiveDocument;
+        //    Range srcRange = srcDoc.Content;
+
+        //    // 新規ドキュメントを作成
+        //    Document docCopy = application.Documents.Add();
+        //    docCopy.TrackRevisions = false;
+
+        //    // 元ドキュメントの全範囲をコピー＆ペースト（フィールドを保持）
+        //    srcRange.Copy();
+        //    Range destRange = docCopy.Content;
+        //    destRange.Paste();
+
+        //    Application.DoEvents();
+
+        //    // クリップボードをクリア（任意）
+        //    ClearClipboardSafely();
+
+        //    log.WriteLine("Number of sections: " + docCopy.Sections.Count);
+        //    return docCopy;
+        //}
     }
 }
