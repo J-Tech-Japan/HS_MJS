@@ -57,5 +57,36 @@ namespace WordAddIn1
 
             return headings;
         }
+
+        // 指定されたスタイル名の見出し内に、特定のコメントがついている場合、見出しのテキストを取得するメソッド
+        private List<string> GetHeadingsWithComment(List<string> styleNames, string commentText)
+        {
+            var application = Globals.ThisAddIn.Application;
+            var activeDocument = application.ActiveDocument;
+            List<string> headings = new List<string>();
+
+            foreach (Paragraph para in activeDocument.Paragraphs)
+            {
+                string styleName = para.get_Style().NameLocal;
+                if (styleNames.Contains(styleName))
+                {
+                    string headingText = para.Range.Text.Trim();
+                    if (!string.IsNullOrEmpty(headingText))
+                    {
+                        // コメントが含まれているかチェック
+                        foreach (Comment comment in para.Range.Comments)
+                        {
+                            if (comment.Range.Text.Contains(commentText))
+                            {
+                                headings.Add(headingText);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return headings;
+        }
     }
 }
