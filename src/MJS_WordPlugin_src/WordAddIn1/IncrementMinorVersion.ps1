@@ -2,9 +2,32 @@
     [string]$Action = ""
 )
 
+function Test-FileLock {
+    param([string]$Path)
+    try {
+        $stream = [System.IO.File]::Open($Path, 'Open', 'ReadWrite', 'None')
+        $stream.Close()
+        return $false  # ロックされていない
+    } catch {
+        return $true   # ロックされている
+    }
+}
+
 $path = Join-Path $PSScriptRoot "Properties\AssemblyInfo.cs"
 $pattern = '(\[assembly: AssemblyVersion\(")(\d+)\.(\d+)\.(\d+)\.0("\)\])'
 $filePattern = '(\[assembly: AssemblyFileVersion\(")(\d+)\.(\d+)\.(\d+)\.0("\)\])'
+
+# ロック解除待ち（最大5回リトライ、1秒ごと）
+$maxRetry = 0
+$retry = 0
+while (Test-FileLock $path) {
+    if ($retry -ge $maxRetry) {
+        Write-Error "$path は他のプロセスによってロックされています。スクリプトを中断します。"
+        exit 1
+    }
+    Start-Sleep -Seconds 1
+    $retry++
+}
 
 if ($Action -eq "reset") {
     (Get-Content $path) | ForEach-Object {

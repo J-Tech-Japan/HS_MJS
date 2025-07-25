@@ -36,7 +36,10 @@ namespace WordAddIn1
             {
                 // TODO: 指定スタイルの見出しを取得
                 var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
-                var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1,MJS_見出し 1" }, "##検索対象外トピック##");
+
+                // "##検索対象外トピック##" というコメントがついている、
+                // "見出し 1" または "見出し 2" スタイルの見出しを取得
+                var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1", "見出し 2" }, "##検索対象外トピック##");
 
                 // 前処理（ドキュメントや環境のチェック）
                 if (!PreProcess(application, activeDocument, load)) return;
@@ -607,13 +610,18 @@ namespace WordAddIn1
                         //    paths.exportDir);
                         //}
 
-                        foreach (string heading in headingsWithComment)
-                        {
-                            RemoveSearchBlockByTitle(
-                            heading,
+                        //foreach (string heading in headingsWithComment)
+                        //{
+                        //    RemoveSearchBlockByTitle(
+                        //    heading,
+                        //    paths.rootPath,
+                        //    paths.exportDir);
+                        //}
+
+                        RemoveSearchBlockByTitle(
+                            "はじめに",
                             paths.rootPath,
                             paths.exportDir);
-                        }
 
                         //RemoveSearchBlockByTitle(
                         //    "マニュアル内の記号・表記について",
