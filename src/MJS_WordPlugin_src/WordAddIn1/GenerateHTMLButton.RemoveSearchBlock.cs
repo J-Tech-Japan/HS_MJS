@@ -19,6 +19,7 @@ namespace WordAddIn1
             string content = File.ReadAllText(searchJsPath, Encoding.UTF8);
 
             string pattern = @"<div\s+class=""search_title"">(.*?)</div>\s*<div\s+class=""displayText"">(.*?)</div>\s*<div\s+class=""search_word"">(.*?)</div>";
+
             var regex = new Regex(pattern, RegexOptions.Singleline);
             var matches = regex.Matches(content);
 
