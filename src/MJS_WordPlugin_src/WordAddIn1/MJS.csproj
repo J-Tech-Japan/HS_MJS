@@ -127,7 +127,7 @@
     <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
     <WarningLevel>4</WarningLevel>
     <RegisterForComInterop>false</RegisterForComInterop>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <!--
     This section defines properties that are set when the "Release" configuration is selected.
@@ -284,6 +284,9 @@
       <DependentUpon>CoverSelectionItem.cs</DependentUpon>
     </Compile>
     <Compile Include="GenerateHTMLButton.CollectMergeScript.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GenerateHTMLButton.CopyDocumentToHtml.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.CopyImagesFromAppDataLocalTemp.cs">
