@@ -44,11 +44,6 @@ namespace MJS_fileJoin
             {
                 if (lvi.BackColor == LightRed)
                 {
-                    // ID不一致やリンク切れはスキップ
-                    // AddRefLinkBrokenOrIdMismatchResult, AddInvalidLinkResult では4番目のサブアイテムが "none" になっている
-                    //if (lvi.SubItems.Count > 4 && lvi.SubItems[4].Text == "none")
-                    //    continue;
-
                     string file = lvi.Text;
                     string linkPage = lvi.SubItems.Count > 1 ? lvi.SubItems[1].Text : "";
 
@@ -59,7 +54,8 @@ namespace MJS_fileJoin
                 }
             }
 
-            UpdateListViewColumnsWidth();
+            // 列幅を文字数に合わせる
+            //UpdateListViewColumnsWidth();
         }
 
         // 進捗バーの初期化

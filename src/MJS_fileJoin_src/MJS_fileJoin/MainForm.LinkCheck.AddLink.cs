@@ -84,6 +84,14 @@ namespace MJS_fileJoin
 
         private bool IsInternalReference(string sourceFile, string linkPage)
         {
+            // 参照先が空なら内部参照とする
+            if (string.IsNullOrEmpty(linkPage))
+                return true;
+
+            // 先頭が#なら内部参照
+            if (linkPage.StartsWith("#"))
+                return true;
+
             // 相対参照なら内部参照
             if (linkPage.StartsWith("./") || linkPage.StartsWith(@".\"))
                 return true;
@@ -104,6 +112,7 @@ namespace MJS_fileJoin
             {
                 // sourceFileのディレクトリ
                 string sourceDir = Path.GetDirectoryName(Path.GetFullPath(sourceFile));
+
                 // linkPageの絶対パス
                 string linkFullPath = Path.GetFullPath(Path.Combine(sourceDir, linkPageWithoutFragment));
                 string linkDir = Path.GetDirectoryName(linkFullPath);
