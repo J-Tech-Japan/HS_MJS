@@ -26,6 +26,18 @@
             }
             HeadingInfo c = (HeadingInfo)obj;
             return (num == c.num) && (title == c.title) && (id == c.id) && (mergeto.Replace("(", "").Replace(")", "") == c.mergeto.Replace("(", "").Replace(")",""));
-        }        
+        }    
+        
+        public override int GetHashCode()
+        {
+            // 例: Title と Level で比較している場合
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + (title != null ? title.GetHashCode() : 0);
+                hash = hash * 23 + num.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

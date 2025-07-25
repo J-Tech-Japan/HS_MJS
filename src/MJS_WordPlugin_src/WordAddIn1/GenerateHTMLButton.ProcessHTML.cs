@@ -60,6 +60,19 @@ namespace WordAddIn1
                 TimeSpan.FromSeconds(1)
             );
 
+            // removeSingleSymbols で定義された記号を単独で削除
+            if (removeSingleSymbols.Length > 0)
+            {
+                string singlePattern = string.Join("", removeSingleSymbols.Select(c => $"\\u{((int)c):X4}"));
+                htmlStr = Regex.Replace(
+                    htmlStr,
+                    $"[{singlePattern}]",
+                    "",
+                    RegexOptions.None,
+                    TimeSpan.FromSeconds(1)
+                );
+            }
+
             return htmlStr;
         }
     }
