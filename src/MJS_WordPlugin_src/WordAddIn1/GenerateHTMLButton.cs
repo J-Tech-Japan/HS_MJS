@@ -32,18 +32,28 @@ namespace WordAddIn1
             // ローダーフォームを表示
             loader load = new loader();
             load.Show();
-            
+
+            // 動作確認用メソッド
+            //ShowHeadingsWithOutlineLevels();
+
+
             try
             {
                 // TODO: 指定スタイルの見出しを取得
-                var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
-                var specifiedHeadings = new List<string> { "はじめに", "マニュアル内の記号・表記について" };
+                //var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
+                //var specifiedHeadings = new List<string> { "はじめに", "マニュアル内の記号・表記について" };
 
-                List<string> commonHeadings = headings.Intersect(specifiedHeadings).ToList();
+                //List<string> commonHeadings = headings.Intersect(specifiedHeadings).ToList();
 
                 // "##検索対象外トピック##" というコメントがついている、
-                // "見出し 1" または "見出し 2" スタイルの見出しを取得
-                var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1,MJS_見出し 1", "見出し 2,MJS_見出し 2" }, "##検索対象外トピック##");
+                // 特定スタイルの見出しを取得
+                var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1,MJS_見出し 1", "見出し 2,MJS_見出し 2", "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" }, "##検索対象外トピック##");
+
+                // commonHeadingsとheadingsWithCommentを重複要素なしで結合
+                //var mergedHeadings = commonHeadings.Union(headingsWithComment).ToList();
+
+                // 特定の見出しとその配下の見出しを取得
+                var headings = GetSpecificHeadingsWithSubheadings();
 
                 // 前処理（ドキュメントや環境のチェック）
                 if (!PreProcess(application, activeDocument, load)) return;
@@ -605,8 +615,8 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
-                        // TODO: 検索ブロックの削除（必要に応じて）
-                        foreach (string heading in commonHeadings)
+                        // TODO: 検索ブロックの削除
+                        foreach (string heading in headings)
                         {
                             RemoveSearchBlockByTitle(
                             heading,
@@ -614,23 +624,22 @@ namespace WordAddIn1
                             paths.exportDir);
                         }
 
-                        //foreach (string heading in headingsWithComment)
+                        // 検索ブロックの削除
+                        foreach (string heading in headingsWithComment)
+                        {
+                            RemoveSearchBlockByTitle(
+                            heading,
+                            paths.rootPath,
+                            paths.exportDir);
+                        }
+
+                        //foreach (string heading in mergedHeadings)
                         //{
                         //    RemoveSearchBlockByTitle(
                         //    heading,
                         //    paths.rootPath,
                         //    paths.exportDir);
                         //}
-
-                        //RemoveSearchBlockByTitle(
-                        //    "はじめに",
-                        //    paths.rootPath,
-                        //    paths.exportDir);
-
-                        //RemoveSearchBlockByTitle(
-                        //    "マニュアル内の記号・表記について",
-                        //    paths.rootPath,
-                        //    paths.exportDir);
 
                         // Zipファイル作成ログ
                         log.WriteLine("Zipファイル作成");
