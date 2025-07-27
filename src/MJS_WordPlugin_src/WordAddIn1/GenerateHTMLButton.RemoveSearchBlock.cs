@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
@@ -61,36 +62,167 @@ namespace WordAddIn1
 
         // 指定されたスタイル名の見出し内にコメントがついている場合、
         // 見出しのテキストを取得するメソッド
+        //private List<string> GetHeadingsWithComment(List<string> styleNames, string commentText)
+        //{
+        //    var application = Globals.ThisAddIn.Application;
+        //    var activeDocument = application.ActiveDocument;
+        //    List<string> headings = new List<string>();
+
+        //    foreach (Paragraph para in activeDocument.Paragraphs)
+        //    {
+        //        string styleName = para.get_Style().NameLocal;
+
+        //        if (styleNames.Contains(styleName))
+        //        {
+        //            string headingText = para.Range.Text.Trim();
+
+        //            if (!string.IsNullOrEmpty(headingText))
+        //            {
+        //                // コメントが含まれているかチェック
+        //                foreach (Comment comment in para.Range.Comments)
+        //                {
+        //                    if (comment.Range.Text.Contains(commentText))
+        //                    {
+        //                        headings.Add(headingText);
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return headings;
+        //}
+
+        // 指定されたスタイル名の見出し内にコメントがついている場合
+        // 見出しのテキストと、見出しの配下の見出しテキストを取得
         private List<string> GetHeadingsWithComment(List<string> styleNames, string commentText)
         {
             var application = Globals.ThisAddIn.Application;
             var activeDocument = application.ActiveDocument;
             List<string> headings = new List<string>();
 
+            int? currentLevel = null;
+            bool inBlock = false;
+
             foreach (Paragraph para in activeDocument.Paragraphs)
             {
                 string styleName = para.get_Style().NameLocal;
+                string headingText = para.Range.Text.Trim();
+                int paraLevel = (int)para.OutlineLevel;
+
+                if (string.IsNullOrEmpty(headingText)) continue;
 
                 if (styleNames.Contains(styleName))
                 {
-                    string headingText = para.Range.Text.Trim();
-
-                    if (!string.IsNullOrEmpty(headingText))
+                    bool hasComment = false;
+                    foreach (Comment comment in para.Range.Comments)
                     {
-                        // コメントが含まれているかチェック
-                        foreach (Comment comment in para.Range.Comments)
+                        if (comment.Range.Text.Contains(commentText))
                         {
-                            if (comment.Range.Text.Contains(commentText))
-                            {
-                                headings.Add(headingText);
-                                break;
-                            }
+                            hasComment = true;
+                            break;
                         }
+                    }
+
+                    if (hasComment)
+                    {
+                        // コメント付き見出しを見つけたらブロック開始
+                        headings.Add(headingText);
+                        currentLevel = paraLevel;
+                        inBlock = true;
+                        continue;
+                    }
+                }
+
+                if (inBlock && currentLevel.HasValue)
+                {
+                    if (paraLevel > currentLevel)
+                    {
+                        // 配下の見出しを追加
+                        headings.Add(headingText);
+                    }
+                    else if (paraLevel <= currentLevel)
+                    {
+                        // 同レベルまたは上位レベルの見出しが来たらブロック終了
+                        inBlock = false;
+                        currentLevel = null;
                     }
                 }
             }
 
             return headings;
+        }
+
+        private List<string> GetSpecificHeadingsWithSubheadings()
+        {
+            var application = Globals.ThisAddIn.Application;
+            var activeDocument = application.ActiveDocument;
+            List<string> result = new List<string>();
+
+            // 対象スタイル・タイトル
+            var targetStyles = new HashSet<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" };
+            var targetTitles = new HashSet<string> { "はじめに", "マニュアル内の記号・表記について" };
+
+            int? currentLevel = null;
+            bool inBlock = false;
+
+            foreach (Paragraph para in activeDocument.Paragraphs)
+            {
+                string styleName = para.get_Style().NameLocal;
+                string text = para.Range.Text.Trim();
+                int paraLevel = (int)para.OutlineLevel;
+
+                if (string.IsNullOrEmpty(text)) continue;
+
+                if (targetStyles.Contains(styleName) && targetTitles.Contains(text))
+                {
+                    // 対象見出しを見つけたらブロック開始
+                    result.Add(text);
+                    currentLevel = paraLevel;
+                    inBlock = true;
+                    continue;
+                }
+
+                if (inBlock && currentLevel.HasValue)
+                {
+                    if (paraLevel > currentLevel)
+                    {
+                        // 配下の見出しを追加
+                        result.Add(text);
+                    }
+                    else if (paraLevel <= currentLevel)
+                    {
+                        // 同レベルまたは上位レベルの見出しが来たらブロック終了
+                        inBlock = false;
+                        currentLevel = null;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        // アウトラインレベルと見出しテキストをメッセージボックスで表示するメソッド（動作確認用）
+        private void ShowHeadingsWithOutlineLevels()
+        {
+            var application = Globals.ThisAddIn.Application;
+            var activeDocument = application.ActiveDocument;
+            var sb = new StringBuilder();
+
+            foreach (Paragraph para in activeDocument.Paragraphs)
+            {
+                int outlineLevel = (int)para.OutlineLevel;
+                string text = para.Range.Text.Trim();
+
+                if (outlineLevel >= 1 && outlineLevel <= 9 && !string.IsNullOrEmpty(text))
+                {
+                    sb.AppendLine($"レベル{outlineLevel}: {text}");
+                }
+            }
+
+            string result = sb.Length > 0 ? sb.ToString() : "見出しが見つかりませんでした。";
+            MessageBox.Show(result, "見出しのアウトラインレベル一覧", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
