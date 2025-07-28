@@ -12,6 +12,34 @@ namespace WordAddIn1
         // 指定テキストと <div class="search_title">...</div> の中身が一致した場合、
         // <div class="search_title">...</div> タグ全体と、
         // 直後の <div class="displayText">...</div><div class="search_word">...</div> も削除
+        //private void RemoveSearchBlockByTitle(string searchTitleText, string rootPath, string exportDir)
+        //{
+        //    string searchJsPath = Path.Combine(rootPath, exportDir, "search.js");
+        //    if (!File.Exists(searchJsPath)) return;
+
+        //    string content = File.ReadAllText(searchJsPath, Encoding.UTF8);
+
+        //    string pattern = @"<div\s+class=""search_title"">(.*?)</div>\s*<div\s+class=""displayText"">(.*?)</div>\s*<div\s+class=""search_word"">(.*?)</div>";
+
+        //    var regex = new Regex(pattern, RegexOptions.Singleline);
+        //    var matches = regex.Matches(content);
+
+        //    foreach (Match match in matches)
+        //    {
+        //        string titleInner = match.Groups[1].Value.Trim();
+        //        if (titleInner == searchTitleText)
+        //        {
+        //            // 一致したブロック全体を削除
+        //            content = content.Replace(match.Value, "");
+        //        }
+        //    }
+
+        //    File.WriteAllText(searchJsPath, content, Encoding.UTF8);
+        //}
+
+        // 指定テキストと <div class="search_title">...</div> の中身が一致した場合、
+        // <div class="search_title">...</div> タグ全体と、
+        // 直後の <div class="displayText">...</div><div class="search_word">...</div> も削除
         private void RemoveSearchBlockByTitle(string searchTitleText, string rootPath, string exportDir)
         {
             string searchJsPath = Path.Combine(rootPath, exportDir, "search.js");
@@ -19,17 +47,23 @@ namespace WordAddIn1
 
             string content = File.ReadAllText(searchJsPath, Encoding.UTF8);
 
-            string pattern = @"<div\s+class=""search_title"">(.*?)</div>\s*<div\s+class=""displayText"">(.*?)</div>\s*<div\s+class=""search_word"">(.*?)</div>";
+            // 改行も含めてマッチするように修正
+            string pattern = @"<div\s+class=""search_title"">([\s\S]*?)</div>\s*<div\s+class=""displayText"">([\s\S]*?)</div>\s*<div\s+class=""search_word"">([\s\S]*?)</div>";
 
             var regex = new Regex(pattern, RegexOptions.Singleline);
             var matches = regex.Matches(content);
 
             foreach (Match match in matches)
             {
-                string titleInner = match.Groups[1].Value.Trim();
-                if (titleInner == searchTitleText)
+                // 改行・空白・全角半角を除去して比較
+                string titleInner = match.Groups[1].Value.Trim()
+                    .Replace("\r", "").Replace("\n", "").Replace("　", " ").Normalize();
+
+                string searchTitleNormalized = searchTitleText.Trim()
+                    .Replace("\r", "").Replace("\n", "").Replace("　", " ").Normalize();
+
+                if (titleInner == searchTitleNormalized)
                 {
-                    // 一致したブロック全体を削除
                     content = content.Replace(match.Value, "");
                 }
             }
@@ -154,6 +188,9 @@ namespace WordAddIn1
             return headings;
         }
 
+        // 以下の条件を共に満たす場合に、見出しのタイトルとその配下の見出しを取得
+        //  ・見出しスタイルが「MJS_見出し 1（項番なし）」または「MJS_見出し 2（項番なし）」である
+        //  ・見出しのタイトルが「はじめに」または「マニュアル内の記号・表記について」である
         private List<string> GetSpecificHeadingsWithSubheadings()
         {
             var application = Globals.ThisAddIn.Application;
@@ -203,7 +240,7 @@ namespace WordAddIn1
             return result;
         }
 
-        // アウトラインレベルと見出しテキストをメッセージボックスで表示するメソッド（動作確認用）
+        // アウトラインレベルと見出しテキストをメッセージボックスで表示（動作確認用）
         private void ShowHeadingsWithOutlineLevels()
         {
             var application = Globals.ThisAddIn.Application;
