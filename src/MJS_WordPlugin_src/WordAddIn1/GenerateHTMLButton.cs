@@ -33,9 +33,8 @@ namespace WordAddIn1
             loader load = new loader();
             load.Show();
 
-            // 動作確認用メソッド
+            // アウトラインレベルと見出しテキストをメッセージボックスで表示（動作確認用）
             //ShowHeadingsWithOutlineLevels();
-
 
             try
             {
@@ -624,7 +623,6 @@ namespace WordAddIn1
                             paths.exportDir);
                         }
 
-                        // 検索ブロックの削除
                         foreach (string heading in headingsWithComment)
                         {
                             RemoveSearchBlockByTitle(
