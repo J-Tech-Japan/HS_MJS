@@ -12,34 +12,6 @@ namespace WordAddIn1
         // 指定テキストと <div class="search_title">...</div> の中身が一致した場合、
         // <div class="search_title">...</div> タグ全体と、
         // 直後の <div class="displayText">...</div><div class="search_word">...</div> も削除
-        //private void RemoveSearchBlockByTitle(string searchTitleText, string rootPath, string exportDir)
-        //{
-        //    string searchJsPath = Path.Combine(rootPath, exportDir, "search.js");
-        //    if (!File.Exists(searchJsPath)) return;
-
-        //    string content = File.ReadAllText(searchJsPath, Encoding.UTF8);
-
-        //    string pattern = @"<div\s+class=""search_title"">(.*?)</div>\s*<div\s+class=""displayText"">(.*?)</div>\s*<div\s+class=""search_word"">(.*?)</div>";
-
-        //    var regex = new Regex(pattern, RegexOptions.Singleline);
-        //    var matches = regex.Matches(content);
-
-        //    foreach (Match match in matches)
-        //    {
-        //        string titleInner = match.Groups[1].Value.Trim();
-        //        if (titleInner == searchTitleText)
-        //        {
-        //            // 一致したブロック全体を削除
-        //            content = content.Replace(match.Value, "");
-        //        }
-        //    }
-
-        //    File.WriteAllText(searchJsPath, content, Encoding.UTF8);
-        //}
-
-        // 指定テキストと <div class="search_title">...</div> の中身が一致した場合、
-        // <div class="search_title">...</div> タグ全体と、
-        // 直後の <div class="displayText">...</div><div class="search_word">...</div> も削除
         private void RemoveSearchBlockByTitle(string searchTitleText, string rootPath, string exportDir)
         {
             string searchJsPath = Path.Combine(rootPath, exportDir, "search.js");
@@ -93,40 +65,6 @@ namespace WordAddIn1
 
             return headings;
         }
-
-        // 指定されたスタイル名の見出し内にコメントがついている場合、
-        // 見出しのテキストを取得するメソッド
-        //private List<string> GetHeadingsWithComment(List<string> styleNames, string commentText)
-        //{
-        //    var application = Globals.ThisAddIn.Application;
-        //    var activeDocument = application.ActiveDocument;
-        //    List<string> headings = new List<string>();
-
-        //    foreach (Paragraph para in activeDocument.Paragraphs)
-        //    {
-        //        string styleName = para.get_Style().NameLocal;
-
-        //        if (styleNames.Contains(styleName))
-        //        {
-        //            string headingText = para.Range.Text.Trim();
-
-        //            if (!string.IsNullOrEmpty(headingText))
-        //            {
-        //                // コメントが含まれているかチェック
-        //                foreach (Comment comment in para.Range.Comments)
-        //                {
-        //                    if (comment.Range.Text.Contains(commentText))
-        //                    {
-        //                        headings.Add(headingText);
-        //                        break;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return headings;
-        //}
 
         // 指定されたスタイル名の見出し内にコメントがついている場合
         // 見出しのテキストと、見出しの配下の見出しテキストを取得

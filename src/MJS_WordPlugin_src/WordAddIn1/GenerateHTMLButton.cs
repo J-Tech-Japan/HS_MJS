@@ -44,8 +44,7 @@ namespace WordAddIn1
 
                 //List<string> commonHeadings = headings.Intersect(specifiedHeadings).ToList();
 
-                // "##検索対象外トピック##" というコメントがついている、
-                // 特定スタイルの見出しを取得
+                // "##検索対象外トピック##" というコメントがついている、特定スタイルの見出しを取得
                 var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1,MJS_見出し 1", "見出し 2,MJS_見出し 2", "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" }, "##検索対象外トピック##");
 
                 // commonHeadingsとheadingsWithCommentを重複要素なしで結合
@@ -319,7 +318,7 @@ namespace WordAddIn1
                                 }
                                 else
                                 {
-                                    foreach (Word.InlineShape wis in docCopy.Sections[1].Range.InlineShapes)
+                                    foreach (InlineShape wis in docCopy.Sections[1].Range.InlineShapes)
                                     {
                                         byte[] vData = (byte[])wis.Range.EnhMetaFileBits;
 
@@ -545,7 +544,6 @@ namespace WordAddIn1
                             //}
 
                             htmlCoverTemplate2 += BuildEasyCloudSubTitleSection(subTitle);
-
                             htmlCoverTemplate2 += @" </p>" + "\n";
                         }
                         else if (isPattern1)
