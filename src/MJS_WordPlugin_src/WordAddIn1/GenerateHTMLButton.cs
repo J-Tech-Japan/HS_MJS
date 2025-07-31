@@ -36,6 +36,7 @@ namespace WordAddIn1
             // アウトラインレベルと見出しテキストをメッセージボックスで表示（動作確認用）
             //ShowHeadingsWithOutlineLevels();
 
+
             try
             {
                 // TODO: 指定スタイルの見出しを取得
@@ -93,33 +94,33 @@ namespace WordAddIn1
 
                         using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
                         {
-                            FileStream fs = File.Create(paths.rootPath + "\\htmlTemplates.zip");
+                            FileStream fs = File.Create(Path.Combine(paths.rootPath, "htmlTemplates.zip"));
                             stream.Seek(0, SeekOrigin.Begin);
                             stream.CopyTo(fs);
                             fs.Close();
                         }
 
-                        if (Directory.Exists(paths.rootPath + "\\htmlTemplates"))
+                        if (Directory.Exists(Path.Combine(paths.rootPath, "htmlTemplates")))
                         {
-                            Directory.Delete(paths.rootPath + "\\htmlTemplates", true);
+                            Directory.Delete(Path.Combine(paths.rootPath, "htmlTemplates"), true);
                         }
 
-                        System.IO.Compression.ZipFile.ExtractToDirectory(paths.rootPath + "\\htmlTemplates.zip", paths.rootPath);
+                        System.IO.Compression.ZipFile.ExtractToDirectory(Path.Combine(paths.rootPath, "htmlTemplates.zip"), paths.rootPath);
 
-                        if (Directory.Exists(paths.rootPath + "\\" + paths.exportDir))
+                        if (Directory.Exists(Path.Combine(paths.rootPath, paths.exportDir)))
                         {
-                            Directory.Delete(paths.rootPath + "\\" + paths.exportDir, true);
+                            Directory.Delete(Path.Combine(paths.rootPath, paths.exportDir), true);
                         }
 
-                        if (Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.Delete(paths.rootPath + "\\tmpcoverpic", true);
-                        Directory.Move(paths.rootPath + "\\htmlTemplates", paths.rootPath + "\\" + paths.exportDir);
+                        if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
+                        Directory.Move(Path.Combine(paths.rootPath, "htmlTemplates"), Path.Combine(paths.rootPath, paths.exportDir));
 
-                        File.Delete(paths.rootPath + "\\htmlTemplates.zip");
+                        File.Delete(Path.Combine(paths.rootPath, "htmlTemplates.zip"));
 
                         string docid = Regex.Replace(paths.docName, "^(.{3}).+$", "$1");
                         string docTitle = Regex.Replace(paths.docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
 
-                        string zipDirPath = paths.rootPath + "\\" + docid + "_" + paths.exportDir + "_" + DateTime.Today.ToString("yyyyMMdd");
+                        string zipDirPath = Path.Combine(paths.rootPath, docid + "_" + paths.exportDir + "_" + DateTime.Today.ToString("yyyyMMdd"));
                         Application.DoEvents();
                         
                         // ドキュメントを一時HTML用にコピー
@@ -151,12 +152,13 @@ namespace WordAddIn1
                         // タイトル・サブタイトル等の整形
                         CleanUpManualTitles(ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter);
 
+                        #region
                         List<List<string>> productSubLogoGroups = new List<List<string>>();
 
                         if (coverExist)
                         {
-                            if (!Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.CreateDirectory(paths.rootPath + "\\tmpcoverpic");
-                            string strOutFileName = paths.rootPath + "\\tmpcoverpic";
+                            if (!Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.CreateDirectory(Path.Combine(paths.rootPath, "tmpcoverpic"));
+                            string strOutFileName = Path.Combine(paths.rootPath, "tmpcoverpic");
 
                             try
                             {
@@ -177,8 +179,6 @@ namespace WordAddIn1
                                         }
                                     }
                                 }
-
-                                //int floatingPictureCount = 0; // 追加: 浮動画像のカウント用
 
                                 foreach (Shape ws in docCopy.Shapes)
                                 {
@@ -218,9 +218,9 @@ namespace WordAddIn1
                                             if (String.IsNullOrEmpty(subTitle))
                                             {
                                                 ws.Select();
-                                                if (!Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.CreateDirectory(paths.rootPath + "\\tmpcoverpic");
+                                                if (!Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.CreateDirectory(Path.Combine(paths.rootPath, "tmpcoverpic"));
 
-                                                strOutFileName = paths.rootPath + "\\tmpcoverpic";
+                                                strOutFileName = Path.Combine(paths.rootPath, "tmpcoverpic");
                                                 byte[] vData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
                                                 if (vData != null)
                                                 {
@@ -230,7 +230,7 @@ namespace WordAddIn1
                                                     if (aspectTemp > 2.683 || aspectTemp < 2.681)
                                                     {
                                                         biCount++;
-                                                        temp.Save(strOutFileName + "\\" + biCount + ".png", ImageFormat.Png);
+                                                        temp.Save(Path.Combine(strOutFileName, biCount + ".png"), ImageFormat.Png);
                                                     }
                                                 }
                                             }
@@ -271,7 +271,7 @@ namespace WordAddIn1
                                                     Clipboard.Clear();
                                                     Globals.ThisAddIn.Application.Selection.CopyAsPicture();
                                                     Image img = Clipboard.GetImage();
-                                                    img.Save(strOutFileName + "\\product_logo_main.png", ImageFormat.Png);
+                                                    img.Save(Path.Combine(strOutFileName, "product_logo_main.png"), ImageFormat.Png);
 
                                                     break; //get first product main logo only
                                                 }
@@ -296,7 +296,7 @@ namespace WordAddIn1
 
                                                     productSubLogoCount++;
                                                     string subLogoFileName = string.Format("product_logo_sub{0}.png", productSubLogoCount);
-                                                    img.Save(strOutFileName + "\\" + subLogoFileName, ImageFormat.Png);
+                                                    img.Save(Path.Combine(strOutFileName, subLogoFileName), ImageFormat.Png);
                                                     productSubLogoFileNames.Add(subLogoFileName);
 
                                                     Clipboard.Clear();
@@ -331,7 +331,7 @@ namespace WordAddIn1
                                             if (aspectTemp > 12.225 && aspectTemp < 12.226) continue;
                                             if (aspectTemp > 2.681 && aspectTemp < 2.683) continue;
                                             biCount++;
-                                            temp.Save(strOutFileName + "\\" + biCount + ".png", ImageFormat.Png);
+                                            temp.Save(Path.Combine(strOutFileName, biCount + ".png"), ImageFormat.Png);
                                         }
                                     }
                                 }
@@ -358,7 +358,7 @@ namespace WordAddIn1
                                 {
                                     for (int p = 0; p < pairs.Count; p++)
                                     {
-                                        string destF = paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\" + Path.GetFileName(pairs[p].Key);
+                                        string destF = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", Path.GetFileName(pairs[p].Key));
 
                                         if (File.Exists(destF))
                                         {
@@ -378,9 +378,9 @@ namespace WordAddIn1
                                         if (p == 0 || p + 1 != pairs.Count)
                                         {
                                             // cover-4.png として保存（既存なら削除してから移動）
-                                            if (File.Exists(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png"))
-                                                File.Delete(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
-                                            File.Move(pairs[p].Key, paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png");
+                                            if (File.Exists(Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png")))
+                                                File.Delete(Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png"));
+                                            File.Move(pairs[p].Key, Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png"));
                                         }
                                         else
                                         {
@@ -394,7 +394,7 @@ namespace WordAddIn1
                                                 Graphics g = Graphics.FromImage(dst);
                                                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
                                                 g.DrawImage(src, 0, 0, w, h);
-                                                dst.Save(paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-background.png", ImageFormat.Png);
+                                                dst.Save(Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-background.png"), ImageFormat.Png);
                                             }
                                             File.Delete(pairs[p].Key);
                                         }
@@ -402,7 +402,7 @@ namespace WordAddIn1
                                 }
 
                                 // cover-4.pngが存在しない場合、セクション1の最初のShape画像をcover-4.pngとして保存
-                                //string cover4Path = paths.rootPath + "\\" + paths.exportDir + "\\template\\images\\cover-4.png";
+                                //string cover4Path = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png");
                                 //if (!File.Exists(cover4Path))
                                 //{
                                 //    var section1 = docCopy.Sections[1];
@@ -427,7 +427,7 @@ namespace WordAddIn1
                                 //    }
                                 //}
 
-                                if (Directory.Exists(paths.rootPath + "\\tmpcoverpic")) Directory.Delete(paths.rootPath + "\\tmpcoverpic", true);
+                                if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
                             }
                             catch (Exception ex)
                             {
@@ -435,6 +435,8 @@ namespace WordAddIn1
                             }
                         }
 
+                        #endregion
+                        
                         // ドキュメント末尾に移動し、一時キャンバスを追加
                         application.Selection.EndKey(WdUnits.wdStory);
                         object selectionRange = application.Selection.Range;
