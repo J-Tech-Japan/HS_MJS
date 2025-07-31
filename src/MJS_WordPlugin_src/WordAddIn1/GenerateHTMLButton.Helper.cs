@@ -226,6 +226,12 @@ namespace WordAddIn1
             {
                 if (docS.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                 {
+                    // テーブル内のキャンバスはスキップ
+                    if (docS.Anchor != null && docS.Anchor.Tables.Count > 0)
+                    {
+                        continue;
+                    }
+
                     List<float> canvasItemsTop = new List<float>();
                     List<float> canvasItemsLeft = new List<float>();
                     List<float> canvasItemsHeight = new List<float>();
