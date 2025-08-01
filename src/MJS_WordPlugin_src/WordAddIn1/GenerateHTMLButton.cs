@@ -12,7 +12,6 @@ using Microsoft.Office.Interop.Word;
 using Table = Microsoft.Office.Interop.Word.Table;
 using System.Drawing;
 using Application = System.Windows.Forms.Application;
-using System.Linq;
 
 namespace WordAddIn1
 {

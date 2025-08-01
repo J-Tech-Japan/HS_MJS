@@ -25,6 +25,7 @@ namespace WordAddIn1
             application.Selection.PasteAndFormat(Word.WdRecoveryType.wdUseDestinationStylesRecovery);
             Application.DoEvents();
             ClearClipboardSafely();
+            Application.DoEvents();
             log.WriteLine("Number of sections: " + docCopy.Sections.Count);
             return docCopy;
         }
