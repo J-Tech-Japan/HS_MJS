@@ -17,6 +17,7 @@ namespace WordAddIn1
             return mergeScript;
         }
 
+        // 見出し結合情報を書誌情報ファイル (headerFile) から収集
         public void CollectMergeScript(string documentPath, string documentName, Dictionary<string, string> mergeScript)
         {
             try
