@@ -1,4 +1,6 @@
-﻿using System;
+﻿// RibbonMJS.Config.cs
+
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Word = Microsoft.Office.Interop.Word;
@@ -42,6 +44,7 @@ namespace WordAddIn1
 
         // 新たな除去候補記号'\u00E8'
         public static readonly char[] removeSingleSymbols = { '\u00E8' };
+        //public static readonly char[] removeSingleSymbols = {  };
 
         // ファイル名形式の規定
         //private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿// GenerateHTMLButton.CopyDocumentToHtml.cs
+
+using System.IO;
 using Word = Microsoft.Office.Interop.Word;
 using Application = System.Windows.Forms.Application;
 

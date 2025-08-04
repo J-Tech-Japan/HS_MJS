@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿// BookInfoButton.cs
+
 using System.Windows.Forms;
 using Microsoft.Office.Tools.Ribbon;
 
@@ -11,6 +12,7 @@ namespace WordAddIn1
         {
             loader load = new loader();
             load.Visible = false;
+
             if (!makeBookInfo(load))
             {
                 load.Close();

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// GenerateHTMLButton.SearchIndex.cs
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -11,7 +13,17 @@ namespace WordAddIn1
     {
         // 検索用HTMLファイルと検索用JSファイルを生成するメソッド
         // objBody: 本文XML, objToc: 目次XML, mergeScript: マージ用スクリプト, searchJs: 検索JSテンプレート
-        public void GenerateSearchFiles(XmlDocument objBody, string rootPath, string exportDir, string docid, string htmlTemplate1, string htmlTemplate2, string htmlCoverTemplate1, string htmlCoverTemplate2, XmlDocument objToc, Dictionary<string, string> mergeScript, string searchJs)
+        public void GenerateSearchFiles
+            (XmlDocument objBody,
+             string rootPath,
+             string exportDir,
+             string docid,
+             string htmlTemplate1,
+             string htmlTemplate2,
+             string htmlCoverTemplate1,
+             string htmlCoverTemplate2,
+             XmlDocument objToc,
+             Dictionary<string, string> mergeScript, string searchJs)
         {
             StreamWriter sw;
 
@@ -31,7 +43,7 @@ namespace WordAddIn1
                 // 表紙ページの場合
                 if (thisId == docid + "00000")
                 {
-                    sw = new StreamWriter(rootPath + "\\" + exportDir + "\\" + thisId + ".html", false, Encoding.UTF8);
+                    sw = new StreamWriter(Path.Combine(rootPath, exportDir, thisId + ".html"), false, Encoding.UTF8);
                     string coverBody = "";
 
                     // manual_クラスを持つ要素を抽出（表紙用）
@@ -111,17 +123,7 @@ namespace WordAddIn1
                             displayText = displayText.Substring(0, 90) + " ...";
                         }
 
-                        // 全角→半角変換テーブル
-                        //string[] wide = { "０", "１", "２", "３", "４", "５", "６", "７", "８", "９", "Ａ", "Ｂ", "Ｃ", "Ｄ", "Ｅ", "Ｆ", "Ｇ", "Ｈ", "Ｉ", "Ｊ", "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ", "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ", "Ｕ", "Ｖ", "Ｗ", "Ｘ", "Ｙ", "Ｚ", "ａ", "ｂ", "ｃ", "ｄ", "ｅ", "ｆ", "ｇ", "ｈ", "ｉ", "ｊ", "ｋ", "ｌ", "ｍ", "ｎ", "ｏ", "ｐ", "ｑ", "ｒ", "ｓ", "ｔ", "ｕ", "ｖ", "ｗ", "ｘ", "ｙ", "ｚ", "ガ", "ギ", "グ", "ゲ", "ゴ", "ザ", "ジ", "ズ", "ゼ", "ゾ", "ダ", "ヂ", "ヅ", "デ", "ド", "バ", "ビ", "ブ", "ベ", "ボ", "パ", "ピ", "プ", "ペ", "ポ", "。", "「", "」", "、", "ヲ", "ァ", "ィ", "ゥ", "ェ", "ォ", "ャ", "ュ", "ョ", "ッ", "ー", "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス", "セ", "ソ", "タ", "チ", "ツ", "テ", "ト", "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ", "リ", "ル", "レ", "ロ", "ワ", "ン" };
-                        //string[] narrow = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "ｶﾞ", "ｷﾞ", "ｸﾞ", "ｹﾞ", "ｺﾞ", "ｻﾞ", "ｼﾞ", "ｽﾞ", "ｾﾞ", "ｿﾞ", "ﾀﾞ", "ﾁﾞ", "ﾂﾞ", "ﾃﾞ", "ﾄﾞ", "ﾊﾞ", "ﾋﾞ", "ﾌﾞ", "ﾍﾞ", "ﾎﾞ", "ﾊﾟ", "ﾋﾟ", "ﾌﾟ", "ﾍﾟ", "ﾎﾟ", "｡", "｢", "｣", "､", "ｦ", "ｧ", "ｨ", "ｩ", "ｪ", "ｫ", "ｬ", "ｭ", "ｮ", "ｯ", "ｰ", "ｱ", "ｲ", "ｳ", "ｴ", "ｵ", "ｶ", "ｷ", "ｸ", "ｹ", "ｺ", "ｻ", "ｼ", "ｽ", "ｾ", "ｿ", "ﾀ", "ﾁ", "ﾂ", "ﾃ", "ﾄ", "ﾅ", "ﾆ", "ﾇ", "ﾈ", "ﾉ", "ﾊ", "ﾋ", "ﾌ", "ﾍ", "ﾎ", "ﾏ", "ﾐ", "ﾑ", "ﾒ", "ﾓ", "ﾔ", "ﾕ", "ﾖ", "ﾗ", "ﾘ", "ﾙ", "ﾚ", "ﾛ", "ﾜ", "ﾝ" };
-
-                        //// 全角→半角変換
-                        //for (int i = 0; i < wide.Length; i++)
-                        //{
-                        //    searchText = Regex.Replace(searchText, wide[i], narrow[i]);
-                        //}
-
-                        // 全角→半角変換メソッドをUtils.TextProcessing.csから呼び出し
+                        // 全角→半角変換メソッドをUtils.TextProcessing.csから呼び出す
                         searchText = Utils.ConvertWideToNarrow(searchText);
 
                         searchText = searchText.ToLower();
@@ -151,7 +153,7 @@ namespace WordAddIn1
                     }
 
                     // HTML本文生成
-                    sw = new StreamWriter(rootPath + "\\" + exportDir + "\\" + thisId + ".html", false, Encoding.UTF8);
+                    sw = new StreamWriter(Path.Combine(rootPath, exportDir, thisId + ".html"), false, Encoding.UTF8);
                     string htmlBody = htmlTemplate1cpy + splithtml.OuterXml + htmlTemplate2;
                     
                     // 手順番号spanのクラス付与・変換などの正規表現処理
@@ -160,7 +162,7 @@ namespace WordAddIn1
                     // 特定文字（è）を手順結果spanに変換
                     htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum"">(è)</span>", @"<span class=""MJS_oflow_stepResult""></span>", RegexOptions.Singleline);
                     
-                    // 手順結果pタグ内のspan削除
+                    // TODO: 手順結果pタグ内のspan削除
                     htmlBody = Regex.Replace(htmlBody, @"<p[^>]*?class=""MJS_oflow_stepResult([^""]*?)""[^>]*?>(.*?)<span[^>]*?>(.*?)</span>(.*?)</p>", @"<p class=""MJS_oflow_stepResult"">$4</p>", RegexOptions.Singleline);
                     
                     // 手順番号span内の入れ子spanを除去
@@ -172,14 +174,14 @@ namespace WordAddIn1
             }
 
             // 検索用JSファイル生成
-            sw = new StreamWriter(rootPath + "\\" + exportDir + "\\search.js", false, Encoding.UTF8);
+            sw = new StreamWriter(Path.Combine(rootPath, exportDir, "search.js"), false, Encoding.UTF8);
             sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;").Replace(@"\u", @"\\u").Replace(@"\U", @"\\U")));
             sw.Close();
 
             // 表紙HTMLが存在しない場合は生成
-            if (!File.Exists(rootPath + "\\" + exportDir + "\\" + docid + "00000.html"))
+            if (!File.Exists(Path.Combine(rootPath, exportDir, docid + "00000.html")))
             {
-                sw = new StreamWriter(rootPath + "\\" + exportDir + "\\" + docid + "00000.html", false, Encoding.UTF8);
+                sw = new StreamWriter(Path.Combine(rootPath, exportDir, docid + "00000.html"), false, Encoding.UTF8);
                 sw.Write(htmlCoverTemplate1 + htmlCoverTemplate2);
                 sw.Close();
             }
