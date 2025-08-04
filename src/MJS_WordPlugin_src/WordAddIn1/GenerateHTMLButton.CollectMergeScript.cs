@@ -1,4 +1,6 @@
-﻿using System;
+﻿// GenerateHTMLButton.CollectMergeScript.cs
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;

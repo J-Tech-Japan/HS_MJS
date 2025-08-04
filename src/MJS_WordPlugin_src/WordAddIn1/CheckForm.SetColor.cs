@@ -1,9 +1,10 @@
-﻿using System;
+﻿// CheckForm.SetColor.cs
+
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-// リファクタリング済
 namespace WordAddIn1
 {
     public partial class CheckForm
@@ -52,6 +53,7 @@ namespace WordAddIn1
             for (int col = 0; col <= 5; col++)
                 dataGridView1[col, i].Style.ForeColor = Color.DarkGray;
         }
+
         private void SetSameValueGray(int i)
         {
             if (!String.IsNullOrEmpty(dataGridView1[0, i].Value.ToString()) &&
@@ -65,6 +67,7 @@ namespace WordAddIn1
                     dataGridView1[col, i].Style.ForeColor = Color.DarkGray;
             }
         }
+
         private void SetIdShowYellow(int i)
         {
             if (!String.IsNullOrEmpty(dataGridView1[6, i].Value.ToString()) &&
@@ -74,6 +77,7 @@ namespace WordAddIn1
                 dataGridView1[6, i].Style.BackColor = Color.LightYellow;
             }
         }
+
         private void SetIdShowMismatchYellow(int i)
         {
             if (!String.IsNullOrEmpty(dataGridView1[5, i].Value.ToString()) &&
@@ -83,6 +87,7 @@ namespace WordAddIn1
                 dataGridView1[6, i].Style.BackColor = Color.LightYellow;
             }
         }
+
         private void SetTitleChangeGray(int i)
         {
             if (dataGridView1[7, i].Value.ToString().Contains("●タイトル変更"))
@@ -90,6 +95,7 @@ namespace WordAddIn1
                 dataGridView1[7, i].Style.BackColor = Color.LightGray;
             }
         }
+        
         private void SetNumDiffRed(int i)
         {
             if (!String.IsNullOrEmpty(dataGridView1[0, i].Value.ToString()) &&
@@ -158,6 +164,7 @@ namespace WordAddIn1
                 dataGridView1[5, i].Style.ForeColor = Color.Blue;
             }
         }
+
         private void SetNewIdShowRed(int i, CheckInfo check)
         {
             if (check.new_id != null && check.new_id_show != null && !check.new_id.Equals(check.new_id_show))

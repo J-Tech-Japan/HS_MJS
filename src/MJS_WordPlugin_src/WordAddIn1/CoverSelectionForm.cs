@@ -1,7 +1,8 @@
-﻿using System;
+﻿// CoverSelectionForm.cs
+
+using System;
 using System.Windows.Forms;
 
-// リファクタリング済
 namespace WordAddIn1
 {
     public partial class CoverSelectionForm : Form
@@ -48,6 +49,7 @@ namespace WordAddIn1
             {
                 // 選択されたアイテムに応じてselectedCoverTemplateを設定
                 UpdateSelectedCoverTemplate(item);
+
                 // 他のアイテムの選択状態を解除
                 DeselectOtherItems(item);
             }

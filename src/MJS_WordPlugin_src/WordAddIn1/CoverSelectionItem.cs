@@ -1,9 +1,10 @@
-﻿using System;
+﻿// CoverSelectionItem.cs
+
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-// リファクタリング済
 namespace WordAddIn1
 {
     // カバー選択用のユーザーコントロール

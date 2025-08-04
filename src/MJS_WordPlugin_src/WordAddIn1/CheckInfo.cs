@@ -1,4 +1,4 @@
-﻿// リファクタリング済
+﻿// CheckInfo.cs
 
 namespace WordAddIn1
 {

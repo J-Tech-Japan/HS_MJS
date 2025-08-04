@@ -1,4 +1,6 @@
-﻿using System;
+﻿// GenerateHTMLButton.cs
+
+using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
@@ -537,6 +539,7 @@ namespace WordAddIn1
                             //    htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 10px;""" + "\n";
                             //    htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
                             //}
+
                             //else
                             //{
                             //    htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";

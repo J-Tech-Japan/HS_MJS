@@ -1,4 +1,6 @@
-﻿using System;
+﻿// GenerateHTMLButton.Helper.cs
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,18 +13,24 @@ using System.Xml;
 using Microsoft.Office.Interop.Word;
 using Word = Microsoft.Office.Interop.Word;
 
-// リファクタリング完了
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        // HTML生成処理の前処理を実行
+        // イベントハンドラの無効化、ボタンの無効化、ファイル名のパターンチェック
+        // ファイル名が規定のパターンに合致しない場合はエラーメッセージを表示して処理を中断
         private bool PreProcess(Word.Application application, Word.Document activeDocument, loader load)
         {
+            // イベントハンドラを一時的に無効化して処理中の干渉を防ぐ
             application.WindowSelectionChange -= Application_WindowSelectionChange;
             button3.Enabled = false;
             application.DocumentChange -= Application_DocumentChange;
+            
+            // ファイル名が規定のパターンに合致するかチェック
             if (!Regex.IsMatch(activeDocument.Name, FileNamePattern))
             {
+                // パターンに合致しない場合はローダーを閉じてエラーメッセージを表示
                 load.Close();
                 load.Dispose();
                 MessageBox.Show(ErrMsgInvalidFileName, ErrMsgFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -31,23 +39,38 @@ namespace WordAddIn1
             return true;
         }
 
+        // Wordドキュメントのカスタムドキュメントプロパティから「webHelpFolderName」の値を取得
+        // この値はHTML出力時のフォルダ名として使用される
         private string GetWebHelpFolderName(Word.Document activeDocument)
         {
+            // カスタムドキュメントプロパティのコレクションを取得
             var properties = (Microsoft.Office.Core.DocumentProperties)activeDocument.CustomDocumentProperties;
+            
+            // LINQ を使用して「webHelpFolderName」プロパティを検索し、その値を返す
+            // プロパティが存在しない場合はnullを返す
             return properties.Cast<Microsoft.Office.Core.DocumentProperty>()
                 .FirstOrDefault(x => x.Name == "webHelpFolderName")?.Value;
         }
 
+        // 例外処理とエラーログの出力
+        // ローダーの終了、詳細なエラー情報のログ出力、ユーザーへのエラーメッセージ表示
         private void HandleException(Exception ex, StreamWriter log, loader load)
         {
+            // ローダーを閉じてリソースを解放
             load.Close();
             load.Dispose();
+            
+            // 詳細なスタックトレース情報を取得
             StackTrace stackTrace = new StackTrace(ex, true);
+            
+            // エラーの詳細情報をログファイルに出力
             log.WriteLine("[Error] Exception Details:");
             log.WriteLine($"  Source: {ex.Source ?? "Unknown Source"}");
             log.WriteLine($"  TargetSite: {ex.TargetSite}");
             log.WriteLine($"  Message: {ex.Message}");
             log.WriteLine($"  StackTrace: {stackTrace}");
+            
+            // ユーザーにエラーメッセージを表示
             MessageBox.Show(ErrMsg);
         }
 
@@ -75,47 +98,6 @@ namespace WordAddIn1
             }
         }
 
-        //public void CopyAndDeleteTemporaryImages(string tmpFolder, string rootPath, string exportDir, StreamWriter log)
-        //{
-        //    if (Directory.Exists(tmpFolder))
-        //    {
-        //        try
-        //        {
-        //            // pict フォルダのパス
-        //            string pictFolder = Path.Combine(Path.GetDirectoryName(tmpFolder), "pict");
-        //            // 既存の pict フォルダがあれば削除
-        //            if (Directory.Exists(pictFolder))
-        //            {
-        //                Directory.Delete(pictFolder, true);
-        //            }
-        //            // tmpFolder を pict にリネーム
-        //            Directory.Move(tmpFolder, pictFolder);
-
-        //            // pict を exportDir 配下に移動
-        //            string exportPictDir = Path.Combine(rootPath, exportDir, "pict");
-        //            // 既存の exportDir/pict があれば削除
-        //            if (Directory.Exists(exportPictDir))
-        //            {
-        //                Directory.Delete(exportPictDir, true);
-        //            }
-        //            // exportDir がなければ作成
-        //            string exportDirPath = Path.Combine(rootPath, exportDir);
-        //            if (!Directory.Exists(exportDirPath))
-        //            {
-        //                Directory.CreateDirectory(exportDirPath);
-        //            }
-        //            Directory.Move(pictFolder, exportPictDir);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            log.WriteLine($"画像フォルダの移動中にエラーが発生しました: {ex.Message}");
-        //            throw;
-        //        }
-        //    }
-        //}
-
-        // 指定されたパスにある書誌情報を読み込み、mergeScript にデータを追加
-        
         // テンプレートZIPファイルをアセンブリから取得し、指定されたパスに解凍
         public void PrepareHtmlTemplates(System.Reflection.Assembly assembly, string rootPath, string exportDir)
         {
