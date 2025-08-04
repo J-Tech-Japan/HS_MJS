@@ -202,25 +202,32 @@ namespace WordAddIn1
         }
 
         // キャンバスに関連する図形のプロパティを調整
+        // キャンバス内の図形の位置調整とレイアウト最適化を実行
+        // Word文書内のキャンバス図形を対象に、HTML出力前の図形調整を実施
         public void AdjustCanvasShapes(Document docCopy)
         {
+            // 文書内のすべての図形をループ処理
             foreach (Shape docS in docCopy.Shapes)
             {
+                // キャンバス図形のみを処理対象とする
                 if (docS.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                 {
-                    // テーブル内のキャンバスはスキップ
+                    // テーブル内のキャンバスは処理をスキップ（レイアウト崩れを防ぐため）
                     if (docS.Anchor != null && docS.Anchor.Tables.Count > 0)
                     {
                         continue;
                     }
 
+                    // キャンバス内の各アイテムの元の位置・サイズ情報を保存
                     List<float> canvasItemsTop = new List<float>();
                     List<float> canvasItemsLeft = new List<float>();
                     List<float> canvasItemsHeight = new List<float>();
                     List<float> canvasItemsWidth = new List<float>();
 
+                    // キャンバス内の各アイテムのプロパティを取得し保存
                     for (int i = 1; i <= docS.CanvasItems.Count; i++)
                     {
+                        // アスペクト比ロックを解除して調整を可能にする
                         docS.CanvasItems[i].LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoFalse;
                         canvasItemsTop.Add(docS.CanvasItems[i].Top);
                         canvasItemsLeft.Add(docS.CanvasItems[i].Left);
@@ -228,53 +235,73 @@ namespace WordAddIn1
                         canvasItemsWidth.Add(docS.CanvasItems[i].Width);
                     }
 
+                    // キャンバス自体のサイズ調整（高さを30ポイント拡張）
                     docS.LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoFalse;
                     docS.Height = docS.Height + 30;
                     docS.LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoTrue;
 
+                    // 保存した位置・サイズ情報を基に各アイテムを再配置
                     for (int i = 1; i <= docS.CanvasItems.Count; i++)
                     {
+                        // アスペクト比ロックを解除して位置・サイズを調整
                         docS.CanvasItems[i].LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoFalse;
+                        // 元のサイズを復元
                         docS.CanvasItems[i].Height = canvasItemsHeight[i - 1];
                         docS.CanvasItems[i].Width = canvasItemsWidth[i - 1];
+                        // 上方向に0.59ポイント移動（レイアウト調整のため）
                         docS.CanvasItems[i].Top = canvasItemsTop[i - 1] + 0.59F;
                         docS.CanvasItems[i].Left = canvasItemsLeft[i - 1];
+                        // アスペクト比ロックを再設定
                         docS.CanvasItems[i].LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoTrue;
                     }
                 }
             }
         }
 
+        // Webヘルプ配布用のZIPアーカイブファイルを生成
+        // HTML出力ファイル、ヘッダーファイル、元のWordファイルを含む配布パッケージを作成
         public void GenerateZipArchive(string zipDirPath, string rootPath, string exportDir, string headerDir, string docFullName, string docName, StreamWriter log)
         {
+            // 各種パスの組み立て
             string exportDirPath = Path.Combine(rootPath, exportDir);
             string headerDirPath = Path.Combine(rootPath, headerDir);
 
+            // 既存のZIP作業ディレクトリがあれば削除し、新規作成
             if (Directory.Exists(zipDirPath))
             {
                 Directory.Delete(zipDirPath, true);
             }
             Directory.CreateDirectory(zipDirPath);
 
+            // HTML出力ディレクトリをZIP作業ディレクトリにコピー
             copyDirectory(exportDirPath, Path.Combine(zipDirPath, exportDir));
+            
+            // ヘッダーファイルディレクトリが存在すればコピー（目次作成に使用）
             if (Directory.Exists(headerDirPath))
             {
                 copyDirectory(headerDirPath, Path.Combine(zipDirPath, headerDir));
             }
+            
+            // 元のWordファイルをZIP作業ディレクトリにコピー
             File.Copy(docFullName, Path.Combine(zipDirPath, docName));
 
+            // ファイルコピー情報をログに記録
             log.WriteLine(docFullName + ":" + Path.Combine(zipDirPath, docName));
 
+            // 既存のZIPファイルがあれば削除
             if (File.Exists(zipDirPath + ".zip"))
             {
                 File.Delete(zipDirPath + ".zip");
             }
 
+            // ZIP作業ディレクトリからZIPアーカイブを作成（Shift_JISエンコーディング使用）
             ZipFile.CreateFromDirectory(zipDirPath, zipDirPath + ".zip", CompressionLevel.Optimal, true, Encoding.GetEncoding("Shift_JIS"));
 
+            // ZIP作業ディレクトリを削除（クリーンアップ）
             Directory.Delete(zipDirPath, true);
         }
 
+        // HTML変換されたXML文書の本文部分において、最初の要素にデフォルトIDを設定
         private void SetDefaultBodyId(XmlDocument objBody, string docid)
         {
             if (((XmlElement)objBody.DocumentElement.FirstChild).GetAttribute("id") == "")
@@ -283,6 +310,7 @@ namespace WordAddIn1
             }
         }
 
+        // HTMLファイルをブラウザで開くかどうかを確認するダイアログを表示
         private void ShowHtmlOutputDialog(string exportDirPath, string indexHtmlPath)
         {
             DialogResult selectMsg = MessageBox.Show(exportDirPath + MsgHtmlOutputSuccess1, MsgHtmlOutputSuccess2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
