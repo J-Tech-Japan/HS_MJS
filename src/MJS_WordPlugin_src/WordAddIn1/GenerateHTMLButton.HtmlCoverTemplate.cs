@@ -1,10 +1,9 @@
-﻿using System;
+﻿// GenerateHTMLButton.HtmlCoverTemplate.cs
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
 
-// リファクタリング完了
 namespace WordAddIn1
 {
     public partial class RibbonMJS
