@@ -1,4 +1,6 @@
-﻿using System;
+﻿// WordAddIn1\bookInfo.cs
+
+using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
