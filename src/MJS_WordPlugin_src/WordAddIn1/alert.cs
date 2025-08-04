@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿// alert.cs
+
+using System.Windows.Forms;
 
 namespace WordAddIn1
 {
