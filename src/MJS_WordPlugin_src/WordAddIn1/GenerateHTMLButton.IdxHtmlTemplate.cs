@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// GenerateHTMLButton.IdxHtmlTemplate.cs
+
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
