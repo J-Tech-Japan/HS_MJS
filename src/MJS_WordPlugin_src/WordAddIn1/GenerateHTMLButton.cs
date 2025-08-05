@@ -34,23 +34,10 @@ namespace WordAddIn1
             loader load = new loader();
             load.Show();
 
-            // アウトラインレベルと見出しテキストをメッセージボックスで表示（動作確認用）
-            //ShowHeadingsWithOutlineLevels();
-
-
             try
             {
-                // TODO: 指定スタイルの見出しを取得
-                //var headings = GetHeadingsByStyles(new List<string> { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" });
-                //var specifiedHeadings = new List<string> { "はじめに", "マニュアル内の記号・表記について" };
-
-                //List<string> commonHeadings = headings.Intersect(specifiedHeadings).ToList();
-
                 // "##検索対象外トピック##" というコメントがついている、特定スタイルの見出しを取得
                 var headingsWithComment = GetHeadingsWithComment(new List<string> { "見出し 1,MJS_見出し 1", "見出し 2,MJS_見出し 2", "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）" }, "##検索対象外トピック##");
-
-                // commonHeadingsとheadingsWithCommentを重複要素なしで結合
-                //var mergedHeadings = commonHeadings.Union(headingsWithComment).ToList();
 
                 // 特定の見出しとその配下の見出しを取得
                 var headings = GetSpecificHeadingsWithSubheadings();
@@ -613,6 +600,9 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
+                        // 画像ファイル情報を抽出・出力
+                        OutputImageInfoFromAllHtmlFiles(paths.exportDirPath, log);
+
                         // TODO: 検索ブロックの削除
                         foreach (string heading in headings)
                         {
@@ -630,14 +620,6 @@ namespace WordAddIn1
                             paths.exportDir);
                         }
 
-                        //foreach (string heading in mergedHeadings)
-                        //{
-                        //    RemoveSearchBlockByTitle(
-                        //    heading,
-                        //    paths.rootPath,
-                        //    paths.exportDir);
-                        //}
-
                         // Zipファイル作成ログ
                         log.WriteLine("Zipファイル作成");
                         
@@ -654,10 +636,10 @@ namespace WordAddIn1
                     finally
                     {
                         log.Close();
-                        if (!isError && File.Exists(paths.logPath))
-                        {
-                            File.Delete(paths.logPath);
-                        }
+                        //if (!isError && File.Exists(paths.logPath))
+                        //{
+                        //    File.Delete(paths.logPath);
+                        //}
 
                         // ドキュメント変更イベントを再登録
                         application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
@@ -687,5 +669,7 @@ namespace WordAddIn1
                 application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
             }
         }
+
+        
     }
 }

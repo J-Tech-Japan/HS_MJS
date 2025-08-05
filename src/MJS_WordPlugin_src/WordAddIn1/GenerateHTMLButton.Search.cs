@@ -1,4 +1,6 @@
-﻿namespace WordAddIn1
+﻿// GenerateHTMLButton.Search.cs
+
+namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
