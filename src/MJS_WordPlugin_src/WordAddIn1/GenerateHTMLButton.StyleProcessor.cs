@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// GenerateHTMLButton.StyleProcessor.cs
+
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Xml;
 

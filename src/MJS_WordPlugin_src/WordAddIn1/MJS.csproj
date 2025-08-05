@@ -414,7 +414,7 @@
     <Compile Include="GenerateHTMLButton.XMLProcessDocument.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GenerateHTMLButton.ProcessCoverImages.cs">
+    <Compile Include="GenerateHTMLButton.ExtractImageInfoFromHtml.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.Search.cs">
