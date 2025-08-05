@@ -1,4 +1,6 @@
-﻿using System;
+﻿// GenerateHTMLButton.ProcessHTML.cs
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;

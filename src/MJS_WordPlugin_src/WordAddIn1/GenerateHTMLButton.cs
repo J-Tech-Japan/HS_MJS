@@ -153,7 +153,6 @@ namespace WordAddIn1
                         // タイトル・サブタイトル等の整形
                         CleanUpManualTitles(ref manualTitle, ref manualSubTitle, ref manualVersion, ref manualTitleCenter, ref manualSubTitleCenter, ref manualVersionCenter);
 
-                        #region
                         List<List<string>> productSubLogoGroups = new List<List<string>>();
 
                         if (coverExist)
@@ -436,8 +435,6 @@ namespace WordAddIn1
                             }
                         }
 
-                        #endregion
-                        
                         // ドキュメント末尾に移動し、一時キャンバスを追加
                         application.Selection.EndKey(WdUnits.wdStory);
                         object selectionRange = application.Selection.Range;
