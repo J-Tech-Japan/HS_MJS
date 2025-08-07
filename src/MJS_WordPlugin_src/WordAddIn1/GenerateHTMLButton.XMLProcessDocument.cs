@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿// GenerateHTMLButton.XMLProcessDocument.cs
+
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace WordAddIn1

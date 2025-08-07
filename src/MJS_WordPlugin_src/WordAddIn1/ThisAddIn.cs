@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Xml;
 using Word = Microsoft.Office.Interop.Word;
 
 /*
@@ -27,15 +32,16 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            //SaveBackupOfActiveDocument();
-            //this.Application.DocumentBeforeClose += Application_DocumentBeforeClose;
+            SaveBackupOfActiveDocument();
+            this.Application.DocumentBeforeClose += Application_DocumentBeforeClose;
 
-            //SaveDocxBackupIfDoc("backup");
-            //ShowBookInfoIdStatusDialog();
-            //OverwriteDocument();
-            //ConvertBackupxToZip("backup");
-            //UnzipBackupxZip("backup");
-            //MoveUnzippedMediaFolderToDocumentDirectory("backup");
+            SaveDocxBackupIfDoc("backup");
+            ShowBookInfoIdStatusDialog();
+            OverwriteDocument();
+            ConvertBackupxToZip("backup");
+            UnzipBackupxZip("backup");
+            MoveUnzippedMediaFolderToDocumentDirectory("backup");
+
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
@@ -174,7 +180,6 @@ namespace WordAddIn1
                 MessageBox.Show($"バックアップファイル削除処理でエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
 
         #region VSTO で生成されたコード
 

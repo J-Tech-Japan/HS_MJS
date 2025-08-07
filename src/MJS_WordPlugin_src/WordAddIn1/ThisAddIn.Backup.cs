@@ -230,24 +230,54 @@ namespace WordAddIn1
                 string zipPath = Path.Combine(backupDir, zipName);
 
                 if (!File.Exists(zipPath))
+                {
+                    MessageBox.Show($"zipファイルが見つかりません: {zipPath}", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
+                }
 
-                // 展開先ディレクトリも backupFolderName
-                string extractDir = backupDir;
+                // 展開先ディレクトリの準備
+                string extractDir = Path.Combine(backupDir, "extracted");
 
                 // 既存の展開先フォルダがあれば削除
                 if (Directory.Exists(extractDir))
                     Directory.Delete(extractDir, true);
 
+                // 展開先ディレクトリを作成
+                Directory.CreateDirectory(extractDir);
+
+                // ZIP解凍
                 ZipFile.ExtractToDirectory(zipPath, extractDir);
+
+                // 解凍結果をログに出力（デバッグ用）
+                string wordDir = Path.Combine(extractDir, "word");
+                string mediaDir = Path.Combine(wordDir, "media");
+                
+                if (Directory.Exists(wordDir))
+                {
+                    MessageBox.Show($"wordフォルダが作成されました: {wordDir}", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+                    if (Directory.Exists(mediaDir))
+                    {
+                        var mediaFiles = Directory.GetFiles(mediaDir);
+                        MessageBox.Show($"mediaフォルダが作成されました: {mediaDir}\nファイル数: {mediaFiles.Length}", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"mediaフォルダが見つかりません: {mediaDir}", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show($"wordフォルダが見つかりません: {wordDir}", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"zip解凍時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"zip解凍時にエラーが発生しました: {ex.Message}\nStackTrace: {ex.StackTrace}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // backupFolderName/word/media フォルダをアクティブドキュメントのあるフォルダに移動
+        // backupFolderName/extracted/word/media フォルダをアクティブドキュメントのあるフォルダに移動
         private void MoveUnzippedMediaFolderToDocumentDirectory(string backupFolderName)
         {
             try
@@ -258,24 +288,41 @@ namespace WordAddIn1
 
                 string docDir = Path.GetDirectoryName(doc.FullName);
 
-                // backupFolderName/word/media を参照
+                // backupFolderName/extracted/word/media を参照
                 string backupDir = Path.Combine(docDir, backupFolderName);
-                string srcMediaDir = Path.Combine(backupDir, "word", "media");
+                string extractedDir = Path.Combine(backupDir, "extracted");
+                string srcMediaDir = Path.Combine(extractedDir, "word", "media");
                 string destMediaDir = Path.Combine(docDir, "media");
 
                 if (!Directory.Exists(srcMediaDir))
+                {
+                    MessageBox.Show($"移動元のmediaフォルダが見つかりません: {srcMediaDir}", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
+                }
 
                 // 既存の media フォルダがあれば削除
                 if (Directory.Exists(destMediaDir))
+                {
                     Directory.Delete(destMediaDir, true);
+                }
 
                 // media フォルダを移動
                 Directory.Move(srcMediaDir, destMediaDir);
+                
+                // 移動成功を確認
+                if (Directory.Exists(destMediaDir))
+                {
+                    var mediaFiles = Directory.GetFiles(destMediaDir);
+                    MessageBox.Show($"mediaフォルダの移動が完了しました: {destMediaDir}\nファイル数: {mediaFiles.Length}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"mediaフォルダの移動に失敗しました: {destMediaDir}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"mediaフォルダ移動時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"mediaフォルダ移動時にエラーが発生しました: {ex.Message}\nStackTrace: {ex.StackTrace}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
