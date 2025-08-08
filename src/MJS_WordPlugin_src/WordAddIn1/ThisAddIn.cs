@@ -1,4 +1,6 @@
-﻿using System;
+﻿// ThisAddIn.cs
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -32,24 +34,89 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            SaveBackupOfActiveDocument();
-            this.Application.DocumentBeforeClose += Application_DocumentBeforeClose;
+            // EnhMetaFileBitsを使用した画像・キャンバス抽出（アクティブドキュメントから直接、テキスト情報付き） ***
+            ExtractImagesAndCanvasFromActiveDocumentWithText();
+        }
 
-            SaveDocxBackupIfDoc("backup");
-            ShowBookInfoIdStatusDialog();
-            OverwriteDocument();
-            ConvertBackupxToZip("backup");
-            UnzipBackupxZip("backup");
-            MoveUnzippedMediaFolderToDocumentDirectory("backup");
+        // EnhMetaFileBitsを使用してアクティブWordドキュメントから画像とキャンバスを直接抽出する
+        private void ExtractImagesAndCanvasFromActiveDocumentWithText()
+        {
+            try
+            {
+                var doc = this.Application.ActiveDocument;
+                if (doc == null || string.IsNullOrEmpty(doc.FullName))
+                {
+                    MessageBox.Show("アクティブドキュメントが見つかりません。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
+                string docDir = Path.GetDirectoryName(doc.FullName);
+                string docName = Path.GetFileNameWithoutExtension(doc.FullName);
+                
+                // 抽出先フォルダを作成（ドキュメントと同じディレクトリに作成）
+                string extractedImagesDir = Path.Combine(docDir, $"{docName}_extracted_images");
+                if (!Directory.Exists(extractedImagesDir))
+                    Directory.CreateDirectory(extractedImagesDir);
+
+                // 既存の画像ファイルをクリア（必要に応じて）
+                if (Directory.Exists(extractedImagesDir))
+                {
+                    var existingFiles = Directory.GetFiles(extractedImagesDir, "*.png");
+                    foreach (var file in existingFiles)
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                    
+                    // 既存のテキストファイルもクリア
+                    var existingTextFiles = Directory.GetFiles(extractedImagesDir, "*.txt");
+                    foreach (var file in existingTextFiles)
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                }
+
+                // EnhMetaFileBitsを使用して画像・キャンバスを抽出
+                List<Utils.ExtractedImageInfo> extractedImages = Utils.ExtractImagesAndCanvasFromWordWithText(
+                    doc, 
+                    extractedImagesDir,
+                    includeInlineShapes: true,    // インライン図形を抽出
+                    includeShapes: true,          // フローティング図形を抽出
+                    includeCanvasItems: false     // キャンバス内アイテムは抽出しない
+                );
+
+                // 画像情報をファイルに出力
+                string imageInfoPath = Path.Combine(extractedImagesDir, $"{docName}_画像情報.txt");
+                Utils.ExportImageInfoToTextFile(extractedImages, imageInfoPath);
+
+                // 抽出結果の統計情報を取得
+                string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
+
+                // 結果をユーザーに表示
+                string message = $"アクティブドキュメントからのEnhMetaFileBits画像抽出が完了しました。\n\n" +
+                               $"ドキュメント: {doc.Name}\n" +
+                               $"抽出先: {extractedImagesDir}\n" +
+                               $"画像情報ファイル: {Path.GetFileName(imageInfoPath)}\n\n" +
+                               $"{statistics}\n\n" +
+                               $"抽出フォルダを開きますか？";
+
+                DialogResult result = MessageBox.Show(message, "画像抽出完了", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+                if (result == DialogResult.Yes && Directory.Exists(extractedImagesDir))
+                {
+                    System.Diagnostics.Process.Start("explorer.exe", extractedImagesDir);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"アクティブドキュメントからの画像抽出中にエラーが発生しました: {ex.Message}\nStackTrace: {ex.StackTrace}", 
+                    "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
             try
             {
-                //DeleteBackupFilesOfActiveDocument();
-
                 // 必要に応じてリソースを解放
                 if (Globals.ThisAddIn.Application != null)
                 {
@@ -59,125 +126,6 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 MessageBox.Show($"アドイン終了時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        /// 書誌情報IDが設定されている場合は true を返す
-        private bool IsBookInfoIdSet()
-        {
-            try
-            {
-                var doc = this.Application.ActiveDocument;
-                if (doc != null)
-                {
-                    foreach (Word.Bookmark bm in doc.Bookmarks)
-                    {
-                        // 書誌情報IDのパターン（例: 3文字+2桁+3桁）にマッチするか
-                        if (System.Text.RegularExpressions.Regex.IsMatch(bm.Name, @"^[A-Z0-9]{3}\d{2}\d{3}$"))
-                        {
-                            return true; // 設定されている
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"書誌情報ID判定時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                // エラー時は「設定されていない」とみなす
-            }
-            return false; // 設定されていない
-        }
-
-        /// 書誌情報IDが設定されていない場合のみダイアログで通知する
-        private void ShowBookInfoIdStatusDialog()
-        {
-            if (!IsBookInfoIdSet())
-            {
-                try
-                {
-                    var doc = this.Application.ActiveDocument;
-                    if (doc != null && !string.IsNullOrEmpty(doc.FullName))
-                    {
-                        string dir = Path.GetDirectoryName(doc.FullName);
-                        string headerDir = Path.Combine(dir, "headerFile");
-                        if (Directory.Exists(headerDir))
-                        {
-                            Directory.Delete(headerDir, true);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"headerFileフォルダ削除時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-
-                MessageBox.Show("書誌情報IDが設定されていません。", "書誌情報チェック", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        // ドキュメントを閉じる直前に呼ばれる
-        private void Application_DocumentBeforeClose(Word.Document doc, ref bool Cancel)
-        {
-            try
-            {
-                // バックアップファイル削除処理を追加
-                DeleteBackupFilesOfActiveDocument();
-
-                //if (doc != null && !string.IsNullOrEmpty(doc.FullName))
-                //{
-                //    string name = Path.GetFileNameWithoutExtension(doc.FullName);
-                //    string dir = Path.GetDirectoryName(doc.FullName);
-                //    string ext = Path.GetExtension(doc.FullName);
-
-                //    if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
-                //    {
-                //        // 元ファイルのパスを生成
-                //        string originalName = name.Substring(0, name.Length - "_backup".Length);
-                //        string originalPath = Path.Combine(dir, originalName + ext);
-
-                //        // 元ファイルが存在すれば開く
-                //        if (File.Exists(originalPath))
-                //        {
-                //            this.Application.Documents.Open(originalPath);
-                //        }
-                //    }
-                //}
-            }
-            catch { /* 例外は無視 */ }
-        }
-
-        private void DeleteBackupFilesOfActiveDocument()
-        {
-            try
-            {
-                var doc = this.Application.ActiveDocument;
-                if (doc != null && !string.IsNullOrEmpty(doc.FullName))
-                {
-                    string dir = Path.GetDirectoryName(doc.FullName);
-                    string ext = Path.GetExtension(doc.FullName);
-
-                    // 指定フォルダ内の同じ拡張子のファイルを取得
-                    var files = Directory.GetFiles(dir, "*" + ext);
-                    foreach (var file in files)
-                    {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        if (name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase))
-                        {
-                            try
-                            {
-                                File.Delete(file);
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show($"バックアップファイル削除時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"バックアップファイル削除処理でエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
