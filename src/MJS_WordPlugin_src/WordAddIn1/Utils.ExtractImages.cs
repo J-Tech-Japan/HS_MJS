@@ -177,10 +177,19 @@ namespace WordAddIn1
                         );
                         extractedImages.Add(imageInfo);
 
-                        // マーカーを追加
-                        if (addMarkers && canvas.Anchor != null)
+                        // マーカーを追加（キャンバスの場合は異なるアプローチを使用）
+                        if (addMarkers)
                         {
-                            InsertHiddenMarkerAtPosition(canvas.Anchor, filePath);
+                            if (canvas.Anchor != null)
+                            {
+                                InsertMarkerAtPosition(canvas.Anchor, filePath);
+                            }
+                            else
+                            {
+                                // Anchorが利用できない場合、キャンバスが選択された状態で
+                                // 現在の選択範囲を使用してマーカーを挿入
+                                InsertMarkerForSelectedCanvas(filePath);
+                            }
                         }
 
                         imageCounter++;
@@ -196,6 +205,42 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"キャンバス図形の抽出でエラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 選択されたキャンバス用のマーカーを挿入
+        /// </summary>
+        private static void InsertMarkerForSelectedCanvas(string filePath)
+        {
+            try
+            {
+                // ファイル名からファイル名部分のみを取得（拡張子なし）
+                string markerText = Path.GetFileNameWithoutExtension(filePath);
+                
+                // 現在の選択範囲を取得
+                var selection = Globals.ThisAddIn.Application.Selection;
+                
+                // 選択範囲の末尾に移動
+                selection.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                
+                // 改行を挿入して新しい行を作成
+                selection.TypeText("\r");
+                
+                // 新しい行に特殊な識別子を挿入
+                string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
+                selection.TypeText(hiddenMarker);
+                
+                // マーカーテキストを隠し文字に設定
+                //selection.Range.Font.Hidden = 1;
+                
+                // マーカーの後に改行を追加
+                selection.TypeText("\r");
+                selection.Range.Font.Hidden = 1;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"キャンバス用マーカー挿入エラー: {ex.Message}");
             }
         }
 
@@ -244,7 +289,7 @@ namespace WordAddIn1
                         // マーカーを追加
                         if (addMarkers && shape.Anchor != null)
                         {
-                            InsertHiddenMarkerAtPosition(shape.Anchor, filePath);
+                            InsertMarkerAtPosition(shape.Anchor, filePath);
                         }
 
                         imageCounter++;
@@ -324,8 +369,8 @@ namespace WordAddIn1
                 markerRange.Text = hiddenMarker;
                 
                 // マーカーテキストを隠し文字に設定（Word上では見えない）
-                markerRange.Font.Hidden = 1;
-                
+                //markerRange.Font.Hidden = 1;
+
                 // マーカーの後に改行を追加
                 var afterMarkerRange = range.Document.Range(markerRange.End, markerRange.End);
                 afterMarkerRange.Text = "\r";
@@ -340,7 +385,7 @@ namespace WordAddIn1
         /// <summary>
         /// 指定した位置の次の行に見えないマーカーを挿入（フローティング図形用）
         /// </summary>
-        private static void InsertHiddenMarkerAtPosition(Word.Range anchor, string filePath)
+        private static void InsertMarkerAtPosition(Word.Range anchor, string filePath)
         {
             try
             {
@@ -362,7 +407,7 @@ namespace WordAddIn1
                 markerRange.Text = hiddenMarker;
                 
                 // マーカーテキストを隠し文字に設定（Word上では見えない）
-                markerRange.Font.Hidden = 1;
+                //markerRange.Font.Hidden = 1;
                 
                 // マーカーの後に改行を追加
                 var afterMarkerRange = anchor.Document.Range(markerRange.End, markerRange.End);
@@ -372,28 +417,6 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"マーカー挿入エラー: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// HTMLファイル内の特殊マーカーを適切なHTML要素に置換
-        /// </summary>
-        /// <param name="htmlContent">HTMLファイルの内容</param>
-        /// <returns>マーカーが置換されたHTML内容</returns>
-        public static string ReplaceImageMarkersInHtml(string htmlContent)
-        {
-            try
-            {
-                // [IMAGEMARKER:ファイル名] パターンを検索し、適切なHTML要素に置換
-                var pattern = @"\[IMAGEMARKER:([^\]]+)\]";
-                var replacement = @"<span style=""display:none;"" data-image-marker=""$1""></span>";
-                
-                return System.Text.RegularExpressions.Regex.Replace(htmlContent, pattern, replacement);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"HTMLマーカー置換エラー: {ex.Message}");
-                return htmlContent;
             }
         }
 

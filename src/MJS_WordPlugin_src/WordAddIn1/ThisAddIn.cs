@@ -97,8 +97,12 @@ namespace WordAddIn1
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
+            var doc = this.Application.ActiveDocument;
             try
             {
+                // アドイン終了時に全ての画像マーカーを削除
+                Utils.RemoveAllImageMarkers(doc);
+                
                 // 必要に応じてリソースを解放
                 if (Globals.ThisAddIn.Application != null)
                 {
