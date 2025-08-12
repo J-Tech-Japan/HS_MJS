@@ -4,7 +4,6 @@ using System.Diagnostics;
 
 using Word = Microsoft.Office.Interop.Word;
 
-// リファクタリング済
 namespace WordAddIn1
 {
     public partial class RibbonMJS

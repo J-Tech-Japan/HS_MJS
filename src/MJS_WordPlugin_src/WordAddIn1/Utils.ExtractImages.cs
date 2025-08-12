@@ -35,13 +35,15 @@ namespace WordAddIn1
         /// <param name="includeInlineShapes">インライン図形を含むかどうか</param>
         /// <param name="includeShapes">フローティング図形を含むかどうか</param>
         /// <param name="includeCanvasItems">キャンバス内アイテムを含むかどうか</param>
+        /// <param name="addMarkers">抽出した画像の後ろに見えないマーカーを追加するかどうか</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesAndCanvasFromWordWithText(
             Word.Document document, 
             string outputDirectory,
             bool includeInlineShapes = true,
             bool includeShapes = true,
-            bool includeCanvasItems = true)
+            bool includeCanvasItems = true,
+            bool addMarkers = true)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -61,13 +63,13 @@ namespace WordAddIn1
                 // インライン図形の抽出
                 if (includeInlineShapes)
                 {
-                    ExtractInlineShapes(document, outputDirectory, ref imageCounter, extractedImages);
+                    ExtractInlineShapes(document, outputDirectory, ref imageCounter, extractedImages, addMarkers);
                 }
 
                 // フローティング図形の抽出
                 if (includeShapes)
                 {
-                    ExtractFloatingShapes(document, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems);
+                    ExtractFloatingShapes(document, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, addMarkers);
                 }
 
                 return extractedImages;
@@ -77,27 +79,11 @@ namespace WordAddIn1
                 throw new InvalidOperationException($"画像抽出中にエラーが発生しました: {ex.Message}", ex);
             }
         }
-
-        /// <summary>
-        /// 従来のメソッド（後方互換性のため維持）
-        /// </summary>
-        public static List<string> ExtractImagesAndCanvasFromWord(
-            Word.Document document, 
-            string outputDirectory,
-            bool includeInlineShapes = true,
-            bool includeShapes = true,
-            bool includeCanvasItems = true)
-        {
-            var extractedImagesWithText = ExtractImagesAndCanvasFromWordWithText(
-                document, outputDirectory, includeInlineShapes, includeShapes, includeCanvasItems);
-            
-            return extractedImagesWithText.Select(img => img.FilePath).ToList();
-        }
-
+        
         /// <summary>
         /// インライン図形からEnhMetaFileBitsを使用して画像を抽出
         /// </summary>
-        private static void ExtractInlineShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages)
+        private static void ExtractInlineShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool addMarkers = false)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -119,6 +105,13 @@ namespace WordAddIn1
                                 inlineShape.Range.Start
                             );
                             extractedImages.Add(imageInfo);
+
+                            // マーカーを追加
+                            if (addMarkers)
+                            {
+                                InsertHiddenMarker(inlineShape.Range, filePath);
+                            }
+
                             imageCounter++;
                         }
                     }
@@ -134,7 +127,7 @@ namespace WordAddIn1
         /// <summary>
         /// フローティング図形からEnhMetaFileBitsを使用して画像を抽出
         /// </summary>
-        private static void ExtractFloatingShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems)
+        private static void ExtractFloatingShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems, bool addMarkers = false)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -143,12 +136,12 @@ namespace WordAddIn1
                     // キャンバス図形の場合
                     if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                     {
-                        ExtractCanvasShape(shape, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems);
+                        ExtractCanvasShape(shape, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, addMarkers);
                     }
                     // 通常の図形の場合
                     else
                     {
-                        ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages);
+                        ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages, "shape", addMarkers);
                     }
                 }
                 catch (Exception ex)
@@ -162,7 +155,7 @@ namespace WordAddIn1
         /// <summary>
         /// キャンバス図形から画像を抽出
         /// </summary>
-        private static void ExtractCanvasShape(Word.Shape canvas, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems)
+        private static void ExtractCanvasShape(Word.Shape canvas, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems, bool addMarkers = false)
         {
             try
             {
@@ -183,6 +176,13 @@ namespace WordAddIn1
                             canvas.Anchor?.Start ?? 0
                         );
                         extractedImages.Add(imageInfo);
+
+                        // マーカーを追加
+                        if (addMarkers && canvas.Anchor != null)
+                        {
+                            InsertHiddenMarkerAtPosition(canvas.Anchor, filePath);
+                        }
+
                         imageCounter++;
                     }
                 }
@@ -190,7 +190,7 @@ namespace WordAddIn1
                 // キャンバス内のアイテムを個別に抽出
                 if (includeCanvasItems && canvas.CanvasItems.Count > 0)
                 {
-                    ExtractCanvasItems(canvas, outputDirectory, ref imageCounter, extractedImages);
+                    ExtractCanvasItems(canvas, outputDirectory, ref imageCounter, extractedImages, addMarkers);
                 }
             }
             catch (Exception ex)
@@ -202,13 +202,13 @@ namespace WordAddIn1
         /// <summary>
         /// キャンバス内のアイテムを抽出
         /// </summary>
-        private static void ExtractCanvasItems(Word.Shape canvas, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages)
+        private static void ExtractCanvasItems(Word.Shape canvas, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool addMarkers = false)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
                 try
                 {
-                    ExtractSingleShape(canvasItem, outputDirectory, ref imageCounter, extractedImages, "canvas_item");
+                    ExtractSingleShape(canvasItem, outputDirectory, ref imageCounter, extractedImages, "canvas_item", addMarkers);
                 }
                 catch (Exception ex)
                 {
@@ -220,7 +220,7 @@ namespace WordAddIn1
         /// <summary>
         /// 単一の図形から画像を抽出
         /// </summary>
-        private static void ExtractSingleShape(Word.Shape shape, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, string prefix = "shape")
+        private static void ExtractSingleShape(Word.Shape shape, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, string prefix = "shape", bool addMarkers = false)
         {
             try
             {
@@ -240,6 +240,13 @@ namespace WordAddIn1
                             shape.Anchor?.Start ?? 0
                         );
                         extractedImages.Add(imageInfo);
+
+                        // マーカーを追加
+                        if (addMarkers && shape.Anchor != null)
+                        {
+                            InsertHiddenMarkerAtPosition(shape.Anchor, filePath);
+                        }
+
                         imageCounter++;
                     }
                 }
@@ -293,68 +300,101 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// 現在アクティブなWordドキュメントから画像とキャンバスを抽出する簡易メソッド
+        /// インライン図形の次の行に見えないマーカーを挿入
         /// </summary>
-        /// <param name="outputDirectory">画像の保存先ディレクトリ</param>
-        /// <returns>抽出された画像ファイルパスのリスト</returns>
-        public static List<string> ExtractImagesFromActiveDocument(string outputDirectory)
+        private static void InsertHiddenMarker(Word.Range range, string filePath)
         {
-            var application = Globals.ThisAddIn.Application;
-            var activeDocument = application?.ActiveDocument;
-            
-            if (activeDocument == null)
-                throw new InvalidOperationException("アクティブなWordドキュメントが見つかりません。");
-
-            return ExtractImagesAndCanvasFromWord(activeDocument, outputDirectory);
-        }
-
-        /// <summary>
-        /// 現在アクティブなWordドキュメントから画像とキャンバスを抽出する
-        /// </summary>
-        /// <param name="outputDirectory">画像の保存先ディレクトリ</param>
-        /// <returns>抽出された画像情報のリスト</returns>
-        public static List<ExtractedImageInfo> ExtractImagesFromActiveDocumentWithText(string outputDirectory)
-        {
-            var application = Globals.ThisAddIn.Application;
-            var activeDocument = application?.ActiveDocument;
-            
-            if (activeDocument == null)
-                throw new InvalidOperationException("アクティブなWordドキュメントが見つかりません。");
-
-            return ExtractImagesAndCanvasFromWordWithText(activeDocument, outputDirectory);
-        }
-
-        /// <summary>
-        /// 抽出結果の統計情報を取得（従来版）
-        /// </summary>
-        /// <param name="extractedImagePaths">抽出された画像パスのリスト</param>
-        /// <returns>統計情報の文字列</returns>
-        public static string GetExtractionStatistics(List<string> extractedImagePaths)
-        {
-            if (extractedImagePaths == null || extractedImagePaths.Count == 0)
-                return "抽出された画像はありません。";
-
-            var statistics = new System.Text.StringBuilder();
-            statistics.AppendLine($"抽出された画像数: {extractedImagePaths.Count}");
-            statistics.AppendLine();
-
-            var groupedByType = extractedImagePaths
-                .GroupBy(path => {
-                    var fileName = Path.GetFileNameWithoutExtension(path);
-                    if (fileName.Contains("inline_image")) return "インライン図形";
-                    if (fileName.Contains("canvas_")) return "キャンバス";
-                    if (fileName.Contains("canvas_item")) return "キャンバス内アイテム";
-                    if (fileName.Contains("shape_")) return "フローティング図形";
-                    return "その他";
-                })
-                .OrderBy(g => g.Key);
-
-            foreach (var group in groupedByType)
+            try
             {
-                statistics.AppendLine($"{group.Key}: {group.Count()}個");
+                // ファイル名からファイル名部分のみを取得（拡張子なし）
+                string markerText = Path.GetFileNameWithoutExtension(filePath);
+                
+                // 図形を含む段落を取得
+                var paragraph = range.Paragraphs[1];
+                
+                // 段落の末尾に移動
+                var insertRange = range.Document.Range(paragraph.Range.End - 1, paragraph.Range.End - 1);
+                
+                // 改行を挿入して新しい行を作成
+                insertRange.Text = "\r";
+                
+                // 新しい行に特殊な識別子を挿入（HTML出力後に置換される）
+                var markerRange = range.Document.Range(insertRange.End, insertRange.End);
+                string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
+                markerRange.Text = hiddenMarker;
+                
+                // マーカーテキストを隠し文字に設定（Word上では見えない）
+                markerRange.Font.Hidden = 1;
+                
+                // マーカーの後に改行を追加
+                var afterMarkerRange = range.Document.Range(markerRange.End, markerRange.End);
+                afterMarkerRange.Text = "\r";
+                afterMarkerRange.Font.Hidden = 1;
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"マーカー挿入エラー: {ex.Message}");
+            }
+        }
 
-            return statistics.ToString();
+        /// <summary>
+        /// 指定した位置の次の行に見えないマーカーを挿入（フローティング図形用）
+        /// </summary>
+        private static void InsertHiddenMarkerAtPosition(Word.Range anchor, string filePath)
+        {
+            try
+            {
+                // ファイル名からファイル名部分のみを取得（拡張子なし）
+                string markerText = Path.GetFileNameWithoutExtension(filePath);
+                
+                // アンカー位置を含む段落を取得
+                var anchorParagraph = anchor.Paragraphs[1];
+                
+                // 段落の末尾に移動
+                var insertRange = anchor.Document.Range(anchorParagraph.Range.End - 1, anchorParagraph.Range.End - 1);
+                
+                // 改行を挿入して新しい行を作成
+                insertRange.Text = "\r";
+                
+                // 新しい行に特殊な識別子を挿入（HTML出力後に置換される）
+                var markerRange = anchor.Document.Range(insertRange.End, insertRange.End);
+                string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
+                markerRange.Text = hiddenMarker;
+                
+                // マーカーテキストを隠し文字に設定（Word上では見えない）
+                markerRange.Font.Hidden = 1;
+                
+                // マーカーの後に改行を追加
+                var afterMarkerRange = anchor.Document.Range(markerRange.End, markerRange.End);
+                afterMarkerRange.Text = "\r";
+                afterMarkerRange.Font.Hidden = 1;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"マーカー挿入エラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// HTMLファイル内の特殊マーカーを適切なHTML要素に置換
+        /// </summary>
+        /// <param name="htmlContent">HTMLファイルの内容</param>
+        /// <returns>マーカーが置換されたHTML内容</returns>
+        public static string ReplaceImageMarkersInHtml(string htmlContent)
+        {
+            try
+            {
+                // [IMAGEMARKER:ファイル名] パターンを検索し、適切なHTML要素に置換
+                var pattern = @"\[IMAGEMARKER:([^\]]+)\]";
+                var replacement = @"<span style=""display:none;"" data-image-marker=""$1""></span>";
+                
+                return System.Text.RegularExpressions.Regex.Replace(htmlContent, pattern, replacement);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"HTMLマーカー置換エラー: {ex.Message}");
+                return htmlContent;
+            }
         }
 
         /// <summary>
