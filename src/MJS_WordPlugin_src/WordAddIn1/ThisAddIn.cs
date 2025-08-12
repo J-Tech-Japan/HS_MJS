@@ -10,24 +10,6 @@ using System.Windows.Forms;
 using System.Xml;
 using Word = Microsoft.Office.Interop.Word;
 
-/*
-COM（Component Object Model）は、Microsoft が開発した技術で、異なるプログラミング言語やプロセス間でオブジェクトを共有するための仕組みです。
-COM オブジェクトは、主に Windows アプリケーションや Office アドインの開発で使用されます。
-
-特徴：
-•プログラミング言語に依存しない。
-•バイナリレベルでの互換性を提供。
-•インターフェースを通じてオブジェクトにアクセス。
-
-NET と COM の関係：
-.NET はマネージコードを使用しますが、COM はアンマネージコードを使用します。
-.NET から COM オブジェクトを使用する際には、相互運用性（Interop） が必要です。
-        
-相互運用性の仕組み：
-•.NET では、Microsoft.Office.Interop 名前空間を使用して COM オブジェクトにアクセスします。
-•例: Microsoft.Office.Interop.Word.Application は Word アプリケーションの COM オブジェクトを表します。
-*/
-
 namespace WordAddIn1
 {
     public partial class ThisAddIn
