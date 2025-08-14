@@ -269,7 +269,7 @@
     </Compile>
     <Compile Include="CheckInfo.cs" />
     <Compile Include="Utils.RemoveAllImageMarkers.cs" />
-    <Compile Include="Utils.ExtractImages.cs" />
+    <Compile Include="Utils.ExtractImagesFromWord.cs" />
     <Compile Include="GenerateHTMLButton.CollectInfo.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -357,6 +357,8 @@
     <None Include="IncrementMinorVersion.ps1" />
     <None Include="MJS.pfx" />
     <None Include="NoteBook\AssemblyInfo_backup.md" />
+    <None Include="NoteBook\EnhMetaFileBits_Explanation.md" />
+    <None Include="NoteBook\MsoShapeType_Explanation.md" />
     <None Include="NoteBook\SaveBackupOfActiveDocument.md" />
     <None Include="NoteBook\search_word_tag_output_process.md" />
     <None Include="packages.config" />
@@ -414,9 +416,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.XMLProcessDocument.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="GenerateHTMLButton.ExtractImageInfoFromHtml.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GenerateHTMLButton.Search.cs">

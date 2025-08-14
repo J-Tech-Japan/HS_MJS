@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Utils.ExtractImagesFromWord.cs
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -35,14 +37,16 @@ namespace WordAddIn1
         /// <param name="includeInlineShapes">インライン図形を含むかどうか</param>
         /// <param name="includeShapes">フローティング図形を含むかどうか</param>
         /// <param name="includeCanvasItems">キャンバス内アイテムを含むかどうか</param>
-        /// <param name="addMarkers">抽出した画像の後ろに見えないマーカーを追加するかどうか</param>
+        /// <param name="includeFreeforms">フリーフォーム図形を含むかどうか</param>
+        /// <param name="addMarkers">抽出した画像の後ろにマーカーテキストを追加するかどうか</param>
         /// <returns>抽出された画像情報のリスト</returns>
-        public static List<ExtractedImageInfo> ExtractImagesAndCanvasFromWordWithText(
+        public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
             string outputDirectory,
             bool includeInlineShapes = true,
             bool includeShapes = true,
             bool includeCanvasItems = true,
+            bool includeFreeforms = true,
             bool addMarkers = true)
         {
             if (document == null)
@@ -69,7 +73,7 @@ namespace WordAddIn1
                 // フローティング図形の抽出
                 if (includeShapes)
                 {
-                    ExtractFloatingShapes(document, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, addMarkers);
+                    ExtractFloatingShapes(document, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, includeFreeforms, addMarkers);
                 }
 
                 return extractedImages;
@@ -127,7 +131,7 @@ namespace WordAddIn1
         /// <summary>
         /// フローティング図形からEnhMetaFileBitsを使用して画像を抽出
         /// </summary>
-        private static void ExtractFloatingShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems, bool addMarkers = false)
+        private static void ExtractFloatingShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems, bool includeFreeforms, bool addMarkers = false)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -137,6 +141,14 @@ namespace WordAddIn1
                     if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                     {
                         ExtractCanvasShape(shape, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, addMarkers);
+                    }
+                    // フリーフォーム図形の場合
+                    else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
+                    {
+                        if (includeFreeforms)
+                        {
+                            ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages, "freeform", addMarkers);
+                        }
                     }
                     // 通常の図形の場合
                     else
@@ -231,12 +243,8 @@ namespace WordAddIn1
                 string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
                 selection.TypeText(hiddenMarker);
                 
-                // マーカーテキストを隠し文字に設定
-                //selection.Range.Font.Hidden = 1;
-                
                 // マーカーの後に改行を追加
                 selection.TypeText("\r");
-                selection.Range.Font.Hidden = 1;
             }
             catch (Exception ex)
             {
@@ -368,13 +376,9 @@ namespace WordAddIn1
                 string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
                 markerRange.Text = hiddenMarker;
                 
-                // マーカーテキストを隠し文字に設定（Word上では見えない）
-                //markerRange.Font.Hidden = 1;
-
                 // マーカーの後に改行を追加
                 var afterMarkerRange = range.Document.Range(markerRange.End, markerRange.End);
                 afterMarkerRange.Text = "\r";
-                afterMarkerRange.Font.Hidden = 1;
             }
             catch (Exception ex)
             {
@@ -406,13 +410,9 @@ namespace WordAddIn1
                 string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
                 markerRange.Text = hiddenMarker;
                 
-                // マーカーテキストを隠し文字に設定（Word上では見えない）
-                //markerRange.Font.Hidden = 1;
-                
                 // マーカーの後に改行を追加
                 var afterMarkerRange = anchor.Document.Range(markerRange.End, markerRange.End);
                 afterMarkerRange.Text = "\r";
-                afterMarkerRange.Font.Hidden = 1;
             }
             catch (Exception ex)
             {

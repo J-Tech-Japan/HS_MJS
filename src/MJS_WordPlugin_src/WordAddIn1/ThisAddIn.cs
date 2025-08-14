@@ -58,12 +58,14 @@ namespace WordAddIn1
                 }
 
                 // EnhMetaFileBitsを使用して画像・キャンバスを抽出
-                List<Utils.ExtractedImageInfo> extractedImages = Utils.ExtractImagesAndCanvasFromWordWithText(
+                List<Utils.ExtractedImageInfo> extractedImages = Utils.ExtractImagesFromWord(
                     doc, 
                     extractedImagesDir,
                     includeInlineShapes: true,    // インライン図形を抽出
                     includeShapes: true,          // フローティング図形を抽出
-                    includeCanvasItems: false     // キャンバス内アイテムは抽出しない
+                    includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
+                    includeFreeforms: false,      // フリーフォーム図形は抽出しない
+                    addMarkers: true              // マーカーを追加
                 );
 
                 // 画像情報をファイルに出力
@@ -117,8 +119,10 @@ namespace WordAddIn1
 
         #region VSTO で生成されたコード
 
+        /// <summary>
         /// デザイナーのサポートに必要なメソッドです。
         /// メソッドの内容をコードエディターで変更しないでください。
+        /// </summary>
         private void InternalStartup()
         {
             Startup += new System.EventHandler(ThisAddIn_Startup);

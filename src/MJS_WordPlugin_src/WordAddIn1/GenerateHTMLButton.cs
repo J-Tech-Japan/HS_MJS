@@ -600,9 +600,6 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
-                        // 画像ファイル情報を抽出・出力
-                        OutputImageInfoFromAllHtmlFiles(paths.exportDirPath, log);
-
                         // TODO: 検索ブロックの削除
                         foreach (string heading in headings)
                         {
