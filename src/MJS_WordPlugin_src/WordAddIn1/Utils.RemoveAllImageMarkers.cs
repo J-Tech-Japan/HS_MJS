@@ -17,7 +17,7 @@ namespace WordAddIn1
         public static int RemoveAllImageMarkers(Word.Document document)
         {
             if (document == null)
-                throw new ArgumentNullException(nameof(document));
+                return 0;
 
             int removedCount = 0;
 
@@ -26,53 +26,63 @@ namespace WordAddIn1
                 // ドキュメント全体の範囲を取得
                 var fullRange = document.Range();
 
-                // 検索条件を設定
-                var find = fullRange.Find;
-                find.ClearFormatting();
-                find.Text = @"\[IMAGEMARKER:*\]";
-                find.Forward = true;
-                find.Wrap = Word.WdFindWrap.wdFindStop;
-                find.Format = false;
-                find.MatchCase = false;
-                find.MatchWholeWord = false;
-                find.MatchWildcards = true;
-                find.MatchSoundsLike = false;
-                find.MatchAllWordForms = false;
-
-                // マーカーを順次検索して削除
-                while (find.Execute())
+                // 検索条件を設定してマーカーを順次削除
+                while (true)
                 {
-                    try
+                    // 新しい検索範囲を作成
+                    var searchRange = document.Range();
+                    var find = searchRange.Find;
+                    
+                    find.ClearFormatting();
+                    find.Text = "[IMAGEMARKER:*]";
+                    find.Forward = true;
+                    find.Wrap = Word.WdFindWrap.wdFindStop;
+                    find.Format = false;
+                    find.MatchCase = false;
+                    find.MatchWholeWord = false;
+                    find.MatchWildcards = true;
+                    find.MatchSoundsLike = false;
+                    find.MatchAllWordForms = false;
+
+                    // マーカーを検索
+                    if (find.Execute())
                     {
-                        // マーカーテキストの範囲を取得
-                        var markerRange = fullRange.Duplicate;
+                        try
+                        {
+                            // マーカーテキストの範囲を取得
+                            var markerRange = searchRange.Duplicate;
 
-                        // マーカーの前後の改行も含めて削除範囲を拡張
-                        ExtendRangeToIncludeAssociatedLineBreaks(markerRange);
+                            // マーカーの前後の改行も含めて削除範囲を拡張
+                            ExtendRangeToIncludeAssociatedLineBreaks(markerRange);
 
-                        // マーカーとその前後の改行を削除
-                        markerRange.Delete();
-                        removedCount++;
+                            // マーカーとその前後の改行を削除
+                            markerRange.Delete();
+                            removedCount++;
 
-                        // 削除後、検索範囲をリセット
-                        fullRange.SetRange(0, document.Range().End);
-                        find.ClearFormatting();
-                        find.Text = @"\[IMAGEMARKER:*\]";
-                        find.MatchWildcards = true;
+                            // デバッグ出力
+                            System.Diagnostics.Debug.WriteLine($"マーカー削除: {removedCount}個目");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"個別マーカー削除エラー: {ex.Message}");
+                            // 個別のマーカー削除でエラーが発生した場合は中断
+                            break;
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        System.Diagnostics.Debug.WriteLine($"個別マーカー削除エラー: {ex.Message}");
-                        // 個別のマーカー削除でエラーが発生しても処理を継続
+                        // これ以上マーカーが見つからない場合は終了
                         break;
                     }
                 }
 
+                System.Diagnostics.Debug.WriteLine($"画像マーカー削除完了: 合計{removedCount}個削除");
                 return removedCount;
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"画像マーカー削除中にエラーが発生しました: {ex.Message}", ex);
+                System.Diagnostics.Debug.WriteLine($"画像マーカー削除中にエラーが発生しました: {ex.Message}");
+                return removedCount;
             }
         }
 
@@ -131,10 +141,10 @@ namespace WordAddIn1
         public static bool RemoveSpecificImageMarker(Word.Document document, string markerText)
         {
             if (document == null)
-                throw new ArgumentNullException(nameof(document));
+                return false;
 
             if (string.IsNullOrEmpty(markerText))
-                throw new ArgumentException("マーカーテキストが指定されていません。", nameof(markerText));
+                return false;
 
             try
             {
@@ -171,7 +181,8 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"画像マーカー削除中にエラーが発生しました: {ex.Message}", ex);
+                System.Diagnostics.Debug.WriteLine($"特定マーカー削除中にエラーが発生しました: {ex.Message}");
+                return false;
             }
         }
 
@@ -183,7 +194,7 @@ namespace WordAddIn1
         public static int CountImageMarkers(Word.Document document)
         {
             if (document == null)
-                throw new ArgumentNullException(nameof(document));
+                return 0;
 
             int count = 0;
 
@@ -195,7 +206,7 @@ namespace WordAddIn1
                 // 検索条件を設定
                 var find = fullRange.Find;
                 find.ClearFormatting();
-                find.Text = @"\[IMAGEMARKER:*\]";
+                find.Text = "[IMAGEMARKER:*]";
                 find.Forward = true;
                 find.Wrap = Word.WdFindWrap.wdFindStop;
                 find.Format = false;
@@ -231,7 +242,7 @@ namespace WordAddIn1
         public static List<string> GetImageMarkersList(Word.Document document)
         {
             if (document == null)
-                throw new ArgumentNullException(nameof(document));
+                return new List<string>();
 
             var markers = new List<string>();
 
@@ -243,7 +254,7 @@ namespace WordAddIn1
                 // 検索条件を設定
                 var find = fullRange.Find;
                 find.ClearFormatting();
-                find.Text = @"\[IMAGEMARKER:*\]";
+                find.Text = "[IMAGEMARKER:*]";
                 find.Forward = true;
                 find.Wrap = Word.WdFindWrap.wdFindStop;
                 find.Format = false;

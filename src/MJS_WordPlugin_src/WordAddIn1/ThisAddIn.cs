@@ -99,11 +99,25 @@ namespace WordAddIn1
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
-            var doc = this.Application.ActiveDocument;
             try
             {
                 // アドイン終了時に全ての画像マーカーを削除
-                Utils.RemoveAllImageMarkers(doc);
+                if (Globals.ThisAddIn.Application != null && Globals.ThisAddIn.Application.Documents.Count > 0)
+                {
+                    try
+                    {
+                        var doc = Globals.ThisAddIn.Application.ActiveDocument;
+                        if (doc != null)
+                        {
+                            int removedCount = Utils.RemoveAllImageMarkers(doc);
+                            System.Diagnostics.Debug.WriteLine($"シャットダウン時にマーカーを削除: {removedCount}個");
+                        }
+                    }
+                    catch (Exception docEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ドキュメントからのマーカー削除エラー: {docEx.Message}");
+                    }
+                }
                 
                 // 必要に応じてリソースを解放
                 if (Globals.ThisAddIn.Application != null)
@@ -113,7 +127,8 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"アドイン終了時にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                System.Diagnostics.Debug.WriteLine($"アドイン終了時にエラーが発生しました: {ex.Message}");
+                // シャットダウン時はメッセージボックスを表示しない（Wordの終了を妨げる可能性があるため）
             }
         }
 
