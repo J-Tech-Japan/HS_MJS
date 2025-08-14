@@ -2,18 +2,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using Microsoft.Office.Tools.Ribbon;
-using Word = Microsoft.Office.Interop.Word;
 using Microsoft.Office.Interop.Word;
-using Table = Microsoft.Office.Interop.Word.Table;
-using System.Drawing;
+using Microsoft.Office.Tools.Ribbon;
 using Application = System.Windows.Forms.Application;
+using Table = Microsoft.Office.Interop.Word.Table;
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -75,9 +75,6 @@ namespace WordAddIn1
                         // アセンブリ取得
                         System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-                        // HTMLテンプレートの準備
-                        //PrepareHtmlTemplates(assembly, paths.rootPath, paths.exportDir);
-
                         log.WriteLine("テンプレートデータ準備");
 
                         using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
@@ -113,6 +110,16 @@ namespace WordAddIn1
                         
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
+
+                        Utils.ExtractImagesFromWord(
+                            docCopy,
+                            paths.exportDir,
+                            includeInlineShapes: true,    // インライン図形を抽出
+                            includeShapes: true,          // フローティング図形を抽出
+                            includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
+                            includeFreeforms: false,      // フリーフォーム図形は抽出しない
+                            addMarkers: true              // マーカーを追加
+                        );
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -387,32 +394,6 @@ namespace WordAddIn1
                                         }
                                     }
                                 }
-
-                                // cover-4.pngが存在しない場合、セクション1の最初のShape画像をcover-4.pngとして保存
-                                //string cover4Path = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png");
-                                //if (!File.Exists(cover4Path))
-                                //{
-                                //    var section1 = docCopy.Sections[1];
-                                //    foreach (Word.Shape shape in section1.Range.ShapeRange)
-                                //    {
-                                //        if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
-                                //        {
-                                //            try
-                                //            {
-                                //                shape.Select();
-                                //                Clipboard.Clear();
-                                //                Globals.ThisAddIn.Application.Selection.CopyAsPicture();
-                                //                Image img = Clipboard.GetImage();
-                                //                if (img != null)
-                                //                {
-                                //                    img.Save(cover4Path, ImageFormat.Png);
-                                //                }
-                                //            }
-                                //            catch { }
-                                //            break; // 最初のShapeのみ
-                                //        }
-                                //    }
-                                //}
 
                                 if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
                             }
