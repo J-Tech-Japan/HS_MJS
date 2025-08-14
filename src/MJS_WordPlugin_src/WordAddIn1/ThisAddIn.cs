@@ -3,12 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Xml;
-using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -17,7 +12,30 @@ namespace WordAddIn1
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             // EnhMetaFileBitsを使用した画像・キャンバス抽出（アクティブドキュメントから直接、テキスト情報付き） ***
-            ExtractImagesAndCanvasFromActiveDocumentWithText();
+            //ExtractImagesAndCanvasFromActiveDocumentWithText();
+        }
+
+        private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+        {
+            try
+            {
+                // アドイン終了時に全ての画像マーカーを削除
+                if (Globals.ThisAddIn.Application != null && Globals.ThisAddIn.Application.Documents.Count > 0)
+                {
+                    RemoveMarkersFromActiveDocument();
+                }
+                
+                // 必要に応じてリソースを解放
+                if (Globals.ThisAddIn.Application != null)
+                {
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(Globals.ThisAddIn.Application);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"アドイン終了時にエラーが発生しました: {ex.Message}");
+                // シャットダウン時はメッセージボックスを表示しない（Wordの終了を妨げる可能性があるため）
+            }
         }
 
         // EnhMetaFileBitsを使用してアクティブWordドキュメントから画像とキャンバスを直接抽出する
@@ -34,7 +52,7 @@ namespace WordAddIn1
 
                 string docDir = Path.GetDirectoryName(doc.FullName);
                 string docName = Path.GetFileNameWithoutExtension(doc.FullName);
-                
+
                 // 抽出先フォルダを作成（ドキュメントと同じディレクトリに作成）
                 string extractedImagesDir = Path.Combine(docDir, $"{docName}_extracted_images");
                 if (!Directory.Exists(extractedImagesDir))
@@ -48,7 +66,7 @@ namespace WordAddIn1
                     {
                         try { File.Delete(file); } catch { }
                     }
-                    
+
                     // 既存のテキストファイルもクリア
                     var existingTextFiles = Directory.GetFiles(extractedImagesDir, "*.txt");
                     foreach (var file in existingTextFiles)
@@ -59,7 +77,7 @@ namespace WordAddIn1
 
                 // EnhMetaFileBitsを使用して画像・キャンバスを抽出
                 List<Utils.ExtractedImageInfo> extractedImages = Utils.ExtractImagesFromWord(
-                    doc, 
+                    doc,
                     extractedImagesDir,
                     includeInlineShapes: true,    // インライン図形を抽出
                     includeShapes: true,          // フローティング図形を抽出
@@ -92,43 +110,33 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"アクティブドキュメントからの画像抽出中にエラーが発生しました: {ex.Message}\nStackTrace: {ex.StackTrace}", 
+                MessageBox.Show($"アクティブドキュメントからの画像抽出中にエラーが発生しました: {ex.Message}\nStackTrace: {ex.StackTrace}",
                     "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+
+        /// <summary>
+        /// アクティブドキュメントから画像マーカーを削除する
+        /// </summary>
+        /// <returns>削除されたマーカーの数。エラーの場合は-1</returns>
+        private int RemoveMarkersFromActiveDocument()
         {
             try
             {
-                // アドイン終了時に全ての画像マーカーを削除
-                if (Globals.ThisAddIn.Application != null && Globals.ThisAddIn.Application.Documents.Count > 0)
+                var doc = Globals.ThisAddIn.Application.ActiveDocument;
+                if (doc != null)
                 {
-                    try
-                    {
-                        var doc = Globals.ThisAddIn.Application.ActiveDocument;
-                        if (doc != null)
-                        {
-                            int removedCount = Utils.RemoveAllImageMarkers(doc);
-                            System.Diagnostics.Debug.WriteLine($"シャットダウン時にマーカーを削除: {removedCount}個");
-                        }
-                    }
-                    catch (Exception docEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"ドキュメントからのマーカー削除エラー: {docEx.Message}");
-                    }
+                    int removedCount = Utils.RemoveAllImageMarkers(doc);
+                    System.Diagnostics.Debug.WriteLine($"シャットダウン時にマーカーを削除: {removedCount}個");
+                    return removedCount;
                 }
-                
-                // 必要に応じてリソースを解放
-                if (Globals.ThisAddIn.Application != null)
-                {
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(Globals.ThisAddIn.Application);
-                }
+                return 0;
             }
-            catch (Exception ex)
+            catch (Exception docEx)
             {
-                System.Diagnostics.Debug.WriteLine($"アドイン終了時にエラーが発生しました: {ex.Message}");
-                // シャットダウン時はメッセージボックスを表示しない（Wordの終了を妨げる可能性があるため）
+                System.Diagnostics.Debug.WriteLine($"ドキュメントからのマーカー削除エラー: {docEx.Message}");
+                return -1;
             }
         }
 

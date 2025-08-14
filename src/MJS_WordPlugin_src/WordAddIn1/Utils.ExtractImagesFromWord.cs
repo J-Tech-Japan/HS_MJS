@@ -113,7 +113,7 @@ namespace WordAddIn1
                             // マーカーを追加
                             if (addMarkers)
                             {
-                                InsertHiddenMarker(inlineShape.Range, filePath);
+                                InsertMarker(inlineShape.Range, filePath);
                             }
 
                             imageCounter++;
@@ -240,8 +240,8 @@ namespace WordAddIn1
                 selection.TypeText("\r");
                 
                 // 新しい行に特殊な識別子を挿入
-                string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
-                selection.TypeText(hiddenMarker);
+                string marker = $"[IMAGEMARKER:{markerText}]";
+                selection.TypeText(marker);
                 
                 // マーカーの後に改行を追加
                 selection.TypeText("\r");
@@ -353,9 +353,9 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// インライン図形の次の行に見えないマーカーを挿入
+        /// インライン図形の次の行にマーカーテキストを挿入
         /// </summary>
-        private static void InsertHiddenMarker(Word.Range range, string filePath)
+        private static void InsertMarker(Word.Range range, string filePath)
         {
             try
             {
@@ -373,8 +373,8 @@ namespace WordAddIn1
                 
                 // 新しい行に特殊な識別子を挿入（HTML出力後に置換される）
                 var markerRange = range.Document.Range(insertRange.End, insertRange.End);
-                string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
-                markerRange.Text = hiddenMarker;
+                string marker = $"[IMAGEMARKER:{markerText}]";
+                markerRange.Text = marker;
                 
                 // マーカーの後に改行を追加
                 var afterMarkerRange = range.Document.Range(markerRange.End, markerRange.End);
@@ -387,7 +387,7 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// 指定した位置の次の行に見えないマーカーを挿入（フローティング図形用）
+        /// 指定した位置の次の行にマーカーを挿入（フローティング図形用）
         /// </summary>
         private static void InsertMarkerAtPosition(Word.Range anchor, string filePath)
         {
@@ -407,8 +407,8 @@ namespace WordAddIn1
                 
                 // 新しい行に特殊な識別子を挿入（HTML出力後に置換される）
                 var markerRange = anchor.Document.Range(insertRange.End, insertRange.End);
-                string hiddenMarker = $"[IMAGEMARKER:{markerText}]";
-                markerRange.Text = hiddenMarker;
+                string marker = $"[IMAGEMARKER:{markerText}]";
+                markerRange.Text = marker;
                 
                 // マーカーの後に改行を追加
                 var afterMarkerRange = anchor.Document.Range(markerRange.End, markerRange.End);
