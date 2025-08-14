@@ -111,9 +111,15 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
+                        // TODO: 抽出先フォルダを作成
+                        string extractedImagesDir = Path.Combine(paths.exportDir, $"extracted_images");
+                        if (!Directory.Exists(extractedImagesDir))
+                            Directory.CreateDirectory(extractedImagesDir);
+
+                        // 高画質の画像とキャンバスの抽出
                         Utils.ExtractImagesFromWord(
                             docCopy,
-                            paths.exportDir,
+                            extractedImagesDir,
                             includeInlineShapes: true,    // インライン図形を抽出
                             includeShapes: true,          // フローティング図形を抽出
                             includeCanvasItems: false,    // キャンバス内アイテムは抽出しない

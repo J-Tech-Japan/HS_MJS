@@ -21,7 +21,10 @@ namespace WordAddIn1
             public string ImageType { get; set; }
             public int Position { get; set; }
 
-            public ExtractedImageInfo(string filePath, string imageType, int position)
+            public ExtractedImageInfo(
+                string filePath, 
+                string imageType, 
+                int position)
             {
                 FilePath = filePath;
                 ImageType = imageType;
@@ -67,13 +70,25 @@ namespace WordAddIn1
                 // インライン図形の抽出
                 if (includeInlineShapes)
                 {
-                    ExtractInlineShapes(document, outputDirectory, ref imageCounter, extractedImages, addMarkers);
+                    ExtractInlineShapes(
+                        document, 
+                        outputDirectory, 
+                        ref imageCounter, 
+                        extractedImages, 
+                        addMarkers);
                 }
 
                 // フローティング図形の抽出
                 if (includeShapes)
                 {
-                    ExtractFloatingShapes(document, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, includeFreeforms, addMarkers);
+                    ExtractFloatingShapes(
+                        document, 
+                        outputDirectory, 
+                        ref imageCounter, 
+                        extractedImages, 
+                        includeCanvasItems, 
+                        includeFreeforms, 
+                        addMarkers);
                 }
 
                 return extractedImages;
@@ -87,7 +102,12 @@ namespace WordAddIn1
         /// <summary>
         /// インライン図形からEnhMetaFileBitsを使用して画像を抽出
         /// </summary>
-        private static void ExtractInlineShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool addMarkers = false)
+        private static void ExtractInlineShapes(
+            Word.Document document, 
+            string outputDirectory, 
+            ref int imageCounter, 
+            List<ExtractedImageInfo> extractedImages, 
+            bool addMarkers = false)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -98,8 +118,11 @@ namespace WordAddIn1
                     
                     if (metaFileData != null && metaFileData.Length > 0)
                     {
-                        string filePath = ExtractImageFromMetaFileData(metaFileData, outputDirectory, 
-                            $"inline_image_{imageCounter}", inlineShape.Type.ToString());
+                        string filePath = ExtractImageFromMetaFileData(
+                            metaFileData, 
+                            outputDirectory, 
+                            $"inline_image_{imageCounter}", 
+                            inlineShape.Type.ToString());
                         
                         if (!string.IsNullOrEmpty(filePath))
                         {
@@ -131,7 +154,14 @@ namespace WordAddIn1
         /// <summary>
         /// フローティング図形からEnhMetaFileBitsを使用して画像を抽出
         /// </summary>
-        private static void ExtractFloatingShapes(Word.Document document, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems, bool includeFreeforms, bool addMarkers = false)
+        private static void ExtractFloatingShapes(
+            Word.Document document, 
+            string outputDirectory, 
+            ref int imageCounter, 
+            List<ExtractedImageInfo> extractedImages, 
+            bool includeCanvasItems, 
+            bool includeFreeforms, 
+            bool addMarkers = false)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -140,20 +170,38 @@ namespace WordAddIn1
                     // キャンバス図形の場合
                     if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                     {
-                        ExtractCanvasShape(shape, outputDirectory, ref imageCounter, extractedImages, includeCanvasItems, addMarkers);
+                        ExtractCanvasShape(
+                            shape, 
+                            outputDirectory, 
+                            ref imageCounter, 
+                            extractedImages, 
+                            includeCanvasItems, 
+                            addMarkers);
                     }
                     // フリーフォーム図形の場合
                     else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
                     {
                         if (includeFreeforms)
                         {
-                            ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages, "freeform", addMarkers);
+                            ExtractSingleShape(
+                                shape, 
+                                outputDirectory, 
+                                ref imageCounter, 
+                                extractedImages, 
+                                "freeform", 
+                                addMarkers);
                         }
                     }
                     // 通常の図形の場合
                     else
                     {
-                        ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages, "shape", addMarkers);
+                        ExtractSingleShape(
+                            shape, 
+                            outputDirectory, 
+                            ref imageCounter, 
+                            extractedImages, 
+                            "shape", 
+                            addMarkers);
                     }
                 }
                 catch (Exception ex)
@@ -167,7 +215,13 @@ namespace WordAddIn1
         /// <summary>
         /// キャンバス図形から画像を抽出
         /// </summary>
-        private static void ExtractCanvasShape(Word.Shape canvas, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool includeCanvasItems, bool addMarkers = false)
+        private static void ExtractCanvasShape(
+            Word.Shape canvas, 
+            string outputDirectory, 
+            ref int imageCounter, 
+            List<ExtractedImageInfo> extractedImages, 
+            bool includeCanvasItems, 
+            bool addMarkers = false)
         {
             try
             {
@@ -177,8 +231,11 @@ namespace WordAddIn1
                 
                 if (canvasData != null && canvasData.Length > 0)
                 {
-                    string filePath = ExtractImageFromMetaFileData(canvasData, outputDirectory, 
-                        $"canvas_{imageCounter}", "Canvas");
+                    string filePath = ExtractImageFromMetaFileData(
+                        canvasData, 
+                        outputDirectory, 
+                        $"canvas_{imageCounter}", 
+                        "Canvas");
                     
                     if (!string.IsNullOrEmpty(filePath))
                     {
@@ -211,7 +268,12 @@ namespace WordAddIn1
                 // キャンバス内のアイテムを個別に抽出
                 if (includeCanvasItems && canvas.CanvasItems.Count > 0)
                 {
-                    ExtractCanvasItems(canvas, outputDirectory, ref imageCounter, extractedImages, addMarkers);
+                    ExtractCanvasItems(
+                        canvas, 
+                        outputDirectory, 
+                        ref imageCounter, 
+                        extractedImages, 
+                        addMarkers);
                 }
             }
             catch (Exception ex)
@@ -255,13 +317,24 @@ namespace WordAddIn1
         /// <summary>
         /// キャンバス内のアイテムを抽出
         /// </summary>
-        private static void ExtractCanvasItems(Word.Shape canvas, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, bool addMarkers = false)
+        private static void ExtractCanvasItems(
+            Word.Shape canvas, 
+            string outputDirectory, 
+            ref int imageCounter, 
+            List<ExtractedImageInfo> extractedImages, 
+            bool addMarkers = false)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
                 try
                 {
-                    ExtractSingleShape(canvasItem, outputDirectory, ref imageCounter, extractedImages, "canvas_item", addMarkers);
+                    ExtractSingleShape(
+                        canvasItem, 
+                        outputDirectory, 
+                        ref imageCounter, 
+                        extractedImages, 
+                        "canvas_item", 
+                        addMarkers);
                 }
                 catch (Exception ex)
                 {
@@ -273,7 +346,13 @@ namespace WordAddIn1
         /// <summary>
         /// 単一の図形から画像を抽出
         /// </summary>
-        private static void ExtractSingleShape(Word.Shape shape, string outputDirectory, ref int imageCounter, List<ExtractedImageInfo> extractedImages, string prefix = "shape", bool addMarkers = false)
+        private static void ExtractSingleShape(
+            Word.Shape shape, 
+            string outputDirectory, 
+            ref int imageCounter, 
+            List<ExtractedImageInfo> extractedImages, 
+            string prefix = "shape", 
+            bool addMarkers = false)
         {
             try
             {
@@ -282,8 +361,11 @@ namespace WordAddIn1
                 
                 if (shapeData != null && shapeData.Length > 0)
                 {
-                    string filePath = ExtractImageFromMetaFileData(shapeData, outputDirectory, 
-                        $"{prefix}_{imageCounter}", shape.Type.ToString());
+                    string filePath = ExtractImageFromMetaFileData(
+                        shapeData, 
+                        outputDirectory, 
+                        $"{prefix}_{imageCounter}", 
+                        shape.Type.ToString());
                     
                     if (!string.IsNullOrEmpty(filePath))
                     {
@@ -313,7 +395,11 @@ namespace WordAddIn1
         /// <summary>
         /// EnhMetaFileBitsから画像ファイルを作成
         /// </summary>
-        private static string ExtractImageFromMetaFileData(byte[] metaFileData, string outputDirectory, string baseFileName, string shapeType)
+        private static string ExtractImageFromMetaFileData(
+            byte[] metaFileData, 
+            string outputDirectory, 
+            string baseFileName, 
+            string shapeType)
         {
             try
             {
@@ -451,7 +537,8 @@ namespace WordAddIn1
         /// </summary>
         /// <param name="extractedImages">抽出された画像情報のリスト</param>
         /// <param name="outputPath">出力ファイルパス</param>
-        public static void ExportImageInfoToTextFile(List<ExtractedImageInfo> extractedImages, string outputPath)
+        public static void ExportImageInfoToTextFile(
+            List<ExtractedImageInfo> extractedImages, string outputPath)
         {
             try
             {
