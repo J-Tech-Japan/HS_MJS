@@ -111,20 +111,16 @@ namespace WordAddIn1
                         // ドキュメントを一時HTML用にコピー
                         var docCopy = CopyDocumentToHtml(application, log);
 
-                        // TODO: 抽出先フォルダを作成
-                        string extractedImagesDir = Path.Combine(paths.exportDir, $"extracted_images");
-                        if (!Directory.Exists(extractedImagesDir))
-                            Directory.CreateDirectory(extractedImagesDir);
-
                         // 高画質の画像とキャンバスの抽出
                         Utils.ExtractImagesFromWord(
                             docCopy,
-                            extractedImagesDir,
+                            Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
                             includeInlineShapes: true,    // インライン図形を抽出
                             includeShapes: true,          // フローティング図形を抽出
                             includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
-                            addMarkers: true              // マーカーを追加
+                            addMarkers: true,             // マーカーを追加
+                            skipCoverMarkers: true        // 表紙の画像にはマーカーをつけない
                         );
 
                         int biCount = 0;
@@ -586,6 +582,20 @@ namespace WordAddIn1
 
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
+
+                        // TODO: 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER:xxx]を処理し、画像参照を更新）
+                        log.WriteLine("画像マーカー処理");
+                        try
+                        {
+                            string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
+                            int processedFiles = Utils.ProcessImageMarkersInWebhelp(webhelpPath, "extracted_images");
+                            log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
+                        }
+                        catch (Exception ex)
+                        {
+                            log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
+                            // エラーが発生しても処理を継続
+                        }
 
                         // TODO: 検索ブロックの削除
                         foreach (string heading in headings)

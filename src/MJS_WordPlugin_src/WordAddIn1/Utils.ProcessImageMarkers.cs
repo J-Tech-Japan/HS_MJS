@@ -17,7 +17,9 @@ namespace WordAddIn1
         /// <param name="webhelpDirectory">webhelpディレクトリのパス</param>
         /// <param name="extractedImagesDirectory">extracted_imagesディレクトリの相対パス（例: "extracted_images"）</param>
         /// <returns>処理されたファイル数</returns>
-        public static int ProcessImageMarkersInWebhelp(string webhelpDirectory, string extractedImagesDirectory = "extracted_images")
+        public static int ProcessImageMarkersInWebhelp(
+            string webhelpDirectory,
+            string extractedImagesDirectory = "extracted_images")
         {
             if (string.IsNullOrEmpty(webhelpDirectory))
                 throw new ArgumentException("webhelpディレクトリが指定されていません。", nameof(webhelpDirectory));
@@ -241,7 +243,9 @@ namespace WordAddIn1
         /// <param name="webhelpDirectory">webhelpディレクトリのパス</param>
         /// <param name="extractedImagesDirectory">extracted_imagesディレクトリの相対パス</param>
         /// <returns>抽出された画像ファイルのパス一覧</returns>
-        public static List<string> GetExtractedImageFiles(string webhelpDirectory, string extractedImagesDirectory = "extracted_images")
+        public static List<string> GetExtractedImageFiles(
+            string webhelpDirectory,
+            string extractedImagesDirectory = "extracted_images")
         {
             string extractedImagesPath = Path.Combine(webhelpDirectory, extractedImagesDirectory);
             
