@@ -597,7 +597,28 @@ namespace WordAddIn1
                             // エラーが発生しても処理を継続
                         }
 
-                        // TODO: 検索ブロックの削除
+                        // search.jsファイルからイメージマーカーを削除
+                        log.WriteLine("search.jsファイルのイメージマーカー削除");
+                        try
+                        {
+                            //string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
+                            int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
+                            if (removedMarkers >= 0)
+                            {
+                                log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
+                            }
+                            else
+                            {
+                                log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
+                            // エラーが発生しても処理を継続
+                        }
+
+                        // 検索ブロックの削除
                         foreach (string heading in headings)
                         {
                             RemoveSearchBlockByTitle(
@@ -614,7 +635,6 @@ namespace WordAddIn1
                             paths.exportDir);
                         }
 
-                        // Zipファイル作成ログ
                         log.WriteLine("Zipファイル作成");
                         
                         // Zipアーカイブの生成
@@ -635,16 +655,7 @@ namespace WordAddIn1
                         //    File.Delete(paths.logPath);
                         //}
 
-                        // ドキュメント変更イベントを再登録
-                        application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
-
-                        // tmpcoverpicのクリーンアップ（必要であれば）
-                        //var tmpCoverPicPath = Path.Combine(paths.rootPath, "tmpcoverpic");
-                        //if (Directory.Exists(tmpCoverPicPath))
-                        //{
-                        //    try { Directory.Delete(tmpCoverPicPath, true); }
-                        //    catch { /* ログ出力など必要に応じて */ }
-                        //}
+                        application.DocumentChange += new ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
                     }
                 }
 
