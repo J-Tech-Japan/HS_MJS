@@ -42,6 +42,7 @@ namespace WordAddIn1
         /// <param name="includeCanvasItems">キャンバス内アイテムを含むかどうか</param>
         /// <param name="includeFreeforms">フリーフォーム図形を含むかどうか</param>
         /// <param name="addMarkers">抽出した画像の後ろにマーカーテキストを追加するかどうか</param>
+        /// <param name="skipCoverMarkers">表紙（第1セクション）の画像にマーカーを追加しないかどうか</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
@@ -50,7 +51,8 @@ namespace WordAddIn1
             bool includeShapes = true,
             bool includeCanvasItems = true,
             bool includeFreeforms = true,
-            bool addMarkers = true)
+            bool addMarkers = true,
+            bool skipCoverMarkers = true)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -75,7 +77,8 @@ namespace WordAddIn1
                         outputDirectory, 
                         ref imageCounter, 
                         extractedImages, 
-                        addMarkers);
+                        addMarkers,
+                        skipCoverMarkers);
                 }
 
                 // フローティング図形の抽出
@@ -88,7 +91,8 @@ namespace WordAddIn1
                         extractedImages, 
                         includeCanvasItems, 
                         includeFreeforms, 
-                        addMarkers);
+                        addMarkers,
+                        skipCoverMarkers);
                 }
 
                 return extractedImages;
@@ -107,7 +111,8 @@ namespace WordAddIn1
             string outputDirectory, 
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
-            bool addMarkers = false)
+            bool addMarkers = false,
+            bool skipCoverMarkers = true)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -133,8 +138,8 @@ namespace WordAddIn1
                             );
                             extractedImages.Add(imageInfo);
 
-                            // マーカーを追加
-                            if (addMarkers)
+                            // マーカーを追加（表紙の画像は除外）
+                            if (addMarkers && !IsInCoverSection(inlineShape.Range, skipCoverMarkers))
                             {
                                 InsertMarker(inlineShape.Range, filePath);
                             }
@@ -161,7 +166,8 @@ namespace WordAddIn1
             List<ExtractedImageInfo> extractedImages, 
             bool includeCanvasItems, 
             bool includeFreeforms, 
-            bool addMarkers = false)
+            bool addMarkers = false,
+            bool skipCoverMarkers = true)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -176,7 +182,8 @@ namespace WordAddIn1
                             ref imageCounter, 
                             extractedImages, 
                             includeCanvasItems, 
-                            addMarkers);
+                            addMarkers,
+                            skipCoverMarkers);
                     }
                     // フリーフォーム図形の場合
                     else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
@@ -189,7 +196,8 @@ namespace WordAddIn1
                                 ref imageCounter, 
                                 extractedImages, 
                                 "freeform", 
-                                addMarkers);
+                                addMarkers,
+                                skipCoverMarkers);
                         }
                     }
                     // 通常の図形の場合
@@ -201,7 +209,8 @@ namespace WordAddIn1
                             ref imageCounter, 
                             extractedImages, 
                             "shape", 
-                            addMarkers);
+                            addMarkers,
+                            skipCoverMarkers);
                     }
                 }
                 catch (Exception ex)
@@ -221,7 +230,8 @@ namespace WordAddIn1
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
             bool includeCanvasItems, 
-            bool addMarkers = false)
+            bool addMarkers = false,
+            bool skipCoverMarkers = true)
         {
             try
             {
@@ -246,8 +256,8 @@ namespace WordAddIn1
                         );
                         extractedImages.Add(imageInfo);
 
-                        // マーカーを追加（キャンバスの場合は異なるアプローチを使用）
-                        if (addMarkers)
+                        // マーカーを追加（表紙の画像は除外）
+                        if (addMarkers && !IsShapeInCoverSection(canvas, skipCoverMarkers))
                         {
                             if (canvas.Anchor != null)
                             {
@@ -273,7 +283,8 @@ namespace WordAddIn1
                         outputDirectory, 
                         ref imageCounter, 
                         extractedImages, 
-                        addMarkers);
+                        addMarkers,
+                        skipCoverMarkers);
                 }
             }
             catch (Exception ex)
@@ -322,7 +333,8 @@ namespace WordAddIn1
             string outputDirectory, 
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
-            bool addMarkers = false)
+            bool addMarkers = false,
+            bool skipCoverMarkers = true)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
@@ -334,7 +346,8 @@ namespace WordAddIn1
                         ref imageCounter, 
                         extractedImages, 
                         "canvas_item", 
-                        addMarkers);
+                        addMarkers,
+                        skipCoverMarkers);
                 }
                 catch (Exception ex)
                 {
@@ -352,7 +365,8 @@ namespace WordAddIn1
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
             string prefix = "shape", 
-            bool addMarkers = false)
+            bool addMarkers = false,
+            bool skipCoverMarkers = true)
         {
             try
             {
@@ -376,8 +390,8 @@ namespace WordAddIn1
                         );
                         extractedImages.Add(imageInfo);
 
-                        // マーカーを追加
-                        if (addMarkers && shape.Anchor != null)
+                        // マーカーを追加（表紙の画像は除外）
+                        if (addMarkers && shape.Anchor != null && !IsShapeInCoverSection(shape, skipCoverMarkers))
                         {
                             InsertMarkerAtPosition(shape.Anchor, filePath);
                         }
@@ -389,6 +403,56 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"図形の抽出でエラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 指定されたRangeが表紙（第1セクション）にあるかどうかを判定
+        /// </summary>
+        /// <param name="range">判定対象のRange</param>
+        /// <param name="skipCoverMarkers">表紙マーカーをスキップするかどうか</param>
+        /// <returns>表紙にある場合はtrue</returns>
+        private static bool IsInCoverSection(Word.Range range, bool skipCoverMarkers)
+        {
+            if (!skipCoverMarkers)
+                return false;
+
+            try
+            {
+                // Rangeが属するセクション番号を取得
+                int sectionNumber = range.Information[Word.WdInformation.wdActiveEndSectionNumber];
+                return sectionNumber == 1;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"セクション番号の取得でエラー: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 指定されたShapeが表紙（第1セクション）にあるかどうかを判定
+        /// </summary>
+        /// <param name="shape">判定対象のShape</param>
+        /// <param name="skipCoverMarkers">表紙マーカーをスキップするかどうか</param>
+        /// <returns>表紙にある場合はtrue</returns>
+        private static bool IsShapeInCoverSection(Word.Shape shape, bool skipCoverMarkers)
+        {
+            if (!skipCoverMarkers)
+                return false;
+
+            try
+            {
+                // Shapeを選択してセクション番号を取得
+                shape.Select();
+                var selection = Globals.ThisAddIn.Application.Selection;
+                int sectionNumber = selection.Information[Word.WdInformation.wdActiveEndSectionNumber];
+                return sectionNumber == 1;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"図形のセクション番号取得でエラー: {ex.Message}");
+                return false;
             }
         }
 
@@ -408,7 +472,7 @@ namespace WordAddIn1
                     using (var image = Image.FromStream(memoryStream))
                     {
                         // 最小サイズのフィルタリング（必要に応じて調整）
-                        if (image.Width < 10 || image.Height < 10)
+                        if (image.Width < 250 || image.Height < 250)
                             return null;
 
                         // ファイル名の生成

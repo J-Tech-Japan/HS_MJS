@@ -12,7 +12,7 @@ namespace WordAddIn1
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             // EnhMetaFileBitsを使用した画像・キャンバス抽出（アクティブドキュメントから直接、テキスト情報付き） ***
-            //ExtractImagesAndCanvasFromActiveDocumentWithText();
+            ExtractImagesAndCanvasFromActiveDocumentWithText();
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
@@ -83,7 +83,8 @@ namespace WordAddIn1
                     includeShapes: true,          // フローティング図形を抽出
                     includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                     includeFreeforms: false,      // フリーフォーム図形は抽出しない
-                    addMarkers: true              // マーカーを追加
+                    addMarkers: true,             // マーカーを追加
+                    skipCoverMarkers: true        // 表紙の画像にはマーカーをつけない
                 );
 
                 // 画像情報をファイルに出力
