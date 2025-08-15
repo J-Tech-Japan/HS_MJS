@@ -112,7 +112,8 @@ namespace WordAddIn1
                         var docCopy = CopyDocumentToHtml(application, log);
 
                         // 高画質の画像とキャンバスの抽出
-                        Utils.ExtractImagesFromWord(
+                        log.WriteLine("高画質画像とキャンバスの抽出開始");
+                        var extractedImages = Utils.ExtractImagesFromWord(
                             docCopy,
                             Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
                             includeInlineShapes: true,    // インライン図形を抽出
@@ -120,8 +121,22 @@ namespace WordAddIn1
                             includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
                             addMarkers: true,             // マーカーを追加
-                            skipCoverMarkers: true        // 表紙の画像にはマーカーをつけない
+                            skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
+                            minOriginalWidth: 50.0f,     // 元画像の最小幅（100ポイント）
+                            minOriginalHeight: 50.0f     // 元画像の最小高さ（100ポイント）
                         );
+                        
+                        // 抽出統計をログに出力
+                        if (extractedImages != null)
+                        {
+                            log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
+                            string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
+                            log.WriteLine(statistics);
+                        }
+                        else
+                        {
+                            log.WriteLine("画像抽出結果: 抽出された画像はありません");
+                        }
 
                         int biCount = 0;
                         bool coverExist = false;
