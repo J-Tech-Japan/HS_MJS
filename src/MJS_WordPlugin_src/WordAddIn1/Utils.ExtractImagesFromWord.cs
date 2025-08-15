@@ -20,15 +20,21 @@ namespace WordAddIn1
             public string FilePath { get; set; }
             public string ImageType { get; set; }
             public int Position { get; set; }
+            public float OriginalWidth { get; set; }
+            public float OriginalHeight { get; set; }
 
             public ExtractedImageInfo(
                 string filePath, 
                 string imageType, 
-                int position)
+                int position,
+                float originalWidth = 0,
+                float originalHeight = 0)
             {
                 FilePath = filePath;
                 ImageType = imageType;
                 Position = position;
+                OriginalWidth = originalWidth;
+                OriginalHeight = originalHeight;
             }
         }
 
@@ -43,6 +49,8 @@ namespace WordAddIn1
         /// <param name="includeFreeforms">フリーフォーム図形を含むかどうか</param>
         /// <param name="addMarkers">抽出した画像の後ろにマーカーテキストを追加するかどうか</param>
         /// <param name="skipCoverMarkers">表紙（第1セクション）の画像にマーカーを追加しないかどうか</param>
+        /// <param name="minOriginalWidth">元画像の最小幅（ポイント単位）</param>
+        /// <param name="minOriginalHeight">元画像の最小高さ（ポイント単位）</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
@@ -52,7 +60,9 @@ namespace WordAddIn1
             bool includeCanvasItems = true,
             bool includeFreeforms = true,
             bool addMarkers = true,
-            bool skipCoverMarkers = true)
+            bool skipCoverMarkers = true,
+            float minOriginalWidth = 50.0f,
+            float minOriginalHeight = 50.0f)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -78,7 +88,9 @@ namespace WordAddIn1
                         ref imageCounter, 
                         extractedImages, 
                         addMarkers,
-                        skipCoverMarkers);
+                        skipCoverMarkers,
+                        minOriginalWidth,
+                        minOriginalHeight);
                 }
 
                 // フローティング図形の抽出
@@ -92,7 +104,9 @@ namespace WordAddIn1
                         includeCanvasItems, 
                         includeFreeforms, 
                         addMarkers,
-                        skipCoverMarkers);
+                        skipCoverMarkers,
+                        minOriginalWidth,
+                        minOriginalHeight);
                 }
 
                 return extractedImages;
@@ -112,12 +126,24 @@ namespace WordAddIn1
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
             bool addMarkers = false,
-            bool skipCoverMarkers = true)
+            bool skipCoverMarkers = true,
+            float minOriginalWidth = 50.0f,
+            float minOriginalHeight = 50.0f)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
                 try
                 {
+                    // 元画像サイズでのフィルタリング
+                    float originalWidth = inlineShape.Width;
+                    float originalHeight = inlineShape.Height;
+                    
+                    if (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"インライン図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                        continue;
+                    }
+
                     // EnhMetaFileBitsを取得
                     byte[] metaFileData = (byte[])inlineShape.Range.EnhMetaFileBits;
                     
@@ -134,7 +160,9 @@ namespace WordAddIn1
                             var imageInfo = new ExtractedImageInfo(
                                 filePath, 
                                 $"インライン図形_{inlineShape.Type}", 
-                                inlineShape.Range.Start
+                                inlineShape.Range.Start,
+                                originalWidth,
+                                originalHeight
                             );
                             extractedImages.Add(imageInfo);
 
@@ -167,7 +195,9 @@ namespace WordAddIn1
             bool includeCanvasItems, 
             bool includeFreeforms, 
             bool addMarkers = false,
-            bool skipCoverMarkers = true)
+            bool skipCoverMarkers = true,
+            float minOriginalWidth = 50.0f,
+            float minOriginalHeight = 50.0f)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -183,7 +213,9 @@ namespace WordAddIn1
                             extractedImages, 
                             includeCanvasItems, 
                             addMarkers,
-                            skipCoverMarkers);
+                            skipCoverMarkers,
+                            minOriginalWidth,
+                            minOriginalHeight);
                     }
                     // フリーフォーム図形の場合
                     else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
@@ -197,7 +229,9 @@ namespace WordAddIn1
                                 extractedImages, 
                                 "freeform", 
                                 addMarkers,
-                                skipCoverMarkers);
+                                skipCoverMarkers,
+                                minOriginalWidth,
+                                minOriginalHeight);
                         }
                     }
                     // 通常の図形の場合
@@ -210,7 +244,9 @@ namespace WordAddIn1
                             extractedImages, 
                             "shape", 
                             addMarkers,
-                            skipCoverMarkers);
+                            skipCoverMarkers,
+                            minOriginalWidth,
+                            minOriginalHeight);
                     }
                 }
                 catch (Exception ex)
@@ -231,47 +267,62 @@ namespace WordAddIn1
             List<ExtractedImageInfo> extractedImages, 
             bool includeCanvasItems, 
             bool addMarkers = false,
-            bool skipCoverMarkers = true)
+            bool skipCoverMarkers = true,
+            float minOriginalWidth = 50.0f,
+            float minOriginalHeight = 50.0f)
         {
             try
             {
-                // キャンバス全体を画像として抽出
-                canvas.Select();
-                byte[] canvasData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
+                // 元画像サイズでのフィルタリング
+                float originalWidth = canvas.Width;
+                float originalHeight = canvas.Height;
                 
-                if (canvasData != null && canvasData.Length > 0)
+                if (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight)
                 {
-                    string filePath = ExtractImageFromMetaFileData(
-                        canvasData, 
-                        outputDirectory, 
-                        $"canvas_{imageCounter}", 
-                        "Canvas");
+                    System.Diagnostics.Debug.WriteLine($"キャンバス図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                }
+                else
+                {
+                    // キャンバス全体を画像として抽出
+                    canvas.Select();
+                    byte[] canvasData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
                     
-                    if (!string.IsNullOrEmpty(filePath))
+                    if (canvasData != null && canvasData.Length > 0)
                     {
-                        var imageInfo = new ExtractedImageInfo(
-                            filePath, 
-                            "キャンバス", 
-                            canvas.Anchor?.Start ?? 0
-                        );
-                        extractedImages.Add(imageInfo);
-
-                        // マーカーを追加（表紙の画像は除外）
-                        if (addMarkers && !IsShapeInCoverSection(canvas, skipCoverMarkers))
+                        string filePath = ExtractImageFromMetaFileData(
+                            canvasData, 
+                            outputDirectory, 
+                            $"canvas_{imageCounter}", 
+                            "Canvas");
+                        
+                        if (!string.IsNullOrEmpty(filePath))
                         {
-                            if (canvas.Anchor != null)
-                            {
-                                InsertMarkerAtPosition(canvas.Anchor, filePath);
-                            }
-                            else
-                            {
-                                // Anchorが利用できない場合、キャンバスが選択された状態で
-                                // 現在の選択範囲を使用してマーカーを挿入
-                                InsertMarkerForSelectedCanvas(filePath);
-                            }
-                        }
+                            var imageInfo = new ExtractedImageInfo(
+                                filePath, 
+                                "キャンバス", 
+                                canvas.Anchor?.Start ?? 0,
+                                originalWidth,
+                                originalHeight
+                            );
+                            extractedImages.Add(imageInfo);
 
-                        imageCounter++;
+                            // マーカーを追加（表紙の画像は除外）
+                            if (addMarkers && !IsShapeInCoverSection(canvas, skipCoverMarkers))
+                            {
+                                if (canvas.Anchor != null)
+                                {
+                                    InsertMarkerAtPosition(canvas.Anchor, filePath);
+                                }
+                                else
+                                {
+                                    // Anchorが利用できない場合、キャンバスが選択された状態で
+                                    // 現在の選択範囲を使用してマーカーを挿入
+                                    InsertMarkerForSelectedCanvas(filePath);
+                                }
+                            }
+
+                            imageCounter++;
+                        }
                     }
                 }
 
@@ -284,7 +335,9 @@ namespace WordAddIn1
                         ref imageCounter, 
                         extractedImages, 
                         addMarkers,
-                        skipCoverMarkers);
+                        skipCoverMarkers,
+                        minOriginalWidth,
+                        minOriginalHeight);
                 }
             }
             catch (Exception ex)
@@ -334,7 +387,9 @@ namespace WordAddIn1
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
             bool addMarkers = false,
-            bool skipCoverMarkers = true)
+            bool skipCoverMarkers = true,
+            float minOriginalWidth = 50.0f,
+            float minOriginalHeight = 50.0f)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
@@ -347,7 +402,9 @@ namespace WordAddIn1
                         extractedImages, 
                         "canvas_item", 
                         addMarkers,
-                        skipCoverMarkers);
+                        skipCoverMarkers,
+                        minOriginalWidth,
+                        minOriginalHeight);
                 }
                 catch (Exception ex)
                 {
@@ -366,10 +423,22 @@ namespace WordAddIn1
             List<ExtractedImageInfo> extractedImages, 
             string prefix = "shape", 
             bool addMarkers = false,
-            bool skipCoverMarkers = true)
+            bool skipCoverMarkers = true,
+            float minOriginalWidth = 50.0f,
+            float minOriginalHeight = 50.0f)
         {
             try
             {
+                // 元画像サイズでのフィルタリング
+                float originalWidth = shape.Width;
+                float originalHeight = shape.Height;
+                
+                if (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{prefix}図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                    return;
+                }
+
                 shape.Select();
                 byte[] shapeData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
                 
@@ -386,7 +455,9 @@ namespace WordAddIn1
                         var imageInfo = new ExtractedImageInfo(
                             filePath, 
                             $"{prefix}_{shape.Type}", 
-                            shape.Anchor?.Start ?? 0
+                            shape.Anchor?.Start ?? 0,
+                            originalWidth,
+                            originalHeight
                         );
                         extractedImages.Add(imageInfo);
 
@@ -593,6 +664,24 @@ namespace WordAddIn1
                 statistics.AppendLine($"{group.Key}: {group.Count()}個");
             }
 
+            // 元サイズ統計を追加
+            if (extractedImages.Any(img => img.OriginalWidth > 0 && img.OriginalHeight > 0))
+            {
+                statistics.AppendLine();
+                statistics.AppendLine("元画像サイズ統計:");
+                var avgWidth = extractedImages.Where(img => img.OriginalWidth > 0).Average(img => img.OriginalWidth);
+                var avgHeight = extractedImages.Where(img => img.OriginalHeight > 0).Average(img => img.OriginalHeight);
+                statistics.AppendLine($"平均サイズ: {avgWidth:F1} x {avgHeight:F1} points");
+                
+                var maxWidth = extractedImages.Where(img => img.OriginalWidth > 0).Max(img => img.OriginalWidth);
+                var maxHeight = extractedImages.Where(img => img.OriginalHeight > 0).Max(img => img.OriginalHeight);
+                statistics.AppendLine($"最大サイズ: {maxWidth:F1} x {maxHeight:F1} points");
+                
+                var minWidth = extractedImages.Where(img => img.OriginalWidth > 0).Min(img => img.OriginalWidth);
+                var minHeight = extractedImages.Where(img => img.OriginalHeight > 0).Min(img => img.OriginalHeight);
+                statistics.AppendLine($"最小サイズ: {minWidth:F1} x {minHeight:F1} points");
+            }
+
             return statistics.ToString();
         }
 
@@ -617,6 +706,10 @@ namespace WordAddIn1
                         writer.WriteLine($"ファイル名: {Path.GetFileName(image.FilePath)}");
                         writer.WriteLine($"種別: {image.ImageType}");
                         writer.WriteLine($"位置: {image.Position}");
+                        if (image.OriginalWidth > 0 && image.OriginalHeight > 0)
+                        {
+                            writer.WriteLine($"元サイズ: {image.OriginalWidth:F1} x {image.OriginalHeight:F1} points");
+                        }
                         writer.WriteLine();
                     }
                 }
