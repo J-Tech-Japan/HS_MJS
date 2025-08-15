@@ -101,28 +101,23 @@ namespace WordAddIn1
         /// <returns>処理されたHTML内容</returns>
         private static string ProcessImageAndMarkerPairs(string htmlContent, string extractedImagesDirectory)
         {
-            // <img>タグの直後に<p>タグで囲まれた[IMAGEMARKER:xxx]があるパターンを検索
-            // パターン説明:
-            // (<img[^>]*>) - <img>タグをキャプチャ
-            // \s*</p>\s* - </p>タグとその前後の空白
-            // <p[^>]*>\s* - <p>タグの開始とその後の空白
-            // \[IMAGEMARKER:([^\]]+)\] - [IMAGEMARKER:xxx]の形式で、xxxの部分をキャプチャ
-            // \s*</p> - その後の空白と</p>タグ
-            string pattern = @"(<img[^>]*>)\s*</p>\s*<p[^>]*>\s*\[IMAGEMARKER:([^\]]+)\]\s*</p>";
+            // 修正版：<img>タグと</p>の間にテキストがある場合も対応
+            string pattern = @"(<img[^>]*>)([^<]*)</p>\s*<p[^>]*>\s*\[IMAGEMARKER:([^\]]+)\]\s*</p>";
 
             var regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             htmlContent = regex.Replace(htmlContent, match =>
             {
                 string imgTag = match.Groups[1].Value;
-                string markerValue = match.Groups[2].Value;
+                string additionalText = match.Groups[2].Value; // 追加テキスト
+                string markerValue = match.Groups[3].Value;
 
                 // imgタグのsrc属性を新しいパスに変更
                 string newSrc = $"{extractedImagesDirectory}/{markerValue}.png";
                 string updatedImgTag = UpdateImageSrc(imgTag, newSrc);
 
-                // マーカーを削除し、更新されたimgタグのみを返す
-                return updatedImgTag + "</p>";
+                // 追加テキストも含めて返す
+                return updatedImgTag + additionalText + "</p>";
             });
 
             return htmlContent;
