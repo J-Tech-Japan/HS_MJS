@@ -1,4 +1,6 @@
-﻿using System;
+﻿// MainForm.BtnJoin.cs
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
