@@ -116,31 +116,31 @@ namespace WordAddIn1
                         var docCopy = CopyDocumentToHtml(application, log);
 
                         // TODO: 高画質の画像とキャンバスの抽出
-                        //log.WriteLine("高画質画像とキャンバスの抽出開始");
-                        //var extractedImages = Utils.ExtractImagesFromWord(
-                        //    docCopy,
-                        //    Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
-                        //    includeInlineShapes: true,    // インライン図形を抽出
-                        //    includeShapes: true,          // フローティング図形を抽出
-                        //    includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
-                        //    includeFreeforms: false,      // フリーフォーム図形は抽出しない
-                        //    addMarkers: true,             // マーカーを追加
-                        //    skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
-                        //    minOriginalWidth: 50.0f,     // 元画像の最小幅（100ポイント）
-                        //    minOriginalHeight: 75.0f     // 元画像の最小高さ（100ポイント）
-                        //);
-                        
+                        log.WriteLine("高画質画像とキャンバスの抽出開始");
+                        var extractedImages = Utils.ExtractImagesFromWord(
+                            docCopy,
+                            Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
+                            includeInlineShapes: true,    // インライン図形を抽出
+                            includeShapes: true,          // フローティング図形を抽出
+                            includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
+                            includeFreeforms: false,      // フリーフォーム図形は抽出しない
+                            addMarkers: true,             // マーカーを追加
+                            skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
+                            minOriginalWidth: 50.0f,     // 元画像の最小幅（100ポイント）
+                            minOriginalHeight: 75.0f     // 元画像の最小高さ（100ポイント）
+                        );
+
                         // 抽出統計をログに出力
-                        //if (extractedImages != null)
-                        //{
-                        //    log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
-                        //    string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
-                        //    log.WriteLine(statistics);
-                        //}
-                        //else
-                        //{
-                        //    log.WriteLine("画像抽出結果: 抽出された画像はありません");
-                        //}
+                        if (extractedImages != null)
+                        {
+                            log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
+                            string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
+                            log.WriteLine(statistics);
+                        }
+                        else
+                        {
+                            log.WriteLine("画像抽出結果: 抽出された画像はありません");
+                        }
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -602,37 +602,37 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
-                        // TODO: 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER:xxx]を処理し、画像参照を更新）
-                        //log.WriteLine("画像マーカー処理");
-                        //try
-                        //{
-                        //    string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
-                        //    int processedFiles = Utils.ProcessImageMarkersInWebhelp(webhelpPath, "extracted_images");
-                        //    log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
-                        //}
-                        //catch (Exception ex)
-                        //{
-                        //    log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
-                        //}
+                        //TODO: 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER: xxx]を処理し、画像参照を更新）
+                        log.WriteLine("画像マーカー処理");
+                        try
+                        {
+                            string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
+                            int processedFiles = Utils.ProcessImageMarkersInWebhelp(webhelpPath, "extracted_images");
+                            log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
+                        }
+                        catch (Exception ex)
+                        {
+                            log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
+                        }
 
                         // search.jsファイルからイメージマーカーを削除
-                        //log.WriteLine("search.jsファイルのイメージマーカー削除");
-                        //try
-                        //{
-                        //    int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
-                        //    if (removedMarkers >= 0)
-                        //    {
-                        //        log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
-                        //    }
-                        //    else
-                        //    {
-                        //        log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
-                        //    }
-                        //}
-                        //catch (Exception ex)
-                        //{
-                        //    log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
-                        //}
+                        log.WriteLine("search.jsファイルのイメージマーカー削除");
+                        try
+                        {
+                            int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
+                            if (removedMarkers >= 0)
+                            {
+                                log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
+                            }
+                            else
+                            {
+                                log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
+                        }
 
                         // 検索ブロックの削除
                         //foreach (string heading in headings)
@@ -651,6 +651,11 @@ namespace WordAddIn1
                         //    paths.exportDir);
                         //}
 
+                        log.WriteLine("Zipファイル作成");
+
+                        // Zipアーカイブの生成
+                        GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName, log);
+
                         foreach (string heading in mergedHeadings)
                         {
                             RemoveSearchBlockByTitle(
@@ -659,7 +664,7 @@ namespace WordAddIn1
                                 paths.exportDir);
                         }
 
-                        // mergedHeadings の内容をテキストファイルに出力
+                        // TODO: mergedHeadings の内容をテキストファイルに出力
                         log.WriteLine("検索対象外見出し一覧をテキストファイルに出力");
                         try
                         {
@@ -676,7 +681,6 @@ namespace WordAddIn1
                         catch (Exception ex)
                         {
                             log.WriteLine($"検索対象外見出し一覧の出力エラー: {ex.Message}");
-                            // エラーが発生しても処理を継続
                         }
                     }
                     catch (Exception ex)
