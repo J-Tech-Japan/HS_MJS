@@ -46,27 +46,27 @@ namespace WordAddIn1
         }
 
         // 指定されたスタイル名の見出しを取得
-        private List<string> GetHeadingsByStyles(List<string> styleNames)
-        {
-            var application = Globals.ThisAddIn.Application;
-            var activeDocument = application.ActiveDocument;
-            List<string> headings = new List<string>();
+        //private List<string> GetHeadingsByStyles(List<string> styleNames)
+        //{
+        //    var application = Globals.ThisAddIn.Application;
+        //    var activeDocument = application.ActiveDocument;
+        //    List<string> headings = new List<string>();
 
-            foreach (Paragraph para in activeDocument.Paragraphs)
-            {
-                string styleName = para.get_Style().NameLocal;
-                if (styleNames.Contains(styleName))
-                {
-                    string text = para.Range.Text.Trim();
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        headings.Add(text);
-                    }
-                }
-            }
+        //    foreach (Paragraph para in activeDocument.Paragraphs)
+        //    {
+        //        string styleName = para.get_Style().NameLocal;
+        //        if (styleNames.Contains(styleName))
+        //        {
+        //            string text = para.Range.Text.Trim();
+        //            if (!string.IsNullOrEmpty(text))
+        //            {
+        //                headings.Add(text);
+        //            }
+        //        }
+        //    }
 
-            return headings;
-        }
+        //    return headings;
+        //}
 
         // 指定されたスタイル名の見出し内にコメントがついている場合
         // 見出しのテキストと、見出しの配下の見出しテキストを取得
