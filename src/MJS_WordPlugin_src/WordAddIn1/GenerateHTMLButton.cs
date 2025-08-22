@@ -634,6 +634,25 @@ namespace WordAddIn1
                             log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
                         }
 
+                        // HTMLファイルからシンプルなspanタグを削除
+                        log.WriteLine("HTMLファイルのシンプルなspanタグ削除");
+                        try
+                        {
+                            int processedHtmlFiles = Utils.RemoveSimpleSpanTagsFromHtmlFolder(paths.exportDirPath);
+                            if (processedHtmlFiles >= 0)
+                            {
+                                log.WriteLine($"HTMLファイルのシンプルなspanタグ削除完了: {processedHtmlFiles}個のファイルを処理しました");
+                            }
+                            else
+                            {
+                                log.WriteLine("HTMLファイルのシンプルなspanタグ削除でエラーが発生しました");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            log.WriteLine($"HTMLファイルのシンプルなspanタグ削除エラー: {ex.Message}");
+                        }
+
                         // 検索ブロックの削除
                         //foreach (string heading in headings)
                         //{
