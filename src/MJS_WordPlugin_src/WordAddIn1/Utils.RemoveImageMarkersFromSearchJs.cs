@@ -101,11 +101,8 @@ namespace WordAddIn1
             // ケースインセンシティブ（大文字小文字区別なし）
             string pattern = @"\[imagemarker:[^\]]*\]";
 
+            // マーカーのみを削除し、元の書式を保持
             string result = Regex.Replace(input, pattern, "", RegexOptions.IgnoreCase);
-
-            // 連続した空白や改行を整理
-            result = Regex.Replace(result, @"\s+", " ");
-            result = Regex.Replace(result, @"\s*\n\s*", "\n");
 
             return result;
         }
