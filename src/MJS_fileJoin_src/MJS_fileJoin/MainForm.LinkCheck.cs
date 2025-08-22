@@ -191,13 +191,38 @@ namespace MJS_fileJoin
             }
             else if (m.Groups[1].Value.StartsWith("_Ref"))
             {
-                titleName = GetRefLinkTitle(file, m);
-                AddLinkTitleMatchResult(file, m, titleName);
+                // _Refリンクの場合は、refPage定義で参照先をチェック
+                if (IsValidRefLink(file, m.Groups[1].Value))
+                {
+                    titleName = GetRefLinkTitle(file, m);
+                }
+                else
+                {
+                    AddInvalidLinkResult(file, m);
+                }
             }
             else
             {
                 AddInvalidLinkResult(file, m);
             }
+        }
+
+        // _Refリンクの妥当性をチェック
+        private bool IsValidRefLink(string file, string refLink)
+        {
+            string allText = ReadAllText(file);
+            var mcRefPage = GetRefPageMatches(allText);
+
+            if (mcRefPage == null || mcRefPage.Count == 0)
+            {
+                return false;
+            }
+
+            // refPage定義内で該当する参照があるかチェック
+            string refPageContent = mcRefPage[0].Groups[1].Value;
+            string refKey = refLink.Replace("_ref", "");
+
+            return Regex.IsMatch(refPageContent, $@"{Regex.Escape(refKey)}\s*:");
         }
     }
 }

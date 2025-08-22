@@ -126,8 +126,8 @@ namespace WordAddIn1
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
                             addMarkers: true,             // マーカーを追加
                             skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
-                            minOriginalWidth: 50.0f,     // 元画像の最小幅（100ポイント）
-                            minOriginalHeight: 75.0f     // 元画像の最小高さ（100ポイント）
+                            minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
+                            minOriginalHeight: 60.0f     // 元画像の最小高さ（ポイント）
                         );
 
                         // 抽出統計をログに出力

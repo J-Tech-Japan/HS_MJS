@@ -363,6 +363,7 @@
     <None Include="NoteBook\MsoShapeType_Explanation.md" />
     <None Include="NoteBook\SaveBackupOfActiveDocument.md" />
     <None Include="NoteBook\search_word_tag_output_process.md" />
+    <None Include="NoteBook\Units_Conversion_Reference.md" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

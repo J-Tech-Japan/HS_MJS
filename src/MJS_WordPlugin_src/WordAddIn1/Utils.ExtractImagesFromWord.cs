@@ -118,6 +118,82 @@ namespace WordAddIn1
         }
         
         /// <summary>
+        /// 指定されたスタイル名が特定のMJSスタイルかどうかを判定
+        /// </summary>
+        /// <param name="styleName">判定対象のスタイル名</param>
+        /// <param name="forceExtract">強制抽出フラグ（出力）</param>
+        /// <param name="forceSkip">強制スキップフラグ（出力）</param>
+        private static void CheckMjsStyleConditions(string styleName, out bool forceExtract, out bool forceSkip)
+        {
+            forceExtract = false;
+            forceSkip = false;
+
+            if (string.IsNullOrEmpty(styleName))
+                return;
+
+            // 強制抽出対象のスタイル（サイズに関わりなく必ず抽出）
+            if (styleName.Contains("MJS_画像（手順内）") || 
+                styleName.Contains("MJS_画像（本文内）") ||
+                styleName.Contains("MJS_画像（コラム内）") ||
+                styleName.Contains("MJS_画像（表内）"))
+            {
+                forceExtract = true;
+                System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定");
+                return;
+            }
+
+            // 強制スキップ対象のスタイル（サイズに関わりなく抽出しない）
+            if (styleName.Contains("MJS_処理フロー") || styleName.Contains("MJS_表内-項目_センタリング"))
+            {
+                forceSkip = true;
+                System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制スキップ対象に設定");
+                return;
+            }
+        }
+
+        /// <summary>
+        /// インライン図形を含む段落のスタイルを取得
+        /// </summary>
+        /// <param name="inlineShape">インライン図形</param>
+        /// <returns>段落のスタイル名</returns>
+        private static string GetInlineShapeParagraphStyle(Word.InlineShape inlineShape)
+        {
+            try
+            {
+                var paragraph = inlineShape.Range.Paragraphs[1];
+                return paragraph.get_Style().NameLocal;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"インライン図形の段落スタイル取得エラー: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// フローティング図形を含む段落のスタイルを取得
+        /// </summary>
+        /// <param name="shape">フローティング図形</param>
+        /// <returns>段落のスタイル名</returns>
+        private static string GetShapeAnchorParagraphStyle(Word.Shape shape)
+        {
+            try
+            {
+                if (shape.Anchor != null)
+                {
+                    var paragraph = shape.Anchor.Paragraphs[1];
+                    return paragraph.get_Style().NameLocal;
+                }
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"フローティング図形のアンカー段落スタイル取得エラー: {ex.Message}");
+                return string.Empty;
+            }
+        }
+        
+        /// <summary>
         /// インライン図形からEnhMetaFileBitsを使用して画像を抽出
         /// </summary>
         private static void ExtractInlineShapes(
@@ -134,11 +210,24 @@ namespace WordAddIn1
             {
                 try
                 {
-                    // 元画像サイズでのフィルタリング
+                    // 段落のスタイルを取得
+                    string paragraphStyle = GetInlineShapeParagraphStyle(inlineShape);
+                    
+                    // MJSスタイルによる条件チェック
+                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip);
+                    
+                    // 強制スキップ対象の場合
+                    if (forceSkip)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"インライン図形をスキップ: スタイル '{paragraphStyle}' により強制スキップ");
+                        continue;
+                    }
+
+                    // 元画像サイズでのフィルタリング（強制抽出の場合はスキップ）
                     float originalWidth = inlineShape.Width;
                     float originalHeight = inlineShape.Height;
                     
-                    if (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight)
+                    if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
                     {
                         System.Diagnostics.Debug.WriteLine($"インライン図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                         continue;
@@ -153,7 +242,8 @@ namespace WordAddIn1
                             metaFileData, 
                             outputDirectory, 
                             $"inline_image_{imageCounter}", 
-                            inlineShape.Type.ToString());
+                            inlineShape.Type.ToString(),
+                            forceExtract);
                         
                         if (!string.IsNullOrEmpty(filePath))
                         {
@@ -273,11 +363,24 @@ namespace WordAddIn1
         {
             try
             {
-                // 元画像サイズでのフィルタリング
+                // アンカー段落のスタイルを取得
+                string anchorParagraphStyle = GetShapeAnchorParagraphStyle(canvas);
+                
+                // MJSスタイルによる条件チェック
+                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip);
+                
+                // 強制スキップ対象の場合
+                if (forceSkip)
+                {
+                    System.Diagnostics.Debug.WriteLine($"キャンバス図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
+                    return;
+                }
+
+                // 元画像サイズでのフィルタリング（強制抽出の場合はスキップ）
                 float originalWidth = canvas.Width;
                 float originalHeight = canvas.Height;
                 
-                if (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight)
+                if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
                 {
                     System.Diagnostics.Debug.WriteLine($"キャンバス図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                 }
@@ -293,7 +396,8 @@ namespace WordAddIn1
                             canvasData, 
                             outputDirectory, 
                             $"canvas_{imageCounter}", 
-                            "Canvas");
+                            "Canvas",
+                            forceExtract);
                         
                         if (!string.IsNullOrEmpty(filePath))
                         {
@@ -429,11 +533,24 @@ namespace WordAddIn1
         {
             try
             {
-                // 元画像サイズでのフィルタリング
+                // アンカー段落のスタイルを取得
+                string anchorParagraphStyle = GetShapeAnchorParagraphStyle(shape);
+                
+                // MJSスタイルによる条件チェック
+                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip);
+                
+                // 強制スキップ対象の場合
+                if (forceSkip)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{prefix}図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
+                    return;
+                }
+
+                // 元画像サイズでのフィルタリング（強制抽出の場合はスキップ）
                 float originalWidth = shape.Width;
                 float originalHeight = shape.Height;
                 
-                if (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight)
+                if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
                 {
                     System.Diagnostics.Debug.WriteLine($"{prefix}図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                     return;
@@ -448,7 +565,8 @@ namespace WordAddIn1
                         shapeData, 
                         outputDirectory, 
                         $"{prefix}_{imageCounter}", 
-                        shape.Type.ToString());
+                        shape.Type.ToString(),
+                        forceExtract);
                     
                     if (!string.IsNullOrEmpty(filePath))
                     {
@@ -534,7 +652,8 @@ namespace WordAddIn1
             byte[] metaFileData, 
             string outputDirectory, 
             string baseFileName, 
-            string shapeType)
+            string shapeType,
+            bool forceExtract = false)
         {
             try
             {
@@ -542,8 +661,8 @@ namespace WordAddIn1
                 {
                     using (var image = Image.FromStream(memoryStream))
                     {
-                        // 最小サイズのフィルタリング（必要に応じて調整）
-                        if (image.Width < 250 || image.Height < 250)
+                        // 最小サイズのフィルタリング（強制抽出の場合はスキップ）
+                        if (!forceExtract && (image.Width < 250 || image.Height < 250))
                             return null;
 
                         // ファイル名の生成
