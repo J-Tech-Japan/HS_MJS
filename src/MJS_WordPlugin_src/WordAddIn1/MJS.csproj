@@ -321,6 +321,7 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Utils.RemoveSpanTagFromHtml.cs" />
     <Compile Include="Utils.TextProcessing.cs" />
     <EmbeddedResource Include="Alert.resx">
       <DependentUpon>Alert.cs</DependentUpon>
