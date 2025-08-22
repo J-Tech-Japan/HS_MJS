@@ -665,23 +665,23 @@ namespace WordAddIn1
                         }
 
                         // TODO: mergedHeadings の内容をテキストファイルに出力
-                        log.WriteLine("検索対象外見出し一覧をテキストファイルに出力");
-                        try
-                        {
-                            string excludedHeadingsFilePath = Path.Combine(paths.exportDirPath, "excluded_headings.txt");
-                            using (StreamWriter writer = new StreamWriter(excludedHeadingsFilePath, false, Encoding.UTF8))
-                            {
-                                foreach (string heading in mergedHeadings)
-                                {
-                                    writer.WriteLine(heading);
-                                }
-                            }
-                            log.WriteLine($"検索対象外見出し一覧を出力しました: {excludedHeadingsFilePath}");
-                        }
-                        catch (Exception ex)
-                        {
-                            log.WriteLine($"検索対象外見出し一覧の出力エラー: {ex.Message}");
-                        }
+                        //log.WriteLine("検索対象外見出し一覧をテキストファイルに出力");
+                        //try
+                        //{
+                        //    string excludedHeadingsFilePath = Path.Combine(paths.exportDirPath, "excluded_headings.txt");
+                        //    using (StreamWriter writer = new StreamWriter(excludedHeadingsFilePath, false, Encoding.UTF8))
+                        //    {
+                        //        foreach (string heading in mergedHeadings)
+                        //        {
+                        //            writer.WriteLine(heading);
+                        //        }
+                        //    }
+                        //    log.WriteLine($"検索対象外見出し一覧を出力しました: {excludedHeadingsFilePath}");
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    log.WriteLine($"検索対象外見出し一覧の出力エラー: {ex.Message}");
+                        //}
                     }
                     catch (Exception ex)
                     {
