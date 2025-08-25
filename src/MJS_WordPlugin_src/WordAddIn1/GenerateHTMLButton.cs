@@ -691,30 +691,6 @@ namespace WordAddIn1
 
                         var lines = Utils.ReadLinesFromFile(paths.exportDirPath, "headingsWithComment.txt");
 
-                        // linesとheadingsWithCommentの中身が同じかを判定
-                        bool areEqual = headingsWithComment.Count == lines.Count &&
-                                       headingsWithComment.SequenceEqual(lines);
-                        
-                        log.WriteLine($"headingsWithCommentとlinesの内容比較: {(areEqual ? "同じ" : "異なる")}");
-
-                        if (!areEqual)
-                        {
-                            log.WriteLine($"headingsWithComment件数: {headingsWithComment.Count}");
-                            log.WriteLine($"lines件数: {lines.Count}");
-
-                            // 相違点をログに出力
-                            for (int i = 0; i < Math.Max(headingsWithComment.Count, lines.Count); i++)
-                            {
-                                string originalItem = i < headingsWithComment.Count ? headingsWithComment[i] : "<なし>";
-                                string readItem = i < lines.Count ? lines[i] : "<なし>";
-
-                                if (originalItem != readItem)
-                                {
-                                    log.WriteLine($"相違点[{i}]: 元='{originalItem}' 読込='{readItem}'");
-                                }
-                            }
-                        }
-
                         // TODO: mergedHeadings の内容をテキストファイルに出力
                         //log.WriteLine("検索対象外見出し一覧をテキストファイルに出力");
                         //try

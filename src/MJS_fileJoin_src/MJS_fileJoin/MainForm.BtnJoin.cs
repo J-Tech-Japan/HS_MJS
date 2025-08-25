@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
+using Microsoft.Office.Core;
 
 namespace MJS_fileJoin
 {
@@ -47,6 +48,9 @@ namespace MJS_fileJoin
             // HTMLファイルリストの作成
             List<string> lsfiles = CreateHtmlFileList();
 
+            // 全結合元フォルダのheadingsWithCommentを統合するリスト
+            List<string> allHeadingsWithComment = new List<string>();
+
             int picCount = 0;
 
             foreach (string htmlDir in lbHtmlList.Items)
@@ -60,6 +64,23 @@ namespace MJS_fileJoin
                     : new List<string>();
 
                 string outputDir = Path.Combine(tbOutputDir.Text, exportDir);
+
+                // headingsWithComment.txtの存在確認と読み込み
+                string headingsWithCommentPath = Path.Combine(htmlDir, "headingsWithComment.txt");
+                
+                if (File.Exists(headingsWithCommentPath))
+                {
+                    try
+                    {
+                        var loadedHeadings = Utils.ReadLinesFromFile(headingsWithCommentPath);
+                        allHeadingsWithComment.AddRange(loadedHeadings);
+                    }
+                    catch (Exception ex)
+                    {
+                        // エラーハンドリング（必要に応じてログ出力やメッセージ表示）
+                        errorList.Add($"headingsWithComment.txtの読み込みエラー ({htmlDir}): {ex.Message}");
+                    }
+                }
 
                 // インデックスページ準備
                 objTocRoot = PrepareIndexPage(htmlDir, outputDir, objTocRoot, objToc, tbChangeTitle, tbAddTop);
@@ -75,26 +96,12 @@ namespace MJS_fileJoin
             sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;")));
             sw.Close();
 
-            // search.jsファイルの内容を変数に格納
-            //var mergedSearchTitles = ExtractSearchTitlesFromFile(searchJsPath);
-            //var sourceSearchTitles = ExtractSourceSearchTitles();
-            
-            // mergedSearchTitlesとsourceSearchTitlesの内容をテキストファイルに書き込み
-            //WriteSearchTitlesToFiles(mergedSearchTitles, sourceSearchTitles, tbOutputDir.Text, exportDir);
-            
-            // mergedSearchTitlesに含まれているが、sourceSearchTitlesには含まれていないタイトルのリストを作成
-            //var newTitles = mergedSearchTitles.Except(sourceSearchTitles).ToList();
-            
-            // 新たに追加されたタイトルに対してRemoveSearchBlockByTitleを実行
-            //foreach (string newTitle in newTitles)
-            //{
-            //    RemoveSearchBlockByTitle(newTitle, tbOutputDir.Text, exportDir);
-            //}
-            
-            // 必要に応じて抽出されたタイトルを使用
-            // mergedSearchTitles: 生成されたsearch.jsファイルの内容
-            // sourceSearchTitles: 結合元フォルダのsearch.jsファイルの内容を合わせたもの
-            // newTitles: 統合時に新たに追加されたタイトル
+            // 結合したheadingsWithCommentの各タイトルに対して
+            // RemoveSearchBlockByTitleを実行して検索対象から除外する
+            foreach (string heading in allHeadingsWithComment)
+            {
+                RemoveSearchBlockByTitle(heading, tbOutputDir.Text, exportDir);
+            }
 
             // 目次アイテムごとのHTMLファイルを処理し、gTopicIdを書き換えて保存
             UpdateHtmlFilesWithTocId(objToc, tbOutputDir.Text, exportDir);
@@ -107,6 +114,20 @@ namespace MJS_fileJoin
 
             //書誌情報ファイルのマージ
             MergeHeaderFile();
+
+            // 統合されたheadingsWithCommentをファイルに出力（必要に応じて）
+            if (allHeadingsWithComment.Count > 0)
+            {
+                try
+                {
+                    string outputHeadingsPath = Path.Combine(tbOutputDir.Text, exportDir, "headingsWithComment.txt");
+                    Utils.WriteLinesToFile(Path.Combine(tbOutputDir.Text, exportDir), "headingsWithComment.txt", allHeadingsWithComment);
+                }
+                catch (Exception ex)
+                {
+                    errorList.Add($"統合されたheadingsWithComment.txtの出力エラー: {ex.Message}");
+                }
+            }
 
             Cursor.Current = prevCursor;
 

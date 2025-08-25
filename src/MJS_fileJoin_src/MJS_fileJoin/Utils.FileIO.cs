@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace WordAddIn1
+namespace MJS_fileJoin
 {
     internal partial class Utils
     {
@@ -20,15 +20,15 @@ namespace WordAddIn1
         /// <param name="encoding">文字エンコーディング（省略時はUTF-8）</param>
         /// <param name="separator">要素間の区切り文字（省略時は改行）</param>
         /// <returns>作成されたファイルのフルパス</returns>
-        public static string WriteListToFile<T>(string folderPath, string fileName, IList<T> list, 
+        public static string WriteListToFile<T>(string folderPath, string fileName, IList<T> list,
             Encoding encoding = null, string separator = null)
         {
             if (string.IsNullOrWhiteSpace(folderPath))
                 throw new ArgumentException("フォルダパスが指定されていません。", nameof(folderPath));
-            
+
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException("ファイル名が指定されていません。", nameof(fileName));
-            
+
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
@@ -45,13 +45,13 @@ namespace WordAddIn1
                 }
 
                 var filePath = Path.Combine(folderPath, fileName);
-                
+
                 // リストの内容を文字列に変換
                 var content = string.Join(separator, list.Select(item => item?.ToString() ?? string.Empty));
-                
+
                 // ファイルに書き込み
                 File.WriteAllText(filePath, content, encoding);
-                
+
                 return filePath;
             }
             catch (UnauthorizedAccessException ex)
@@ -79,10 +79,10 @@ namespace WordAddIn1
         {
             if (string.IsNullOrWhiteSpace(folderPath))
                 throw new ArgumentException("フォルダパスが指定されていません。", nameof(folderPath));
-            
+
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException("ファイル名が指定されていません。", nameof(fileName));
-            
+
             if (lines == null)
                 throw new ArgumentNullException(nameof(lines));
 
@@ -95,10 +95,10 @@ namespace WordAddIn1
                 }
 
                 var filePath = Path.Combine(folderPath, fileName);
-                
+
                 // ファイルに書き込み（UTF-8エンコーディング）
                 File.WriteAllLines(filePath, lines, Encoding.UTF8);
-                
+
                 return filePath;
             }
             catch (UnauthorizedAccessException ex)
@@ -124,7 +124,7 @@ namespace WordAddIn1
         /// <param name="separator">要素間の区切り文字（省略時は改行）</param>
         /// <param name="converter">文字列からT型への変換関数</param>
         /// <returns>読み込まれたリスト</returns>
-        public static IList<T> ReadListFromFile<T>(string filePath, Encoding encoding = null, 
+        public static IList<T> ReadListFromFile<T>(string filePath, Encoding encoding = null,
             string separator = null, Func<string, T> converter = null)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -142,13 +142,13 @@ namespace WordAddIn1
             {
                 // ファイルの内容を読み込み
                 var content = File.ReadAllText(filePath, encoding);
-                
+
                 if (string.IsNullOrEmpty(content))
                     return new List<T>();
 
                 // 区切り文字で分割
                 var items = content.Split(new[] { separator }, StringSplitOptions.None);
-                
+
                 // T型に変換してリストを作成
                 var result = new List<T>();
                 foreach (var item in items)
@@ -163,7 +163,7 @@ namespace WordAddIn1
                         throw new InvalidOperationException($"文字列 '{item}' を {typeof(T).Name} 型に変換できませんでした。", ex);
                     }
                 }
-                
+
                 return result;
             }
             catch (UnauthorizedAccessException ex)
@@ -219,12 +219,12 @@ namespace WordAddIn1
         /// <param name="separator">要素間の区切り文字（省略時は改行）</param>
         /// <param name="converter">文字列からT型への変換関数</param>
         /// <returns>読み込まれたリスト</returns>
-        public static IList<T> ReadListFromFile<T>(string folderPath, string fileName, 
+        public static IList<T> ReadListFromFile<T>(string folderPath, string fileName,
             Encoding encoding = null, string separator = null, Func<string, T> converter = null)
         {
             if (string.IsNullOrWhiteSpace(folderPath))
                 throw new ArgumentException("フォルダパスが指定されていません。", nameof(folderPath));
-            
+
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException("ファイル名が指定されていません。", nameof(fileName));
 
@@ -243,7 +243,7 @@ namespace WordAddIn1
         {
             if (string.IsNullOrWhiteSpace(folderPath))
                 throw new ArgumentException("フォルダパスが指定されていません。", nameof(folderPath));
-            
+
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException("ファイル名が指定されていません。", nameof(fileName));
 
