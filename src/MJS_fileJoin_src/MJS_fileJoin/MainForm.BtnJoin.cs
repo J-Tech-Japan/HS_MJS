@@ -76,20 +76,20 @@ namespace MJS_fileJoin
             sw.Close();
 
             // search.jsファイルの内容を変数に格納
-            var mergedSearchTitles = ExtractSearchTitlesFromFile(searchJsPath);
-            var sourceSearchTitles = ExtractSourceSearchTitles();
+            //var mergedSearchTitles = ExtractSearchTitlesFromFile(searchJsPath);
+            //var sourceSearchTitles = ExtractSourceSearchTitles();
             
             // mergedSearchTitlesとsourceSearchTitlesの内容をテキストファイルに書き込み
-            WriteSearchTitlesToFiles(mergedSearchTitles, sourceSearchTitles, tbOutputDir.Text, exportDir);
+            //WriteSearchTitlesToFiles(mergedSearchTitles, sourceSearchTitles, tbOutputDir.Text, exportDir);
             
             // mergedSearchTitlesに含まれているが、sourceSearchTitlesには含まれていないタイトルのリストを作成
-            var newTitles = mergedSearchTitles.Except(sourceSearchTitles).ToList();
+            //var newTitles = mergedSearchTitles.Except(sourceSearchTitles).ToList();
             
             // 新たに追加されたタイトルに対してRemoveSearchBlockByTitleを実行
-            foreach (string newTitle in newTitles)
-            {
-                RemoveSearchBlockByTitle(newTitle, tbOutputDir.Text, exportDir);
-            }
+            //foreach (string newTitle in newTitles)
+            //{
+            //    RemoveSearchBlockByTitle(newTitle, tbOutputDir.Text, exportDir);
+            //}
             
             // 必要に応じて抽出されたタイトルを使用
             // mergedSearchTitles: 生成されたsearch.jsファイルの内容
