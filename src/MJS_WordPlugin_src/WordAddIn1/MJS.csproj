@@ -594,6 +594,7 @@
     <Content Include="htmlTemplates\resp.js" />
     <Content Include="htmlTemplates\screendata.js" />
     <Content Include="htmlTemplates\search.js" />
+    <Content Include="htmlTemplates\searchBase.js" />
     <Content Include="htmlTemplates\template\Azure_Blue01\andsearch_mark.png" />
     <Content Include="htmlTemplates\template\Azure_Blue01\andsearch_nomark.png" />
     <Content Include="htmlTemplates\template\Azure_Blue01\back_mobile_filter.png" />
