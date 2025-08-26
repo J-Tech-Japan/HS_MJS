@@ -174,8 +174,31 @@ namespace WordAddIn1
             }
 
             // 検索用JSファイル生成
+            // searchBase.jsファイルを読み込んで結合する
+            string searchJsContent = searchJs; // "var searchWords = $('♪');" で始まる
+            
+            // searchBase.jsファイルが存在するかチェックし、内容を追加
+            string searchBaseJsPath = Path.Combine(rootPath, exportDir, "searchBase.js");
+            if (File.Exists(searchBaseJsPath))
+            {
+                try
+                {
+                    string searchBaseContent = File.ReadAllText(searchBaseJsPath, Encoding.UTF8);
+                    searchJsContent += searchBaseContent;
+                    
+                    // searchBase.jsファイルは不要になったので削除
+                    File.Delete(searchBaseJsPath);
+                }
+                catch (Exception ex)
+                {
+                    // searchBase.jsの読み込みに失敗した場合はログ出力などを行う
+                    // ここでは既存のsearchJsのみを使用
+                    System.Diagnostics.Debug.WriteLine($"searchBase.js読み込みエラー: {ex.Message}");
+                }
+            }
+            
             sw = new StreamWriter(Path.Combine(rootPath, exportDir, "search.js"), false, Encoding.UTF8);
-            sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;").Replace(@"\u", @"\\u").Replace(@"\U", @"\\U")));
+            sw.Write(Regex.Replace(searchJsContent, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;").Replace(@"\u", @"\\u").Replace(@"\U", @"\\U")));
             sw.Close();
 
             // 表紙HTMLが存在しない場合は生成
