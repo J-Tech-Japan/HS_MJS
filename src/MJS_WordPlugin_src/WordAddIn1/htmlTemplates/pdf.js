@@ -35,8 +35,24 @@ p_pdfClass.prototype = {
 	},
 	setNavi: function(){
 		$('#print_page').on('click', function(){
-			p_pdf.openPdf();
-			p_pdf.htmlcanvas();
+			// iframe内のコンテンツを印刷する
+			setTimeout(function() {
+				try {
+					var _frame = document.getElementsByClassName("topic");
+					console.log('frames found:', _frame.length);
+					
+					if (_frame.length > 1 && _frame[1].contentWindow) {
+						_frame[1].contentWindow.print();
+					} else {
+						window.print();
+					}
+				} catch (error) {
+					console.error('Error executing print():', error);
+				}
+			}, 100);
+			
+			// p_pdf.openPdf();
+			// p_pdf.htmlcanvas();
 		});
 		
 		$('#buttonCloseModalPdf, #buttonCancelPdf').on('click', function(){
