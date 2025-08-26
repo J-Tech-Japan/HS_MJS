@@ -87,6 +87,7 @@ namespace WordAddIn1
                             stream.Seek(0, SeekOrigin.Begin);
                             stream.CopyTo(fs);
                             fs.Close();
+                            log.WriteLine("htmlTemplates.zipファイルの作成完了");
                         }
 
                         if (Directory.Exists(Path.Combine(paths.rootPath, "htmlTemplates")))
@@ -102,6 +103,7 @@ namespace WordAddIn1
                         }
 
                         if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
+                        
                         Directory.Move(Path.Combine(paths.rootPath, "htmlTemplates"), Path.Combine(paths.rootPath, paths.exportDir));
 
                         File.Delete(Path.Combine(paths.rootPath, "htmlTemplates.zip"));
