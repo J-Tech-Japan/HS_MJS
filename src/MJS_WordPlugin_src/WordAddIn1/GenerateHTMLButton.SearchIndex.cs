@@ -162,7 +162,7 @@ namespace WordAddIn1
                     // 特定文字（è）を手順結果spanに変換
                     htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum"">(è)</span>", @"<span class=""MJS_oflow_stepResult""></span>", RegexOptions.Singleline);
                     
-                    // TODO: 手順結果pタグ内のspan削除
+                    // 手順結果pタグ内のspan削除
                     htmlBody = Regex.Replace(htmlBody, @"<p[^>]*?class=""MJS_oflow_stepResult([^""]*?)""[^>]*?>(.*?)<span[^>]*?>(.*?)</span>(.*?)</p>", @"<p class=""MJS_oflow_stepResult"">$4</p>", RegexOptions.Singleline);
                     
                     // 手順番号span内の入れ子spanを除去

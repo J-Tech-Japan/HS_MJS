@@ -682,6 +682,7 @@
     <Content Include="htmlTemplates\template\images\cover-1.png" />
     <Content Include="htmlTemplates\template\images\cover-2.png" />
     <Content Include="htmlTemplates\template\images\cover-3.png" />
+    <Content Include="htmlTemplates\template\images\cover.png" />
     <Content Include="htmlTemplates\template\images\expand.png" />
     <Content Include="htmlTemplates\template\images\modal-close.png" />
     <Content Include="htmlTemplates\template\resources\BSBack.png" />
