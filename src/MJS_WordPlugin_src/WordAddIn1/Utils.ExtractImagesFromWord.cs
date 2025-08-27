@@ -51,6 +51,7 @@ namespace WordAddIn1
         /// <param name="skipCoverMarkers">表紙（第1セクション）の画像にマーカーを追加しないかどうか</param>
         /// <param name="minOriginalWidth">元画像の最小幅（ポイント単位）</param>
         /// <param name="minOriginalHeight">元画像の最小高さ（ポイント単位）</param>
+        /// <param name="includeMjsTableImages">MJS_画像（表内）スタイルの画像を抽出するかどうか</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
@@ -62,7 +63,8 @@ namespace WordAddIn1
             bool addMarkers = true,
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f)
+            float minOriginalHeight = 50.0f,
+            bool includeMjsTableImages = true)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -90,7 +92,8 @@ namespace WordAddIn1
                         addMarkers,
                         skipCoverMarkers,
                         minOriginalWidth,
-                        minOriginalHeight);
+                        minOriginalHeight,
+                        includeMjsTableImages);
                 }
 
                 // フローティング図形の抽出
@@ -106,7 +109,8 @@ namespace WordAddIn1
                         addMarkers,
                         skipCoverMarkers,
                         minOriginalWidth,
-                        minOriginalHeight);
+                        minOriginalHeight,
+                        includeMjsTableImages);
                 }
 
                 return extractedImages;
@@ -123,7 +127,8 @@ namespace WordAddIn1
         /// <param name="styleName">判定対象のスタイル名</param>
         /// <param name="forceExtract">強制抽出フラグ（出力）</param>
         /// <param name="forceSkip">強制スキップフラグ（出力）</param>
-        private static void CheckMjsStyleConditions(string styleName, out bool forceExtract, out bool forceSkip)
+        /// <param name="includeMjsTableImages">MJS_画像（表内）スタイルを含めるかどうか</param>
+        private static void CheckMjsStyleConditions(string styleName, out bool forceExtract, out bool forceSkip, bool includeMjsTableImages = true)
         {
             forceExtract = false;
             forceSkip = false;
@@ -131,11 +136,26 @@ namespace WordAddIn1
             if (string.IsNullOrEmpty(styleName))
                 return;
 
-            // 強制抽出対象のスタイル（サイズに関わりなく必ず抽出）
+            // MJS_画像（表内）の特別処理
+            if (styleName.Contains("MJS_画像（表内）"))
+            {
+                if (includeMjsTableImages)
+                {
+                    forceExtract = true;
+                    System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定（MJS表内画像許可）");
+                }
+                else
+                {
+                    forceSkip = true;
+                    System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制スキップ対象に設定（MJS表内画像除外）");
+                }
+                return;
+            }
+
+            // その他の強制抽出対象のスタイル（サイズに関わりなく必ず抽出）
             if (styleName.Contains("MJS_画像（手順内）") || 
                 styleName.Contains("MJS_画像（本文内）") ||
-                styleName.Contains("MJS_画像（コラム内）") ||
-                styleName.Contains("MJS_画像（表内）"))
+                styleName.Contains("MJS_画像（コラム内）"))
             {
                 forceExtract = true;
                 System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定");
@@ -204,7 +224,8 @@ namespace WordAddIn1
             bool addMarkers = false,
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f)
+            float minOriginalHeight = 50.0f,
+            bool includeMjsTableImages = true)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -214,7 +235,7 @@ namespace WordAddIn1
                     string paragraphStyle = GetInlineShapeParagraphStyle(inlineShape);
                     
                     // MJSスタイルによる条件チェック
-                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip);
+                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip, includeMjsTableImages);
                     
                     // 強制スキップ対象の場合
                     if (forceSkip)
@@ -287,7 +308,8 @@ namespace WordAddIn1
             bool addMarkers = false,
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f)
+            float minOriginalHeight = 50.0f,
+            bool includeMjsTableImages = true)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -305,7 +327,8 @@ namespace WordAddIn1
                             addMarkers,
                             skipCoverMarkers,
                             minOriginalWidth,
-                            minOriginalHeight);
+                            minOriginalHeight,
+                            includeMjsTableImages);
                     }
                     // フリーフォーム図形の場合
                     else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
@@ -321,7 +344,8 @@ namespace WordAddIn1
                                 addMarkers,
                                 skipCoverMarkers,
                                 minOriginalWidth,
-                                minOriginalHeight);
+                                minOriginalHeight,
+                                includeMjsTableImages);
                         }
                     }
                     // 通常の図形の場合
@@ -336,7 +360,8 @@ namespace WordAddIn1
                             addMarkers,
                             skipCoverMarkers,
                             minOriginalWidth,
-                            minOriginalHeight);
+                            minOriginalHeight,
+                            includeMjsTableImages);
                     }
                 }
                 catch (Exception ex)
@@ -359,7 +384,8 @@ namespace WordAddIn1
             bool addMarkers = false,
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f)
+            float minOriginalHeight = 50.0f,
+            bool includeMjsTableImages = true)
         {
             try
             {
@@ -367,7 +393,7 @@ namespace WordAddIn1
                 string anchorParagraphStyle = GetShapeAnchorParagraphStyle(canvas);
                 
                 // MJSスタイルによる条件チェック
-                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip);
+                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, includeMjsTableImages);
                 
                 // 強制スキップ対象の場合
                 if (forceSkip)
@@ -441,7 +467,8 @@ namespace WordAddIn1
                         addMarkers,
                         skipCoverMarkers,
                         minOriginalWidth,
-                        minOriginalHeight);
+                        minOriginalHeight,
+                        includeMjsTableImages);
                 }
             }
             catch (Exception ex)
@@ -493,7 +520,8 @@ namespace WordAddIn1
             bool addMarkers = false,
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f)
+            float minOriginalHeight = 50.0f,
+            bool includeMjsTableImages = true)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
@@ -508,7 +536,8 @@ namespace WordAddIn1
                         addMarkers,
                         skipCoverMarkers,
                         minOriginalWidth,
-                        minOriginalHeight);
+                        minOriginalHeight,
+                        includeMjsTableImages);
                 }
                 catch (Exception ex)
                 {
@@ -529,7 +558,8 @@ namespace WordAddIn1
             bool addMarkers = false,
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f)
+            float minOriginalHeight = 50.0f,
+            bool includeMjsTableImages = true)
         {
             try
             {
@@ -537,7 +567,7 @@ namespace WordAddIn1
                 string anchorParagraphStyle = GetShapeAnchorParagraphStyle(shape);
                 
                 // MJSスタイルによる条件チェック
-                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip);
+                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, includeMjsTableImages);
                 
                 // 強制スキップ対象の場合
                 if (forceSkip)

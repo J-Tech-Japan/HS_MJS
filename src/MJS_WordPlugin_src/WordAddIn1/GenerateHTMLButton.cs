@@ -129,7 +129,8 @@ namespace WordAddIn1
                             addMarkers: true,             // マーカーを追加
                             skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
                             minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
-                            minOriginalHeight: 60.0f     // 元画像の最小高さ（ポイント）
+                            minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
+                            includeMjsTableImages: true    // MJS_画像（表内）スタイルの画像を抽出
                         );
 
                         // 抽出統計をログに出力
