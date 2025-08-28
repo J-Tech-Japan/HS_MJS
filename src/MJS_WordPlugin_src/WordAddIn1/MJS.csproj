@@ -578,6 +578,7 @@
     <Content Include="htmlTemplates\font.css" />
     <Content Include="htmlTemplates\fontchange.js" />
     <Content Include="htmlTemplates\html2canvas.min.js" />
+    <Content Include="htmlTemplates\htmlTemplate1Base.html" />
     <Content Include="htmlTemplates\jquery-3.1.0.min.js" />
     <Content Include="htmlTemplates\jquery.cookie.js" />
     <Content Include="htmlTemplates\jspdf.debug.js" />

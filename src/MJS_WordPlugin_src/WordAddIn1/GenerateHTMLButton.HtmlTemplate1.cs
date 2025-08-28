@@ -1,13 +1,72 @@
 ﻿//GenerateHTMLButton.HtmlTemplate1.cs
 
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        private static string BuildHtmlTemplate1(Dictionary<string, string[]> title4Collection, Dictionary<string, string> mergeScript, string rootPath, string exportDir)
+        {
+            // exportDirに展開されたhtmlTemplate1Base.htmlのパスを取得
+            string htmlTemplate1BasePath = Path.Combine(rootPath, exportDir, "htmlTemplate1Base.html");
+            
+            string htmlTemplate1 = "";
+            
+            // htmlTemplate1Base.htmlファイルが存在する場合はそれを読み込み
+            if (File.Exists(htmlTemplate1BasePath))
+            {
+                htmlTemplate1 = File.ReadAllText(htmlTemplate1BasePath, Encoding.UTF8);
+                htmlTemplate1 += @" <meta name=""topic-breadcrumbs"" content="""" />" + "\n";
+                htmlTemplate1 += @"</head>" + "\n";
+                htmlTemplate1 += @"<body style=""text-justify-trim: punctuation;"">" + "\n";
+
+                // コメントアウトされた変数の位置を探して置換
+                htmlTemplate1 = htmlTemplate1.Replace("//gTopicId = \"\";", "gTopicId = \"♪\";");
+                htmlTemplate1 = htmlTemplate1.Replace("//refPage = {};", $"refPage = {{{BuildRefPageData(title4Collection)}}};");
+                htmlTemplate1 = htmlTemplate1.Replace("//mergePage = {};", $"mergePage = {{{BuildMergePageData(mergeScript)}}};");
+            }
+            else
+            {
+                // フォールバック: 既存の方法で構築
+                htmlTemplate1 = BuildHtmlTemplate1Fallback(title4Collection, mergeScript);
+            }
+            
+            return htmlTemplate1;
+        }
+        
+        // 引数なしのオーバーロードメソッド（既存コードとの互換性のため）
         private static string BuildHtmlTemplate1(Dictionary<string, string[]> title4Collection, Dictionary<string, string> mergeScript)
         {
+            // フォールバック: 既存の方法で構築
+            return BuildHtmlTemplate1Fallback(title4Collection, mergeScript);
+        }
+        
+        private static string BuildRefPageData(Dictionary<string, string[]> title4Collection)
+        {
+            var refPageData = new StringBuilder();
+            foreach (var item in title4Collection)
+            {
+                refPageData.Append($"{item.Key}:['{item.Value[0]}','{item.Value[1]}'],");
+            }
+            return refPageData.ToString();
+        }
+        
+        private static string BuildMergePageData(Dictionary<string, string> mergeScript)
+        {
+            var mergePageData = new StringBuilder();
+            foreach (var item in mergeScript)
+            {
+                mergePageData.Append($"{item.Value.Split(new char[] { '♯' })[0]}:'{item.Key.Split(new char[] { '♯' })[0]}',");
+            }
+            return mergePageData.ToString();
+        }
+        
+        private static string BuildHtmlTemplate1Fallback(Dictionary<string, string[]> title4Collection, Dictionary<string, string> mergeScript)
+        {
+            // 既存の実装をそのまま保持（フォールバック用）
             string htmlTemplate1 = "";
             htmlTemplate1 += @"<!DOCTYPE HTML>" + "\n";
             htmlTemplate1 += @"<html>" + "\n";
@@ -75,10 +134,6 @@ namespace WordAddIn1
             {
                 htmlTemplate1 += item.Key + ":['" + item.Value[0] + "','" + item.Value[1] + "'],";
             }
-            //foreach (var item in headerCollection)
-            //{
-            //    htmlTemplate1 += item.Key + ":['" + item.Value[0] + "','" + item.Value[1] + "'],";
-            //}
             htmlTemplate1 += @"};" + "\n";
             htmlTemplate1 += @"mergePage = {" + "\n";
             foreach (var item in mergeScript)
@@ -89,6 +144,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"};" + "\n";
             htmlTemplate1 += @"	 url = [];" + "\n";
 
+            // 以下は既存のJavaScriptコードを続ける（省略）
             htmlTemplate1 += @"function areDirectoriesEqual(relativePath) {" + "\n";
             htmlTemplate1 += @"	if (!relativePath) return false;" + "\n";
             htmlTemplate1 += @"	if (!relativePath.match(""/"") || relativePath.match(/^\.\/.*/)) return true;" + "\n";
@@ -152,7 +208,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"					di.append(html);" + "\n";
             htmlTemplate1 += @"		$("".ref"").each(function () {" + "\n";
             htmlTemplate1 += @"			var refname = $(this).attr(""name"");" + "\n";
-            htmlTemplate1 += @"			$(""[name="" + refname + ""]"").each(function () {" + "\n";
+            htmlTemplate1 += @"			$""[name="" + refname + ""]"").each(function () {" + "\n";
             htmlTemplate1 += @"				$(this).append(""<a name='"" + refname + ""'>"");" + "\n";
             htmlTemplate1 += @"			})" + "\n";
             htmlTemplate1 += @"		});" + "\n";
@@ -206,9 +262,8 @@ namespace WordAddIn1
             htmlTemplate1 += @"        		    }" + "\n";
             htmlTemplate1 += @"        		    $(this).attr('href', href);" + "\n";
             htmlTemplate1 += @"        		    $(this).attr('onclick', ""anchorElement(href.split('#Ref')[0])"");" + "\n";
-
             htmlTemplate1 += @"        		   }" + "\n";
-            htmlTemplate1 += @"        	    }" + "\n";
+            htmlTemplate1 += @"        	   }" + "\n";
             htmlTemplate1 += @"         })" + "\n";
             htmlTemplate1 += @"             $(this).find('.ref').each(function () {" + "\n";
             htmlTemplate1 += @"        	    var name = $(this).attr(""name"");" + "\n";
@@ -241,7 +296,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"		}else{" + "\n";
             htmlTemplate1 += @"		$("".ref"").each(function () {" + "\n";
             htmlTemplate1 += @"			var refname = $(this).attr(""name"");" + "\n";
-            htmlTemplate1 += @"			$(""[name="" + refname + ""]"").each(function () {" + "\n";
+            htmlTemplate1 += @"			$""[name="" + refname + ""]"").each(function () {" + "\n";
             htmlTemplate1 += @"				$(this).append(""<a name='"" + refname + ""'>"");" + "\n";
             htmlTemplate1 += @"			})" + "\n";
             htmlTemplate1 += @"		});" + "\n";
