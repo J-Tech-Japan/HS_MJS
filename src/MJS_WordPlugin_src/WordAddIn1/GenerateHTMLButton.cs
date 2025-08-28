@@ -87,7 +87,6 @@ namespace WordAddIn1
                             stream.Seek(0, SeekOrigin.Begin);
                             stream.CopyTo(fs);
                             fs.Close();
-                            log.WriteLine("htmlTemplates.zipファイルの作成完了");
                         }
 
                         if (Directory.Exists(Path.Combine(paths.rootPath, "htmlTemplates")))
@@ -571,7 +570,7 @@ namespace WordAddIn1
                         htmlCoverTemplate2 += BuildHtmlCoverFooter();
 
                         // HTMLテンプレートの生成
-                        var htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript);
+                        var htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript, paths.rootPath, paths.exportDir);
                         var htmlTemplate2 = "</body>\n</html>\n";
                         
                         // 検索用JSの生成
