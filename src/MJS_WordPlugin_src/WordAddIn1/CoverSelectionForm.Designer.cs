@@ -32,6 +32,7 @@
             this.FlowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.CoverSelectionItemEasyCloud = new WordAddIn1.CoverSelectionItem();
             this.CoverSelectionItemEdgeTracker = new WordAddIn1.CoverSelectionItem();
+            this.CoverSelectionItemLucaTechGX = new WordAddIn1.CoverSelectionItem();
             this.FlowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.CoverSelectionItemGeneralPattern1 = new WordAddIn1.CoverSelectionItem();
             this.CoverSelectionItemGeneralPattern2 = new WordAddIn1.CoverSelectionItem();
@@ -60,7 +61,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 23F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(310, 346);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(465, 346);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // FlowLayoutPanel1
@@ -68,12 +69,13 @@
             this.FlowLayoutPanel1.AutoSize = true;
             this.FlowLayoutPanel1.Controls.Add(this.CoverSelectionItemEasyCloud);
             this.FlowLayoutPanel1.Controls.Add(this.CoverSelectionItemEdgeTracker);
+            this.FlowLayoutPanel1.Controls.Add(this.CoverSelectionItemLucaTechGX);
             this.FlowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FlowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.FlowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.FlowLayoutPanel1.Name = "FlowLayoutPanel1";
             this.FlowLayoutPanel1.Padding = new System.Windows.Forms.Padding(5, 5, 0, 0);
-            this.FlowLayoutPanel1.Size = new System.Drawing.Size(310, 155);
+            this.FlowLayoutPanel1.Size = new System.Drawing.Size(465, 155);
             this.FlowLayoutPanel1.TabIndex = 0;
             // 
             // CoverSelectionItemEasyCloud
@@ -102,6 +104,19 @@
             this.CoverSelectionItemEdgeTracker.TabIndex = 1;
             this.CoverSelectionItemEdgeTracker.OnSelectedStatusChanged += new System.EventHandler(this.CoverSelectionItem_OnSelectedStatusChanged);
             // 
+            // CoverSelectionItemLucaTechGX
+            // 
+            this.CoverSelectionItemLucaTechGX.BackColor = System.Drawing.Color.Transparent;
+            this.CoverSelectionItemLucaTechGX.Caption = "MJS LucaTech GX";
+            this.CoverSelectionItemLucaTechGX.CoverThumbnail = global::WordAddIn1.Properties.Resources.coverLucaTech;
+            this.CoverSelectionItemLucaTechGX.Location = new System.Drawing.Point(310, 5);
+            this.CoverSelectionItemLucaTechGX.Margin = new System.Windows.Forms.Padding(0);
+            this.CoverSelectionItemLucaTechGX.Name = "CoverSelectionItemLucaTechGX";
+            this.CoverSelectionItemLucaTechGX.Selected = false;
+            this.CoverSelectionItemLucaTechGX.Size = new System.Drawing.Size(150, 150);
+            this.CoverSelectionItemLucaTechGX.TabIndex = 2;
+            this.CoverSelectionItemLucaTechGX.OnSelectedStatusChanged += new System.EventHandler(this.CoverSelectionItem_OnSelectedStatusChanged);
+            // 
             // FlowLayoutPanel2
             // 
             this.FlowLayoutPanel2.AutoSize = true;
@@ -112,7 +127,7 @@
             this.FlowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.FlowLayoutPanel2.Name = "FlowLayoutPanel2";
             this.FlowLayoutPanel2.Padding = new System.Windows.Forms.Padding(5, 5, 0, 0);
-            this.FlowLayoutPanel2.Size = new System.Drawing.Size(310, 155);
+            this.FlowLayoutPanel2.Size = new System.Drawing.Size(465, 155);
             this.FlowLayoutPanel2.TabIndex = 1;
             // 
             // CoverSelectionItemGeneralPattern1
@@ -125,7 +140,7 @@
             this.CoverSelectionItemGeneralPattern1.Name = "CoverSelectionItemGeneralPattern1";
             this.CoverSelectionItemGeneralPattern1.Selected = false;
             this.CoverSelectionItemGeneralPattern1.Size = new System.Drawing.Size(150, 150);
-            this.CoverSelectionItemGeneralPattern1.TabIndex = 1;
+            this.CoverSelectionItemGeneralPattern1.TabIndex = 0;
             this.CoverSelectionItemGeneralPattern1.OnSelectedStatusChanged += new System.EventHandler(this.CoverSelectionItem_OnSelectedStatusChanged);
             // 
             // CoverSelectionItemGeneralPattern2
@@ -138,7 +153,7 @@
             this.CoverSelectionItemGeneralPattern2.Name = "CoverSelectionItemGeneralPattern2";
             this.CoverSelectionItemGeneralPattern2.Selected = false;
             this.CoverSelectionItemGeneralPattern2.Size = new System.Drawing.Size(150, 150);
-            this.CoverSelectionItemGeneralPattern2.TabIndex = 2;
+            this.CoverSelectionItemGeneralPattern2.TabIndex = 1;
             this.CoverSelectionItemGeneralPattern2.OnSelectedStatusChanged += new System.EventHandler(this.CoverSelectionItem_OnSelectedStatusChanged);
             // 
             // FlowLayoutPanel3
@@ -151,13 +166,13 @@
             this.FlowLayoutPanel3.Location = new System.Drawing.Point(3, 313);
             this.FlowLayoutPanel3.Name = "FlowLayoutPanel3";
             this.FlowLayoutPanel3.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
-            this.FlowLayoutPanel3.Size = new System.Drawing.Size(304, 30);
+            this.FlowLayoutPanel3.Size = new System.Drawing.Size(459, 30);
             this.FlowLayoutPanel3.TabIndex = 2;
             // 
             // BtnCancel
             // 
             this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.BtnCancel.Location = new System.Drawing.Point(223, 3);
+            this.BtnCancel.Location = new System.Drawing.Point(378, 3);
             this.BtnCancel.Name = "BtnCancel";
             this.BtnCancel.Size = new System.Drawing.Size(75, 23);
             this.BtnCancel.TabIndex = 0;
@@ -167,7 +182,7 @@
             // 
             // BtnOK
             // 
-            this.BtnOK.Location = new System.Drawing.Point(142, 3);
+            this.BtnOK.Location = new System.Drawing.Point(297, 3);
             this.BtnOK.Name = "BtnOK";
             this.BtnOK.Size = new System.Drawing.Size(75, 23);
             this.BtnOK.TabIndex = 1;
@@ -182,7 +197,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(217)))), ((int)(((byte)(217)))), ((int)(((byte)(217)))));
             this.CancelButton = this.BtnCancel;
-            this.ClientSize = new System.Drawing.Size(310, 346);
+            this.ClientSize = new System.Drawing.Size(465, 346);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -209,6 +224,7 @@
         private CoverSelectionItem CoverSelectionItemEdgeTracker;
         private CoverSelectionItem CoverSelectionItemGeneralPattern1;
         private CoverSelectionItem CoverSelectionItemGeneralPattern2;
+        private CoverSelectionItem CoverSelectionItemLucaTechGX;
         private System.Windows.Forms.FlowLayoutPanel FlowLayoutPanel3;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;

@@ -259,6 +259,36 @@ namespace WordAddIn1
             return sb.ToString();
         }
 
+        private string GeneratePattern3CoverHtml(
+            string manualTitle,
+            string manualTitleCenter,
+            string manualSubTitle,
+            string manualSubTitleCenter,
+            string trademarkTitle,
+            List<string> trademarkTextList,
+            string trademarkRight)
+        {
+            var sb = new StringBuilder();
+            sb.AppendFormat(@"<p class=""manual_title"" style=""line-height: 130%; "">{0}</p>" + "\n",
+                !string.IsNullOrWhiteSpace(manualTitle) ? manualTitle : manualTitleCenter);
+            sb.AppendFormat(@"<p class=""manual_subtitle"">{0}</p>" + "\n",
+                !string.IsNullOrWhiteSpace(manualSubTitle) ? manualSubTitle : manualSubTitleCenter);
+            sb.AppendLine(@"<p class=""product_logo_main_nosub"">");
+            sb.AppendLine(@"  <img src = ""template/images/coverLucaTech.png"" alt=""MJS LucaTech GX ロゴ"">");
+            sb.AppendLine(@"</p>");
+            sb.AppendLine(@"<div class=""product_trademarks"">");
+            sb.AppendFormat(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);
+            foreach (string trademarkText in trademarkTextList)
+            {
+                sb.AppendFormat(@"  <p class=""trademark_text"">{0}</p>" + "\n", trademarkText);
+            }
+            sb.AppendFormat(@"  <p class=""trademark_right"">{0}</p>" + "\n", trademarkRight);
+            sb.AppendLine(@"</div>");
+            sb.AppendLine(@"<p><a href = ""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）"" style=""margin-left: 700px; margin-top: 100px;"" width=""132"" height=""48"" /></a>");
+            sb.AppendLine(@"</p>");
+            return sb.ToString();
+        }
+
         private string BuildHtmlCoverFooter()
         {
             var sb = new StringBuilder();

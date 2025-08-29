@@ -68,8 +68,12 @@ namespace WordAddIn1
                 : item == CoverSelectionItemEdgeTracker
                     ? CoverTemplateEnum.EdgeTracker
                     : item == CoverSelectionItemGeneralPattern1
-                                    ? CoverTemplateEnum.GeneralPattern1
-                                    : item == CoverSelectionItemGeneralPattern2 ? CoverTemplateEnum.GeneralPattern2 : CoverTemplateEnum.None;
+                        ? CoverTemplateEnum.GeneralPattern1
+                        : item == CoverSelectionItemGeneralPattern2
+                            ? CoverTemplateEnum.GeneralPattern2
+                            : item == CoverSelectionItemLucaTechGX
+                                ? CoverTemplateEnum.GeneralPattern3
+                                : CoverTemplateEnum.None;
         }
 
         // 他のアイテムの選択状態を解除するメソッド
@@ -95,10 +99,10 @@ namespace WordAddIn1
                 CoverSelectionItemGeneralPattern2.Selected = false;
             }
 
-            //if (selectedItem != this.CoverSelectionItemGeneralPattern3)
-            //{
-            //    this.CoverSelectionItemGeneralPattern3.Selected = false;
-            //}
+            if (selectedItem != CoverSelectionItemLucaTechGX)
+            {
+                CoverSelectionItemLucaTechGX.Selected = false;
+            }
         }
 
         // OKボタンがクリックされたときのイベントハンドラ
@@ -108,11 +112,6 @@ namespace WordAddIn1
             if (selectedCoverTemplate == CoverTemplateEnum.None)
             {
                 MessageBox.Show("表紙のパターンをを選択してください。");
-            }
-            // 汎用パターン3が選択された場合の処理
-            else if (selectedCoverTemplate == CoverTemplateEnum.GeneralPattern3)
-            {
-                MessageBox.Show("[汎用パターン3]テンプレートはまもなく登場します。");
             }
             else
             {
