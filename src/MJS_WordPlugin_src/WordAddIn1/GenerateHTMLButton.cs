@@ -739,7 +739,6 @@ namespace WordAddIn1
                         //}
 
                         // HTMLファイルからシンプルなspanタグを削除
-                        log.WriteLine("HTMLファイルのシンプルなspanタグ削除");
                         try
                         {
                             int processedHtmlFiles = Utils.RemoveSimpleSpanTagsFromHtmlFolder(paths.exportDirPath);
@@ -811,10 +810,10 @@ namespace WordAddIn1
                     finally
                     {
                         log.Close();
-                        //if (!isError && File.Exists(paths.logPath))
-                        //{
-                        //    File.Delete(paths.logPath);
-                        //}
+                        if (!isError && File.Exists(paths.logPath))
+                        {
+                            File.Delete(paths.logPath);
+                        }
 
                         application.DocumentChange += new ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
                     }

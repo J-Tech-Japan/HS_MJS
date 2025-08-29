@@ -274,7 +274,7 @@ namespace WordAddIn1
             sb.AppendFormat(@"<p class=""manual_subtitle"">{0}</p>" + "\n",
                 !string.IsNullOrWhiteSpace(manualSubTitle) ? manualSubTitle : manualSubTitleCenter);
             sb.AppendLine(@"<p class=""product_logo_main_nosub"">");
-            sb.AppendLine(@"  <img src = ""template/images/coverLucaTech.png"" alt=""MJS LucaTech GX ロゴ"">");
+            sb.AppendLine(@"  <img src = ""template/images/coverLucaTech.png"" alt=""MJS LucaTech GX ロゴ"" style=""width: 75%; height: auto;"">");
             sb.AppendLine(@"</p>");
             sb.AppendLine(@"<div class=""product_trademarks"">");
             sb.AppendFormat(@"  <p class=""trademark_title"">{0}</p>" + "\n", trademarkTitle);

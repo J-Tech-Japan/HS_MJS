@@ -3,9 +3,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Math;
-using static System.Windows.Forms.LinkLabel;
 
 namespace WordAddIn1
 {
