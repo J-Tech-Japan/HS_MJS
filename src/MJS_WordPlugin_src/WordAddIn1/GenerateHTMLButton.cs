@@ -59,7 +59,7 @@ namespace WordAddIn1
                 var mergeScript = CollectMergeScriptDict(activeDocument);
                 
                 // カバー選択ダイアログの処理
-                if (!HandleCoverSelection(load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2)) return;
+                if (!HandleCoverSelection(load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2, out bool isPattern3)) return;
                 
                 // ローダーを可視化
                 load.Visible = true;
@@ -117,32 +117,32 @@ namespace WordAddIn1
                         var docCopy = CopyDocumentToHtml(application, log);
 
                         // TODO: 高画質の画像とキャンバスの抽出
-                        log.WriteLine("高画質画像とキャンバスの抽出開始");
-                        var extractedImages = Utils.ExtractImagesFromWord(
-                            docCopy,
-                            Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
-                            includeInlineShapes: true,    // インライン図形を抽出
-                            includeShapes: true,          // フローティング図形を抽出
-                            includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
-                            includeFreeforms: false,      // フリーフォーム図形は抽出しない
-                            addMarkers: true,             // マーカーを追加
-                            skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
-                            minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
-                            minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
-                            includeMjsTableImages: true    // MJS_画像（表内）スタイルの画像を抽出
-                        );
+                        //log.WriteLine("高画質画像とキャンバスの抽出開始");
+                        //var extractedImages = Utils.ExtractImagesFromWord(
+                        //    docCopy,
+                        //    Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
+                        //    includeInlineShapes: true,    // インライン図形を抽出
+                        //    includeShapes: true,          // フローティング図形を抽出
+                        //    includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
+                        //    includeFreeforms: false,      // フリーフォーム図形は抽出しない
+                        //    addMarkers: true,             // マーカーを追加
+                        //    skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
+                        //    minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
+                        //    minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
+                        //    includeMjsTableImages: true    // MJS_画像（表内）スタイルの画像を抽出
+                        //);
 
                         // 抽出統計をログに出力
-                        if (extractedImages != null)
-                        {
-                            log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
-                            string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
-                            log.WriteLine(statistics);
-                        }
-                        else
-                        {
-                            log.WriteLine("画像抽出結果: 抽出された画像はありません");
-                        }
+                        //if (extractedImages != null)
+                        //{
+                        //    log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
+                        //    string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
+                        //    log.WriteLine(statistics);
+                        //}
+                        //else
+                        //{
+                        //    log.WriteLine("画像抽出結果: 抽出された画像はありません");
+                        //}
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -333,6 +333,68 @@ namespace WordAddIn1
                                         }
                                     }
                                 }
+                                else if (isPattern3)
+                                {
+                                    // MJS LucaTech GX用の処理 - Pattern1と同様だが、coverLucaTech.pngを使用
+                                    int productSubLogoCount = 0;
+
+                                    foreach (Paragraph wp in docCopy.Sections[1].Range.Paragraphs)
+                                    {
+                                        if (wp.get_Style().NameLocal == "MJS_製品ロゴ（メイン）")
+                                        {
+                                            try
+                                            {
+                                                foreach (InlineShape wis in wp.Range.InlineShapes)
+                                                {
+                                                    wis.Range.Select();
+                                                    Clipboard.Clear();
+                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    Image img = Clipboard.GetImage();
+                                                    img.Save(Path.Combine(strOutFileName, "product_logo_main.png"), ImageFormat.Png);
+
+                                                    break; //get first product main logo only
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（メイン）]: " + ex.ToString());
+                                            }
+                                        }
+                                        else if (wp.get_Style().NameLocal == "MJS_製品ロゴ（サブ）" && productSubLogoCount < 3)
+                                        {
+                                            try
+                                            {
+                                                List<string> productSubLogoFileNames = new List<string>();
+
+                                                foreach (InlineShape wis in wp.Range.InlineShapes)
+                                                {
+                                                    wis.Range.Select();
+                                                    Clipboard.Clear();
+                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    Image img = Clipboard.GetImage();
+
+                                                    productSubLogoCount++;
+                                                    string subLogoFileName = string.Format("product_logo_sub{0}.png", productSubLogoCount);
+                                                    img.Save(Path.Combine(strOutFileName, subLogoFileName), ImageFormat.Png);
+                                                    productSubLogoFileNames.Add(subLogoFileName);
+
+                                                    Clipboard.Clear();
+
+                                                    if (productSubLogoCount == 3)
+                                                    {
+                                                        break; //get first 3 sub logos only
+                                                    }
+                                                }
+
+                                                productSubLogoGroups.Add(productSubLogoFileNames);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（サブ）]: " + ex.ToString());
+                                            }
+                                        }
+                                    }
+                                }
                                 else
                                 {
                                     foreach (InlineShape wis in docCopy.Sections[1].Range.InlineShapes)
@@ -383,6 +445,34 @@ namespace WordAddIn1
                                         }
 
                                         File.Move(pairs[p].Key, destF);
+                                    }
+                                }
+                                else if (isPattern3)
+                                {
+                                    // MJS LucaTech GX用の処理 - Pattern1と同様
+                                    for (int p = 0; p < pairs.Count; p++)
+                                    {
+                                        string destF = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", Path.GetFileName(pairs[p].Key));
+
+                                        if (File.Exists(destF))
+                                        {
+                                            File.Delete(destF);
+                                        }
+
+                                        File.Move(pairs[p].Key, destF);
+                                    }
+
+                                    // coverLucaTech.pngをcover-4.pngとしてコピー
+                                    string lucaTechSrc = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "coverLucaTech.png");
+                                    string lucaTechDest = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png");
+                                    
+                                    if (File.Exists(lucaTechSrc))
+                                    {
+                                        if (File.Exists(lucaTechDest))
+                                        {
+                                            File.Delete(lucaTechDest);
+                                        }
+                                        File.Copy(lucaTechSrc, lucaTechDest);
                                     }
                                 }
                                 else
@@ -566,6 +656,18 @@ namespace WordAddIn1
                                 trademarkRight
                             );
                         }
+                        else if (isPattern3)
+                        {
+                            htmlCoverTemplate2 += GeneratePattern3CoverHtml(
+                                manualTitle,
+                                manualTitleCenter,
+                                manualSubTitle,
+                                manualSubTitleCenter,
+                                trademarkTitle,
+                                trademarkTextList,
+                                trademarkRight
+                            );
+                        }
 
                         htmlCoverTemplate2 += BuildHtmlCoverFooter();
 
@@ -605,36 +707,36 @@ namespace WordAddIn1
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
                         //TODO: 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER: xxx]を処理し、画像参照を更新）
-                        log.WriteLine("画像マーカー処理");
-                        try
-                        {
-                            string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
-                            int processedFiles = Utils.ProcessImageMarkersInWebhelp(webhelpPath, "extracted_images");
-                            log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
-                        }
-                        catch (Exception ex)
-                        {
-                            log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
-                        }
+                        //log.WriteLine("画像マーカー処理");
+                        //try
+                        //{
+                        //    string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
+                        //    int processedFiles = Utils.ProcessImageMarkersInWebhelp(webhelpPath, "extracted_images");
+                        //    log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
+                        //}
 
                         // search.jsファイルからイメージマーカーを削除
-                        log.WriteLine("search.jsファイルのイメージマーカー削除");
-                        try
-                        {
-                            int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
-                            if (removedMarkers >= 0)
-                            {
-                                log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
-                            }
-                            else
-                            {
-                                log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
-                        }
+                        //log.WriteLine("search.jsファイルのイメージマーカー削除");
+                        //try
+                        //{
+                        //    int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
+                        //    if (removedMarkers >= 0)
+                        //    {
+                        //        log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
+                        //    }
+                        //    else
+                        //    {
+                        //        log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
+                        //    }
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
+                        //}
 
                         // HTMLファイルからシンプルなspanタグを削除
                         log.WriteLine("HTMLファイルのシンプルなspanタグ削除");

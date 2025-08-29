@@ -159,12 +159,13 @@ namespace WordAddIn1
         }
 
         // 表紙選択ダイアログを表示し、選択されたテンプレートに応じてフラグを設定
-        public bool HandleCoverSelection(loader load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2)
+        public bool HandleCoverSelection(loader load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2, out bool isPattern3)
         {
             isEasyCloud = false;
             isEdgeTracker = false;
             isPattern1 = false;
             isPattern2 = false;
+            isPattern3 = false;
 
             CoverSelectionForm coverSelectionForm = new CoverSelectionForm();
             load.Visible = false;
@@ -185,18 +186,11 @@ namespace WordAddIn1
                 return false;
             }
 
-            if (coverSelectionForm.SelectedCoverTemplate == CoverSelectionForm.CoverTemplateEnum.GeneralPattern3)
-            {
-                load.Close();
-                load.Dispose();
-                MessageBox.Show("[汎用パターン3]テンプレートはまもなく登場します。");
-                return false;
-            }
-
             isEasyCloud = coverSelectionForm.SelectedCoverTemplate == CoverSelectionForm.CoverTemplateEnum.EasyCloud;
             isEdgeTracker = coverSelectionForm.SelectedCoverTemplate == CoverSelectionForm.CoverTemplateEnum.EdgeTracker;
             isPattern1 = coverSelectionForm.SelectedCoverTemplate == CoverSelectionForm.CoverTemplateEnum.GeneralPattern1;
             isPattern2 = coverSelectionForm.SelectedCoverTemplate == CoverSelectionForm.CoverTemplateEnum.GeneralPattern2;
+            isPattern3 = coverSelectionForm.SelectedCoverTemplate == CoverSelectionForm.CoverTemplateEnum.GeneralPattern3;
 
             return true;
         }

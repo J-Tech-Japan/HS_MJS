@@ -273,6 +273,16 @@ namespace WordAddIn1.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap coverLucaTech {
+            get {
+                object obj = ResourceManager.GetObject("coverLucaTech", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Preloader_2 {
             get {
                 object obj = ResourceManager.GetObject("Preloader_2", resourceCulture);

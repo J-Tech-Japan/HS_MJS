@@ -683,7 +683,7 @@
     <Content Include="htmlTemplates\template\images\cover-1.png" />
     <Content Include="htmlTemplates\template\images\cover-2.png" />
     <Content Include="htmlTemplates\template\images\cover-3.png" />
-    <Content Include="htmlTemplates\template\images\cover.png" />
+    <Content Include="htmlTemplates\template\images\coverLucaTech.png" />
     <Content Include="htmlTemplates\template\images\expand.png" />
     <Content Include="htmlTemplates\template\images\modal-close.png" />
     <Content Include="htmlTemplates\template\resources\BSBack.png" />
@@ -723,6 +723,7 @@
     <Content Include="htmlTemplates\whxdata\searchAuto_Index.js" />
     <Content Include="htmlTemplates\whxdata\searchAuto_Map_0.js" />
     <Content Include="htmlTemplates\whxdata\whtagdata.js" />
+    <Content Include="Resources\coverLucaTech.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
