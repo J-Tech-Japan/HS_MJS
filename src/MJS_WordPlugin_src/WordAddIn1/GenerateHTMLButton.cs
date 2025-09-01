@@ -569,7 +569,7 @@ namespace WordAddIn1
                         var (className, styleName, chapterSplitClass) = ProcessCssStyles(objXml);
                         
                         // index.htmlの書き出し
-                        WriteIndexHtml(paths.indexHtmlPath, paths.docTitle, paths.docid, mergeScript);
+                        WriteIndexHtml(paths.indexHtmlPath, paths.docTitle, paths.docid, mergeScript, isPattern3);
 
                         // カバーテンプレートの生成
                         string htmlCoverTemplate1 = BuildHtmlCoverTemplate1Header();
