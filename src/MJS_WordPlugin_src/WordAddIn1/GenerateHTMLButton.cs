@@ -609,22 +609,6 @@ namespace WordAddIn1
                                 trademarkRight
                             );
 
-                            //if (!String.IsNullOrEmpty(subTitle))
-                            //{
-                            //    htmlCoverTemplate2 += @"<p style=""margin-left: 700px; margin-top: 150px; font-size: 15pt; font-family: メイリオ;" + "\n";
-                            //    htmlCoverTemplate2 += @"    font-weight: bold;"">" + subTitle + "</p>" + "\n";
-                            //    htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
-                            //    htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 10px;""" + "\n";
-                            //    htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
-                            //}
-
-                            //else
-                            //{
-                            //    htmlCoverTemplate2 += @"<p><a href=""http://www.mjs.co.jp"" target=""_blank""><img src=""template/images/cover-3.png"" alt=""株式会社ミロク情報サービス （http://www.mjs.co.jp）""" + "\n";
-                            //    htmlCoverTemplate2 += @"                                        style=""margin-left: 700px; margin-top: 100px;""" + "\n";
-                            //    htmlCoverTemplate2 += @"                                        width=""132"" height=""48"" /></a>" + "\n";
-                            //}
-
                             htmlCoverTemplate2 += BuildEasyCloudSubTitleSection(subTitle);
                             htmlCoverTemplate2 += @" </p>" + "\n";
                         }

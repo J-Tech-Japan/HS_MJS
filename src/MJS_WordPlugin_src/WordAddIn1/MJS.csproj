@@ -355,6 +355,7 @@
     <None Include="IncrementMinorVersion.ps1" />
     <None Include="MJS.pfx" />
     <None Include="NoteBook\AssemblyInfo_backup.md" />
+    <None Include="NoteBook\CoverPattern_Images_Generation.md" />
     <None Include="NoteBook\EnhMetaFileBits_Explanation.md" />
     <None Include="NoteBook\MsoShapeType_Explanation.md" />
     <None Include="NoteBook\SaveBackupOfActiveDocument.md" />
@@ -760,6 +761,7 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>if "$(ConfigurationName)"=="Release" powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
