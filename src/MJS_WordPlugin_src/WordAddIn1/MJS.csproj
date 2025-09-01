@@ -718,7 +718,7 @@
     <Content Include="htmlTemplates\whxdata\searchAuto_Index.js" />
     <Content Include="htmlTemplates\whxdata\searchAuto_Map_0.js" />
     <Content Include="htmlTemplates\whxdata\whtagdata.js" />
-    <Content Include="Resources\coverLucaTech.png" />
+    <EmbeddedResource Include="Resources\coverLucaTech.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

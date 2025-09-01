@@ -89,5 +89,18 @@ namespace WordAddIn1
             {"ワ", "ﾜ"}, {"ン", "ﾝ"}
         };
 
+        /// <summary>
+        /// 改行文字を\nに統一するメソッド
+        /// </summary>
+        /// <param name="input">入力文字列</param>
+        /// <returns>改行文字が統一された文字列</returns>
+        internal static string NormalizeLineEndings(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            // \r\nを\nに変換し、単独の\rも\nに変換
+            return input.Replace("\r\n", "\n").Replace("\r", "\n");
+        }
     }
 }

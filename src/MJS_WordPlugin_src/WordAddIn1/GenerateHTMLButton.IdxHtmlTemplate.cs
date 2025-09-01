@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Microsoft.Office.Interop.Word;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WordAddIn1
 {
@@ -74,6 +76,19 @@ namespace WordAddIn1
             idxHtmlTemplate += @"gRootRelPath = ""."";" + "\n";
             idxHtmlTemplate += @"gCommonRootRelPath = ""."";" + "\n";
             idxHtmlTemplate += @"mergePage = {" + "\n";
+
+            //追加
+            //idxHtmlTemplate += @"</script>" + "\n";
+            //idxHtmlTemplate += @"< !--Google tag(gtag.js) かんたんクラウド用-- >" + "\n";
+            //idxHtmlTemplate += @"<script async src = ""https://www.googletagmanager.com/gtag/js?id=G-KBTBSXHNXX""></script>" + "\n";
+            //idxHtmlTemplate += @"<script>" + "\n";
+            //idxHtmlTemplate += @"window.dataLayer = window.dataLayer || [];" + "\n";
+            //idxHtmlTemplate += @"function gtag() { dataLayer.push(arguments); }" + "\n";
+            //idxHtmlTemplate += @"gtag('js', new Date());" + "\n";
+
+            //idxHtmlTemplate += @"gtag('config', 'G-KBTBSXHNXX');" + "\n";
+            //idxHtmlTemplate += @"</script>" + "\n";
+
             foreach (var item in mergeScript)
             {
                 idxHtmlTemplate += item.Value.Split(new char[] { '♯' })[0] + ":'" + item.Key.Split(new char[] { '♯' })[0] + "',";
@@ -288,7 +303,16 @@ namespace WordAddIn1
             idxHtmlTemplate += @"       <div class=""print_page"" id=""print_page"">" + "\n";
             idxHtmlTemplate += @"         <div class=""print_page_area"" title=""いま表示されているページをPDFとして保存します。""><img src=""./template/Azure_Blue01/icon_pdf.png""><p class=""print_page_title"">ページ印刷</p></div>" + "\n";
             idxHtmlTemplate += @"       </div>" + "\n";
-            idxHtmlTemplate += @"       <p class=""fontchange_title"">文字サイズ</p>" + "\n";
+
+            //idxHtmlTemplate += @"<span class=""pdf_download"">" + "\n";
+            //idxHtmlTemplate += @"<ul>" + "\n";
+            //idxHtmlTemplate += @"<li class=""parent"">" + "\n";
+            //idxHtmlTemplate += @"<a class=""pdf_download_title"" href=""javascript:void(0);"" onclick=""javascript:PDFDLPageOpen('KC_KAC_pdfDL.html');"" title=""PDFマニュアルダウンロードページを表示します。""><img class=""pdf_download_icon"" src=""template/Azure_Blue01/PDFmouse-off.png""/>マニュアル<br> ダウンロードページ</a>" + "\n";
+            //idxHtmlTemplate += @"</li>" + "\n";
+            //idxHtmlTemplate += @"</ul>" + "\n";
+            //idxHtmlTemplate += @"</span>" + "\n";
+
+            idxHtmlTemplate += @" < p class=""fontchange_title"">文字サイズ</p>" + "\n";
             idxHtmlTemplate += @"       <div class=""fontsize_change"" id=""fontsize_small""><span>小</span></div>" + "\n";
             idxHtmlTemplate += @"       <div class=""fontsize_change"" id=""fontsize_medium""><span>中</span></div>" + "\n";
             idxHtmlTemplate += @"       <div class=""fontsize_change"" id=""fontsize_large""><span>大</span></div>" + "\n";
@@ -341,7 +365,6 @@ namespace WordAddIn1
             idxHtmlTemplate += @"   !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');" + "\n";
             idxHtmlTemplate += @"}" + "\n";
             idxHtmlTemplate += @"</script>" + "\n";
-            //idxHtmlTemplate += @"<script type=""text/javascript"" src=""whxdata/whtagdata.js""></script>" + "\n";
             idxHtmlTemplate += @"</body>" + "\n";
             idxHtmlTemplate += @"</html>" + "\n";
             return idxHtmlTemplate;

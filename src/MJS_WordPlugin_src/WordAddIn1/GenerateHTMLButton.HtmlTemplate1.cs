@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace WordAddIn1
 {
@@ -19,6 +20,10 @@ namespace WordAddIn1
             if (File.Exists(htmlTemplate1BasePath))
             {
                 htmlTemplate1 = File.ReadAllText(htmlTemplate1BasePath, Encoding.UTF8);
+
+                // 改行文字を\nに統一
+                htmlTemplate1 = Utils.NormalizeLineEndings(htmlTemplate1);
+                
                 htmlTemplate1 += @" <meta name=""topic-breadcrumbs"" content="""" />" + "\n";
                 htmlTemplate1 += @"</head>" + "\n";
                 htmlTemplate1 += @"<body style=""text-justify-trim: punctuation;"">" + "\n";
@@ -43,6 +48,8 @@ namespace WordAddIn1
             // フォールバック: 既存の方法で構築
             return BuildHtmlTemplate1Fallback(title4Collection, mergeScript);
         }
+        
+        
         
         private static string BuildRefPageData(Dictionary<string, string[]> title4Collection)
         {
@@ -144,7 +151,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"};" + "\n";
             htmlTemplate1 += @"	 url = [];" + "\n";
 
-            // 以下は既存のJavaScriptコードを続ける（省略）
+            // 以下は既存のJavaScriptコードを続ける
             htmlTemplate1 += @"function areDirectoriesEqual(relativePath) {" + "\n";
             htmlTemplate1 += @"	if (!relativePath) return false;" + "\n";
             htmlTemplate1 += @"	if (!relativePath.match(""/"") || relativePath.match(/^\.\/.*/)) return true;" + "\n";
@@ -183,7 +190,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"	if (text.match(""[/][A-Z]{3}[0-9]{5}[.]html"") != null) {" + "\n";
             htmlTemplate1 += @"		let id = text.match(""[/][A-Z]{3}[0-9]{5}[.]html"")[0].replace(""/"", """").replace("".html"", """");" + "\n";
             htmlTemplate1 += @"		// check id in mergePage" + "\n";
-            htmlTemplate1 += @"	    if (location.protocol !== ""file:"") {";
+            htmlTemplate1 += @"	    if (location.protocol !== ""file:"") {" + "\n";
             htmlTemplate1 += @"         for (let key in mergePage) {" + "\n";
             htmlTemplate1 += @"			    if(mergePage[key]==id){" + "\n";
             htmlTemplate1 += @"				    var newid=findFirstPageInMerge(id);" + "\n";
@@ -192,7 +199,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"					    document.location.href = newid + "".html#"" + id;" + "\n";
             htmlTemplate1 += @"					    } else {" + "\n";
             htmlTemplate1 += @"						    document.location.href = newid + "".html#"" + ref;" + "\n";
-            htmlTemplate1 += @"	                    }";
+            htmlTemplate1 += @"	                    }" + "\n";
             htmlTemplate1 += @"             }" + "\n";
             htmlTemplate1 += @"			}" + "\n";
             htmlTemplate1 += @"	    }" + "\n";
@@ -217,7 +224,6 @@ namespace WordAddIn1
             htmlTemplate1 += @"        	    var name = $(this).attr(""name"");" + "\n";
             htmlTemplate1 += @"        	    if (name?.indexOf(""_ref"") > -1) {" + "\n";
             htmlTemplate1 += @"        	    } else {" + "\n";
-            //htmlTemplate1 += @"        		    let currentUri = $(this).attr('href');" + "\n";
             htmlTemplate1 += @"        		        let currentUri = $(this).attr('href').replace(/^\.\//, '');" + "\n";
             htmlTemplate1 += @"" + "\n";
             htmlTemplate1 += @"        		        if (currentUri.match(/^https?:/)) {" + "\n";
@@ -305,7 +311,6 @@ namespace WordAddIn1
             htmlTemplate1 += @"        	    var name = $(this).attr(""name"");" + "\n";
             htmlTemplate1 += @"        	    if (name?.indexOf(""_ref"") > -1) {" + "\n";
             htmlTemplate1 += @"        	    } else {" + "\n";
-            //htmlTemplate1 += @"        		    let currentUri = $(this).attr('href');" + "\n";
             htmlTemplate1 += @"        		        let currentUri = $(this).attr('href').replace(/^\.\//, '');" + "\n";
             htmlTemplate1 += @"" + "\n";
             htmlTemplate1 += @"        		        if (currentUri.match(/^https?:/)) {" + "\n";
@@ -379,7 +384,7 @@ namespace WordAddIn1
             htmlTemplate1 += @"		" + "\n";
             htmlTemplate1 += @"		" + "\n";
             htmlTemplate1 += @"		if(text.indexOf(""#"")>0){" + "\n";
-            htmlTemplate1 += @"			window.location.href=text;" + "\n";
+            htmlTemplate1 += @"		 window.location.href=text;" + "\n";
             htmlTemplate1 += @"		}" + "\n";
             htmlTemplate1 += @"		var di = $('body');" + "\n";
             htmlTemplate1 += @"     di.html(""<div></div><main>"" + di.html() + ""</main>"");" + "\n";
