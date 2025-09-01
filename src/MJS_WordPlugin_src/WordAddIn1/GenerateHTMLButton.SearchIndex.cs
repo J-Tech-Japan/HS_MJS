@@ -168,6 +168,9 @@ namespace WordAddIn1
                     // 手順番号span内の入れ子spanを除去
                     htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum""><span[^>]*?>(.*?)</span>(.*?)</span>", @"<span class=""MJS_oflow_stepNum"">$1$2</span>", RegexOptions.Singleline);
 
+                    // HTML本文の改行文字を統一
+                    htmlBody = Utils.NormalizeLineEndings(htmlBody);
+                    
                     sw.Write(htmlBody);
                     sw.Close();
                 }
@@ -184,8 +187,10 @@ namespace WordAddIn1
                 try
                 {
                     string searchBaseContent = File.ReadAllText(searchBaseJsPath, Encoding.UTF8);
+                    // searchBase.jsの改行文字も統一
+                    searchBaseContent = Utils.NormalizeLineEndings(searchBaseContent);
                     searchJsContent += searchBaseContent;
-                    
+
                     // searchBase.jsファイルは不要になったので削除
                     File.Delete(searchBaseJsPath);
                 }
@@ -197,17 +202,34 @@ namespace WordAddIn1
                 }
             }
             
+            // searchJsContentの改行文字を統一
+            searchJsContent = Utils.NormalizeLineEndings(searchJsContent);
+            
+            // XMLコンテンツの処理と改行文字統一
+            string processedXml = Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline)
+                .Replace("'", "&apos;")
+                .Replace(@"\u", @"\\u")
+                .Replace(@"\U", @"\\U");
+            processedXml = Utils.NormalizeLineEndings(processedXml);
+            
             sw = new StreamWriter(Path.Combine(rootPath, exportDir, "search.js"), false, Encoding.UTF8);
-            sw.Write(Regex.Replace(searchJsContent, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;").Replace(@"\u", @"\\u").Replace(@"\U", @"\\U")));
+            string finalSearchJs = Regex.Replace(searchJsContent, "♪", processedXml);
+            // 最終的なsearch.jsの改行文字も統一
+            finalSearchJs = Utils.NormalizeLineEndings(finalSearchJs);
+            sw.Write(finalSearchJs);
             sw.Close();
 
             // 表紙HTMLが存在しない場合は生成
             if (!File.Exists(Path.Combine(rootPath, exportDir, docid + "00000.html")))
             {
                 sw = new StreamWriter(Path.Combine(rootPath, exportDir, docid + "00000.html"), false, Encoding.UTF8);
-                sw.Write(htmlCoverTemplate1 + htmlCoverTemplate2);
+                string coverHtml = htmlCoverTemplate1 + htmlCoverTemplate2;
+                // 表紙HTMLの改行文字も統一
+                coverHtml = Utils.NormalizeLineEndings(coverHtml);
+                sw.Write(coverHtml);
                 sw.Close();
             }
         }
+        
     }
 }
