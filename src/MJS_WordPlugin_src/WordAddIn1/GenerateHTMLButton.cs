@@ -770,19 +770,23 @@ namespace WordAddIn1
                                 paths.exportDir);
                         }
 
-                        Utils.WriteLinesToFile(
-                            paths.exportDirPath,
-                            "headingsWithComment.txt",
-                            headingsWithComment
-                        );
+                        if (headingsWithComment.Count > 0)
+                        {
+                            Utils.WriteLinesToFile(
+                                paths.exportDirPath,
+                                "headingsWithComment.txt",
+                                headingsWithComment
+                            );
+                        }
 
-                        Utils.WriteLinesToFile(
-                            paths.exportDirPath,
-                            "headings.txt",
-                            headings
-                        );
-
-                        var lines = Utils.ReadLinesFromFile(paths.exportDirPath, "headingsWithComment.txt");
+                        if (headings.Count > 0)
+                        {
+                            Utils.WriteLinesToFile(
+                                paths.exportDirPath,
+                                "headings.txt",
+                                headings
+                            );
+                        }
                     }
                     catch (Exception ex)
                     {
