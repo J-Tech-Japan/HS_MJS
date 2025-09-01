@@ -187,8 +187,6 @@ namespace WordAddIn1
                 try
                 {
                     string searchBaseContent = File.ReadAllText(searchBaseJsPath, Encoding.UTF8);
-                    // searchBase.jsの改行文字も統一
-                    searchBaseContent = Utils.NormalizeLineEndings(searchBaseContent);
                     searchJsContent += searchBaseContent;
 
                     // searchBase.jsファイルは不要になったので削除
@@ -202,19 +200,16 @@ namespace WordAddIn1
                 }
             }
             
-            // searchJsContentの改行文字を統一
-            searchJsContent = Utils.NormalizeLineEndings(searchJsContent);
-            
             // XMLコンテンツの処理と改行文字統一
             string processedXml = Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline)
                 .Replace("'", "&apos;")
                 .Replace(@"\u", @"\\u")
                 .Replace(@"\U", @"\\U");
-            processedXml = Utils.NormalizeLineEndings(processedXml);
             
             sw = new StreamWriter(Path.Combine(rootPath, exportDir, "search.js"), false, Encoding.UTF8);
             string finalSearchJs = Regex.Replace(searchJsContent, "♪", processedXml);
-            // 最終的なsearch.jsの改行文字も統一
+
+            // 最終的なsearch.jsの改行文字を統一
             finalSearchJs = Utils.NormalizeLineEndings(finalSearchJs);
             sw.Write(finalSearchJs);
             sw.Close();

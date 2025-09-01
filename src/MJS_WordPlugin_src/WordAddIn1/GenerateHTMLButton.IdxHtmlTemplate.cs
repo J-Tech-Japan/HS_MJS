@@ -10,16 +10,16 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
-        private void WriteIndexHtml(string indexHtmlPath, string docTitle, string docid, Dictionary<string, string> mergeScript)
+        private void WriteIndexHtml(string indexHtmlPath, string docTitle, string docid, Dictionary<string, string> mergeScript, bool isLucaTechGX = false)
         {
-            string idxHtmlTemplate = BuildIdxHtmlTemplate(docTitle, docid, mergeScript);
+            string idxHtmlTemplate = BuildIdxHtmlTemplate(docTitle, docid, mergeScript, isLucaTechGX);
             using (StreamWriter sw = new StreamWriter(indexHtmlPath, false, Encoding.UTF8))
             {
                 sw.Write(idxHtmlTemplate);
             }
         }
 
-        private static string BuildIdxHtmlTemplate(string docTitle, string docid, Dictionary<string, string> mergeScript)
+        private static string BuildIdxHtmlTemplate(string docTitle, string docid, Dictionary<string, string> mergeScript, bool includeBreadcrumb = false)
         {
             string idxHtmlTemplate = "";
             idxHtmlTemplate += @"<?xml version=""1.0"" encoding=""utf-8"" ?>" + "\n";
@@ -32,7 +32,13 @@ namespace WordAddIn1
             idxHtmlTemplate += @"<meta name=""generator"" content=""Adobe Framemaker 2017"" />" + "\n";
             idxHtmlTemplate += @"<title>" + docTitle + "</title>" + "\n";
             idxHtmlTemplate += @"<link rel=""StyleSheet"" href=""template/Azure_Blue01/layout.css"" type=""text/css"" />" + "\n";
-            idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/hc_breadcrumb.js""></script>" + "\n";
+
+            // breadcrumbのJavaScriptは、MJS LucaTech GXが選択された時のみ追加
+            if (includeBreadcrumb)
+            {
+                idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/hc_breadcrumb.js""></script>" + "\n";
+            }
+
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/rh.min.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/common.min.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/layout.min.js""></script>" + "\n";
@@ -56,7 +62,13 @@ namespace WordAddIn1
             idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""template/styles/font.css"">" + "\n";
             idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""template/styles/resp.css"">" + "\n";
             idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""template/styles/pdf.css"" >" + "\n";
-            idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""../../center/css/hc_breadcrumb.css"">" + "\n";
+
+            // breadcrumbのCSSは、MJS LucaTech GXが選択された時のみ追加
+            if (includeBreadcrumb)
+            {
+                idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""../../center/css/hc_breadcrumb.css"">" + "\n";
+            }
+
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/mhfhost.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/search.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""promise-6.1.0.min.js""></script>" + "\n";
