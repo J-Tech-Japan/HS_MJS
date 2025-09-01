@@ -30,7 +30,7 @@ namespace WordAddIn1
             idxHtmlTemplate += @"<meta name=""generator"" content=""Adobe Framemaker 2017"" />" + "\n";
             idxHtmlTemplate += @"<title>" + docTitle + "</title>" + "\n";
             idxHtmlTemplate += @"<link rel=""StyleSheet"" href=""template/Azure_Blue01/layout.css"" type=""text/css"" />" + "\n";
-            idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/hc_breadcrumb.js""></script >" + "\n";
+            idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/hc_breadcrumb.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/rh.min.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/common.min.js""></script>" + "\n";
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/layout.min.js""></script>" + "\n";
