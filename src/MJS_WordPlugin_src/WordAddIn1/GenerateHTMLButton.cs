@@ -722,13 +722,14 @@ namespace WordAddIn1
                         //    log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
                         //}
 
-                        // HTMLファイルからシンプルなspanタグを削除
+                        // HTMLファイルからシンプルなspanタグを削除（index.htmlは除外）
                         try
                         {
-                            int processedHtmlFiles = Utils.RemoveSimpleSpanTagsFromHtmlFolder(paths.exportDirPath);
+                            string[] excludeFiles = { "index.html" };
+                            int processedHtmlFiles = Utils.RemoveSimpleSpanTagsFromHtmlFolder(paths.exportDirPath, excludeFiles);
                             if (processedHtmlFiles >= 0)
                             {
-                                log.WriteLine($"HTMLファイルのシンプルなspanタグ削除完了: {processedHtmlFiles}個のファイルを処理しました");
+                                log.WriteLine($"HTMLファイルのシンプルなspanタグ削除完了: {processedHtmlFiles}個のファイルを処理しました（index.htmlは除外）");
                             }
                             else
                             {

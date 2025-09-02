@@ -1,6 +1,7 @@
 ﻿// Utils.RemoveSpanTagFromHtml.cs
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,8 +15,9 @@ namespace WordAddIn1
         /// ただし、name、class、id、style等の属性があるspanタグは対象外
         /// </summary>
         /// <param name="folderPath">HTMLファイルを含むフォルダのパス</param>
+        /// <param name="excludeFileNames">除外するファイル名のリスト（拡張子含む）。nullの場合は全ファイルを処理</param>
         /// <returns>処理したファイル数。エラーの場合は-1</returns>
-        public static int RemoveSimpleSpanTagsFromHtmlFolder(string folderPath)
+        public static int RemoveSimpleSpanTagsFromHtmlFolder(string folderPath, string[] excludeFileNames = null)
         {
             if (string.IsNullOrEmpty(folderPath))
             {
@@ -40,11 +42,27 @@ namespace WordAddIn1
                     return 0;
                 }
 
+                // 除外ファイル名のセットを作成（大文字小文字を区別しない）
+                var excludeFileNamesSet = excludeFileNames != null 
+                    ? new HashSet<string>(excludeFileNames, StringComparer.OrdinalIgnoreCase) 
+                    : new HashSet<string>();
+
                 int processedCount = 0;
                 int totalRemovedTags = 0;
+                int excludedCount = 0;
 
                 foreach (string htmlFile in htmlFiles)
                 {
+                    string fileName = Path.GetFileName(htmlFile);
+                    
+                    // 除外対象ファイルかチェック
+                    if (excludeFileNamesSet.Contains(fileName))
+                    {
+                        excludedCount++;
+                        System.Diagnostics.Debug.WriteLine($"除外対象ファイルをスキップしました: {fileName}");
+                        continue;
+                    }
+
                     int removedTags = RemoveSimpleSpanTagsFromHtmlFile(htmlFile);
                     if (removedTags >= 0)
                     {
@@ -53,7 +71,7 @@ namespace WordAddIn1
                     }
                 }
 
-                System.Diagnostics.Debug.WriteLine($"処理完了: {processedCount}個のHTMLファイル, {totalRemovedTags}個のspanタグを削除しました。");
+                System.Diagnostics.Debug.WriteLine($"処理完了: {processedCount}個のHTMLファイル処理, {excludedCount}個のファイル除外, {totalRemovedTags}個のspanタグを削除しました。");
                 return processedCount;
             }
             catch (Exception ex)
