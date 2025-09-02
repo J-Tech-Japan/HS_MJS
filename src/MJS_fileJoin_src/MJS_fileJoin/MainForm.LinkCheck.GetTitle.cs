@@ -122,13 +122,114 @@ namespace MJS_fileJoin
 
         private string GetRefLinkTitle(string file, Match m)
         {
+            string refLink = m.Groups[1].Value;
+            
+            // _Refリンクの場合、_Refの後ろの数字を抽出してrefPageから情報を取得
+            var refMatch = Regex.Match(refLink, @"_Ref(\d+)");
+            if (refMatch.Success)
+            {
+                string refNumber = refMatch.Groups[1].Value;
+                string refId = "_Ref" + refNumber;
+                
+                // まずrefPageからタイトルを取得を試行
+                string titleFromRefPage = GetTitleFromRefPage(file, refNumber);
+                if (!string.IsNullOrEmpty(titleFromRefPage))
+                {
+                    return titleFromRefPage;
+                }
+                
+                // refPageで見つからない場合、同じディレクトリ内のHTMLファイルを検索
+                string titleFromHtmlFiles = GetTitleFromHtmlFiles(file, refId);
+                if (!string.IsNullOrEmpty(titleFromHtmlFiles))
+                {
+                    return titleFromHtmlFiles;
+                }
+            }
+            
+            // 従来の方法でリンクタイトルを取得（フォールバック）
             string replaceTitleName = "";
             using (StreamReader srFile = new StreamReader(file, Encoding.UTF8))
             {
                 string titleNameFile = srFile.ReadToEnd();
-                replaceTitleName = Regex.Match(titleNameFile, @"<a\s+href=""" + m.Groups[1].Value + @""">([^<]+)<\/a>").Groups[1].Value.Trim();
+                replaceTitleName = Regex.Match(titleNameFile, @"<a\s+href=""" + Regex.Escape(m.Groups[1].Value) + @""">([^<]+)<\/a>").Groups[1].Value.Trim();
             }
             return replaceTitleName;
+        }
+
+        // refPageから指定されたrefNumberのタイトルを取得
+        private string GetTitleFromRefPage(string file, string refNumber)
+        {
+            string allText = ReadAllText(file);
+            var mcRefPage = GetRefPageMatches(allText);
+            
+            if (mcRefPage != null && mcRefPage.Count > 0)
+            {
+                string refPageContent = mcRefPage[0].Groups[1].Value;
+                
+                // refPage内から対応する参照IDの情報を取得
+                string refPattern = @"_Ref" + refNumber + @"\s*:\s*\[(.*?)\]";
+                var refPageMatch = Regex.Match(refPageContent, refPattern, RegexOptions.Singleline);
+                
+                if (refPageMatch.Success)
+                {
+                    string content = refPageMatch.Groups[1].Value.Trim();
+                    string[] parts = content.Split(',');
+                    
+                    if (parts.Length >= 2)
+                    {
+                        // 2番目の要素（タイトル部分）を返す
+                        return parts[1].Trim().Trim('\'', '"');
+                    }
+                }
+            }
+            
+            return string.Empty;
+        }
+
+        // HTMLファイルから指定されたrefIdのタイトルを取得
+        private string GetTitleFromHtmlFiles(string file, string refId)
+        {
+            string directory = Path.GetDirectoryName(file);
+            string[] htmlFiles = Directory.GetFiles(directory, "*.html", SearchOption.TopDirectoryOnly);
+            
+            foreach (string htmlFile in htmlFiles)
+            {
+                string content = ReadAllText(htmlFile);
+                
+                // <span name="_Ref{数字}" class="ref" />の周辺のタイトルを取得
+                string spanPattern = @"<span\s+name=""" + Regex.Escape(refId) + @"""\s+class=""ref""\s*/>\s*([^<]*?)(?=</p>|<|$)";
+                var spanMatch = Regex.Match(content, spanPattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                
+                if (spanMatch.Success && !string.IsNullOrWhiteSpace(spanMatch.Groups[1].Value))
+                {
+                    return spanMatch.Groups[1].Value.Trim();
+                }
+                
+                // MJS_refクラス内の参照タイトルを検索
+                string mjsRefPattern = @"<p\s+class=""MJS_ref""><span\s+name=""" + Regex.Escape(refId) + @"""\s+class=""ref""\s*/>(.*?)</p>";
+                var mjsRefMatch = Regex.Match(content, mjsRefPattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                
+                if (mjsRefMatch.Success)
+                {
+                    return mjsRefMatch.Groups[1].Value.Trim();
+                }
+                
+                // より広範囲での検索：refIdを含む段落のテキストを取得
+                string paragraphPattern = @"<p[^>]*>.*?<span[^>]*name=""" + Regex.Escape(refId) + @"""[^>]*>.*?</span>(.*?)</p>";
+                var paragraphMatch = Regex.Match(content, paragraphPattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                
+                if (paragraphMatch.Success && !string.IsNullOrWhiteSpace(paragraphMatch.Groups[1].Value))
+                {
+                    // HTMLタグを除去してテキストのみを返す
+                    string text = Regex.Replace(paragraphMatch.Groups[1].Value, @"<[^>]*>", "").Trim();
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        return text;
+                    }
+                }
+            }
+            
+            return string.Empty;
         }
 
         private string GetMjsRefTitleFromFile(string file, string refName)

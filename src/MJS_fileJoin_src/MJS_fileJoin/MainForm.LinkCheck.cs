@@ -153,7 +153,6 @@ namespace MJS_fileJoin
             }
         }
 
-        // アンカーリンクの検証
         private void HandleAnchorLink(string file, Match m)
         {
             string targetURL = "";
@@ -191,13 +190,15 @@ namespace MJS_fileJoin
             }
             else if (m.Groups[1].Value.StartsWith("_Ref"))
             {
-                // _Refリンクの場合は、refPage定義で参照先をチェック
-                if (IsValidRefLink(file, m.Groups[1].Value))
+                // _Refリンクの参照先存在判定
+                if (IsRefLinkValid(file, m.Groups[1].Value))
                 {
                     titleName = GetRefLinkTitle(file, m);
+                    AddLinkTitleMatchResult(file, m, titleName);
                 }
                 else
                 {
+                    // 参照先が存在しない場合は赤くする
                     AddInvalidLinkResult(file, m);
                 }
             }
@@ -207,22 +208,49 @@ namespace MJS_fileJoin
             }
         }
 
-        // _Refリンクの妥当性をチェック
-        private bool IsValidRefLink(string file, string refLink)
+        // _Refリンクの参照先が存在するかを判定
+        private bool IsRefLinkValid(string file, string refLink)
         {
-            string allText = ReadAllText(file);
-            var mcRefPage = GetRefPageMatches(allText);
-
-            if (mcRefPage == null || mcRefPage.Count == 0)
+            // _Refの後の数字を抽出
+            var refMatch = Regex.Match(refLink, @"_Ref(\d+)");
+            if (!refMatch.Success)
             {
-                return false;
+                return false; // _Refの後に数字がない場合は無効
             }
 
-            // refPage定義内で該当する参照があるかチェック
-            string refPageContent = mcRefPage[0].Groups[1].Value;
-            string refKey = refLink.Replace("_ref", "");
+            string refNumber = refMatch.Groups[1].Value;
+            string allText = ReadAllText(file);
 
-            return Regex.IsMatch(refPageContent, $@"{Regex.Escape(refKey)}\s*:");
+            // 同じファイル内でrefPage定義をチェック
+            var mcRefPage = GetRefPageMatches(allText);
+            if (mcRefPage != null && mcRefPage.Count > 0)
+            {
+                string refPageContent = mcRefPage[0].Groups[1].Value;
+                // refPage内に対応する参照IDが存在するかチェック
+                string refPattern = @"_Ref" + refNumber + @"\s*:\s*\[";
+                if (Regex.IsMatch(refPageContent, refPattern))
+                {
+                    return true;
+                }
+            }
+
+            // 同じディレクトリ内の他のHTMLファイルでref要素をチェック
+            string directory = Path.GetDirectoryName(file);
+            string[] htmlFiles = Directory.GetFiles(directory, "*.html", SearchOption.TopDirectoryOnly);
+
+            foreach (string htmlFile in htmlFiles)
+            {
+                string content = ReadAllText(htmlFile);
+                // <span name="_Ref{数字}" class="ref" />の存在をチェック
+                string spanPattern = @"<span\s+name=""_Ref" + refNumber + @"""\s+class=""ref""\s/>";
+                if (Regex.IsMatch(content, spanPattern, RegexOptions.IgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false; // 参照先が見つからない
         }
+
     }
 }
