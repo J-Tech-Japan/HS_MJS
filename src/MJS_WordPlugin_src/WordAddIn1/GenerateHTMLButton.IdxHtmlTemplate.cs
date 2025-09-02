@@ -324,7 +324,7 @@ namespace WordAddIn1
             //idxHtmlTemplate += @"</ul>" + "\n";
             //idxHtmlTemplate += @"</span>" + "\n";
 
-            idxHtmlTemplate += @" < p class=""fontchange_title"">文字サイズ</p>" + "\n";
+            idxHtmlTemplate += @"<p class=""fontchange_title"">文字サイズ</p>" + "\n";
             idxHtmlTemplate += @"       <div class=""fontsize_change"" id=""fontsize_small""><span>小</span></div>" + "\n";
             idxHtmlTemplate += @"       <div class=""fontsize_change"" id=""fontsize_medium""><span>中</span></div>" + "\n";
             idxHtmlTemplate += @"       <div class=""fontsize_change"" id=""fontsize_large""><span>大</span></div>" + "\n";
