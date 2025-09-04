@@ -1,8 +1,11 @@
-﻿using System;
+﻿// MainForm.LinkCheck.AddLink.cs
+
+using System;
 using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Windows.Forms;
 
 namespace MJS_fileJoin
@@ -13,16 +16,54 @@ namespace MJS_fileJoin
         private static readonly Color LightOrange = Color.FromArgb(255, 255, 216, 93);
         private static readonly Color LightRed = Color.FromArgb(255, 255, 180, 180);
 
+        // タイトル正規化メソッド（HTMLエンティティをデコードし、特殊文字を統一）
+        private string NormalizeTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+                return string.Empty;
+
+            // HTMLエンティティをデコード
+            string normalized = HttpUtility.HtmlDecode(title);
+            
+            // 前後の空白を除去
+            normalized = normalized.Trim();
+            
+            // HTMLタグを除去
+            normalized = Regex.Replace(normalized, @"<[^>]*>", "");
+            
+            // 連続する空白を単一の空白に統一
+            normalized = Regex.Replace(normalized, @"\s+", " ");
+            
+            return normalized;
+        }
+
+        // 表示用のタイトルデコードメソッド（HTMLエンティティをデコードするが、HTMLタグは保持）
+        private string DecodeForDisplay(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+                return string.Empty;
+
+            // HTMLエンティティをデコード
+            return HttpUtility.HtmlDecode(title).Trim();
+        }
+
         // タイトル一致チェック
         private void AddLinkTitleMatchResult(string file, Match m, string titleName)
         {
-            bool isMatch = titleName == m.Groups[2].Value;
+            // タイトルを正規化して比較
+            string normalizedTitleName = NormalizeTitle(titleName);
+            string normalizedLinkText = NormalizeTitle(m.Groups[2].Value);
+            bool isMatch = normalizedTitleName == normalizedLinkText;
+
+            // 表示用にHTMLエンティティをデコード
+            string displayLinkText = DecodeForDisplay(m.Groups[2].Value);
+            string displayTitleName = DecodeForDisplay(titleName);
 
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add(m.Groups[1].Value);
-            lvi.SubItems.Add(m.Groups[2].Value);
+            lvi.SubItems.Add(displayLinkText);  // デコードされた参照元タイトル
             lvi.SubItems.Add(isMatch ? "true" : "false");
-            lvi.SubItems.Add(titleName);
+            lvi.SubItems.Add(displayTitleName);  // デコードされた参照先タイトル
             lvi.SubItems.Add("true");
             if (!isMatch)
             {
@@ -73,30 +114,18 @@ namespace MJS_fileJoin
             {
                 // パス解決失敗時は無視
             }
-
-            // ファイル名が「アルファベット3文字+5桁数字」形式か判定
-            //var fileNamePattern = new Regex(@"^([A-Z]{3})(\d{5})\.html$", RegexOptions.IgnoreCase);
-
-            //var sourceMatch = fileNamePattern.Match(sourceFileName);
-            //var linkMatch = fileNamePattern.Match(linkFileName);
-
-            //if (sourceMatch.Success && linkMatch.Success)
-            //{
-            //    // 先頭2桁の数字が一致すれば内部参照
-            //    string sourcePrefix = sourceMatch.Groups[2].Value.Substring(0, 2);
-            //    string linkPrefix = linkMatch.Groups[2].Value.Substring(0, 2);
-            //    return sourcePrefix == linkPrefix;
-            //}
-
             return false;
         }
 
         // リンク切れやID不一致などがあった場合の結果をListViewに追加
         private void AddRefLinkBrokenOrIdMismatchResult(string file, string linkPage, Match m4, string content, int indexOfComma)
         {
+            // 表示用にHTMLエンティティをデコード
+            string displayContent = DecodeForDisplay(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", ""));
+
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add($"{linkPage}.html#{m4.Groups[1].Value.Replace("_ref", "")}");
-            lvi.SubItems.Add(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", ""));
+            lvi.SubItems.Add(displayContent);
             lvi.SubItems.Add("false");
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");
@@ -106,11 +135,15 @@ namespace MJS_fileJoin
         // 参照リンクの検証結果（正常）をListViewに追加
         private void AddRefLinkValidOrMatchedResult(string file, string linkPage, Match m4, string content, int indexOfComma, string titleName)
         {
+            // 表示用にHTMLエンティティをデコード
+            string displayContent = DecodeForDisplay(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", ""));
+            string displayTitleName = DecodeForDisplay(titleName);
+
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add($"{linkPage}.html#{m4.Groups[1].Value.Replace("_ref", "")}");
-            lvi.SubItems.Add(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", ""));
+            lvi.SubItems.Add(displayContent);
             lvi.SubItems.Add("true");
-            lvi.SubItems.Add(titleName);
+            lvi.SubItems.Add(displayTitleName);
             lvi.SubItems.Add("true");
         }
 
@@ -136,9 +169,12 @@ namespace MJS_fileJoin
         // 無効なリンクの検証結果をListViewに追加
         private void AddInvalidLinkResult(string file, Match m)
         {
+            // 表示用にHTMLエンティティをデコード
+            string displayLinkText = DecodeForDisplay(m.Groups[2].Value);
+
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add(m.Groups[1].Value);
-            lvi.SubItems.Add(m.Groups[2].Value);
+            lvi.SubItems.Add(displayLinkText);
             lvi.SubItems.Add("false");
             lvi.SubItems.Add("none");
             lvi.SubItems.Add("false");

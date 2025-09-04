@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using Microsoft.Office.Core;
 
 namespace MJS_fileJoin
 {
@@ -123,11 +122,38 @@ namespace MJS_fileJoin
                 RemoveSearchBlockByTitle(heading, tbOutputDir.Text, exportDir);
             }
 
+            // allHeadingsWithCommentでheadingsWithComment.txtを上書きする
+            string exportDirPath = Path.Combine(tbOutputDir.Text, exportDir);
+            if (allHeadingsWithComment.Count > 0)
+            {
+                try
+                {
+                    Utils.WriteLinesToFile(exportDirPath, "headingsWithComment.txt", allHeadingsWithComment);
+                }
+                catch (Exception ex)
+                {
+                    errorList.Add($"headingsWithComment.txtの書き込みエラー: {ex.Message}");
+                }
+            }
+
             // 結合したheadingsの各タイトルに対して
             // RemoveSearchBlockByTitleを実行して検索対象から除外する
             foreach (string heading in allHeadings)
             {
                 RemoveSearchBlockByTitle(heading, tbOutputDir.Text, exportDir);
+            }
+
+            // allHeadingsでheadingsを上書きする
+            if (allHeadings.Count > 0)
+            {
+                try
+                {
+                    Utils.WriteLinesToFile(exportDirPath, "headings.txt", allHeadings);
+                }
+                catch (Exception ex)
+                {
+                    errorList.Add($"headings.txtの書き込みエラー: {ex.Message}");
+                }
             }
 
             // 目次アイテムごとのHTMLファイルを処理し、gTopicIdを書き換えて保存
