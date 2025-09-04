@@ -3,8 +3,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Office.Interop.Word;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WordAddIn1
 {

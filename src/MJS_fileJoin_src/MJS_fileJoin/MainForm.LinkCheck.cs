@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -136,9 +135,19 @@ namespace MJS_fileJoin
                                 titleName = GetMjsRefTitleFromFile(file, m4.Groups[1].Value);
                             }
                             else titleName = "";
-                            if (titleName.Contains(content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", "")))
+                            
+                            // タイトル比較を正規化して行う
+                            string expectedTitle = content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", "");
+                            string normalizedTitleName = NormalizeTitle(titleName);
+                            string normalizedExpectedTitle = NormalizeTitle(expectedTitle);
+                            
+                            if (normalizedTitleName.Contains(normalizedExpectedTitle) || normalizedExpectedTitle.Contains(normalizedTitleName))
                             {
                                 AddRefLinkValidOrMatchedResult(file, linkPage, m4, content, indexOfComma, titleName);
+                            }
+                            else
+                            {
+                                AddRefLinkBrokenOrIdMismatchResult(file, linkPage, m4, content, indexOfComma);
                             }
                         }
                         else
@@ -248,9 +257,7 @@ namespace MJS_fileJoin
                     return true;
                 }
             }
-
             return false; // 参照先が見つからない
         }
-
     }
 }
