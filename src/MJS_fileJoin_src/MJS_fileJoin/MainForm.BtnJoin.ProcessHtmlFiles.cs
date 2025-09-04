@@ -68,6 +68,7 @@ namespace MJS_fileJoin
                     File.Copy(src, dst);
             }
 
+            // pictフォルダの画像処理
             if (Regex.IsMatch(selHtml, @"<img(?: [^ />]+)* src=""pict[/\\].+?"""))
             {
                 string dirName = "pict";
@@ -89,6 +90,30 @@ namespace MJS_fileJoin
 
                 selHtml = Regex.Replace(selHtml, @"(<img(?: [^ />]+)* src="")pict[/\\](.+?)(\.\w+"")", "$1" + dirName + "/$2_" + picCount.ToString("00") + "$3");
             }
+
+            // extracted_imagesフォルダの画像処理
+            if (Regex.IsMatch(selHtml, @"<img(?: [^ />]+)* src=""extracted_images[/\\].+?"""))
+            {
+                string dirName = "extracted_images";
+                string extractedImagesDir = Path.Combine(outputDir, dirName);
+                if (!Directory.Exists(extractedImagesDir))
+                {
+                    Directory.CreateDirectory(extractedImagesDir);
+                }
+
+                foreach (Match m in Regex.Matches(selHtml, @"<img(?: [^ />]+)* src=""extracted_images[/\\](.+?)"""))
+                {
+                    string src = Path.Combine(htmlDir, "extracted_images", m.Groups[1].Value);
+                    string dst = Path.Combine(extractedImagesDir, Path.GetFileNameWithoutExtension(m.Groups[1].Value) + "_" + picCount.ToString("00") + Path.GetExtension(m.Groups[1].Value));
+                    if (File.Exists(src) && !File.Exists(dst))
+                    {
+                        File.Copy(src, dst);
+                    }
+                }
+
+                selHtml = Regex.Replace(selHtml, @"(<img(?: [^ />]+)* src="")extracted_images[/\\](.+?)(\.\w+"")", "$1" + dirName + "/$2_" + picCount.ToString("00") + "$3");
+            }
+
             return selHtml;
         }
 
