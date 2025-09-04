@@ -38,6 +38,7 @@ namespace MJS_fileJoin
         }
 
         // 表示用のタイトルデコードメソッド（HTMLエンティティをデコードするが、HTMLタグは保持）
+        
         private string DecodeForDisplay(string title)
         {
             if (string.IsNullOrEmpty(title))
@@ -56,6 +57,9 @@ namespace MJS_fileJoin
             bool isMatch = normalizedTitleName == normalizedLinkText;
 
             // 表示用にHTMLエンティティをデコード
+            // • &lt; → <
+            // • &gt; → >
+            // • &amp; → &
             string displayLinkText = DecodeForDisplay(m.Groups[2].Value);
             string displayTitleName = DecodeForDisplay(titleName);
 
