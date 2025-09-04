@@ -102,6 +102,12 @@ namespace MJS_fileJoin
                 Regex.Match(selHtml, @"<div style=""text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;"">((?:.(?!</div>))+.)</div>").Groups[1].Value,
                 "<.+?>", "").Split(new string[] { " &gt; " }, StringSplitOptions.None);
 
+            // パンくずの各要素をHTMLデコード
+            for (int i = 0; i < breadcrumbs.Length; i++)
+            {
+                breadcrumbs[i] = System.Web.HttpUtility.HtmlDecode(breadcrumbs[i]);
+            }
+
             Regex r = new Regex(@"<a.*?href=("")(?<href>.*?)(""|').*?>(?<value>.*?)</a>");
             MatchCollection urls2 = r.Matches(selHtml);
 
@@ -111,7 +117,7 @@ namespace MJS_fileJoin
                 string title = "";
                 foreach (Match match in urls2)
                 {
-                    title = match.Groups["value"].Value.ToString();
+                    title = System.Web.HttpUtility.HtmlDecode(match.Groups["value"].Value.ToString());
                     if (title == breadcrumbs[i])
                     {
                         urls = match.Groups["href"].Value.ToString();
@@ -158,7 +164,9 @@ namespace MJS_fileJoin
                                 breadcrumb += " > ";
                                 breadcrumbDisplay.AppendChild(objToc.CreateTextNode(" > "));
                             }
-                            breadcrumb += ((XmlElement)objTocItem).GetAttribute("title");
+                            
+                            string itemTitle = ((XmlElement)objTocItem).GetAttribute("title");
+                            breadcrumb += itemTitle;
 
                             if (objTocItem.SelectSingleNode("@href") != null)
                             {
@@ -169,15 +177,18 @@ namespace MJS_fileJoin
                                     href = ((XmlElement)objTocItem).GetAttribute("href");
                                 }
                                 ((XmlElement)breadcrumbDisplay.LastChild).SetAttribute("href", href);
-                                breadcrumbDisplay.LastChild.InnerText = ((XmlElement)objTocItem).GetAttribute("title");
+                                breadcrumbDisplay.LastChild.InnerText = itemTitle;
                             }
                             else
                             {
-                                breadcrumbDisplay.AppendChild(objToc.CreateTextNode(((XmlElement)objTocItem).GetAttribute("title")));
+                                breadcrumbDisplay.AppendChild(objToc.CreateTextNode(itemTitle));
                             }
                         }
                         selHtml = Regex.Replace(selHtml, @"(?<=<div style=""text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;"">)(?:.(?!</div>))+.(?=</div>)", breadcrumbDisplay.InnerXml);
-                        selHtml = Regex.Replace(selHtml, @"(?<=<meta name=""topic-breadcrumbs"" content="")[^""]*(?="")", breadcrumb);
+                        
+                        // HTMLエンティティのエンコードを避けて、元の文字のまま保持
+                        string breadcrumbForMeta = breadcrumb;
+                        selHtml = Regex.Replace(selHtml, @"(?<=<meta name=""topic-breadcrumbs"" content="")[^""]*(?="")", breadcrumbForMeta);
 
                         searchWords.DocumentElement.AppendChild(searchWords.CreateElement("div"));
                         ((System.Xml.XmlElement)searchWords.DocumentElement.LastChild).SetAttribute("id", selRow["Column4"].ToString());

@@ -26,14 +26,21 @@ namespace MJS_fileJoin
 
             foreach (Match match in matches)
             {
-                // 改行・空白・全角半角を除去して比較
-                string titleInner = match.Groups[1].Value.Trim()
-                    .Replace("\r", "").Replace("\n", "").Replace("　", " ").Normalize();
+                // HTMLエスケープを解除してから正規化
+                string titleInner = System.Net.WebUtility.HtmlDecode(match.Groups[1].Value.Trim())
+                    .Replace("\r", "").Replace("\n", "").Replace("　", " ")
+                    .Replace("&amp;", "&").Replace("&lt;", "<").Replace("&gt;", ">")
+                    .Replace("&quot;", "\"").Replace("&#39;", "'")
+                    .Normalize();
 
-                string searchTitleNormalized = searchTitleText.Trim()
-                    .Replace("\r", "").Replace("\n", "").Replace("　", " ").Normalize();
+                string searchTitleNormalized = System.Net.WebUtility.HtmlDecode(searchTitleText.Trim())
+                    .Replace("\r", "").Replace("\n", "").Replace("　", " ")
+                    .Replace("&amp;", "&").Replace("&lt;", "<").Replace("&gt;", ">")
+                    .Replace("&quot;", "\"").Replace("&#39;", "'")
+                    .Normalize();
 
-                if (titleInner == searchTitleNormalized)
+                // 大文字小文字を無視して比較
+                if (string.Equals(titleInner, searchTitleNormalized, StringComparison.OrdinalIgnoreCase))
                 {
                     content = content.Replace(match.Value, "");
                 }
