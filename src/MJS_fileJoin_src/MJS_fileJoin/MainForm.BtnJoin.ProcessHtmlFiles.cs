@@ -69,52 +69,48 @@ namespace MJS_fileJoin
             }
 
             // pictフォルダの画像処理
-            if (Regex.IsMatch(selHtml, @"<img(?: [^ />]+)* src=""pict[/\\].+?"""))
-            {
-                string dirName = "pict";
-                string pictDir = Path.Combine(outputDir, dirName);
-                if (!Directory.Exists(pictDir))
-                {
-                    Directory.CreateDirectory(pictDir);
-                }
-
-                foreach (Match m in Regex.Matches(selHtml, @"<img(?: [^ />]+)* src=""pict[/\\](.+?)"""))
-                {
-                    string src = Path.Combine(htmlDir, "pict", m.Groups[1].Value);
-                    string dst = Path.Combine(pictDir, Path.GetFileNameWithoutExtension(m.Groups[1].Value) + "_" + picCount.ToString("00") + Path.GetExtension(m.Groups[1].Value));
-                    if (!File.Exists(dst))
-                    {
-                        File.Copy(src, dst);
-                    }
-                }
-
-                selHtml = Regex.Replace(selHtml, @"(<img(?: [^ />]+)* src="")pict[/\\](.+?)(\.\w+"")", "$1" + dirName + "/$2_" + picCount.ToString("00") + "$3");
-            }
+            selHtml = ProcessImageFolder(selHtml, htmlDir, outputDir, picCount, "pict");
 
             // extracted_imagesフォルダの画像処理
-            if (Regex.IsMatch(selHtml, @"<img(?: [^ />]+)* src=""extracted_images[/\\].+?"""))
-            {
-                string dirName = "extracted_images";
-                string extractedImagesDir = Path.Combine(outputDir, dirName);
-                if (!Directory.Exists(extractedImagesDir))
-                {
-                    Directory.CreateDirectory(extractedImagesDir);
-                }
-
-                foreach (Match m in Regex.Matches(selHtml, @"<img(?: [^ />]+)* src=""extracted_images[/\\](.+?)"""))
-                {
-                    string src = Path.Combine(htmlDir, "extracted_images", m.Groups[1].Value);
-                    string dst = Path.Combine(extractedImagesDir, Path.GetFileNameWithoutExtension(m.Groups[1].Value) + "_" + picCount.ToString("00") + Path.GetExtension(m.Groups[1].Value));
-                    if (File.Exists(src) && !File.Exists(dst))
-                    {
-                        File.Copy(src, dst);
-                    }
-                }
-
-                selHtml = Regex.Replace(selHtml, @"(<img(?: [^ />]+)* src="")extracted_images[/\\](.+?)(\.\w+"")", "$1" + dirName + "/$2_" + picCount.ToString("00") + "$3");
-            }
+            selHtml = ProcessImageFolder(selHtml, htmlDir, outputDir, picCount, "extracted_images");
 
             return selHtml;
+        }
+
+        // 指定されたフォルダ内の画像の処理（汎用メソッド）
+        private string ProcessImageFolder(string htmlContent, string htmlDir, string outputDir, int picCount, string folderName)
+        {
+            string pattern = $@"<img(?: [^ />]+)* src=""{folderName}[/\\].+?""";
+            
+            if (!Regex.IsMatch(htmlContent, pattern))
+            {
+                return htmlContent;
+            }
+
+            string imageDir = Path.Combine(outputDir, folderName);
+            if (!Directory.Exists(imageDir))
+            {
+                Directory.CreateDirectory(imageDir);
+            }
+
+            string matchPattern = $@"<img(?: [^ />]+)* src=""{folderName}[/\\](.+?)""";
+            foreach (Match m in Regex.Matches(htmlContent, matchPattern))
+            {
+                string src = Path.Combine(htmlDir, folderName, m.Groups[1].Value);
+                string dst = Path.Combine(imageDir, 
+                    Path.GetFileNameWithoutExtension(m.Groups[1].Value) + "_" + 
+                    picCount.ToString("00") + Path.GetExtension(m.Groups[1].Value));
+                
+                if (File.Exists(src) && !File.Exists(dst))
+                {
+                    File.Copy(src, dst);
+                }
+            }
+
+            string replacePattern = $@"(<img(?: [^ />]+)* src=""){folderName}[/\\](.+?)(\.\w+"")";
+            string replacement = $"$1{folderName}/$2_{picCount:00}$3";
+            
+            return Regex.Replace(htmlContent, replacePattern, replacement);
         }
 
         // パンくずリスト・目次・全文検索用データ生成
