@@ -164,27 +164,5 @@ namespace WordAddIn1
 
             return result;
         }
-
-        // アウトラインレベルと見出しテキストをメッセージボックスで表示（動作確認用）
-        private void ShowHeadingsWithOutlineLevels()
-        {
-            var application = Globals.ThisAddIn.Application;
-            var activeDocument = application.ActiveDocument;
-            var sb = new StringBuilder();
-
-            foreach (Paragraph para in activeDocument.Paragraphs)
-            {
-                int outlineLevel = (int)para.OutlineLevel;
-                string text = para.Range.Text.Trim();
-
-                if (outlineLevel >= 1 && outlineLevel <= 9 && !string.IsNullOrEmpty(text))
-                {
-                    sb.AppendLine($"レベル{outlineLevel}: {text}");
-                }
-            }
-
-            string result = sb.Length > 0 ? sb.ToString() : "見出しが見つかりませんでした。";
-            MessageBox.Show(result, "見出しのアウトラインレベル一覧", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
     }
 }
