@@ -741,28 +741,12 @@ namespace WordAddIn1
                             log.WriteLine($"HTMLファイルのシンプルなspanタグ削除エラー: {ex.Message}");
                         }
 
-                        // 検索ブロックの削除
-                        //foreach (string heading in headings)
-                        //{
-                        //    RemoveSearchBlockByTitle(
-                        //    heading,
-                        //    paths.rootPath,
-                        //    paths.exportDir);
-                        //}
-
-                        //foreach (string heading in headingsWithComment)
-                        //{
-                        //    RemoveSearchBlockByTitle(
-                        //    heading,
-                        //    paths.rootPath,
-                        //    paths.exportDir);
-                        //}
-
                         log.WriteLine("Zipファイル作成");
 
                         // Zipアーカイブの生成
                         GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName, log);
 
+                        // 検索ブロック削除
                         foreach (string heading in mergedHeadings)
                         {
                             RemoveSearchBlockByTitle(
@@ -771,6 +755,7 @@ namespace WordAddIn1
                                 paths.exportDir);
                         }
 
+                        // 検索除外する見出しリストの生成
                         if (headingsWithComment.Count > 0)
                         {
                             Utils.WriteLinesToFile(

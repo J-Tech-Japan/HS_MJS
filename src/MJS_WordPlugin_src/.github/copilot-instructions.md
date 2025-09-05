@@ -59,12 +59,6 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - GenerateHTMLButton.Helper.cs: HTML¶¬‚Å‹¤’Ê—˜—p‚·‚éƒwƒ‹ƒp[ŠÖ”ŒQBƒpƒXˆ—Aƒtƒ@ƒCƒ‹‘€ìA•\Ž†‘I‘ðƒ_ƒCƒAƒƒOA—áŠOˆ—‚È‚Ç
 - GenerateHTMLButton.CopyImagesFromAppDataLocalTemp.cs: AppData/Local/TempƒtƒHƒ‹ƒ_‚©‚ç‰æ‘œƒtƒ@ƒCƒ‹‚ðŒŸõ‚µAwebhelp/pictƒtƒHƒ‹ƒ_‚É“KØ‚Èƒtƒ@ƒCƒ‹–¼‚ÅƒRƒs[
 
-#### ‰æ‘œˆ—ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
-- Utils.ExtractImagesFromWord.cs: WordƒhƒLƒ…ƒƒ“ƒg‚©‚çEnhMetaFileBits‚ðŽg—p‚µ‚ÄƒCƒ“ƒ‰ƒCƒ“}Œ`Eƒtƒ[ƒeƒBƒ“ƒO}Œ`EƒLƒƒƒ“ƒoƒX}Œ`‚ð‚•iŽ¿‚Å’Šo‚·‚éˆ—B’Šo‚µ‚½‰æ‘œ‚É‘Î‰ž‚·‚éƒ}[ƒJ[‚ðWord•¶‘“à‚É‘}“ü‚µAŒã‘±‚ÌHTMLˆ—‚Å‰æ‘œƒpƒX‚ð³Šm‚ÉŽQÆ‚Å‚«‚é‚æ‚¤§Œä
-- Utils.ProcessImageMarkers.cs: HTMLo—ÍŒã‚ÌwebhelpƒfƒBƒŒƒNƒgƒŠ“à‚ÅA[IMAGEMARKER:xxx]ƒpƒ^[ƒ“‚ðŒŸõ‚µ‘Î‰ž‚·‚é‰æ‘œƒtƒ@ƒCƒ‹‚Ö‚Ìsrc‘®«‚ðXV‚·‚éˆ—B‰æ‘œƒ}[ƒJ[‚ÆHTML‚Ìimg—v‘f‚ðŠÖ˜A•t‚¯‚ÄA’Šo‚³‚ê‚½‰æ‘œ‚Ö‚Ì³Šm‚ÈƒŠƒ“ƒN‚ð¶¬
-- Utils.RemoveAllImageMarkers.cs: Word•¶‘‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚·‚éˆ—BHTMLo—ÍŠ®—¹Œã‚ÌƒNƒŠ[ƒ“ƒAƒbƒv‹@”\
-- Utils.RemoveImageMarkersFromSearchJs.cs: ŒŸõ‹@”\—pJavaScriptisearch.jsjƒtƒ@ƒCƒ‹‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚Æ‚µ‚ÄœŠO‚·‚éˆ—
-
 #### XMLEHTML•ÏŠ·ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
 - GenerateHTMLButton.XMLProcessDocument.cs: Word‚ÌHTMLo—Í‚ðXMLŒ`Ž®‚É•ÏŠ·‚µA–ÚŽŸE–{•¶\‘¢‚Ì‰ðÍ‚Æ•ªŠ„ˆ—‚ðŽÀs
 - GenerateHTMLButton.XMLBuildTocBody.cs: XMLŒ`Ž®‚Ì•¶‘ƒf[ƒ^‚©‚ç–ÚŽŸ\‘¢‚Æ–{•¶ƒy[ƒW‚ð\’zBÍ•ªŠ„‚âƒy[ƒWŠK‘w‚Ì¶¬ˆ—
@@ -74,6 +68,15 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - GenerateHTMLButton.Search.cs: Webƒwƒ‹ƒvƒVƒXƒeƒ€‚Ì‘S•¶ŒŸõ‹@”\‚ðŽÀ‘•‚·‚éJavaScriptƒR[ƒh‚ð“®“I‚É¶¬
 - GenerateHTMLButton.SearchIndex.cs: ŒŸõ‘ÎÛ‚Æ‚È‚éHTMLƒy[ƒW‚ÆŒŸõ—pƒCƒ“ƒfƒbƒNƒXƒtƒ@ƒCƒ‹isearch.jsj‚ð¶¬‚µAŒŸõŒêœb‚Ì’Šo‚Æõˆø‰»‚ðŽÀs
 - GenerateHTMLButton.RemoveSearchBlock.cs: Žw’è‚³‚ê‚½ƒ^ƒCƒgƒ‹‚Ìƒy[ƒW‚©‚çŒŸõƒuƒƒbƒN‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚ÌœŠOˆ—‚ðŽÀs
+
+## ‹¤’Êƒ†[ƒeƒBƒŠƒeƒBƒNƒ‰ƒXiUtilsj
+- Utils.FileIO.cs: ƒŠƒXƒgŒ^•Ï”‚Ì“à—e‚ðƒeƒLƒXƒgƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ”Ä—pƒƒ\ƒbƒh‚ÆAƒtƒ@ƒCƒ‹‘€ì‚Ì‹¤’Êˆ—‚ð’ñ‹Ÿ
+- Utils.TextProcessing.cs: ‘SŠp•¶Žš‚©‚ç”¼Šp•¶Žš‚Ö‚Ì•ÏŠ·‹@”\B”ŽšE‰pŽšE‹L†‚Ì•¶ŽšŽí•ÏŠ·Ž«‘‚ÆConvertWideToNarrowƒƒ\ƒbƒh‚ð’ñ‹Ÿ
+- Utils.RemoveSpanTagFromHtml.cs: HTMLƒtƒ@ƒCƒ‹‚©‚ç•s—v‚Èspanƒ^ƒO‚ðíœ‚·‚é‹@”\BHTMLƒtƒ@ƒCƒ‹’P‘Ì‚Ü‚½‚ÍƒtƒHƒ‹ƒ_“à‚ÌˆêŠ‡ˆ—‚É‘Î‰ž‚µA‘®«‚È‚µ‚ÌƒVƒ“ƒvƒ‹‚Èspanƒ^ƒO‚Ì‚Ý‚ð‘ÎÛ‚Æ‚µ‚Ä’†g‚ÌƒeƒLƒXƒg‚Í•ÛŽ
+- Utils.ExtractImagesFromWord.cs: WordƒhƒLƒ…ƒƒ“ƒg‚©‚çEnhMetaFileBits‚ðŽg—p‚µ‚ÄƒCƒ“ƒ‰ƒCƒ“}Œ`Eƒtƒ[ƒeƒBƒ“ƒO}Œ`EƒLƒƒƒ“ƒoƒX}Œ`‚ð‚•iŽ¿‚Å’Šo‚·‚éˆ—B’Šo‚µ‚½‰æ‘œ‚É‘Î‰ž‚·‚éƒ}[ƒJ[‚ðWord•¶‘“à‚É‘}“ü‚µAŒã‘±‚ÌHTMLˆ—‚Å‰æ‘œƒpƒX‚ð³Šm‚ÉŽQÆ‚Å‚«‚é‚æ‚¤§Œä
+- Utils.ProcessImageMarkers.cs: HTMLo—ÍŒã‚ÌwebhelpƒfƒBƒŒƒNƒgƒŠ“à‚ÅA[IMAGEMARKER:xxx]ƒpƒ^[ƒ“‚ðŒŸõ‚µ‘Î‰ž‚·‚é‰æ‘œƒtƒ@ƒCƒ‹‚Ö‚Ìsrc‘®«‚ðXV‚·‚éˆ—B‰æ‘œƒ}[ƒJ[‚ÆHTML‚Ìimg—v‘f‚ðŠÖ˜A•t‚¯‚ÄA’Šo‚³‚ê‚½‰æ‘œ‚Ö‚Ì³Šm‚ÈƒŠƒ“ƒN‚ð¶¬
+- Utils.RemoveAllImageMarkers.cs: Word•¶‘‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚·‚éˆ—BHTMLo—ÍŠ®—¹Œã‚ÌƒNƒŠ[ƒ“ƒAƒbƒv‹@”\
+- Utils.RemoveImageMarkersFromSearchJs.cs: ŒŸõ‹@”\—pJavaScriptisearch.jsjƒtƒ@ƒCƒ‹‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚Æ‚µ‚ÄœŠO‚·‚éˆ—
 
 ## Copilot ƒŠƒtƒ@ƒNƒ^ƒŠƒ“ƒOŽwŽ¦‘
 
@@ -91,6 +94,7 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - `IDisposable` ‚ÈƒIƒuƒWƒFƒNƒg‚Í `using` •¶‚ÅŠmŽÀ‚É”jŠü‚µ‚Ä‚­‚¾‚³‚¢B
 - ƒRƒŒƒNƒVƒ‡ƒ“‚âƒIƒuƒWƒFƒNƒg‰Šú‰»Žq‚ðÏ‹É“I‚É—˜—p‚µ‚Ä‚­‚¾‚³‚¢B
 - •¶Žš—ñ˜AŒ‹‚É‚Í‰Â”\‚ÈŒÀ‚è•¶Žš—ñ•âŠÔi$"...") ‚ðŽg‚Á‚Ä‚­‚¾‚³‚¢B
+- LINQ‚È‚Ç‚Ì‹@”\‚ðŠˆ—p‚µA‰Â“Ç«‚Ì‚‚¢ƒR[ƒh‚ð‘‚¢‚Ä‚­‚¾‚³‚¢B
 
 ### ƒAƒhƒCƒ“^Interop ŒÅ—L
 - ƒƒ‚ƒŠƒŠ[ƒN–hŽ~‚Ì‚½‚ßACOMƒIƒuƒWƒFƒNƒg‚ÍŠmŽÀ‚É‰ð•ú‚µ‚Ä‚­‚¾‚³‚¢B
