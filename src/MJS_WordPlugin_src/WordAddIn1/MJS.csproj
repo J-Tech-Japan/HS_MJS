@@ -357,6 +357,7 @@
     <None Include="NoteBook\AssemblyInfo_backup.md" />
     <None Include="NoteBook\CoverPattern_Images_Generation.md" />
     <None Include="NoteBook\EnhMetaFileBits_Explanation.md" />
+    <None Include="NoteBook\ExtractImagesFromWord_Overview.md" />
     <None Include="NoteBook\MsoShapeType_Explanation.md" />
     <None Include="NoteBook\search_word_tag_output_process.md" />
     <None Include="NoteBook\Units_Conversion_Reference.md" />
