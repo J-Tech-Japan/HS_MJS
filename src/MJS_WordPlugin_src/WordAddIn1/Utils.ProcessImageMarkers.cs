@@ -73,9 +73,22 @@ namespace WordAddIn1
             }
 
             string originalContent = htmlContent;
+            
+            // webhelpディレクトリのパスを取得（HTMLファイルの親ディレクトリまたはその上位）
+            string webhelpDirectory = Path.GetDirectoryName(htmlFilePath);
+            while (!string.IsNullOrEmpty(webhelpDirectory))
+            {
+                if (Directory.Exists(Path.Combine(webhelpDirectory, extractedImagesDirectory)))
+                {
+                    break;
+                }
+                string parentDir = Directory.GetParent(webhelpDirectory)?.FullName;
+                if (parentDir == webhelpDirectory) break; // ルートディレクトリに到達
+                webhelpDirectory = parentDir;
+            }
 
             // 画像とマーカーのペアを処理
-            htmlContent = ProcessImageAndMarkerPairs(htmlContent, extractedImagesDirectory);
+            htmlContent = ProcessImageAndMarkerPairs(htmlContent, extractedImagesDirectory, webhelpDirectory);
 
             // 残りのIMAGEMARKERを削除
             htmlContent = RemoveRemainingImageMarkers(htmlContent);
@@ -98,8 +111,9 @@ namespace WordAddIn1
         /// </summary>
         /// <param name="htmlContent">処理対象のHTML内容</param>
         /// <param name="extractedImagesDirectory">extracted_imagesディレクトリの相対パス</param>
+        /// <param name="webhelpDirectory">webhelpディレクトリのパス（古い画像削除用）</param>
         /// <returns>処理されたHTML内容</returns>
-        private static string ProcessImageAndMarkerPairs(string htmlContent, string extractedImagesDirectory)
+        private static string ProcessImageAndMarkerPairs(string htmlContent, string extractedImagesDirectory, string webhelpDirectory = null)
         {
             // 修正版：<img>タグと</p>の間にテキストがある場合も対応
             string pattern = @"(<img[^>]*>)([^<]*)</p>\s*<p[^>]*>\s*\[IMAGEMARKER:([^\]]+)\]\s*</p>";
@@ -112,9 +126,9 @@ namespace WordAddIn1
                 string additionalText = match.Groups[2].Value; // 追加テキスト
                 string markerValue = match.Groups[3].Value;
 
-                // imgタグのsrc属性を新しいパスに変更
+                // imgタグのsrc属性を新しいパスに変更（古い画像ファイル削除含む）
                 string newSrc = $"{extractedImagesDirectory}/{markerValue}.png";
-                string updatedImgTag = UpdateImageSrc(imgTag, newSrc);
+                string updatedImgTag = UpdateImageSrc(imgTag, newSrc, webhelpDirectory);
 
                 // 追加テキストも含めて返す
                 return updatedImgTag + additionalText + "</p>";
@@ -124,12 +138,13 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// <img>タグのsrc属性を新しい値に変更
+        /// <img>タグのsrc属性を新しい値に変更し、古い画像ファイルを削除
         /// </summary>
         /// <param name="imgTag">元の<img>タグ</param>
         /// <param name="newSrc">新しいsrc値</param>
+        /// <param name="webhelpDirectory">webhelpディレクトリのパス（古い画像削除用）</param>
         /// <returns>src属性が更新された<img>タグ</returns>
-        private static string UpdateImageSrc(string imgTag, string newSrc)
+        private static string UpdateImageSrc(string imgTag, string newSrc, string webhelpDirectory = null)
         {
             // src属性のパターンをマッチ
             var srcPattern = @"src\s*=\s*[""']([^""']*)[""']";
@@ -137,6 +152,15 @@ namespace WordAddIn1
 
             if (srcRegex.IsMatch(imgTag))
             {
+                var match = srcRegex.Match(imgTag);
+                string oldSrc = match.Groups[1].Value;
+                
+                // 古い画像ファイルを削除
+                if (!string.IsNullOrEmpty(webhelpDirectory) && !string.IsNullOrEmpty(oldSrc))
+                {
+                    DeleteOldImageFile(oldSrc, webhelpDirectory);
+                }
+                
                 // 既存のsrc属性を新しい値に置換
                 return srcRegex.Replace(imgTag, $"src=\"{newSrc}\"");
             }
@@ -154,6 +178,43 @@ namespace WordAddIn1
             }
 
             return imgTag;
+        }
+
+        /// <summary>
+        /// 古い画像ファイルを削除
+        /// </summary>
+        /// <param name="oldSrc">古いsrc属性値</param>
+        /// <param name="webhelpDirectory">webhelpディレクトリのパス</param>
+        private static void DeleteOldImageFile(string oldSrc, string webhelpDirectory)
+        {
+            try
+            {
+                // 相対パスを絶対パスに変換
+                string oldImagePath;
+                
+                if (Path.IsPathRooted(oldSrc))
+                {
+                    // 絶対パスの場合
+                    oldImagePath = oldSrc;
+                }
+                else
+                {
+                    // 相対パスの場合、webhelpディレクトリからの相対パス
+                    oldImagePath = Path.Combine(webhelpDirectory, oldSrc);
+                }
+                
+                // ファイルが存在する場合は削除
+                if (File.Exists(oldImagePath))
+                {
+                    File.Delete(oldImagePath);
+                    System.Diagnostics.Debug.WriteLine($"古い画像ファイルを削除しました: {oldImagePath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // ファイル削除エラーはログ出力のみで処理を継続
+                System.Diagnostics.Debug.WriteLine($"画像ファイル削除エラー ({oldSrc}): {ex.Message}");
+            }
         }
 
         /// <summary>

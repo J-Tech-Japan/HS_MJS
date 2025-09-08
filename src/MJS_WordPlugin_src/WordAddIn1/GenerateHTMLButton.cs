@@ -76,7 +76,6 @@ namespace WordAddIn1
                     bool isError = false;
                     try
                     {
-                        // アセンブリ取得
                         System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
                         log.WriteLine("テンプレートデータ準備");
@@ -186,7 +185,7 @@ namespace WordAddIn1
                                     foreach (Shape ws in docCopy.Shapes)
                                     {
                                         ws.Select();
-                                        if (Globals.ThisAddIn.Application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
+                                        if (application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
                                         {
                                             if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
                                             {
@@ -200,7 +199,7 @@ namespace WordAddIn1
                                 foreach (Shape ws in docCopy.Shapes)
                                 {
                                     ws.Select();
-                                    if (Globals.ThisAddIn.Application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
+                                    if (application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
                                     {
                                         if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
                                         {
@@ -238,7 +237,7 @@ namespace WordAddIn1
                                                 if (!Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.CreateDirectory(Path.Combine(paths.rootPath, "tmpcoverpic"));
 
                                                 strOutFileName = Path.Combine(paths.rootPath, "tmpcoverpic");
-                                                byte[] vData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
+                                                byte[] vData = (byte[])application.Selection.EnhMetaFileBits;
                                                 if (vData != null)
                                                 {
                                                     MemoryStream ms = new MemoryStream(vData);
@@ -263,7 +262,7 @@ namespace WordAddIn1
                                 foreach (Shape ws in docCopy.Shapes)
                                 {
                                     ws.Select();
-                                    if (Globals.ThisAddIn.Application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
+                                    if (application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
                                     {
                                         if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
                                         {
@@ -286,7 +285,7 @@ namespace WordAddIn1
                                                 {
                                                     wis.Range.Select();
                                                     Clipboard.Clear();
-                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    application.Selection.CopyAsPicture();
                                                     Image img = Clipboard.GetImage();
                                                     img.Save(Path.Combine(strOutFileName, "product_logo_main.png"), ImageFormat.Png);
 
@@ -308,7 +307,7 @@ namespace WordAddIn1
                                                 {
                                                     wis.Range.Select();
                                                     Clipboard.Clear();
-                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    application.Selection.CopyAsPicture();
                                                     Image img = Clipboard.GetImage();
 
                                                     productSubLogoCount++;
@@ -348,7 +347,7 @@ namespace WordAddIn1
                                                 {
                                                     wis.Range.Select();
                                                     Clipboard.Clear();
-                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    application.Selection.CopyAsPicture();
                                                     Image img = Clipboard.GetImage();
                                                     img.Save(Path.Combine(strOutFileName, "product_logo_main.png"), ImageFormat.Png);
 
@@ -370,7 +369,7 @@ namespace WordAddIn1
                                                 {
                                                     wis.Range.Select();
                                                     Clipboard.Clear();
-                                                    Globals.ThisAddIn.Application.Selection.CopyAsPicture();
+                                                    application.Selection.CopyAsPicture();
                                                     Image img = Clipboard.GetImage();
 
                                                     productSubLogoCount++;
@@ -626,7 +625,6 @@ namespace WordAddIn1
                         }
                         else if (isPattern2)
                         {
-                         
                             htmlCoverTemplate2 += GeneratePattern2CoverHtml(
                                 productSubLogoGroups,
                                 manualTitleCenter,
@@ -690,7 +688,7 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
-                        //TODO: 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER: xxx]を処理し、画像参照を更新）
+                        // 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER: xxx]を処理し、画像参照を更新）
                         log.WriteLine("画像マーカー処理");
                         try
                         {
@@ -808,7 +806,5 @@ namespace WordAddIn1
                 application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
             }
         }
-
-        
     }
 }
