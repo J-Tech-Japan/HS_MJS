@@ -24,21 +24,21 @@ namespace MJS_fileJoin
 
             // HTMLエンティティをデコード
             string normalized = HttpUtility.HtmlDecode(title);
-            
+
             // 前後の空白を除去
             normalized = normalized.Trim();
-            
+
             // HTMLタグを除去
             normalized = Regex.Replace(normalized, @"<[^>]*>", "");
-            
+
             // 連続する空白を単一の空白に統一
             normalized = Regex.Replace(normalized, @"\s+", " ");
-            
+
             return normalized;
         }
 
         // 表示用のタイトルデコードメソッド（HTMLエンティティをデコードするが、HTMLタグは保持）
-        
+
         private string DecodeForDisplay(string title)
         {
             if (string.IsNullOrEmpty(title))
@@ -57,19 +57,20 @@ namespace MJS_fileJoin
             bool isMatch = normalizedTitleName == normalizedLinkText;
 
             // 表示用にHTMLエンティティをデコード
-            // • &lt; → <
-            // • &gt; → >
-            // • &amp; → &
             string displayLinkText = DecodeForDisplay(m.Groups[2].Value);
             string displayTitleName = DecodeForDisplay(titleName);
+
+            // タイトルが空の場合はリンク先が存在しないと判断
+            bool hasValidTarget = !string.IsNullOrEmpty(normalizedTitleName);
 
             ListViewItem lvi = listView1.Items.Add(file);
             lvi.SubItems.Add(m.Groups[1].Value);
             lvi.SubItems.Add(displayLinkText);  // デコードされた参照元タイトル
             lvi.SubItems.Add(isMatch ? "true" : "false");
             lvi.SubItems.Add(displayTitleName);  // デコードされた参照先タイトル
-            lvi.SubItems.Add("true");
-            if (!isMatch)
+            lvi.SubItems.Add(hasValidTarget ? "true" : "false"); // タイトルの有無でファイル有無を判定
+
+            if (!isMatch || !hasValidTarget)
             {
                 lvi.BackColor = LightRed;
             }
