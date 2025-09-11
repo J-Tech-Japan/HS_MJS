@@ -74,6 +74,9 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - Utils.TextProcessing.cs: ‘SŠp•¶Žš‚©‚ç”¼Šp•¶Žš‚Ö‚Ì•ÏŠ·‹@”\B”ŽšE‰pŽšE‹L†‚Ì•¶ŽšŽí•ÏŠ·Ž«‘‚ÆConvertWideToNarrowƒƒ\ƒbƒh‚ð’ñ‹Ÿ
 - Utils.RemoveSpanTagFromHtml.cs: HTMLƒtƒ@ƒCƒ‹‚©‚ç•s—v‚Èspanƒ^ƒO‚ðíœ‚·‚é‹@”\BHTMLƒtƒ@ƒCƒ‹’P‘Ì‚Ü‚½‚ÍƒtƒHƒ‹ƒ_“à‚ÌˆêŠ‡ˆ—‚É‘Î‰ž‚µA‘®«‚È‚µ‚ÌƒVƒ“ƒvƒ‹‚Èspanƒ^ƒO‚Ì‚Ý‚ð‘ÎÛ‚Æ‚µ‚Ä’†g‚ÌƒeƒLƒXƒg‚Í•ÛŽ
 - Utils.ExtractImagesFromWord.cs: WordƒhƒLƒ…ƒƒ“ƒg‚©‚çEnhMetaFileBits‚ðŽg—p‚µ‚ÄƒCƒ“ƒ‰ƒCƒ“}Œ`Eƒtƒ[ƒeƒBƒ“ƒO}Œ`EƒLƒƒƒ“ƒoƒX}Œ`‚ð‚•iŽ¿‚Å’Šo‚·‚éˆ—B’Šo‚µ‚½‰æ‘œ‚É‘Î‰ž‚·‚éƒ}[ƒJ[‚ðWord•¶‘“à‚É‘}“ü‚µAŒã‘±‚ÌHTMLˆ—‚Å‰æ‘œƒpƒX‚ð³Šm‚ÉŽQÆ‚Å‚«‚é‚æ‚¤§Œä
+- Utils.ExtractImagesFromWord.CheckStyle.cs: ‰æ‘œ’ŠoŽž‚ÌƒXƒ^ƒCƒ‹”»’èˆ—BMJS“Á’èƒXƒ^ƒCƒ‹i‰æ‘œAŽè‡“àA–{•¶“àAƒRƒ‰ƒ€“àA•\“àAˆ—ƒtƒ[“™j‚Ì”»’è‚ÆƒXƒ^ƒCƒ‹ƒx[ƒX‹­§’ŠoEƒXƒLƒbƒv§ŒäA•\Ž†ƒZƒNƒVƒ‡ƒ“”»’è‹@”\‚ð’ñ‹Ÿ
+- Utils.ExtractImagesFromWord.Info.cs: ‰æ‘œ’ŠoŒ‹‰Ê‚Ì“Œvî•ñ¶¬‚ÆƒeƒLƒXƒgƒtƒ@ƒCƒ‹o—Í‹@”\B’Šo‚µ‚½‰æ‘œ‚ÌŽí•ÊEƒTƒCƒYE”—Ê‚ÉŠÖ‚·‚éÚ×ƒŒƒ|[ƒg‚ð¶¬
+- Utils.ExtractImagesFromWord.InsertMarker.cs: ’Šo‚µ‚½‰æ‘œ‚ÌˆÊ’u‚Éƒ}[ƒJ[ƒeƒLƒXƒg‚ð‘}“ü‚·‚éˆ—BƒCƒ“ƒ‰ƒCƒ“}Œ`‚Æƒtƒ[ƒeƒBƒ“ƒO}Œ`‚»‚ê‚¼‚ê‚É‘Î‰ž‚µ‚½[IMAGEMARKER:xxx]Œ`Ž®‚Ìƒ}[ƒJ[‘}“ü‹@”\
 - Utils.ProcessImageMarkers.cs: HTMLo—ÍŒã‚ÌwebhelpƒfƒBƒŒƒNƒgƒŠ“à‚ÅA[IMAGEMARKER:xxx]ƒpƒ^[ƒ“‚ðŒŸõ‚µ‘Î‰ž‚·‚é‰æ‘œƒtƒ@ƒCƒ‹‚Ö‚Ìsrc‘®«‚ðXV‚·‚éˆ—B‰æ‘œƒ}[ƒJ[‚ÆHTML‚Ìimg—v‘f‚ðŠÖ˜A•t‚¯‚ÄA’Šo‚³‚ê‚½‰æ‘œ‚Ö‚Ì³Šm‚ÈƒŠƒ“ƒN‚ð¶¬
 - Utils.RemoveAllImageMarkers.cs: Word•¶‘‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚·‚éˆ—BHTMLo—ÍŠ®—¹Œã‚ÌƒNƒŠ[ƒ“ƒAƒbƒv‹@”\
 - Utils.RemoveImageMarkersFromSearchJs.cs: ŒŸõ‹@”\—pJavaScriptisearch.jsjƒtƒ@ƒCƒ‹‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚Æ‚µ‚ÄœŠO‚·‚éˆ—

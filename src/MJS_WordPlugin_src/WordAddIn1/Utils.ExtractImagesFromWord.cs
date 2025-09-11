@@ -1,6 +1,4 @@
-﻿// Utils.ExtractImagesFromWord.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -51,6 +49,8 @@ namespace WordAddIn1
         /// <param name="minOriginalWidth">元画像の最小幅（ポイント単位）</param>
         /// <param name="minOriginalHeight">元画像の最小高さ（ポイント単位）</param>
         /// <param name="includeMjsTableImages">MJS_画像（表内）スタイルの画像を抽出するかどうか</param>
+        /// <param name="maxOutputWidth">出力画像の最大幅（ピクセル単位、デフォルト: 2048）</param>
+        /// <param name="maxOutputHeight">出力画像の最大高さ（ピクセル単位、デフォルト: 2048）</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
@@ -63,7 +63,9 @@ namespace WordAddIn1
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true)
+            bool includeMjsTableImages = true,
+            int maxOutputWidth = 2048,
+            int maxOutputHeight = 2048)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -92,7 +94,9 @@ namespace WordAddIn1
                         skipCoverMarkers,
                         minOriginalWidth,
                         minOriginalHeight,
-                        includeMjsTableImages);
+                        includeMjsTableImages,
+                        maxOutputWidth,
+                        maxOutputHeight);
                 }
 
                 // フローティング図形の抽出
@@ -109,7 +113,9 @@ namespace WordAddIn1
                         skipCoverMarkers,
                         minOriginalWidth,
                         minOriginalHeight,
-                        includeMjsTableImages);
+                        includeMjsTableImages,
+                        maxOutputWidth,
+                        maxOutputHeight);
                 }
 
                 return extractedImages;
@@ -132,7 +138,9 @@ namespace WordAddIn1
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true)
+            bool includeMjsTableImages = true,
+            int maxOutputWidth = 2048,
+            int maxOutputHeight = 2048)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -171,7 +179,9 @@ namespace WordAddIn1
                             outputDirectory, 
                             $"inline_image_{imageCounter}", 
                             inlineShape.Type.ToString(),
-                            forceExtract);
+                            forceExtract,
+                            maxOutputWidth,
+                            maxOutputHeight);
                         
                         if (!string.IsNullOrEmpty(filePath))
                         {
@@ -216,7 +226,9 @@ namespace WordAddIn1
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true)
+            bool includeMjsTableImages = true,
+            int maxOutputWidth = 2048,
+            int maxOutputHeight = 2048)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -235,7 +247,9 @@ namespace WordAddIn1
                             skipCoverMarkers,
                             minOriginalWidth,
                             minOriginalHeight,
-                            includeMjsTableImages);
+                            includeMjsTableImages,
+                            maxOutputWidth,
+                            maxOutputHeight);
                     }
                     // フリーフォーム図形の場合
                     else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
@@ -252,7 +266,9 @@ namespace WordAddIn1
                                 skipCoverMarkers,
                                 minOriginalWidth,
                                 minOriginalHeight,
-                                includeMjsTableImages);
+                                includeMjsTableImages,
+                                maxOutputWidth,
+                                maxOutputHeight);
                         }
                     }
                     // 通常の図形の場合
@@ -268,7 +284,9 @@ namespace WordAddIn1
                             skipCoverMarkers,
                             minOriginalWidth,
                             minOriginalHeight,
-                            includeMjsTableImages);
+                            includeMjsTableImages,
+                            maxOutputWidth,
+                            maxOutputHeight);
                     }
                 }
                 catch (Exception ex)
@@ -292,7 +310,9 @@ namespace WordAddIn1
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true)
+            bool includeMjsTableImages = true,
+            int maxOutputWidth = 2048,
+            int maxOutputHeight = 2048)
         {
             try
             {
@@ -330,7 +350,9 @@ namespace WordAddIn1
                             outputDirectory, 
                             $"canvas_{imageCounter}", 
                             "Canvas",
-                            forceExtract);
+                            forceExtract,
+                            maxOutputWidth,
+                            maxOutputHeight);
                         
                         if (!string.IsNullOrEmpty(filePath))
                         {
@@ -375,7 +397,9 @@ namespace WordAddIn1
                         skipCoverMarkers,
                         minOriginalWidth,
                         minOriginalHeight,
-                        includeMjsTableImages);
+                        includeMjsTableImages,
+                        maxOutputWidth,
+                        maxOutputHeight);
                 }
             }
             catch (Exception ex)
@@ -428,7 +452,9 @@ namespace WordAddIn1
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true)
+            bool includeMjsTableImages = true,
+            int maxOutputWidth = 2048,
+            int maxOutputHeight = 2048)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
@@ -444,7 +470,9 @@ namespace WordAddIn1
                         skipCoverMarkers,
                         minOriginalWidth,
                         minOriginalHeight,
-                        includeMjsTableImages);
+                        includeMjsTableImages,
+                        maxOutputWidth,
+                        maxOutputHeight);
                 }
                 catch (Exception ex)
                 {
@@ -466,7 +494,9 @@ namespace WordAddIn1
             bool skipCoverMarkers = true,
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true)
+            bool includeMjsTableImages = true,
+            int maxOutputWidth = 2048,
+            int maxOutputHeight = 2048)
         {
             try
             {
@@ -503,7 +533,9 @@ namespace WordAddIn1
                         outputDirectory, 
                         $"{prefix}_{imageCounter}", 
                         shape.Type.ToString(),
-                        forceExtract);
+                        forceExtract,
+                        maxOutputWidth,
+                        maxOutputHeight);
                     
                     if (!string.IsNullOrEmpty(filePath))
                     {
@@ -535,40 +567,76 @@ namespace WordAddIn1
         /// <summary>
         /// EnhMetaFileBitsから画像ファイルを作成
         /// </summary>
+        /// <param name="metaFileData">メタファイルデータ</param>
+        /// <param name="outputDirectory">出力ディレクトリ</param>
+        /// <param name="baseFileName">ベースファイル名</param>
+        /// <param name="shapeType">図形タイプ</param>
+        /// <param name="forceExtract">強制抽出フラグ</param>
+        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 2048）</param>
+        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 2048）</param>
+        /// <returns>作成されたファイルのパス、失敗時はnull</returns>
         private static string ExtractImageFromMetaFileData(
             byte[] metaFileData, 
             string outputDirectory, 
             string baseFileName, 
             string shapeType,
-            bool forceExtract = false)
+            bool forceExtract = false,
+            int maxWidth = 2048,
+            int maxHeight = 2048)
         {
             try
             {
                 using (var memoryStream = new MemoryStream(metaFileData))
                 {
-                    using (var image = Image.FromStream(memoryStream))
+                    using (var originalImage = Image.FromStream(memoryStream))
                     {
                         // 最小サイズのフィルタリング（強制抽出の場合はスキップ）
-                        if (!forceExtract && (image.Width < 250 || image.Height < 250))
+                        if (!forceExtract && (originalImage.Width < 250 || originalImage.Height < 250))
                             return null;
 
-                        // ファイル名の生成
-                        string fileName = $"{baseFileName}_{shapeType}.png";
-                        string filePath = Path.Combine(outputDirectory, fileName);
+                        // リサイズが必要かチェック
+                        bool needsResize = originalImage.Width > maxWidth || originalImage.Height > maxHeight;
+                        Image finalImage = originalImage;
 
-                        // 重複ファイル名の回避
-                        int duplicateCounter = 1;
-                        while (File.Exists(filePath))
+                        if (needsResize)
                         {
-                            fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
-                            filePath = Path.Combine(outputDirectory, fileName);
-                            duplicateCounter++;
+                            // 縦横比を維持してリサイズサイズを計算
+                            var newSize = CalculateResizedDimensions(originalImage.Width, originalImage.Height, maxWidth, maxHeight);
+                            
+                            // リサイズされた画像を作成
+                            finalImage = ResizeImageWithQuality(originalImage, newSize.Width, newSize.Height);
+                            
+                            System.Diagnostics.Debug.WriteLine($"画像をリサイズしました: {originalImage.Width}x{originalImage.Height} → {newSize.Width}x{newSize.Height}");
                         }
 
-                        // PNG形式で保存
-                        image.Save(filePath, ImageFormat.Png);
-                        
-                        return filePath;
+                        try
+                        {
+                            // ファイル名の生成
+                            string fileName = $"{baseFileName}_{shapeType}.png";
+                            string filePath = Path.Combine(outputDirectory, fileName);
+
+                            // 重複ファイル名の回避
+                            int duplicateCounter = 1;
+                            while (File.Exists(filePath))
+                            {
+                                fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
+                                filePath = Path.Combine(outputDirectory, fileName);
+                                duplicateCounter++;
+                            }
+
+                            // PNG形式で保存
+                            finalImage.Save(filePath, ImageFormat.Png);
+                            
+                            return filePath;
+                        }
+                        finally
+                        {
+                            // リサイズした画像のリソースを解放（オリジナル画像と異なる場合のみ）
+                            if (needsResize && finalImage != originalImage)
+                            {
+                                finalImage.Dispose();
+                            }
+                        }
                     }
                 }
             }
@@ -577,6 +645,85 @@ namespace WordAddIn1
                 System.Diagnostics.Debug.WriteLine($"メタファイルデータからの画像生成でエラー: {ex.Message}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 縦横比を維持してリサイズ後のサイズを計算
+        /// </summary>
+        /// <param name="originalWidth">元の幅</param>
+        /// <param name="originalHeight">元の高さ</param>
+        /// <param name="maxWidth">最大幅</param>
+        /// <param name="maxHeight">最大高さ</param>
+        /// <returns>リサイズ後のサイズ</returns>
+        private static Size CalculateResizedDimensions(int originalWidth, int originalHeight, int maxWidth, int maxHeight)
+        {
+            // 元のサイズが最大サイズ以下の場合はそのまま返す
+            if (originalWidth <= maxWidth && originalHeight <= maxHeight)
+            {
+                return new Size(originalWidth, originalHeight);
+            }
+
+            // 縦横比を計算
+            double aspectRatio = (double)originalWidth / originalHeight;
+
+            int newWidth, newHeight;
+
+            // 幅が制限を超える場合と高さが制限を超える場合の両方を考慮
+            if (originalWidth > maxWidth && originalHeight > maxHeight)
+            {
+                // 両方が制限を超える場合、より制限が厳しい方に合わせる
+                double widthRatio = (double)maxWidth / originalWidth;
+                double heightRatio = (double)maxHeight / originalHeight;
+                double ratio = Math.Min(widthRatio, heightRatio);
+
+                newWidth = (int)Math.Round(originalWidth * ratio);
+                newHeight = (int)Math.Round(originalHeight * ratio);
+            }
+            else if (originalWidth > maxWidth)
+            {
+                // 幅のみが制限を超える場合
+                newWidth = maxWidth;
+                newHeight = (int)Math.Round(maxWidth / aspectRatio);
+            }
+            else
+            {
+                // 高さのみが制限を超える場合
+                newHeight = maxHeight;
+                newWidth = (int)Math.Round(maxHeight * aspectRatio);
+            }
+
+            // 最小サイズの保証（1ピクセル以上）
+            newWidth = Math.Max(1, newWidth);
+            newHeight = Math.Max(1, newHeight);
+
+            return new Size(newWidth, newHeight);
+        }
+
+        /// <summary>
+        /// 高品質でリサイズされた画像を作成
+        /// </summary>
+        /// <param name="originalImage">元の画像</param>
+        /// <param name="newWidth">新しい幅</param>
+        /// <param name="newHeight">新しい高さ</param>
+        /// <returns>リサイズされた画像</returns>
+        private static Image ResizeImageWithQuality(Image originalImage, int newWidth, int newHeight)
+        {
+            var resizedImage = new Bitmap(newWidth, newHeight);
+            
+            using (var graphics = Graphics.FromImage(resizedImage))
+            {
+                // 高品質なリサイズのための設定
+                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                // リサイズ実行
+                graphics.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+            }
+
+            return resizedImage;
         }
     }
 }
