@@ -262,6 +262,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CheckInfo.cs" />
+    <Compile Include="Utils.ExtractImagesFromWord.CheckStyle.cs" />
+    <Compile Include="Utils.ExtractImagesFromWord.Info.cs" />
+    <Compile Include="Utils.ExtractImagesFromWord.InsertMarker.cs" />
     <Compile Include="Utils.RemoveImageMarkersFromSearchJs.cs" />
     <Compile Include="Utils.ProcessImageMarkers.cs" />
     <Compile Include="Utils.RemoveAllImageMarkers.cs" />
@@ -358,6 +361,7 @@
     <None Include="NoteBook\CoverPattern_Images_Generation.md" />
     <None Include="NoteBook\EnhMetaFileBits_Explanation.md" />
     <None Include="NoteBook\ExtractImagesFromWord_Overview.md" />
+    <None Include="NoteBook\HighQualityImageReplacementSystem.md" />
     <None Include="NoteBook\MsoShapeType_Explanation.md" />
     <None Include="NoteBook\search_word_tag_output_process.md" />
     <None Include="NoteBook\Units_Conversion_Reference.md" />
