@@ -135,12 +135,12 @@ namespace MJS_fileJoin
                                 titleName = GetMjsRefTitleFromFile(file, m4.Groups[1].Value);
                             }
                             else titleName = "";
-                            
+
                             // タイトル比較を正規化して行う
                             string expectedTitle = content.Substring(indexOfComma + 1).Trim('\'', ' ').Replace("'", "");
                             string normalizedTitleName = NormalizeTitle(titleName);
                             string normalizedExpectedTitle = NormalizeTitle(expectedTitle);
-                            
+
                             if (normalizedTitleName.Contains(normalizedExpectedTitle) || normalizedExpectedTitle.Contains(normalizedTitleName))
                             {
                                 AddRefLinkValidOrMatchedResult(file, linkPage, m4, content, indexOfComma, titleName);
@@ -194,7 +194,10 @@ namespace MJS_fileJoin
             }
             else if (File.Exists(Path.GetDirectoryName(Path.GetFullPath(file)) + "\\" + Regex.Replace(m.Groups[1].Value, @"#.*?$", "")))
             {
+                // ファイルが存在する場合でも、実際に見出しが存在するかチェック
                 titleName = GetHeading3aTitle(file, m);
+
+                // 削除された見出しの場合は無効なリンクとして扱う
                 AddLinkTitleMatchResult(file, m, titleName);
             }
             else if (m.Groups[1].Value.StartsWith("_Ref"))
