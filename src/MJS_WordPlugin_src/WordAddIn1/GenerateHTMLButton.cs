@@ -743,9 +743,6 @@ namespace WordAddIn1
 
                         log.WriteLine("Zipファイル作成");
 
-                        // Zipアーカイブの生成
-                        GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName, log);
-
                         // 検索ブロック削除
                         foreach (string heading in mergedHeadings)
                         {
@@ -773,6 +770,9 @@ namespace WordAddIn1
                                 headings
                             );
                         }
+
+                        // Zipアーカイブの生成
+                        GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName, log);
                     }
                     catch (Exception ex)
                     {
