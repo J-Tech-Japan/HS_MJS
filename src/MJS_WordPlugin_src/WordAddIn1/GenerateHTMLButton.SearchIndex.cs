@@ -178,9 +178,8 @@ namespace WordAddIn1
 
             // 検索用JSファイル生成
             // searchBase.jsファイルを読み込んで結合する
-            string searchJs = @"var searchWords = $('♪');" + "\n";
-            string searchJsContent = searchJs;
-            
+            string searchJsContent = @"var searchWords = $('♪');" + "\n";
+
             // searchBase.jsファイルが存在するかチェックし、内容を追加
             string searchBaseJsPath = Path.Combine(rootPath, exportDir, "searchBase.js");
             if (File.Exists(searchBaseJsPath))

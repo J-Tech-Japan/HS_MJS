@@ -1,5 +1,6 @@
 ﻿// GenerateHTMLButton.HtmlTemplate1.cs
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -29,6 +30,17 @@ namespace WordAddIn1
                 htmlTemplate1 = htmlTemplate1.Replace("{{TOPIC_ID_PLACEHOLDER}}", "gTopicId = \"♪\";");
                 htmlTemplate1 = htmlTemplate1.Replace("{{REFPAGE_DATA_PLACEHOLDER}}", $"refPage = {{{BuildRefPageData(title4Collection)}}};");
                 htmlTemplate1 = htmlTemplate1.Replace("{{MERGEPAGE_DATA_PLACEHOLDER}}", $"mergePage = {{{BuildMergePageData(mergeScript)}}};");
+            }
+
+            // テンプレートファイルを削除（使用済みのため）
+            try
+            {
+                File.Delete(htmlTemplate1BasePath);
+            }
+            catch (Exception ex)
+            {
+                // ログ出力があれば記録（削除に失敗しても処理は継続）
+                System.Diagnostics.Debug.WriteLine($"htmlTemplate1Base.html削除エラー: {ex.Message}");
             }
 
             return htmlTemplate1;
