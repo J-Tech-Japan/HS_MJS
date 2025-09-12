@@ -12,9 +12,9 @@ namespace WordAddIn1
         {
             // exportDirに展開されたhtmlTemplate1Base.htmlのパスを取得
             string htmlTemplate1BasePath = Path.Combine(rootPath, exportDir, "htmlTemplate1Base.html");
-            
+
             string htmlTemplate1 = "";
-            
+
             // htmlTemplate1Base.htmlファイルが存在する場合はそれを読み込み
             if (File.Exists(htmlTemplate1BasePath))
             {
@@ -22,20 +22,18 @@ namespace WordAddIn1
 
                 // 改行文字を\nに統一
                 htmlTemplate1 = Utils.NormalizeLineEndings(htmlTemplate1);
-                
-                htmlTemplate1 += @" <meta name=""topic-breadcrumbs"" content="""" />" + "\n";
-                htmlTemplate1 += @"</head>" + "\n";
-                htmlTemplate1 += @"<body style=""text-justify-trim: punctuation;"">" + "\n";
 
-                // コメントアウトされた変数の位置を探して置換
-                htmlTemplate1 = htmlTemplate1.Replace("//gTopicId = \"\";", "gTopicId = \"♪\";");
-                htmlTemplate1 = htmlTemplate1.Replace("//refPage = {};", $"refPage = {{{BuildRefPageData(title4Collection)}}};");
-                htmlTemplate1 = htmlTemplate1.Replace("//mergePage = {};", $"mergePage = {{{BuildMergePageData(mergeScript)}}};");
+                // プレースホルダーを実際の値に置換
+                htmlTemplate1 = htmlTemplate1.Replace("{{TOPIC_BREADCRUMBS_PLACEHOLDER}}", @" <meta name=""topic-breadcrumbs"" content="""" />");
+                htmlTemplate1 = htmlTemplate1.Replace("{{BODY_STYLE_PLACEHOLDER}}", @"style=""text-justify-trim: punctuation;""");
+                htmlTemplate1 = htmlTemplate1.Replace("{{TOPIC_ID_PLACEHOLDER}}", "gTopicId = \"♪\";");
+                htmlTemplate1 = htmlTemplate1.Replace("{{REFPAGE_DATA_PLACEHOLDER}}", $"refPage = {{{BuildRefPageData(title4Collection)}}};");
+                htmlTemplate1 = htmlTemplate1.Replace("{{MERGEPAGE_DATA_PLACEHOLDER}}", $"mergePage = {{{BuildMergePageData(mergeScript)}}};");
             }
-            
+
             return htmlTemplate1;
         }
-        
+
         private static string BuildRefPageData(Dictionary<string, string[]> title4Collection)
         {
             var refPageData = new StringBuilder();
