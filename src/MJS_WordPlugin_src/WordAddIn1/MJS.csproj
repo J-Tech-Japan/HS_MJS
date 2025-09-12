@@ -578,6 +578,7 @@
     <Content Include="htmlTemplates\fontchange.js" />
     <Content Include="htmlTemplates\html2canvas.min.js" />
     <Content Include="htmlTemplates\htmlTemplate1Base.html" />
+    <Content Include="htmlTemplates\indexBase.html" />
     <Content Include="htmlTemplates\jquery-3.1.0.min.js" />
     <Content Include="htmlTemplates\jquery.cookie.js" />
     <Content Include="htmlTemplates\jspdf.debug.js" />
@@ -765,6 +766,7 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>if "$(ConfigurationName)"=="Release" powershell -ExecutionPolicy Bypass -File "$(ProjectDir)IncrementMinorVersion.ps1"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
