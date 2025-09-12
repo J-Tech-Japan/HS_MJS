@@ -659,9 +659,6 @@ namespace WordAddIn1
                         var htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript, paths.rootPath, paths.exportDir);
                         var htmlTemplate2 = "</body>\n</html>\n";
                         
-                        // 検索用JSの生成
-                        //var searchJs = BuildSearchJs();
-                        
                         // 目次・本文ノードの参照取得
                         XmlNode objTocCurrent = objToc.DocumentElement;
                         XmlNode objBodyCurrent = objBody.DocumentElement;
@@ -725,7 +722,7 @@ namespace WordAddIn1
                         // HTMLファイルからシンプルなspanタグを削除（index.htmlは除外）
                         try
                         {
-                            string[] excludeFiles = { "index.html" };
+                            string[] excludeFiles = { "index.html", "indexBase.html" };
                             int processedHtmlFiles = Utils.RemoveSimpleSpanTagsFromHtmlFolder(paths.exportDirPath, excludeFiles);
                             if (processedHtmlFiles >= 0)
                             {
