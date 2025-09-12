@@ -660,7 +660,7 @@ namespace WordAddIn1
                         var htmlTemplate2 = "</body>\n</html>\n";
                         
                         // 検索用JSの生成
-                        var searchJs = BuildSearchJs();
+                        //var searchJs = BuildSearchJs();
                         
                         // 目次・本文ノードの参照取得
                         XmlNode objTocCurrent = objToc.DocumentElement;
@@ -685,7 +685,7 @@ namespace WordAddIn1
                         CleanUpXmlNodes(objBody);
                         
                         // 検索用ファイルの生成
-                        GenerateSearchFiles(objBody, paths.rootPath, paths.exportDir, paths.docid, htmlTemplate1, htmlTemplate2, htmlCoverTemplate1, htmlCoverTemplate2, objToc, mergeScript, searchJs);
+                        GenerateSearchFiles(objBody, paths.rootPath, paths.exportDir, paths.docid, htmlTemplate1, htmlTemplate2, htmlCoverTemplate1, htmlCoverTemplate2, objToc, mergeScript);
 
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);

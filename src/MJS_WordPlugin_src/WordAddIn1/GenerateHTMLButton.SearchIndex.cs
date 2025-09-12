@@ -23,7 +23,7 @@ namespace WordAddIn1
              string htmlCoverTemplate1,
              string htmlCoverTemplate2,
              XmlDocument objToc,
-             Dictionary<string, string> mergeScript, string searchJs)
+             Dictionary<string, string> mergeScript)
         {
             StreamWriter sw;
 
@@ -178,7 +178,8 @@ namespace WordAddIn1
 
             // 検索用JSファイル生成
             // searchBase.jsファイルを読み込んで結合する
-            string searchJsContent = searchJs; // "var searchWords = $('♪');" で始まる
+            string searchJs = @"var searchWords = $('♪');" + "\n";
+            string searchJsContent = searchJs;
             
             // searchBase.jsファイルが存在するかチェックし、内容を追加
             string searchBaseJsPath = Path.Combine(rootPath, exportDir, "searchBase.js");
