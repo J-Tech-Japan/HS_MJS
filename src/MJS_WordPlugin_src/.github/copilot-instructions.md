@@ -65,7 +65,6 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ğ‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - GenerateHTMLButton.XMLExportTocAsJsFiles.cs: –ÚŸƒf[ƒ^‚ğJavaScriptŒ`®‚Åo—Í‚µAWebƒwƒ‹ƒvƒVƒXƒeƒ€‚ÌƒiƒrƒQ[ƒVƒ‡ƒ“‹@”\‚ğ¶¬
 
 #### ŒŸõ‹@”\ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
-- GenerateHTMLButton.Search.cs: Webƒwƒ‹ƒvƒVƒXƒeƒ€‚Ì‘S•¶ŒŸõ‹@”\‚ğÀ‘•‚·‚éJavaScriptƒR[ƒh‚ğ“®“I‚É¶¬
 - GenerateHTMLButton.SearchIndex.cs: ŒŸõ‘ÎÛ‚Æ‚È‚éHTMLƒy[ƒW‚ÆŒŸõ—pƒCƒ“ƒfƒbƒNƒXƒtƒ@ƒCƒ‹isearch.jsj‚ğ¶¬‚µAŒŸõŒêœb‚Ì’Šo‚Æõˆø‰»‚ğÀs
 - GenerateHTMLButton.RemoveSearchBlock.cs: w’è‚³‚ê‚½ƒ^ƒCƒgƒ‹‚Ìƒy[ƒW‚©‚çŒŸõƒuƒƒbƒN‚ğíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚ÌœŠOˆ—‚ğÀs
 
