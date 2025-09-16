@@ -43,7 +43,7 @@ namespace WordAddIn1
 
         // Wordドキュメントのカスタムドキュメントプロパティから「webHelpFolderName」の値を取得
         // この値はHTML出力時のフォルダ名として使用される
-        private string GetWebHelpFolderName(Word.Document activeDocument)
+        private string GetWebHelpFolderName(Document activeDocument)
         {
             // カスタムドキュメントプロパティのコレクションを取得
             var properties = (Microsoft.Office.Core.DocumentProperties)activeDocument.CustomDocumentProperties;
