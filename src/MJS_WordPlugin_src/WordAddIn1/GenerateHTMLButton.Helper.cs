@@ -33,6 +33,8 @@ namespace WordAddIn1
                 // パターンに合致しない場合はローダーを閉じてエラーメッセージを表示
                 load.Close();
                 load.Dispose();
+                string ErrMsgInvalidFileName = "開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」";
+                string ErrMsgFileNameRule = "ファイル命名規則エラー";
                 MessageBox.Show(ErrMsgInvalidFileName, ErrMsgFileNameRule, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -307,7 +309,13 @@ namespace WordAddIn1
         // HTMLファイルをブラウザで開くかどうかを確認するダイアログを表示
         private void ShowHtmlOutputDialog(string exportDirPath, string indexHtmlPath)
         {
+            string MsgHtmlOutputSuccess1 = "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？";
+            string MsgHtmlOutputSuccess2 = "HTML出力成功。";
+            string ErrMsgHtmlOutputFailure1 = "HTMLの出力に失敗しました。";
+            string ErrMsgHtmlOutputFailure2 = "HTML出力失敗。";
+
             DialogResult selectMsg = MessageBox.Show(exportDirPath + MsgHtmlOutputSuccess1, MsgHtmlOutputSuccess2, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            
             if (selectMsg == DialogResult.Yes)
             {
                 try { Process.Start(indexHtmlPath); }

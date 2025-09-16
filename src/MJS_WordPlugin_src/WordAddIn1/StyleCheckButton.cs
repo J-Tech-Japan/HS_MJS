@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// StyleCheckButton.cs
+
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,6 +23,9 @@ namespace WordAddIn1
             // ドキュメント変更イベントとウィンドウ選択変更イベントのハンドラーを解除
             application.DocumentChange -= new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
             application.WindowSelectionChange -= new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(Application_WindowSelectionChange);
+
+            // PreparePathsを使用してパス情報を取得
+            var paths = PreparePaths(activeDocument, string.Empty);
 
             // スタイル名を格納するリスト
             List<string> styleList = new List<string>();
@@ -45,7 +50,7 @@ namespace WordAddIn1
             Word.Document templateDocument = application.Documents.Open(attachedTemplateFile);
 
             // ログファイルにテンプレートファイルのパスを記録
-            using (StreamWriter log = new StreamWriter(activeDocument.Path + "\\log.txt", true, Encoding.UTF8))
+            using (StreamWriter log = new StreamWriter(paths.logPath, true, Encoding.UTF8))
             {
                 log.WriteLine("Attached template file: " + attachedTemplateFile);
             }
