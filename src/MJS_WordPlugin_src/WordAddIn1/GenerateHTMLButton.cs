@@ -700,7 +700,7 @@ namespace WordAddIn1
                             log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
                         }
 
-                        //search.jsファイルからイメージマーカーを削除
+                        // search.jsファイルからイメージマーカーを削除
                         log.WriteLine("search.jsファイルのイメージマーカー削除");
                         try
                         {
@@ -738,8 +738,6 @@ namespace WordAddIn1
                             log.WriteLine($"HTMLファイルのシンプルなspanタグ削除エラー: {ex.Message}");
                         }
 
-                        log.WriteLine("Zipファイル作成");
-
                         // 検索ブロック削除
                         foreach (string heading in mergedHeadings)
                         {
@@ -769,6 +767,7 @@ namespace WordAddIn1
                         }
 
                         // Zipアーカイブの生成
+                        log.WriteLine("Zipファイル作成");
                         GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName, log);
                     }
                     catch (Exception ex)

@@ -114,123 +114,6 @@ namespace WordAddIn1
             }
         }
 
-        //private void Application_DocumentBeforeSave(Word.Document Doc, ref bool SaveAsUI, ref bool Cancel)
-        //{
-        //    Word.Document activeDoc = Globals.ThisAddIn.Application.ActiveDocument;
-
-        //    if (!File.Exists(activeDoc.Path + "\\" + Path.ChangeExtension(activeDoc.Name, ".h")))
-        //            File.CreateText(activeDoc.Path + "\\" + Path.ChangeExtension(activeDoc.Name, ".h"));
-        //    using (StreamReader sr = new StreamReader(activeDoc.Path + "\\" + Path.ChangeExtension(activeDoc.Name, ".h"), Encoding.UTF8))
-        //    {
-
-        //    }
-
-        //    foreach (Word.Paragraph wp in activeDoc.Paragraphs)
-        //    {
-        //    }
-
-        //}
-
-        //private void toggleButton1_Click(object sender, RibbonControlEventArgs e)
-        //{
-        //    if (toggleButton1.Checked == true)
-        //        button2.Enabled = true;
-        //    else button2.Enabled = false;
-        //    var activeDoc = Globals.ThisAddIn.Application.ActiveDocument as Microsoft.Office.Interop.Word.Document;
-        //    Word.Selection ws = Globals.ThisAddIn.Application.Selection;
-
-        //    if (toggleButton1.Checked)
-        //    {
-        //        activeDoc.TrackRevisions = true;
-        //        activeDoc.ShowRevisions = false;
-        //    }
-
-        //    if (!toggleButton1.Checked)
-        //    {
-        //        activeDoc.TrackRevisions = false;
-        //        activeDoc.ShowRevisions = true;
-        //    }
-        //}
-
-        /*以下は、次期対応変更履歴保存用コードの一部です。
-        private string cordConvert(int i)
-        {
-            string rireki = "";
-            switch (i)
-            {
-                case 1:
-                    rireki = "挿入";
-                    break;
-                case 2:
-                    rireki = "削除";
-                    break;
-                case 3:
-                    rireki = "プロパティの変更";
-                    break;
-                case 4:
-                    rireki = "段落番号の変更";
-                    break;
-                case 5:
-                    rireki = "フィールド表示の変更";
-                    break;
-                case 6:
-                    rireki = "解決された競合";
-                    break;
-                case 7:
-                    rireki = "競合";
-                    break;
-                case 8:
-                    rireki = "スタイルの変更";
-                    break;
-                case 9:
-                    rireki = "置換";
-                    break;
-                case 10:
-                    rireki = "段落のプロパティの変更";
-                    break;
-                case 11:
-                    rireki = "表のプロパティの変更";
-                    break;
-                case 12:
-                    rireki = "セクションのプロパティの変更";
-                    break;
-                case 13:
-                    rireki = "スタイル定義の変更";
-                    break;
-                case 14:
-                    rireki = "内容の移動元";
-                    break;
-                case 15:
-                    rireki = "内容の移動先";
-                    break;
-                case 16:
-                    rireki = "表のセルの挿入";
-                    break;
-                case 17:
-                    rireki = "表のセルの削除";
-                    break;
-                case 18:
-                    rireki = "表のセルの結合";
-                    break;
-            }
-            return rireki;
-        }
-        */
-
-        //private void NowLoadingProc()
-        //{
-        //    alert f = new alert();
-        //    try
-        //    {
-        //        f.ShowDialog();
-        //        f.Dispose();
-        //    }
-        //    catch (ThreadAbortException)
-        //    {
-        //        f.Close();
-        //    }
-        //}
-
         // 指定したディレクトリ（fromPath）配下の全ファイル・サブディレクトリを別ディレクトリ（toPath）へコピー
         private void copyDirectory(string fromPath, string toPath)
         {
@@ -264,7 +147,6 @@ namespace WordAddIn1
             }
         }
 
-
         // Wordの選択範囲が変更されたときに呼び出されるイベントハンドラ。
         // スタイルチェック後にドキュメントが変更された場合、再チェックを促す。
         private void Application_WindowSelectionChange(Word.Selection ws)
@@ -282,47 +164,13 @@ namespace WordAddIn1
             // スタイルチェックボタンが有効な場合、ドキュメント変更を通知し再チェックを促す
             if (button3.Enabled)
             {
+                string ErrMsgDocumentChanged1 = "「スタイルチェック」クリック後に変更が加えられました。\r\n「HTML出力」を実行するためには\r\nもう一度「スタイルチェック」を実行してください。";
+                string ErrMsgDocumentChanged2 = "ドキュメントが変更されました！";
                 MessageBox.Show(ErrMsgDocumentChanged1, ErrMsgDocumentChanged2, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 button3.Enabled = false;
                 return;
             }
         }
-
-        //private string getStyleName(Dictionary<string, string> styleName, System.Xml.XmlNode seekNode)
-        //{
-        //    string thisStyleName = "";
-
-        //    if (seekNode.SelectSingleNode("@class") == null)
-        //    {
-        //        if (styleName.ContainsKey(seekNode.Name))
-        //        {
-        //            thisStyleName = styleName[seekNode.Name];
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (styleName.ContainsKey(seekNode.Name + "." + seekNode.SelectSingleNode("@class").InnerText))
-        //        {
-        //            thisStyleName = styleName[seekNode.Name + "." + seekNode.SelectSingleNode("@class").InnerText];
-        //        }
-        //    }
-
-        //    if ((thisStyleName == "") && (seekNode.SelectSingleNode("*[@class != '']") != null))
-        //    {
-        //        if (styleName.ContainsKey(seekNode.SelectSingleNode("*[@class != '']").Name + "." + seekNode.SelectSingleNode("*[@class != '']/@class").InnerText))
-        //        {
-        //            thisStyleName = styleName[seekNode.SelectSingleNode("*[@class != '']").Name + "." + seekNode.SelectSingleNode("*[@class != '']/@class").InnerText];
-        //        }
-        //    }
-        //    else if ((thisStyleName == "") && (seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']") != null))
-        //    {
-        //        if (styleName.ContainsKey(seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']").Name))
-        //        {
-        //            thisStyleName = styleName[seekNode.SelectSingleNode("*[translate(name(), '0123456789', '') = 'h']").Name];
-        //        }
-        //    }
-        //    return thisStyleName;
-        //}
 
         public List<HeadingInfo> oldInfo;  // 書誌情報（旧）
         public List<HeadingInfo> newInfo;  // 書誌情報（新）

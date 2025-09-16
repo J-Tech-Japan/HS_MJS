@@ -44,34 +44,12 @@ namespace WordAddIn1
 
         // 新たな除去候補記号'\u00E8'
         public static readonly char[] removeSingleSymbols = { '\u00E8' };
-        //public static readonly char[] removeSingleSymbols = {  };
 
         // ファイル名形式の規定
-        //private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
-
-        private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}(_backup)?\.docx*$";
-
+        private const string FileNamePattern = @"^[A-Z]{3}(_[^_]*?){2}\.docx*$";
+        
         // 一般的なエラーメッセージ
         private const string ErrMsg = "エラーが発生しました。";
-
-        // 開いているファイル名が正しくない場合に表示するメッセージ
-        private const string ErrMsgInvalidFileName = "開いているWordのファイル名が正しくありません。\r\n下記の例を参考にファイル名を変更してください。\r\n\r\n(英半角大文字3文字)_(製品名)_(バージョンなど自由付加).doc\r\n\r\n例):「AAA_製品A_r1.doc」";
-        private const string ErrMsgFileNameRule = "ファイル命名規則エラー";
-
-        private const string ErrMsgTmpDocOpen = "同階層のtmp.docが開かれています。\r\ntmp.docを閉じてから実行してください。";
-        private const string ErrMsgFile = "ファイルエラー";
-
-        // スタイルチェック中に文書が変更された時のメッセージ
-        private const string ErrMsgDocumentChanged1 = "「スタイルチェック」クリック後に変更が加えられました。\r\n「HTML出力」を実行するためには\r\nもう一度「スタイルチェック」を実行してください。";
-        private const string ErrMsgDocumentChanged2 = "ドキュメントが変更されました！";
-
-        // HTML出力が成功した場合に表示するメッセージ
-        private const string MsgHtmlOutputSuccess1 = "\r\nにHTMLが出力されました。\r\n出力したHTMLをブラウザで表示しますか？";
-        private const string MsgHtmlOutputSuccess2 = "HTML出力成功";
-
-        // HTML出力が失敗した場合に表示するメッセージ
-        private const string ErrMsgHtmlOutputFailure1 = "HTMLの出力に失敗しました。";
-        private const string ErrMsgHtmlOutputFailure2 = "HTML出力失敗。";
 
         // ヘルパーメソッド: ドキュメントの表示設定
         private void ConfigDocumentDisplay()
