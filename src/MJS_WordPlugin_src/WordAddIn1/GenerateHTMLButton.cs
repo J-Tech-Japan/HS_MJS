@@ -7,7 +7,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 using Microsoft.Office.Interop.Word;
@@ -106,10 +105,6 @@ namespace WordAddIn1
 
                         File.Delete(Path.Combine(paths.rootPath, "htmlTemplates.zip"));
 
-                        string docid = Regex.Replace(paths.docName, "^(.{3}).+$", "$1");
-                        string docTitle = Regex.Replace(paths.docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
-
-                        string zipDirPath = Path.Combine(paths.rootPath, docid + "_" + paths.exportDir + "_" + DateTime.Today.ToString("yyyyMMdd"));
                         Application.DoEvents();
                         
                         // ドキュメントを一時HTML用にコピー
@@ -691,8 +686,7 @@ namespace WordAddIn1
                         log.WriteLine("画像マーカー処理");
                         try
                         {
-                            string webhelpPath = Path.Combine(paths.rootPath, paths.exportDir);
-                            int processedFiles = Utils.ProcessImageMarkersInWebhelp(webhelpPath, "extracted_images");
+                            int processedFiles = Utils.ProcessImageMarkersInWebhelp(paths.exportDirPath, "extracted_images");
                             log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
                         }
                         catch (Exception ex)
@@ -719,7 +713,7 @@ namespace WordAddIn1
                             log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
                         }
 
-                        // HTMLファイルからシンプルなspanタグを削除（index.htmlは除外）
+                        // HTMLファイルからシンプルなspanタグを削除
                         try
                         {
                             string[] excludeFiles = { "index.html", "indexBase.html" };
@@ -801,7 +795,7 @@ namespace WordAddIn1
             finally
             {
                 // ドキュメント変更イベントを再登録
-                application.DocumentChange += new Word.ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
+                application.DocumentChange += new ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
             }
         }
     }
