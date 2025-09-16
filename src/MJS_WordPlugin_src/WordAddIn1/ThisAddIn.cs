@@ -8,20 +8,12 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
-            // EnhMetaFileBitsを使用した画像・キャンバス抽出（アクティブドキュメントから直接、テキスト情報付き） ***
-            //ExtractImagesAndCanvasFromActiveDocumentWithText();
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
             try
             {
-                // アドイン終了時に全ての画像マーカーを削除
-                //if (Globals.ThisAddIn.Application != null && Globals.ThisAddIn.Application.Documents.Count > 0)
-                //{
-                //    RemoveMarkersFromActiveDocument();
-                //}
-                
                 // 必要に応じてリソースを解放
                 if (Globals.ThisAddIn.Application != null)
                 {

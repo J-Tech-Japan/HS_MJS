@@ -20,6 +20,8 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - BookInfoButton.cs: ‘Žî•ño—Íƒ{ƒ^ƒ“‚Ìˆ—BmakeBookInfo()ƒƒ\ƒbƒh‚ðŒÄ‚Ño‚µ‚ÄƒƒCƒ“ˆ—‚ðŽÀs
 - RibbonMJS.MakeBookInfo.cs: ‘Žî•ñì¬‚ÌƒƒCƒ“ˆ—B•¶‘“à‚ÌŒ©o‚µ’i—Ž‚ð‰ðÍ‚µ‚ÄƒuƒbƒNƒ}[ƒN‚ð¶¬‚µAV‹Œ‘Žî•ñ‚Ì”äŠrEXV‚ðŽÀs
 - RibbonMJS.MakeBookInfo.Helper.cs: ‘Žî•ñì¬‚Ìƒwƒ‹ƒp[ŠÖ”ŒQBƒtƒ@ƒCƒ‹–¼ƒ`ƒFƒbƒNAƒuƒbƒNƒ}[ƒN‘€ìAV‹Œ‘Žî•ñ‚Ì”äŠrˆ—
+- RibbonMJS.CheckDocInfo.cs: V‹Œ‘Žî•ñ‚Ì”äŠrˆ—B€–Ú‚Ì’Ç‰ÁEíœE•ÏXEID•sˆê’vEƒ^ƒCƒgƒ‹•ÏX‚È‚Ç8Ží—Þ‚Ì•ÏXƒpƒ^[ƒ“‚ðŒŸo‚µA”äŠrŒ‹‰ÊƒŠƒXƒg‚ð¶¬
+- RibbonMJS.CheckSortInfo.cs: ‘Žî•ñ”äŠrŒ‹‰Ê‚Ìƒ\[ƒgˆ—B€”ÔŠK‘wi4ƒŒƒxƒ‹j‚ÉŠî‚Ã‚­“KØ‚È•À‚Ñ‡‚Å‚Ì”äŠrŒ‹‰Ê•\Ž¦‹@”\
 - RibbonMJS.MakeBookInfo.HeaderFile.cs: ƒwƒbƒ_[ƒtƒ@ƒCƒ‹i‘Žî•ñƒtƒ@ƒCƒ‹j‚Ì“Ç‚Ýž‚ÝE‘‚«ž‚Ýˆ—‚Æƒtƒ@ƒCƒ‹ƒAƒNƒZƒX§Œä
 - BookInfo.cs: ‘Žî•ñ‚ÌƒfƒtƒHƒ‹ƒg’l“ü—Í—pƒ_ƒCƒAƒƒOƒtƒH[ƒ€B2Œ…‚Ì”’l“ü—Í‚Æ‘SŠpE”¼Šp•ÏŠ·‹@”\
 - HeadingInfo.cs: Œ©o‚µî•ñ‚ðŠi”[‚·‚éƒf[ƒ^ƒNƒ‰ƒXi€”ÔEƒ^ƒCƒgƒ‹EIDEƒ}[ƒWæî•ñj
@@ -58,6 +60,9 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - GenerateHTMLButton.CollectMergeScript.cs: Œ©o‚µŒ‹‡î•ñ‚ð‘Žî•ñƒtƒ@ƒCƒ‹iheaderFilej‚©‚çŽûW‚µAHTMLo—ÍŽž‚Ìƒy[ƒWƒ}[ƒWˆ——pŽ«‘‚ð¶¬
 - GenerateHTMLButton.Helper.cs: HTML¶¬‚Å‹¤’Ê—˜—p‚·‚éƒwƒ‹ƒp[ŠÖ”ŒQBƒpƒXˆ—Aƒtƒ@ƒCƒ‹‘€ìA•\Ž†‘I‘ðƒ_ƒCƒAƒƒOA—áŠOˆ—‚È‚Ç
 - GenerateHTMLButton.CopyImagesFromAppDataLocalTemp.cs: AppData/Local/TempƒtƒHƒ‹ƒ_‚©‚ç‰æ‘œƒtƒ@ƒCƒ‹‚ðŒŸõ‚µAwebhelp/pictƒtƒHƒ‹ƒ_‚É“KØ‚Èƒtƒ@ƒCƒ‹–¼‚ÅƒRƒs[
+- RibbonMJS.InnerNode.cs: HTML•ÏŠ·Žž‚ÌXMLƒm[ƒh“à•”ˆ—BWord•¶‘‚ÌŠe—v‘fi•\E}Œ`EƒXƒ^ƒCƒ‹j‚ðHTML—v‘f‚É•ÏŠ·‚·‚éƒƒCƒ“ˆ—
+- RibbonMJS.InnerNode.Helper.cs: InnerNode.cs‚Ìƒwƒ‹ƒp[ŠÖ”ŒQB‘€ìŽè‡EQ&AE‘I‘ðŽˆE‰Óð‘‚«E•\EƒRƒ‰ƒ€‚È‚ÇŠeŽíMJSƒXƒ^ƒCƒ‹‚Ìê—pHTML•ÏŠ·ˆ—
+
 
 #### XMLEHTML•ÏŠ·ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
 - GenerateHTMLButton.XMLProcessDocument.cs: Word‚ÌHTMLo—Í‚ðXMLŒ`Ž®‚É•ÏŠ·‚µA–ÚŽŸE–{•¶\‘¢‚Ì‰ðÍ‚Æ•ªŠ„ˆ—‚ðŽÀs
@@ -68,7 +73,9 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - GenerateHTMLButton.SearchIndex.cs: ŒŸõ‘ÎÛ‚Æ‚È‚éHTMLƒy[ƒW‚ÆŒŸõ—pƒCƒ“ƒfƒbƒNƒXƒtƒ@ƒCƒ‹isearch.jsj‚ð¶¬‚µAŒŸõŒêœb‚Ì’Šo‚Æõˆø‰»‚ðŽÀs
 - GenerateHTMLButton.RemoveSearchBlock.cs: Žw’è‚³‚ê‚½ƒ^ƒCƒgƒ‹‚Ìƒy[ƒW‚©‚çŒŸõƒuƒƒbƒN‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚ÌœŠOˆ—‚ðŽÀs
 
-## ‹¤’Êƒ†[ƒeƒBƒŠƒeƒBƒNƒ‰ƒXiUtilsj
+## ‚»‚Ì‘¼‚Ìƒtƒ@ƒCƒ‹
+
+### ‹¤’Êƒ†[ƒeƒBƒŠƒeƒBƒNƒ‰ƒXiUtilsj
 - Utils.FileIO.cs: ƒŠƒXƒgŒ^•Ï”‚Ì“à—e‚ðƒeƒLƒXƒgƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ”Ä—pƒƒ\ƒbƒh‚ÆAƒtƒ@ƒCƒ‹‘€ì‚Ì‹¤’Êˆ—‚ð’ñ‹Ÿ
 - Utils.TextProcessing.cs: ‘SŠp•¶Žš‚©‚ç”¼Šp•¶Žš‚Ö‚Ì•ÏŠ·‹@”\B”ŽšE‰pŽšE‹L†‚Ì•¶ŽšŽí•ÏŠ·Ž«‘‚ÆConvertWideToNarrowƒƒ\ƒbƒh‚ð’ñ‹Ÿ
 - Utils.RemoveSpanTagFromHtml.cs: HTMLƒtƒ@ƒCƒ‹‚©‚ç•s—v‚Èspanƒ^ƒO‚ðíœ‚·‚é‹@”\BHTMLƒtƒ@ƒCƒ‹’P‘Ì‚Ü‚½‚ÍƒtƒHƒ‹ƒ_“à‚ÌˆêŠ‡ˆ—‚É‘Î‰ž‚µA‘®«‚È‚µ‚ÌƒVƒ“ƒvƒ‹‚Èspanƒ^ƒO‚Ì‚Ý‚ð‘ÎÛ‚Æ‚µ‚Ä’†g‚ÌƒeƒLƒXƒg‚Í•ÛŽ
@@ -80,6 +87,14 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - Utils.RemoveAllImageMarkers.cs: Word•¶‘‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚·‚éˆ—BHTMLo—ÍŠ®—¹Œã‚ÌƒNƒŠ[ƒ“ƒAƒbƒv‹@”\
 - Utils.RemoveImageMarkersFromSearchJs.cs: ŒŸõ‹@”\—pJavaScriptisearch.jsjƒtƒ@ƒCƒ‹‚©‚ç‰æ‘œƒ}[ƒJ[ƒeƒLƒXƒg‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚Æ‚µ‚ÄœŠO‚·‚éˆ—
 
+### Ý’èE‰Šú‰»ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
+- RibbonMJS.Config.cs: HTMLo—Í—pƒpƒXˆê——‚Ì€”õAŠeŽí’è”Eƒpƒ^[ƒ“‚Ì’è‹`AŒŸõðŒÝ’è‚È‚Çƒvƒ‰ƒOƒCƒ“‘S‘Ì‚ÌÝ’è‹@”\‚ð’ñ‹Ÿ
+
+### UIEƒVƒXƒeƒ€‹@”\
+- RibbonMJS.ClearClipboard.cs: ƒNƒŠƒbƒvƒ{[ƒh‚ÌˆÀ‘S‚ÈƒNƒŠƒAˆ—BCOMException‘Î‰ž‚ÌƒŠƒgƒ‰ƒC‹@”\•t‚«ƒNƒŠƒbƒvƒ{[ƒh‘€ì
+- RibbonMJS.Designer.cs: ƒŠƒ{ƒ“UIiMJSƒ[ƒhƒvƒ‰ƒOƒCƒ“ƒ^ƒuj‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒhBƒ{ƒ^ƒ“”z’uEƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰[Ý’èEƒŠƒ\[ƒXŠÇ—
+
+
 ## Copilot ƒŠƒtƒ@ƒNƒ^ƒŠƒ“ƒOŽwŽ¦‘
 
 ### ˆê”Ê“I‚ÈƒKƒCƒhƒ‰ƒCƒ“
@@ -89,7 +104,6 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - ƒ}ƒWƒbƒNƒiƒ“ƒo[‚Í”ð‚¯A’è”‚âenum‚ðŽg—p‚µ‚Ä‚­‚¾‚³‚¢B
 - “KØ‚É—áŠOˆ—‚ðs‚¢A•K—v‚É‰ž‚¶‚ÄƒGƒ‰[ƒƒO‚ðo—Í‚µ‚Ä‚­‚¾‚³‚¢B
 - Œ»ó‚ÅƒƒO‚Ì‹L˜^‚ª•K—v‚¾‚ÆŽv‚Á‚½‰ÓŠ‚É‚ÍA“KØ‚ÈƒƒOo—Í‚ð’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢B
-- ‚·‚×‚Ä‚Ì•ÏX‚ªƒrƒ‹ƒh‚É¬Œ÷‚µAŠù‘¶‚ÌƒeƒXƒg‚É‡Ši‚·‚é‚±‚Æ‚ðŠm”F‚µ‚Ä‚­‚¾‚³‚¢B
 
 ### C#/.NET ŒÅ—L
 - ‰E•Ó‚©‚çŒ^‚ª–¾Šm‚Èê‡‚Ì‚Ý `var` ‚ðŽg—p‚µ‚Ä‚­‚¾‚³‚¢B

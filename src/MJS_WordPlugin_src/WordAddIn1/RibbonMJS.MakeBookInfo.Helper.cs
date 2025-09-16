@@ -1,4 +1,6 @@
-﻿using System;
+﻿// RibbonMJS.MakeBookInfo.Helper.cs
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -41,11 +43,10 @@ namespace WordAddIn1
             ref string bookInfoDef,
             ref bool checkBL)
         {
-            string headerFilePath = Path.Combine(
-                Path.GetDirectoryName(Doc.FullName),
-                "headerFile",
-                Regex.Replace(Doc.Name, "^(.{3}).+$", "$1") + ".txt"
-            );
+            // PreparePathsを使用してパス情報を取得
+            var paths = PreparePaths(Doc, string.Empty);
+            string headerFilePath = Path.Combine(paths.rootPath, paths.headerDir, $"{paths.docid}.txt");
+            
             if (File.Exists(headerFilePath))
             {
                 try
@@ -57,21 +58,19 @@ namespace WordAddIn1
                 catch
                 {
                     load.Visible = false;
-                    MessageBox.Show(headerFilePath + "が開かれています。\r\nファイルを閉じてから書誌情報出力を実行してください。",
+                    MessageBox.Show($"{headerFilePath}が開かれています。\r\nファイルを閉じてから書誌情報出力を実行してください。",
                         "ファイルエラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.DoEvents();
                     Globals.ThisAddIn.Application.ScreenUpdating = true;
                     return false;
                 }
 
-                // SOURCELINK追加==========================================================================START
                 // 書誌情報（旧）
                 oldInfo = new List<HeadingInfo>();
                 // 書誌情報（新）
                 newInfo = new List<HeadingInfo>();
                 // 比較結果
                 checkResult = new List<CheckInfo>();
-                // SOURCELINK追加==========================================================================END
 
                 using (StreamReader sr = new StreamReader(headerFilePath, System.Text.Encoding.Default))
                 {
@@ -80,7 +79,6 @@ namespace WordAddIn1
                     {
                         string strBuffer = sr.ReadLine();
 
-                        // SOURCELINK追加==========================================================================START
                         string[] info = strBuffer.Split('\t');
 
                         HeadingInfo headingInfo = new HeadingInfo();
@@ -94,8 +92,6 @@ namespace WordAddIn1
 
                         oldInfo.Add(headingInfo);
 
-                        // SOURCELINK追加==========================================================================END
-
                         bibNum = int.Parse(info[2].Substring(info[2].Length - 3, 3));
                         if (bibMaxNum < bibNum)
                         {
@@ -106,7 +102,7 @@ namespace WordAddIn1
 
                 foreach (Word.Bookmark bm in Doc.Bookmarks)
                 {
-                    if (Regex.IsMatch(bm.Name, "^" + Regex.Replace(Doc.Name, "^(.{3}).+$", "$1")))
+                    if (Regex.IsMatch(bm.Name, $"^{paths.docid}"))
                     {
                         bookInfoDef = Regex.Replace(bm.Name, "^.{3}(.{2}).*$", "$1");
                         break;
@@ -127,7 +123,7 @@ namespace WordAddIn1
             return true;
         }
 
-        private bool EnsureBookInfoDef(Word.Document thisDocument, ref string bookInfoDef, StreamWriter log, string rootPath)
+        private bool EnsureBookInfoDef(Word.Document thisDocument, ref string bookInfoDef, StreamWriter log)
         {
             if (bookInfoDef == "")
             {
@@ -141,8 +137,9 @@ namespace WordAddIn1
                     else
                     {
                         log.Close();
-                        string logPath = Path.Combine(rootPath, "log.txt");
-                        if (File.Exists(logPath)) File.Delete(logPath);
+                        // PreparePathsを使用してlogPathを取得
+                        var paths = PreparePaths(thisDocument, string.Empty);
+                        if (File.Exists(paths.logPath)) File.Delete(paths.logPath);
                         button4.Enabled = true;
                         return false;
                     }
@@ -249,16 +246,16 @@ namespace WordAddIn1
             }
         }
 
-
         private void WriteBookInfoToFile(
-            string rootPath,
-            string headerDir,
-            string docid,
+            Word.Document activeDocument,
             Dictionary<string, string> bookInfoDic,
             Dictionary<string, string> mergeSetId,
             Action<StreamWriter, Dictionary<string, string>, string, string, string> MakeHeaderLine)
         {
-            string filePath = Path.Combine(rootPath, headerDir, docid + ".txt");
+            // PreparePathsを使用してパス情報を取得
+            var paths = PreparePaths(activeDocument, string.Empty);
+            string filePath = Path.Combine(paths.rootPath, paths.headerDir, $"{paths.docid}.txt");
+            
             using (StreamWriter docinfo = new StreamWriter(filePath, false, Encoding.UTF8))
             {
                 foreach (string key in bookInfoDic.Keys)
@@ -416,14 +413,15 @@ namespace WordAddIn1
 
         // 書誌情報をファイルに書き込む
         private void WriteCheckInfoToFile(
-            string rootPath,
-            string headerDir,
-            string docid,
+            Word.Document activeDocument,
             IEnumerable<CheckInfo> checkResult,
             Dictionary<string, string> mergeSetId,
             Action<StreamWriter, Dictionary<string, string>, string, string, string> MakeHeaderLine)
         {
-            string filePath = Path.Combine(rootPath, headerDir, docid + ".txt");
+            // PreparePathsを使用してパス情報を取得
+            var paths = PreparePaths(activeDocument, string.Empty);
+            string filePath = Path.Combine(paths.rootPath, paths.headerDir, $"{paths.docid}.txt");
+            
             using (StreamWriter docinfo = new StreamWriter(filePath, false, Encoding.UTF8))
             {
                 foreach (CheckInfo info in checkResult)
@@ -464,7 +462,5 @@ namespace WordAddIn1
             blHTMLPublish = false;
             return false;
         }
-
-
     }
 }

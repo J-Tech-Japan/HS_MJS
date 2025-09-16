@@ -1,4 +1,6 @@
-﻿using System;
+﻿// RibbonMJS.MakeBookInfo.cs
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -23,11 +25,9 @@ namespace WordAddIn1
             var selection = Globals.ThisAddIn.Application.Selection;
             int selStart = selection.Start;
             int selEnd = selection.End;
-            string rootPath = thisDocument.Path;
-            string docName = thisDocument.Name;
-            string headerDir = "headerFile";
-            string docid = Regex.Replace(docName, "^(.{3}).+$", "$1");
-            string docTitle = Regex.Replace(docName, @"^.{3}_?(.+?)(?:_.+)?\.[^\.]+$", "$1");
+            
+            // PreparePathsを使用してパス情報を取得
+            var paths = PreparePaths(thisDocument, string.Empty);
 
             selection.EndKey(Word.WdUnits.wdStory);
             Application.DoEvents();
@@ -61,13 +61,13 @@ namespace WordAddIn1
 
             if (swLog == null)
             {
-                log = new StreamWriter(rootPath + "\\log.txt", false, Encoding.UTF8);
+                log = new StreamWriter(paths.logPath, false, Encoding.UTF8);
             }
 
             try
             {
                 
-                if (!EnsureBookInfoDef(thisDocument, ref bookInfoDef, log, rootPath))
+                if (!EnsureBookInfoDef(thisDocument, ref bookInfoDef, log))
                 {
                     return false;
                 }
@@ -75,9 +75,9 @@ namespace WordAddIn1
                 Dictionary<string, string> oldBookInfoDic = new Dictionary<string, string>();
                 HashSet<string> ls = new HashSet<string>();
 
-                if (!Directory.Exists(rootPath + "\\" + headerDir))
+                if (!Directory.Exists(Path.Combine(paths.rootPath, paths.headerDir)))
                 {
-                    Directory.CreateDirectory(rootPath + "\\" + headerDir);
+                    Directory.CreateDirectory(Path.Combine(paths.rootPath, paths.headerDir));
                 }
 
                 // 既存のブックマークを削除
@@ -87,8 +87,8 @@ namespace WordAddIn1
                 // 入れ子構造やコレクションの動的変化により、1回のループでは全ての不要なブックマークを削除できない場合がある
                 // 2回繰り返すことで、削除漏れを防ぎ、確実に不要なブックマークを全て削除する
 
-                DeleteUnmatchedNestedBookmarks(thisDocument, docid, bookInfoDef);
-                DeleteUnmatchedNestedBookmarks(thisDocument, docid, bookInfoDef);
+                DeleteUnmatchedNestedBookmarks(thisDocument, paths.docid, bookInfoDef);
+                DeleteUnmatchedNestedBookmarks(thisDocument, paths.docid, bookInfoDef);
 
                 // ブックマークリストと最大番号を更新
                 UpdateBookmarkListAndMaxNum(thisDocument, ls, ref bibMaxNum);
@@ -107,9 +107,9 @@ namespace WordAddIn1
 
                 bool breakFlg = false;
 
-                if (!bookInfoDic.ContainsKey(docid + "00000"))
+                if (!bookInfoDic.ContainsKey(paths.docid + "00000"))
                 {
-                    bookInfoDic.Add(docid + "00000", "表紙");
+                    bookInfoDic.Add(paths.docid + "00000", "表紙");
                 }
 
                 log.WriteLine("書誌情報リスト作成開始");
@@ -168,7 +168,7 @@ namespace WordAddIn1
 
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}$"))
+                                if (Regex.IsMatch(bm.Name, "^" + paths.docid + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = bm.Name;
                                     upperClassID = bm.Name;
@@ -184,11 +184,11 @@ namespace WordAddIn1
                                 bibMaxNum++;
                                 splitCount = bibMaxNum;
                                 ls.Add(splitCount.ToString("000"));
-                                setid = docid + bookInfoDef + splitCount.ToString("000");
+                                setid = paths.docid + bookInfoDef + splitCount.ToString("000");
                                 upperClassID = setid;
 
                                 // 行末尾にブックマークを追加する
-                                sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
+                                sel.Bookmarks.Add(paths.docid + bookInfoDef + splitCount.ToString("000"));
 
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
                                 
@@ -229,7 +229,7 @@ namespace WordAddIn1
                                 string setid = "";
                                 foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                                 {
-                                    if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}$"))
+                                    if (Regex.IsMatch(bm.Name, "^" + paths.docid + bookInfoDef + @"\d{3}$"))
                                     {
                                         setid = bm.Name;
                                         upperClassID = bm.Name;
@@ -246,11 +246,11 @@ namespace WordAddIn1
                                     bibMaxNum++;
                                     splitCount = bibMaxNum;
                                     ls.Add(splitCount.ToString("000"));
-                                    setid = docid + bookInfoDef + splitCount.ToString("000");
-                                    upperClassID = docid + bookInfoDef + splitCount.ToString("000");
+                                    setid = paths.docid + bookInfoDef + splitCount.ToString("000");
+                                    upperClassID = paths.docid + bookInfoDef + splitCount.ToString("000");
 
                                     // 行末尾にブックマークを追加する
-                                    sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
+                                    sel.Bookmarks.Add(paths.docid + bookInfoDef + splitCount.ToString("000"));
 
                                     bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
 
@@ -302,7 +302,7 @@ namespace WordAddIn1
                             string setid = "";
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}$"))
+                                if (Regex.IsMatch(bm.Name, "^" + paths.docid + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = bm.Name;
                                     upperClassID = bm.Name;
@@ -319,11 +319,11 @@ namespace WordAddIn1
                                 bibMaxNum++;
                                 splitCount = bibMaxNum;
                                 ls.Add(splitCount.ToString("000"));
-                                setid = docid + bookInfoDef + splitCount.ToString("000");
-                                upperClassID = docid + bookInfoDef + splitCount.ToString("000");
+                                setid = paths.docid + bookInfoDef + splitCount.ToString("000");
+                                upperClassID = paths.docid + bookInfoDef + splitCount.ToString("000");
 
                                 // 行末尾にブックマークを追加する
-                                sel.Bookmarks.Add(docid + bookInfoDef + splitCount.ToString("000"));
+                                sel.Bookmarks.Add(paths.docid + bookInfoDef + splitCount.ToString("000"));
 
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
 
@@ -379,13 +379,13 @@ namespace WordAddIn1
                             string setid = "";
                             foreach (Word.Bookmark bm in tgtPara.Range.Bookmarks)
                             {
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}" + "♯" + docid + bookInfoDef + @"\d{3}$"))
+                                if (Regex.IsMatch(bm.Name, "^" + paths.docid + bookInfoDef + @"\d{3}" + "♯" + paths.docid + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(♯.*?)$", "$1");
                                     sel.Bookmarks.Add(setid);
                                     break;
                                 }
-                                if (Regex.IsMatch(bm.Name, "^" + docid + bookInfoDef + @"\d{3}" + "＃" + docid + bookInfoDef + @"\d{3}$"))
+                                if (Regex.IsMatch(bm.Name, "^" + paths.docid + bookInfoDef + @"\d{3}" + "＃" + paths.docid + bookInfoDef + @"\d{3}$"))
                                 {
                                     setid = upperClassID + Regex.Replace(bm.Name, @"^.*?(＃.*?)$", "$1");
                                     sel.Bookmarks.Add(setid);
@@ -398,9 +398,9 @@ namespace WordAddIn1
                                 bibMaxNum++;
                                 splitCount = bibMaxNum;
                                 ls.Add(splitCount.ToString("000"));
-                                setid = upperClassID + "♯" + docid + bookInfoDef + splitCount.ToString("000");
+                                setid = upperClassID + "♯" + paths.docid + bookInfoDef + splitCount.ToString("000");
                                 // 行末尾にブックマークを追加する
-                                sel.Bookmarks.Add(upperClassID + "♯" + docid + bookInfoDef + splitCount.ToString("000"));
+                                sel.Bookmarks.Add(upperClassID + "♯" + paths.docid + bookInfoDef + splitCount.ToString("000"));
 
                                 bookInfoDic.Add(setid, Regex.Replace(tgtPara.Range.ListFormat.ListString, @"[^\.\d]", "") + "♪" + tgtPara.Range.Text.Trim());
 
@@ -456,7 +456,7 @@ namespace WordAddIn1
 
                 if (checkBL || oldInfo.Count == 0)
                 {
-                    WriteBookInfoToFile(rootPath, headerDir, docid, bookInfoDic, mergeSetId, MakeHeaderLine);
+                    WriteBookInfoToFile(thisDocument, bookInfoDic, mergeSetId, MakeHeaderLine);
 
                     thisDocument.Save();
 
@@ -473,7 +473,7 @@ namespace WordAddIn1
                     // 処理結果が0:正常の場合
                     if (ret == 0)
                     {
-                        using (StreamWriter docinfo = new StreamWriter(rootPath + "\\" + headerDir + "\\" + docid + ".txt", false, Encoding.UTF8))
+                        using (StreamWriter docinfo = new StreamWriter(Path.Combine(paths.rootPath, paths.headerDir, $"{paths.docid}.txt"), false, Encoding.UTF8))
                         {
                             foreach (HeadingInfo info in newInfo)
                             {
@@ -515,7 +515,7 @@ namespace WordAddIn1
                             AddBookmarksFromCheckResult(thisDocument, checkResult, ref breakFlg);
 
                             // 書誌情報をファイルに書き込む
-                            WriteCheckInfoToFile(rootPath, headerDir, docid, checkResult, mergeSetId, MakeHeaderLine);
+                            WriteCheckInfoToFile(thisDocument, checkResult, mergeSetId, MakeHeaderLine);
 
                             thisDocument.Save();
 
@@ -529,7 +529,7 @@ namespace WordAddIn1
                 if (swLog == null)
                 {
                     log.Close();
-                    File.Delete(rootPath + "\\log.txt");
+                    File.Delete(paths.logPath);
                 }
                 blHTMLPublish = false;
                 return true;

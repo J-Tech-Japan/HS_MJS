@@ -461,7 +461,6 @@
     <Compile Include="SetLink.Designer.cs">
       <DependentUpon>SetLink.cs</DependentUpon>
     </Compile>
-    <Compile Include="ThisAddIn.Helper.cs" />
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>
     </Compile>
