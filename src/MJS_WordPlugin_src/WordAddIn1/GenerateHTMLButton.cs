@@ -68,49 +68,21 @@ namespace WordAddIn1
                 
                 // 各種パスの準備
                 var paths = PreparePaths(activeDocument, webHelpFolderName);
-                
-                // ログファイルの作成
+
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                PrepareHtmlTemplates(assembly, paths.rootPath, paths.exportDirPath);
+
+                // ドキュメントを一時HTML用にコピー
+                var docCopy = CopyDocumentToHtml(application);
+
                 using (StreamWriter log = new StreamWriter(paths.logPath, false, Encoding.UTF8))
                 {
                     bool isError = false;
+                    log.WriteLine("Number of sections: " + docCopy.Sections.Count);
+                    
                     try
                     {
-                        System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-
-                        log.WriteLine("テンプレートデータ準備");
-
-                        using (Stream stream = assembly.GetManifestResourceStream("WordAddIn1.htmlTemplates.zip"))
-                        {
-                            FileStream fs = File.Create(Path.Combine(paths.rootPath, "htmlTemplates.zip"));
-                            stream.Seek(0, SeekOrigin.Begin);
-                            stream.CopyTo(fs);
-                            fs.Close();
-                        }
-
-                        if (Directory.Exists(Path.Combine(paths.rootPath, "htmlTemplates")))
-                        {
-                            Directory.Delete(Path.Combine(paths.rootPath, "htmlTemplates"), true);
-                        }
-
-                        System.IO.Compression.ZipFile.ExtractToDirectory(Path.Combine(paths.rootPath, "htmlTemplates.zip"), paths.rootPath);
-
-                        if (Directory.Exists(Path.Combine(paths.rootPath, paths.exportDir)))
-                        {
-                            Directory.Delete(Path.Combine(paths.rootPath, paths.exportDir), true);
-                        }
-
-                        if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
-                        
-                        Directory.Move(Path.Combine(paths.rootPath, "htmlTemplates"), Path.Combine(paths.rootPath, paths.exportDir));
-
-                        File.Delete(Path.Combine(paths.rootPath, "htmlTemplates.zip"));
-
-                        Application.DoEvents();
-                        
-                        // ドキュメントを一時HTML用にコピー
-                        var docCopy = CopyDocumentToHtml(application, log);
-
-                        // TODO: 高画質の画像とキャンバスの抽出
+                        // 高画質の画像とキャンバスの抽出
                         log.WriteLine("高画質画像とキャンバスの抽出開始");
                         var extractedImages = Utils.ExtractImagesFromWord(
                             docCopy,
@@ -124,21 +96,22 @@ namespace WordAddIn1
                             minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
                             minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
                             includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
-                            maxOutputWidth: 1024,   // 出力画像の最大幅
-                            maxOutputHeight: 1024   // 出力画像の最大高さ
+                            maxOutputWidth: 4*1024,   // 出力画像の最大幅
+                            maxOutputHeight: 4*1024   // 出力画像の最大高さ
                         );
 
                         // 抽出統計をログに出力
                         if (extractedImages != null)
                         {
                             log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
-                            string statistics = Utils.GetExtractionStatisticsWithText(extractedImages);
-                            log.WriteLine(statistics);
                         }
                         else
                         {
                             log.WriteLine("画像抽出結果: 抽出された画像はありません");
                         }
+
+                        // CSVファイルに出力
+                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -175,240 +148,24 @@ namespace WordAddIn1
 
                             try
                             {
-                                bool repeatUngroup = true;
-                                while (repeatUngroup)
-                                {
-                                    repeatUngroup = false;
-                                    foreach (Shape ws in docCopy.Shapes)
-                                    {
-                                        ws.Select();
-                                        if (application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
-                                        {
-                                            if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
-                                            {
-                                                ws.Ungroup();
-                                                repeatUngroup = true;
-                                            }
-                                        }
-                                    }
-                                }
+                                UngroupAllShapesInFirstSection(docCopy, application);
 
-                                foreach (Shape ws in docCopy.Shapes)
-                                {
-                                    ws.Select();
-                                    if (application.Selection.Information[WdInformation.wdActiveEndSectionNumber] == 1)
-                                    {
-                                        if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
-                                        {
-                                            bool checkCanvas = true;
-                                            while (checkCanvas)
-                                            {
-                                                checkCanvas = false;
-                                                foreach (Shape wsp in ws.CanvasItems)
-                                                {
-                                                    if (wsp.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
-                                                    {
-                                                        wsp.Ungroup();
-                                                        checkCanvas = true;
-                                                    }
-                                                }
-                                            }
-                                            foreach (Shape wsp in ws.CanvasItems)
-                                            {
-                                                wsp.Select();
-                                                string tempSubTitle = "";
-                                                try
-                                                {
-                                                    tempSubTitle = wsp.TextFrame.TextRange.Text;
-                                                }
-                                                catch { }
-                                                if (!String.IsNullOrEmpty(tempSubTitle) && tempSubTitle != "/" && subTitle == "")
-                                                {
-                                                    subTitle = tempSubTitle;
-                                                    break;
-                                                }
-                                            }
-                                            if (String.IsNullOrEmpty(subTitle))
-                                            {
-                                                ws.Select();
-                                                if (!Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic"))) Directory.CreateDirectory(Path.Combine(paths.rootPath, "tmpcoverpic"));
+                                ProcessCanvasAndPictureShapesInFirstSection(docCopy, application, ref subTitle, ref biCount, strOutFileName, paths);
 
-                                                strOutFileName = Path.Combine(paths.rootPath, "tmpcoverpic");
-                                                byte[] vData = (byte[])application.Selection.EnhMetaFileBits;
-                                                if (vData != null)
-                                                {
-                                                    MemoryStream ms = new MemoryStream(vData);
-                                                    Image temp = Image.FromStream(ms);
-                                                    float aspectTemp = (float)temp.Width / (float)temp.Height;
-                                                    if (aspectTemp > 2.683 || aspectTemp < 2.681)
-                                                    {
-                                                        biCount++;
-                                                        temp.Save(Path.Combine(strOutFileName, biCount + ".png"), ImageFormat.Png);
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        else if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
-                                        {
-                                            ws.ConvertToInlineShape();
-                                        }
-                                    }
-                                }
-
-                                foreach (Shape ws in docCopy.Shapes)
-                                {
-                                    ws.Select();
-                                    if (application.Selection.Information[Word.WdInformation.wdActiveEndSectionNumber] == 1)
-                                    {
-                                        if (ws.Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
-                                        {
-                                            ws.ConvertToInlineShape();
-                                        }
-                                    }
-                                }
+                                ConvertPictureShapesToInlineInFirstSection(docCopy, application);
 
                                 if (isPattern1 || isPattern2)
                                 {
-                                    int productSubLogoCount = 0;
-
-                                    foreach (Paragraph wp in docCopy.Sections[1].Range.Paragraphs)
-                                    {
-                                        if (wp.get_Style().NameLocal == "MJS_製品ロゴ（メイン）")
-                                        {
-                                            try
-                                            {
-                                                foreach (InlineShape wis in wp.Range.InlineShapes)
-                                                {
-                                                    wis.Range.Select();
-                                                    Clipboard.Clear();
-                                                    application.Selection.CopyAsPicture();
-                                                    Image img = Clipboard.GetImage();
-                                                    img.Save(Path.Combine(strOutFileName, "product_logo_main.png"), ImageFormat.Png);
-
-                                                    break; //get first product main logo only
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（メイン）]: " + ex.ToString());
-                                            }
-                                        }
-                                        else if (wp.get_Style().NameLocal == "MJS_製品ロゴ（サブ）" && productSubLogoCount < 3)
-                                        {
-                                            try
-                                            {
-                                                List<string> productSubLogoFileNames = new List<string>();
-
-                                                foreach (InlineShape wis in wp.Range.InlineShapes)
-                                                {
-                                                    wis.Range.Select();
-                                                    Clipboard.Clear();
-                                                    application.Selection.CopyAsPicture();
-                                                    Image img = Clipboard.GetImage();
-
-                                                    productSubLogoCount++;
-                                                    string subLogoFileName = string.Format("product_logo_sub{0}.png", productSubLogoCount);
-                                                    img.Save(Path.Combine(strOutFileName, subLogoFileName), ImageFormat.Png);
-                                                    productSubLogoFileNames.Add(subLogoFileName);
-
-                                                    Clipboard.Clear();
-
-                                                    if (productSubLogoCount == 3)
-                                                    {
-                                                        break; //get first 3 sub logos only
-                                                    }
-                                                }
-
-                                                productSubLogoGroups.Add(productSubLogoFileNames);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（サブ）]: " + ex.ToString());
-                                            }
-                                        }
-                                    }
+                                    ExtractProductLogosPattern1Pattern2(docCopy, application, strOutFileName, productSubLogoGroups, log);
                                 }
                                 else if (isPattern3)
                                 {
-                                    // MJS LucaTech GX用の処理 - Pattern1と同様だが、coverLucaTech.pngを使用
-                                    int productSubLogoCount = 0;
-
-                                    foreach (Paragraph wp in docCopy.Sections[1].Range.Paragraphs)
-                                    {
-                                        if (wp.get_Style().NameLocal == "MJS_製品ロゴ（メイン）")
-                                        {
-                                            try
-                                            {
-                                                foreach (InlineShape wis in wp.Range.InlineShapes)
-                                                {
-                                                    wis.Range.Select();
-                                                    Clipboard.Clear();
-                                                    application.Selection.CopyAsPicture();
-                                                    Image img = Clipboard.GetImage();
-                                                    img.Save(Path.Combine(strOutFileName, "product_logo_main.png"), ImageFormat.Png);
-
-                                                    break; //get first product main logo only
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（メイン）]: " + ex.ToString());
-                                            }
-                                        }
-                                        else if (wp.get_Style().NameLocal == "MJS_製品ロゴ（サブ）" && productSubLogoCount < 3)
-                                        {
-                                            try
-                                            {
-                                                List<string> productSubLogoFileNames = new List<string>();
-
-                                                foreach (InlineShape wis in wp.Range.InlineShapes)
-                                                {
-                                                    wis.Range.Select();
-                                                    Clipboard.Clear();
-                                                    application.Selection.CopyAsPicture();
-                                                    Image img = Clipboard.GetImage();
-
-                                                    productSubLogoCount++;
-                                                    string subLogoFileName = string.Format("product_logo_sub{0}.png", productSubLogoCount);
-                                                    img.Save(Path.Combine(strOutFileName, subLogoFileName), ImageFormat.Png);
-                                                    productSubLogoFileNames.Add(subLogoFileName);
-
-                                                    Clipboard.Clear();
-
-                                                    if (productSubLogoCount == 3)
-                                                    {
-                                                        break; //get first 3 sub logos only
-                                                    }
-                                                }
-
-                                                productSubLogoGroups.Add(productSubLogoFileNames);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                log.WriteLine("Error when extracting [MJS_製品ロゴ（サブ）]: " + ex.ToString());
-                                            }
-                                        }
-                                    }
+                                    // MJS LucaTech GX用の処理（coverLucaTech.pngを使用）
+                                    ExtractProductLogosPattern3(docCopy, application, strOutFileName, productSubLogoGroups, log);
                                 }
                                 else
                                 {
-                                    foreach (InlineShape wis in docCopy.Sections[1].Range.InlineShapes)
-                                    {
-                                        byte[] vData = (byte[])wis.Range.EnhMetaFileBits;
-
-                                        if (vData != null)
-                                        {
-                                            MemoryStream ms = new MemoryStream(vData);
-                                            Image temp = Image.FromStream(ms);
-                                            float aspectTemp = (float)temp.Width / (float)temp.Height;
-                                            if ((float)temp.Height < 360) continue;
-                                            if (aspectTemp > 12.225 && aspectTemp < 12.226) continue;
-                                            if (aspectTemp > 2.681 && aspectTemp < 2.683) continue;
-                                            biCount++;
-                                            temp.Save(Path.Combine(strOutFileName, biCount + ".png"), ImageFormat.Png);
-                                        }
-                                    }
+                                    ExtractInlineShapesDefaultPattern(docCopy, strOutFileName, ref biCount);
                                 }
 
                                 // 一時フォルダ内のPNG画像をすべて取得し、
@@ -774,10 +531,10 @@ namespace WordAddIn1
                     finally
                     {
                         log.Close();
-                        if (!isError && File.Exists(paths.logPath))
-                        {
-                            File.Delete(paths.logPath);
-                        }
+                        //if (!isError && File.Exists(paths.logPath))
+                        //{
+                        //    File.Delete(paths.logPath);
+                        //}
 
                         application.DocumentChange += new ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
                     }
