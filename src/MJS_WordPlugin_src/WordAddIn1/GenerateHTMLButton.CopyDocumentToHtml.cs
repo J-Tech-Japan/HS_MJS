@@ -9,7 +9,7 @@ namespace WordAddIn1
     public partial class RibbonMJS
     {
         //ドキュメントを一時 HTML 用にコピー（旧版コード）
-        private Word.Document CopyDocumentToHtml(Word.Application application, StreamWriter log)
+        private Word.Document CopyDocumentToHtml(Word.Application application)
         {
             ClearClipboardSafely();
             Application.DoEvents();
@@ -28,7 +28,6 @@ namespace WordAddIn1
             Application.DoEvents();
             ClearClipboardSafely();
             Application.DoEvents();
-            log.WriteLine("Number of sections: " + docCopy.Sections.Count);
             return docCopy;
         }
 

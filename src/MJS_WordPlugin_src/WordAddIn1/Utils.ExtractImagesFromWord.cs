@@ -19,19 +19,33 @@ namespace WordAddIn1
             public int Position { get; set; }
             public float OriginalWidth { get; set; }
             public float OriginalHeight { get; set; }
+            
+            /// <summary>
+            /// 抽出されたPNG画像の実際の幅（ピクセル単位）
+            /// </summary>
+            public int PngPixelWidth { get; set; }
+            
+            /// <summary>
+            /// 抽出されたPNG画像の実際の高さ（ピクセル単位）
+            /// </summary>
+            public int PngPixelHeight { get; set; }
 
             public ExtractedImageInfo(
                 string filePath, 
                 string imageType, 
                 int position,
                 float originalWidth = 0,
-                float originalHeight = 0)
+                float originalHeight = 0,
+                int pngPixelWidth = 0,
+                int pngPixelHeight = 0)
             {
                 FilePath = filePath;
                 ImageType = imageType;
                 Position = position;
                 OriginalWidth = originalWidth;
                 OriginalHeight = originalHeight;
+                PngPixelWidth = pngPixelWidth;
+                PngPixelHeight = pngPixelHeight;
             }
         }
 
@@ -174,7 +188,7 @@ namespace WordAddIn1
                     
                     if (metaFileData != null && metaFileData.Length > 0)
                     {
-                        string filePath = ExtractImageFromMetaFileData(
+                        var extractResult = ExtractImageFromMetaFileDataWithSize(
                             metaFileData, 
                             outputDirectory, 
                             $"inline_image_{imageCounter}", 
@@ -183,21 +197,23 @@ namespace WordAddIn1
                             maxOutputWidth,
                             maxOutputHeight);
                         
-                        if (!string.IsNullOrEmpty(filePath))
+                        if (extractResult != null)
                         {
                             var imageInfo = new ExtractedImageInfo(
-                                filePath, 
+                                extractResult.FilePath, 
                                 $"インライン図形_{inlineShape.Type}", 
                                 inlineShape.Range.Start,
                                 originalWidth,
-                                originalHeight
+                                originalHeight,
+                                extractResult.PixelWidth,
+                                extractResult.PixelHeight
                             );
                             extractedImages.Add(imageInfo);
 
                             // マーカーを追加（表紙の画像は除外）
                             if (addMarkers && !IsInCoverSection(inlineShape.Range, skipCoverMarkers))
                             {
-                                InsertMarker(inlineShape.Range, filePath);
+                                InsertMarker(inlineShape.Range, extractResult.FilePath);
                             }
 
                             imageCounter++;
@@ -345,7 +361,7 @@ namespace WordAddIn1
                     
                     if (canvasData != null && canvasData.Length > 0)
                     {
-                        string filePath = ExtractImageFromMetaFileData(
+                        var extractResult = ExtractImageFromMetaFileDataWithSize(
                             canvasData, 
                             outputDirectory, 
                             $"canvas_{imageCounter}", 
@@ -354,14 +370,16 @@ namespace WordAddIn1
                             maxOutputWidth,
                             maxOutputHeight);
                         
-                        if (!string.IsNullOrEmpty(filePath))
+                        if (extractResult != null)
                         {
                             var imageInfo = new ExtractedImageInfo(
-                                filePath, 
+                                extractResult.FilePath, 
                                 "キャンバス", 
                                 canvas.Anchor?.Start ?? 0,
                                 originalWidth,
-                                originalHeight
+                                originalHeight,
+                                extractResult.PixelWidth,
+                                extractResult.PixelHeight
                             );
                             extractedImages.Add(imageInfo);
 
@@ -370,13 +388,13 @@ namespace WordAddIn1
                             {
                                 if (canvas.Anchor != null)
                                 {
-                                    InsertMarkerAtPosition(canvas.Anchor, filePath);
+                                    InsertMarkerAtPosition(canvas.Anchor, extractResult.FilePath);
                                 }
                                 else
                                 {
                                     // Anchorが利用できない場合、キャンバスが選択された状態で
                                     // 現在の選択範囲を使用してマーカーを挿入
-                                    InsertMarkerForSelectedCanvas(filePath);
+                                    InsertMarkerForSelectedCanvas(extractResult.FilePath);
                                 }
                             }
 
@@ -528,7 +546,7 @@ namespace WordAddIn1
                 
                 if (shapeData != null && shapeData.Length > 0)
                 {
-                    string filePath = ExtractImageFromMetaFileData(
+                    var extractResult = ExtractImageFromMetaFileDataWithSize(
                         shapeData, 
                         outputDirectory, 
                         $"{prefix}_{imageCounter}", 
@@ -537,21 +555,23 @@ namespace WordAddIn1
                         maxOutputWidth,
                         maxOutputHeight);
                     
-                    if (!string.IsNullOrEmpty(filePath))
+                    if (extractResult != null)
                     {
                         var imageInfo = new ExtractedImageInfo(
-                            filePath, 
+                            extractResult.FilePath, 
                             $"{prefix}_{shape.Type}", 
                             shape.Anchor?.Start ?? 0,
                             originalWidth,
-                            originalHeight
+                            originalHeight,
+                            extractResult.PixelWidth,
+                            extractResult.PixelHeight
                         );
                         extractedImages.Add(imageInfo);
 
                         // マーカーを追加（表紙の画像は除外）
                         if (addMarkers && shape.Anchor != null && !IsShapeInCoverSection(shape, skipCoverMarkers))
                         {
-                            InsertMarkerAtPosition(shape.Anchor, filePath);
+                            InsertMarkerAtPosition(shape.Anchor, extractResult.FilePath);
                         }
 
                         imageCounter++;
@@ -565,7 +585,17 @@ namespace WordAddIn1
         }
         
         /// <summary>
-        /// EnhMetaFileBitsから画像ファイルを作成
+        /// 画像抽出結果を格納するクラス
+        /// </summary>
+        private class ImageExtractionResult
+        {
+            public string FilePath { get; set; }
+            public int PixelWidth { get; set; }
+            public int PixelHeight { get; set; }
+        }
+        
+        /// <summary>
+        /// EnhMetaFileBitsから画像ファイルを作成し、PNG画像のサイズも取得
         /// </summary>
         /// <param name="metaFileData">メタファイルデータ</param>
         /// <param name="outputDirectory">出力ディレクトリ</param>
@@ -574,8 +604,8 @@ namespace WordAddIn1
         /// <param name="forceExtract">強制抽出フラグ</param>
         /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 2048）</param>
         /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 2048）</param>
-        /// <returns>作成されたファイルのパス、失敗時はnull</returns>
-        private static string ExtractImageFromMetaFileData(
+        /// <returns>作成されたファイルのパスとピクセルサイズ、失敗時はnull</returns>
+        private static ImageExtractionResult ExtractImageFromMetaFileDataWithSize(
             byte[] metaFileData, 
             string outputDirectory, 
             string baseFileName, 
@@ -597,6 +627,8 @@ namespace WordAddIn1
                         // リサイズが必要かチェック
                         bool needsResize = originalImage.Width > maxWidth || originalImage.Height > maxHeight;
                         Image finalImage = originalImage;
+                        int finalWidth = originalImage.Width;
+                        int finalHeight = originalImage.Height;
 
                         if (needsResize)
                         {
@@ -605,8 +637,10 @@ namespace WordAddIn1
                             
                             // リサイズされた画像を作成
                             finalImage = ResizeImageWithQuality(originalImage, newSize.Width, newSize.Height);
+                            finalWidth = newSize.Width;
+                            finalHeight = newSize.Height;
                             
-                            System.Diagnostics.Debug.WriteLine($"画像をリサイズしました: {originalImage.Width}x{originalImage.Height} → {newSize.Width}x{newSize.Height}");
+                            System.Diagnostics.Debug.WriteLine($"画像をリサイズしました: {originalImage.Width}x{originalImage.Height} → {finalWidth}x{finalHeight}");
                         }
 
                         try
@@ -627,7 +661,12 @@ namespace WordAddIn1
                             // PNG形式で保存
                             finalImage.Save(filePath, ImageFormat.Png);
                             
-                            return filePath;
+                            return new ImageExtractionResult
+                            {
+                                FilePath = filePath,
+                                PixelWidth = finalWidth,
+                                PixelHeight = finalHeight
+                            };
                         }
                         finally
                         {
@@ -645,6 +684,30 @@ namespace WordAddIn1
                 System.Diagnostics.Debug.WriteLine($"メタファイルデータからの画像生成でエラー: {ex.Message}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// EnhMetaFileBitsから画像ファイルを作成（旧版、互換性のため保持）
+        /// </summary>
+        /// <param name="metaFileData">メタファイルデータ</param>
+        /// <param name="outputDirectory">出力ディレクトリ</param>
+        /// <param name="baseFileName">ベースファイル名</param>
+        /// <param name="shapeType">図形タイプ</param>
+        /// <param name="forceExtract">強制抽出フラグ</param>
+        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 2048）</param>
+        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 2048）</param>
+        /// <returns>作成されたファイルのパス、失敗時はnull</returns>
+        private static string ExtractImageFromMetaFileData(
+            byte[] metaFileData, 
+            string outputDirectory, 
+            string baseFileName, 
+            string shapeType,
+            bool forceExtract = false,
+            int maxWidth = 2048,
+            int maxHeight = 2048)
+        {
+            var result = ExtractImageFromMetaFileDataWithSize(metaFileData, outputDirectory, baseFileName, shapeType, forceExtract, maxWidth, maxHeight);
+            return result?.FilePath;
         }
 
         /// <summary>

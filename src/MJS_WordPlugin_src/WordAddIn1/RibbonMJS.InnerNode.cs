@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// RibbonMJS.InnerNode.cs
+
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -6,7 +8,7 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
-        private void InnerNode(Dictionary<string, string> styleName, System.Xml.XmlNode objTargetNode, System.Xml.XmlNode seekNode)
+        private void InnerNode(Dictionary<string, string> styleName, XmlNode objTargetNode, XmlNode seekNode)
         {
 
             if (seekNode.NodeType == XmlNodeType.Text)
