@@ -160,7 +160,7 @@ namespace WordAddIn1
                                 }
                                 else if (isPattern3)
                                 {
-                                    // MJS LucaTech GX用の処理（coverLucaTech.pngを使用）
+                                    // MJS LucaTech GX用の処理（pattern3.pngを使用）
                                     ExtractProductLogosPattern3(docCopy, application, strOutFileName, productSubLogoGroups);
                                 }
                                 else
@@ -216,17 +216,24 @@ namespace WordAddIn1
                                         File.Move(pairs[p].Key, destF);
                                     }
 
-                                    // coverLucaTech.pngをcover-4.pngとしてコピー
-                                    string lucaTechSrc = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "coverLucaTech.png");
-                                    string lucaTechDest = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png");
-                                    
-                                    if (File.Exists(lucaTechSrc))
+                                    // pattern3.pngをcover-4.pngとしてコピー（リソースからpattern3を使用）
+                                    try
                                     {
-                                        if (File.Exists(lucaTechDest))
+                                        using (var pattern3Image = Properties.Resources.pattern3)
                                         {
-                                            File.Delete(lucaTechDest);
+                                            string cover4Dest = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png");
+                                            
+                                            if (File.Exists(cover4Dest))
+                                            {
+                                                File.Delete(cover4Dest);
+                                            }
+                                            
+                                            pattern3Image.Save(cover4Dest, ImageFormat.Png);
                                         }
-                                        File.Copy(lucaTechSrc, lucaTechDest);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        log.WriteLine($"Pattern3画像保存エラー: {ex.Message}");
                                     }
                                 }
                                 else
