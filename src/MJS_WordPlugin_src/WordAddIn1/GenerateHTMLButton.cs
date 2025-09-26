@@ -92,12 +92,12 @@ namespace WordAddIn1
                             includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
                             addMarkers: true,             // マーカーを追加
-                            skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
+                            skipCoverMarkers: false,       // 表紙の画像にはマーカーをつけない
                             minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
                             minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
                             includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
-                            maxOutputWidth: 4*1024,   // 出力画像の最大幅
-                            maxOutputHeight: 4*1024   // 出力画像の最大高さ
+                            maxOutputWidth: 1024,   // 出力画像の最大幅
+                            maxOutputHeight: 1024   // 出力画像の最大高さ
                         );
 
                         // 抽出統計をログに出力
@@ -290,6 +290,22 @@ namespace WordAddIn1
                         //    if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
                         //        wt.AllowAutoFit = true;
                         //}
+
+                        // テーブル幅の自動調整
+                        foreach (Table wt in docCopy.Tables)
+                        {
+                            if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
+                            {
+                                // 指定されたスタイルを持つセルを含むテーブルは自動調整を適用しない
+                                var excludeStyles = new[] { "MJS_コラム-本文", "MJS_コラム-タイトル" };
+                                if (!ShouldApplyAutoFitToTable(wt, excludeStyles))
+                                {
+                                    continue;
+                                }
+
+                                wt.AllowAutoFit = true;
+                            }
+                        }
 
                         // スタイル名の置換
                         foreach (Style ws in docCopy.Styles)

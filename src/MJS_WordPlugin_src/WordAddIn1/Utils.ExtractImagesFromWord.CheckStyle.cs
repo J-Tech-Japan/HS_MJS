@@ -26,12 +26,12 @@ namespace WordAddIn1
                 if (includeMjsTableImages)
                 {
                     forceExtract = true;
-                    System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定（MJS表内画像許可）");
+                    System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定（MJS表内画像許可）");
                 }
                 else
                 {
                     forceSkip = true;
-                    System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制スキップ対象に設定（MJS表内画像除外）");
+                    System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制スキップ対象に設定（MJS表内画像除外）");
                 }
                 return;
             }
@@ -42,7 +42,7 @@ namespace WordAddIn1
                 styleName.Contains("MJS_画像（コラム内）"))
             {
                 forceExtract = true;
-                System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定");
+                System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定");
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace WordAddIn1
             if (styleName.Contains("MJS_処理フロー") || styleName.Contains("MJS_表内-項目_センタリング"))
             {
                 forceSkip = true;
-                System.Diagnostics.Debug.WriteLine($"スタイル '{styleName}' により強制スキップ対象に設定");
+                System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制スキップ対象に設定");
                 return;
             }
         }
@@ -69,7 +69,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"インライン図形の段落スタイル取得エラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"インライン図形の段落スタイル取得エラー: {ex.Message}");
                 return string.Empty;
             }
         }
@@ -92,7 +92,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"フローティング図形のアンカー段落スタイル取得エラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"フローティング図形のアンカー段落スタイル取得エラー: {ex.Message}");
                 return string.Empty;
             }
         }
@@ -110,14 +110,23 @@ namespace WordAddIn1
 
             try
             {
-                // Rangeが属するセクション番号を取得
+                // 複数の方法でセクション番号を取得
                 int sectionNumber = range.Information[Word.WdInformation.wdActiveEndSectionNumber];
+                System.Diagnostics.Trace.WriteLine($"[IsInCoverSection] セクション番号: {sectionNumber}");
                 return sectionNumber == 1;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"セクション番号の取得でエラー: {ex.Message}");
-                return false;
+                System.Diagnostics.Trace.WriteLine($"[IsInCoverSection] セクション番号取得エラー: {ex.Message}");
+                // フォールバック: 位置で判定
+                try 
+                {
+                    return range.Start < 1000; // 仮の閾値
+                }
+                catch 
+                {
+                    return false; // 判定不可の場合は表紙扱いしない
+                }
             }
         }
 
@@ -142,7 +151,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"図形のセクション番号取得でエラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"図形のセクション番号取得でエラー: {ex.Message}");
                 return false;
             }
         }
