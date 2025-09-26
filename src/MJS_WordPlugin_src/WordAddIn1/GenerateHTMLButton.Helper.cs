@@ -324,6 +324,7 @@ namespace WordAddIn1
             }
         }
 
+        // 最初のセクション内の図形に対して、図形グループをすべて解除
         private void UngroupAllShapesInFirstSection(Document docCopy, Word.Application application)
         {
             bool repeatUngroup = true;

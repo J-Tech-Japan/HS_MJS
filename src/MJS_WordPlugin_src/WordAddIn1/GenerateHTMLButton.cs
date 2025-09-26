@@ -114,7 +114,7 @@ namespace WordAddIn1
                         }
 
                         // CSVファイルに出力
-                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
+                        //Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -151,7 +151,7 @@ namespace WordAddIn1
 
                             try
                             {
-                                UngroupAllShapesInFirstSection(docCopy, application);
+                                //UngroupAllShapesInFirstSection(docCopy, application);
 
                                 ProcessCanvasAndPictureShapesInFirstSection(docCopy, application, ref subTitle, ref biCount, strOutFileName, paths);
 
