@@ -7,13 +7,10 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Xml;
 using Microsoft.Office.Interop.Word;
 using Microsoft.Office.Tools.Ribbon;
-using Application = System.Windows.Forms.Application;
 using Table = Microsoft.Office.Interop.Word.Table;
-using Word = Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -159,12 +156,12 @@ namespace WordAddIn1
 
                                 if (isPattern1 || isPattern2)
                                 {
-                                    ExtractProductLogosPattern1Pattern2(docCopy, application, strOutFileName, productSubLogoGroups, log);
+                                    ExtractProductLogosPattern1Pattern2(docCopy, application, strOutFileName, productSubLogoGroups);
                                 }
                                 else if (isPattern3)
                                 {
                                     // MJS LucaTech GX用の処理（coverLucaTech.pngを使用）
-                                    ExtractProductLogosPattern3(docCopy, application, strOutFileName, productSubLogoGroups, log);
+                                    ExtractProductLogosPattern3(docCopy, application, strOutFileName, productSubLogoGroups);
                                 }
                                 else
                                 {
@@ -181,8 +178,9 @@ namespace WordAddIn1
                                 foreach (string coverPic in coverPics)
                                 {
                                     using (FileStream fs = new FileStream(coverPic, FileMode.Open, FileAccess.Read))
+                                    using (Image img = Image.FromStream(fs))
                                     {
-                                        dicStrFlo.Add(coverPic, (float)Image.FromStream(fs).Width * (float)Image.FromStream(fs).Height);
+                                        dicStrFlo.Add(coverPic, (float)img.Width * (float)img.Height);
                                     }
                                 }
 
@@ -253,11 +251,13 @@ namespace WordAddIn1
                                             {
                                                 int w = src.Width / 5;
                                                 int h = src.Height / 5;
-                                                Bitmap dst = new Bitmap(w, h);
-                                                Graphics g = Graphics.FromImage(dst);
-                                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
-                                                g.DrawImage(src, 0, 0, w, h);
-                                                dst.Save(Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-background.png"), ImageFormat.Png);
+                                                using (Bitmap dst = new Bitmap(w, h))
+                                                using (Graphics g = Graphics.FromImage(dst))
+                                                {
+                                                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+                                                    g.DrawImage(src, 0, 0, w, h);
+                                                    dst.Save(Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-background.png"), ImageFormat.Png);
+                                                }
                                             }
                                             File.Delete(pairs[p].Key);
                                         }
@@ -285,11 +285,11 @@ namespace WordAddIn1
                         temporaryCanvas.Delete();
 
                         // テーブル幅の自動調整
-                        foreach (Table wt in docCopy.Tables)
-                        {
-                            if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
-                                wt.AllowAutoFit = true;
-                        }
+                        //foreach (Table wt in docCopy.Tables)
+                        //{
+                        //    if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
+                        //        wt.AllowAutoFit = true;
+                        //}
 
                         // スタイル名の置換
                         foreach (Style ws in docCopy.Styles)
@@ -313,7 +313,7 @@ namespace WordAddIn1
                         log.WriteLine("画像フォルダ コピー");
 
                         bool isTmpDot = true;
-                        CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir, log);
+                        CopyAndDeleteTemporaryImages(paths.tmpFolderForImagesSavedBySaveAs2Method, paths.rootPath, paths.exportDir);
 
                         // HTMLファイルの読み込みと加工
                         var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, isTmpDot);
@@ -522,12 +522,14 @@ namespace WordAddIn1
 
                         // Zipアーカイブの生成
                         log.WriteLine("Zipファイル作成");
-                        GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName, log);
+                        GenerateZipArchive(paths.zipDirPath, paths.rootPath, paths.exportDir, paths.headerDir, paths.docFullName, paths.docName);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         isError = true;
-                        HandleException(ex, log, load);
+                        //HandleException(ex, log, load);
+                        load.Close();
+                        load.Dispose();
                         button3.Enabled = true;
                         return;
                     }
@@ -538,6 +540,12 @@ namespace WordAddIn1
                         //{
                         //    File.Delete(paths.logPath);
                         //}
+
+                        // tmpcoverpicフォルダを削除
+                        if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic")))
+                        {
+                            Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
+                        }
 
                         application.DocumentChange += new ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
                     }

@@ -262,6 +262,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CheckInfo.cs" />
+    <Compile Include="GenerateHTMLButton.ProcessImages.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Utils.ExtractImagesFromWord.CheckStyle.cs" />
     <Compile Include="Utils.ExtractImagesFromWord.Info.cs" />
     <Compile Include="Utils.ExtractImagesFromWord.InsertMarker.cs" />
