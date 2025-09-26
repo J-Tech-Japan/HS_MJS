@@ -290,6 +290,21 @@ namespace WordAddIn1
                 // 新しいログファイルパスを作成
                 string logFilePath = Path.Combine(documentPath, logFileName);
 
+                // 既存のログファイルが存在する場合は削除（上書きを確実にするため）
+                if (File.Exists(logFilePath))
+                {
+                    try
+                    {
+                        File.Delete(logFilePath);
+                        System.Diagnostics.Debug.WriteLine($"既存のログファイルを削除しました: {logFilePath}");
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"既存のログファイル削除エラー: {deleteEx.Message}");
+                        // 削除に失敗した場合でも処理を続行
+                    }
+                }
+
                 // 新しいTraceListenerを追加
                 var newListener = new System.Diagnostics.TextWriterTraceListener(logFilePath)
                 {
