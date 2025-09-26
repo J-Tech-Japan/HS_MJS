@@ -31,7 +31,7 @@ namespace WordAddIn1
             idxHtmlTemplate += @"<title>" + docTitle + "</title>" + "\n";
             idxHtmlTemplate += @"<link rel=""StyleSheet"" href=""template/Azure_Blue01/layout.css"" type=""text/css"" />" + "\n";
 
-            // breadcrumbのJavaScriptは、MJS LucaTech GXが選択された時のみ追加
+            // breadcrumbのJavaScriptは、LucaTech GXが選択された時のみ追加
             if (includeBreadcrumb)
             {
                 idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/hc_breadcrumb.js""></script>" + "\n";
@@ -61,7 +61,7 @@ namespace WordAddIn1
             idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""template/styles/resp.css"">" + "\n";
             idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""template/styles/pdf.css"" >" + "\n";
 
-            // breadcrumbのCSSは、MJS LucaTech GXが選択された時のみ追加
+            // breadcrumbのCSSは、LucaTech GXが選択された時のみ追加
             if (includeBreadcrumb)
             {
                 idxHtmlTemplate += @"<link rel=""stylesheet"" type=""text/css"" href=""../../center/css/hc_breadcrumb.css"">" + "\n";

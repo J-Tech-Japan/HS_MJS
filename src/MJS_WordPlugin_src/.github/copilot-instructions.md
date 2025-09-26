@@ -25,6 +25,11 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - RibbonMJS.MakeBookInfo.HeaderFile.cs: ƒwƒbƒ_[ƒtƒ@ƒCƒ‹i‘Žî•ñƒtƒ@ƒCƒ‹j‚Ì“Ç‚Ýž‚ÝE‘‚«ž‚Ýˆ—‚Æƒtƒ@ƒCƒ‹ƒAƒNƒZƒX§Œä
 - BookInfo.cs: ‘Žî•ñ‚ÌƒfƒtƒHƒ‹ƒg’l“ü—Í—pƒ_ƒCƒAƒƒOƒtƒH[ƒ€B2Œ…‚Ì”’l“ü—Í‚Æ‘SŠpE”¼Šp•ÏŠ·‹@”\
 - HeadingInfo.cs: Œ©o‚µî•ñ‚ðŠi”[‚·‚éƒf[ƒ^ƒNƒ‰ƒXi€”ÔEƒ^ƒCƒgƒ‹EIDEƒ}[ƒWæî•ñj
+- CheckInfo.cs: ‘Žî•ñ‚Ì”äŠrŒ‹‰Ê‚ðŠi”[‚·‚éƒf[ƒ^ƒNƒ‰ƒXB‹Œ‘Žî•ñ‚ÆV‘Žî•ñ‚Ì·•ªî•ñi€”ÔEƒ^ƒCƒgƒ‹EIDE•ÏXŽí•ÊE•\Ž¦Fj‚ðŠÇ—
+- CheckForm.cs: ‘Žî•ñƒ`ƒFƒbƒNŒ‹‰Ê•\Ž¦ƒ_ƒCƒAƒƒOƒtƒH[ƒ€BDataGridView‚É‚æ‚é”äŠrŒ‹‰Ê‚Ì•\Ž¦‚ÆAƒ†[ƒU[‚É‚æ‚éC³“à—e‚ÌŠm”FE³”F‹@”\
+- CheckForm.DataGridView.cs: CheckForm‚ÌDataGridView‘€ìˆ—BƒZƒ‹‚Ì•ÒW§ŒäAF•ª‚¯•\Ž¦AIDŒó•â‚ÌŽ©“®•âŠ®‹@”\
+- CheckForm.SetColor.cs: CheckForm‚Ì•\Ž¦F§Œäˆ—B•ÏXŽí•Ê‚É‰ž‚¶‚½”wŒiFE•¶ŽšF‚ÌÝ’è‚ÆŽ‹Šo“I‚È·•ª•\Ž¦‹@”\
+- CheckForm.ExportCsv.cs: ‘Žî•ñ”äŠrŒ‹‰Ê‚ÌCSVo—Í‹@”\Bƒ`ƒFƒbƒNŒ‹‰Ê‚ðCSVƒtƒ@ƒCƒ‹‚Æ‚µ‚Ä•Û‘¶‚µAŠO•”ƒc[ƒ‹‚Å‚Ì•ªÍ‚ð‰Â”\‚É‚·‚é
 
 ### ƒŠƒ“ƒNÝ’è
 - WordŒ´e‚Ì•ÒW•â•‹@”\‚Æ‚µ‚ÄA‘¼‚Ì€–Ú‚Ö‚ÌƒŠƒ“ƒNiŽQÆj‚ðÝ’è‚µ‚Ü‚·B
@@ -50,19 +55,19 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 
 #### HTMLo—Í‚ÉŠÖ˜A‚·‚éƒtƒ@ƒCƒ‹
 - GenerateHTMLButton.cs: HTMLo—Í‚ÌƒƒCƒ“ˆ—BWordƒhƒLƒ…ƒƒ“ƒg‚©‚çWebƒwƒ‹ƒvŒ`Ž®‚ÌHTMLƒRƒ“ƒeƒ“ƒc‚ð¶¬‚µA•\Ž†‰æ‘œ‚Ì’Šo‚©‚çŒŸõ‹@”\‚Ü‚Å•ïŠ‡“I‚È•ÏŠ·ˆ—‚ðŽÀs
+- GenerateHTMLButton.Helper.cs: HTML¶¬‚Å‹¤’Ê—˜—p‚·‚éƒwƒ‹ƒp[ŠÖ”ŒQBƒpƒXˆ—Aƒtƒ@ƒCƒ‹‘€ìA—áŠOˆ—‚È‚Ç
 - GenerateHTMLButton.CopyDocumentToHtml.cs: WordƒhƒLƒ…ƒƒ“ƒg‚ðHTML•ÏŠ·—p‚É•¡»‚·‚éˆ—BƒNƒŠƒbƒvƒ{[ƒhŒo—R‚ÅƒhƒLƒ…ƒƒ“ƒg‘S‘Ì‚ðƒRƒs[‚µAV‹KƒhƒLƒ…ƒƒ“ƒg‚É“\‚è•t‚¯
 - GenerateHTMLButton.StyleProcessor.cs: Word•¶‘‚©‚ç’Šo‚µ‚½CSSƒXƒ^ƒCƒ‹’è‹`‚Ì‰ðÍˆ—Bmso-style-name‘®«‚ðŠî‚ÉÍ•ªŠ„ƒNƒ‰ƒX‚âƒXƒ^ƒCƒ‹–¼Ž«‘‚ð¶¬
 - GenerateHTMLButton.ProcessHTML.cs: ˆêŽž“I‚É•Û‘¶‚³‚ê‚½HTMLƒtƒ@ƒCƒ‹‚Ì“Ç‚Ýž‚Ý‚Æ‘Oˆ—B•¶ŽšƒGƒ“ƒR[ƒfƒBƒ“ƒOC³‚âHTML\‘¢‚Ì³‹K‰»‚ðŽÀs
+- GenerateHTMLButton.ProcessImages.cs: HTMLo—ÍŽž‚Ì‰æ‘œˆ—“‡‹@”\B‰æ‘œ’ŠoEƒ}[ƒJ[‘}“üEƒtƒ@ƒCƒ‹ƒRƒs[EƒpƒXC³‚ð“Š‡‚µA‰æ‘œ‚ÆHTMLƒRƒ“ƒeƒ“ƒc‚Ì®‡«‚ð•ÛØ
 - GenerateHTMLButton.HtmlTemplate1.cs: ŒÂ•Êƒy[ƒW—pHTMLƒeƒ“ƒvƒŒ[ƒg¶¬Bƒpƒ“‚­‚¸ƒŠƒXƒgA–ÚŽŸŠK‘wAŒŸõ‹@”\‚ðŠÜ‚Þ•W€ƒy[ƒWƒŒƒCƒAƒEƒg‚Ì\’z
 - GenerateHTMLButton.HtmlCoverTemplate.cs: •\Ž†ƒy[ƒW—pHTMLƒeƒ“ƒvƒŒ[ƒg¶¬B»•iƒƒSAƒ^ƒCƒgƒ‹A¤•Wî•ñ‚ðŠÜ‚Þ•\Ž†ƒŒƒCƒAƒEƒg‚Ì\’z
 - GenerateHTMLButton.IdxHtmlTemplate.cs: ƒCƒ“ƒfƒbƒNƒXi–ÚŽŸjƒy[ƒW—pHTMLƒeƒ“ƒvƒŒ[ƒg¶¬B‘S‘Ì‚ÌƒiƒrƒQ[ƒVƒ‡ƒ“\‘¢‚ÆƒtƒŒ[ƒ€Ý’è‚ðŠÜ‚ÞƒƒCƒ“ƒy[ƒW‚Ì\’z
 - GenerateHTMLButton.CollectInfo.cs: Word•¶‘‚©‚ç•\Ž†E¤•WEƒo[ƒWƒ‡ƒ“î•ñ‚ÌŽûWˆ—B“Á’èƒXƒ^ƒCƒ‹‚Ì’i—Ž‚©‚çƒ^ƒCƒgƒ‹‚â’˜ìŒ î•ñ‚ð’Šo
 - GenerateHTMLButton.CollectMergeScript.cs: Œ©o‚µŒ‹‡î•ñ‚ð‘Žî•ñƒtƒ@ƒCƒ‹iheaderFilej‚©‚çŽûW‚µAHTMLo—ÍŽž‚Ìƒy[ƒWƒ}[ƒWˆ——pŽ«‘‚ð¶¬
-- GenerateHTMLButton.Helper.cs: HTML¶¬‚Å‹¤’Ê—˜—p‚·‚éƒwƒ‹ƒp[ŠÖ”ŒQBƒpƒXˆ—Aƒtƒ@ƒCƒ‹‘€ìA•\Ž†‘I‘ðƒ_ƒCƒAƒƒOA—áŠOˆ—‚È‚Ç
 - GenerateHTMLButton.CopyImagesFromAppDataLocalTemp.cs: AppData/Local/TempƒtƒHƒ‹ƒ_‚©‚ç‰æ‘œƒtƒ@ƒCƒ‹‚ðŒŸõ‚µAwebhelp/pictƒtƒHƒ‹ƒ_‚É“KØ‚Èƒtƒ@ƒCƒ‹–¼‚ÅƒRƒs[
 - RibbonMJS.InnerNode.cs: HTML•ÏŠ·Žž‚ÌXMLƒm[ƒh“à•”ˆ—BWord•¶‘‚ÌŠe—v‘fi•\E}Œ`EƒXƒ^ƒCƒ‹j‚ðHTML—v‘f‚É•ÏŠ·‚·‚éƒƒCƒ“ˆ—
 - RibbonMJS.InnerNode.Helper.cs: InnerNode.cs‚Ìƒwƒ‹ƒp[ŠÖ”ŒQB‘€ìŽè‡EQ&AE‘I‘ðŽˆE‰Óð‘‚«E•\EƒRƒ‰ƒ€‚È‚ÇŠeŽíMJSƒXƒ^ƒCƒ‹‚Ìê—pHTML•ÏŠ·ˆ—
-
 
 #### XMLEHTML•ÏŠ·ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
 - GenerateHTMLButton.XMLProcessDocument.cs: Word‚ÌHTMLo—Í‚ðXMLŒ`Ž®‚É•ÏŠ·‚µA–ÚŽŸE–{•¶\‘¢‚Ì‰ðÍ‚Æ•ªŠ„ˆ—‚ðŽÀs
@@ -74,6 +79,23 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 - GenerateHTMLButton.RemoveSearchBlock.cs: Žw’è‚³‚ê‚½ƒ^ƒCƒgƒ‹‚Ìƒy[ƒW‚©‚çŒŸõƒuƒƒbƒN‚ðíœ‚µAŒŸõ‘ÎÛŠOƒRƒ“ƒeƒ“ƒc‚ÌœŠOˆ—‚ðŽÀs
 
 ## ‚»‚Ì‘¼‚Ìƒtƒ@ƒCƒ‹
+
+### ƒf[ƒ^ƒNƒ‰ƒXEƒGƒ“ƒeƒBƒeƒB
+- CheckInfo.cs: ‘Žî•ñ‚Ì”äŠrŒ‹‰Ê‚ðŠi”[‚·‚éƒf[ƒ^ƒNƒ‰ƒXB‹Œ‘Žî•ñ‚ÆV‘Žî•ñ‚Ì·•ªî•ñi€”ÔEƒ^ƒCƒgƒ‹EIDE•ÏXŽí•ÊE•\Ž¦Fj‚ðŠÇ—
+- HeadingInfo.cs: Œ©o‚µî•ñ‚ðŠi”[‚·‚éƒf[ƒ^ƒNƒ‰ƒXi€”ÔEƒ^ƒCƒgƒ‹EIDEƒ}[ƒWæî•ñj
+
+### UIEƒ_ƒCƒAƒƒOƒtƒH[ƒ€
+- Alert.cs: ƒAƒ‰[ƒg•\Ž¦—pƒtƒH[ƒ€BƒAƒjƒ[ƒVƒ‡ƒ“‰æ‘œ•t‚«‚Ì’Ê’mƒ_ƒCƒAƒƒO
+- BookInfo.cs: ‘Žî•ñ‚ÌƒfƒtƒHƒ‹ƒg’l“ü—Í—pƒ_ƒCƒAƒƒOƒtƒH[ƒ€B2Œ…‚Ì”’l“ü—Í‚Æ‘SŠpE”¼Šp•ÏŠ·‹@”\
+- CheckForm.cs: ‘Žî•ñƒ`ƒFƒbƒNŒ‹‰Ê•\Ž¦ƒ_ƒCƒAƒƒOƒtƒH[ƒ€BDataGridView‚É‚æ‚é”äŠrŒ‹‰Ê‚Ì•\Ž¦‚ÆAƒ†[ƒU[‚É‚æ‚éC³“à—e‚ÌŠm”FE³”F‹@”\
+- CheckForm.DataGridView.cs: CheckForm‚ÌDataGridView‘€ìˆ—BƒZƒ‹‚Ì•ÒW§ŒäAF•ª‚¯•\Ž¦AIDŒó•â‚ÌŽ©“®•âŠ®‹@”\
+- CheckForm.SetColor.cs: CheckForm‚Ì•\Ž¦F§Œäˆ—B•ÏXŽí•Ê‚É‰ž‚¶‚½”wŒiFE•¶ŽšF‚ÌÝ’è‚ÆŽ‹Šo“I‚È·•ª•\Ž¦‹@”\
+- CheckForm.ExportCsv.cs: ‘Žî•ñ”äŠrŒ‹‰Ê‚ÌCSVo—Í‹@”\Bƒ`ƒFƒbƒNŒ‹‰Ê‚ðCSVƒtƒ@ƒCƒ‹‚Æ‚µ‚Ä•Û‘¶‚µAŠO•”ƒc[ƒ‹‚Å‚Ì•ªÍ‚ð‰Â”\‚É‚·‚é
+- CoverSelectionForm.cs: •\Ž†ƒeƒ“ƒvƒŒ[ƒg‘I‘ðƒ_ƒCƒAƒƒOƒtƒH[ƒ€BEasyCloudEEdgeTrackerE”Ä—pƒpƒ^[ƒ“‚È‚Ç•¡”‚Ì•\Ž†ƒfƒUƒCƒ“‚©‚ç‘I‘ð‚·‚é‹@”\
+- CoverSelectionItem.cs: •\Ž†‘I‘ð—p‚Ìƒ†[ƒU[ƒRƒ“ƒgƒ[ƒ‹BƒTƒ€ƒlƒCƒ‹‰æ‘œ‚ÆƒLƒƒƒvƒVƒ‡ƒ“A‘I‘ðó‘Ô‚ðŠÇ—‚·‚éƒJƒXƒ^ƒ€ƒRƒ“ƒgƒ[ƒ‹
+- loader.cs: ˆ—’†•\Ž¦—p‚Ìƒ[ƒ_[ƒtƒH[ƒ€BƒoƒbƒNƒOƒ‰ƒEƒ“ƒhˆ—’†‚ÌUI•\Ž¦§Œä
+- ProgressBar.cs: ƒvƒƒOƒŒƒXƒo[•\Ž¦ƒtƒH[ƒ€B’·ŽžŠÔˆ—‚Ìi’»ó‹µ•\Ž¦‚ÆƒLƒƒƒ“ƒZƒ‹‹@”\•t‚«ƒXƒŒƒbƒhƒZ[ƒt‚Èi’»ŠÇ—
+- SetLink.cs: ƒŠƒ“ƒNÝ’èƒ_ƒCƒAƒƒOƒtƒH[ƒ€B‘¼‚Ì€–Ú‚Ö‚ÌƒŠƒ“ƒNiŽQÆjÝ’è‹@”\
 
 ### ‹¤’Êƒ†[ƒeƒBƒŠƒeƒBƒNƒ‰ƒXiUtilsj
 - Utils.FileIO.cs: ƒŠƒXƒgŒ^•Ï”‚Ì“à—e‚ðƒeƒLƒXƒgƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ”Ä—pƒƒ\ƒbƒh‚ÆAƒtƒ@ƒCƒ‹‘€ì‚Ì‹¤’Êˆ—‚ð’ñ‹Ÿ
@@ -89,11 +111,26 @@ Wordƒvƒ‰ƒOƒCƒ“‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚éó‘Ô‚ÅWord‚ð‹N“®‚·‚é‚ÆAƒƒjƒ…[‚ÉuMJSƒ
 
 ### Ý’èE‰Šú‰»ŠÖ˜A‚Ìƒtƒ@ƒCƒ‹
 - RibbonMJS.Config.cs: HTMLo—Í—pƒpƒXˆê——‚Ì€”õAŠeŽí’è”Eƒpƒ^[ƒ“‚Ì’è‹`AŒŸõðŒÝ’è‚È‚Çƒvƒ‰ƒOƒCƒ“‘S‘Ì‚ÌÝ’è‹@”\‚ð’ñ‹Ÿ
+- ThisAddIn.cs: VSTOƒAƒhƒCƒ“‚ÌƒGƒ“ƒgƒŠ[ƒ|ƒCƒ“ƒgƒNƒ‰ƒXBƒAƒhƒCƒ“‚Ì‹N“®EI—¹ˆ—‚ÆCOMƒIƒuƒWƒFƒNƒg‚ÌƒŠƒ\[ƒXŠÇ—
 
 ### UIEƒVƒXƒeƒ€‹@”\
+- RibbonMJS.cs: ƒƒCƒ“‚ÌƒŠƒ{ƒ“ƒNƒ‰ƒXB‘Žî•ño—ÍEƒŠƒ“ƒNÝ’èEƒXƒ^ƒCƒ‹ƒ`ƒFƒbƒNEHTMLo—Í‚Ì“‡§Œä‚Æ‹¤’Êƒf[ƒ^ŠÇ—
 - RibbonMJS.ClearClipboard.cs: ƒNƒŠƒbƒvƒ{[ƒh‚ÌˆÀ‘S‚ÈƒNƒŠƒAˆ—BCOMException‘Î‰ž‚ÌƒŠƒgƒ‰ƒC‹@”\•t‚«ƒNƒŠƒbƒvƒ{[ƒh‘€ì
 - RibbonMJS.Designer.cs: ƒŠƒ{ƒ“UIiMJSƒ[ƒhƒvƒ‰ƒOƒCƒ“ƒ^ƒuj‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒhBƒ{ƒ^ƒ“”z’uEƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰[Ý’èEƒŠƒ\[ƒXŠÇ—
 
+### Visual StudioEƒvƒƒWƒFƒNƒgŠÖ˜Aƒtƒ@ƒCƒ‹
+- Properties\AssemblyInfo.cs: ƒAƒZƒ“ƒuƒŠƒƒ^ƒf[ƒ^iƒo[ƒWƒ‡ƒ“E’˜ìŒ Eà–¾‚È‚Çj‚Ì’è‹`
+- Properties\Resources.Designer.cs: ƒŠƒ\[ƒXƒtƒ@ƒCƒ‹i‰æ‘œE•¶Žš—ñ‚È‚Çj‚Ö‚ÌŒ^ˆÀ‘S‚ÈƒAƒNƒZƒX‚ð’ñ‹Ÿ‚·‚éŽ©“®¶¬ƒNƒ‰ƒX
+- Properties\Settings.Designer.cs: ƒAƒvƒŠƒP[ƒVƒ‡ƒ“Ý’è‚Ö‚ÌƒAƒNƒZƒX‹@”\‚ð’ñ‹Ÿ‚·‚éŽ©“®¶¬ƒNƒ‰ƒX
+- ThisAddIn.Designer.cs: VSTOƒAƒhƒCƒ“ƒfƒUƒCƒi[‚ÌŽ©“®¶¬ƒR[ƒh
+- BookInfo.Designer.cs: BookInfoƒtƒH[ƒ€‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- CoverSelectionForm.Designer.cs: CoverSelectionForm‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- CoverSelectionItem.Designer.cs: CoverSelectionItemƒRƒ“ƒgƒ[ƒ‹‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- CheckForm.Designer.cs: CheckForm‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- Alert.Designer.cs: AlertƒtƒH[ƒ€‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- loader.Designer.cs: loaderƒtƒH[ƒ€‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- ProgressBar.Designer.cs: ProgressBarƒtƒH[ƒ€‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
+- SetLink.Designer.cs: SetLinkƒtƒH[ƒ€‚ÌƒfƒUƒCƒi[Ž©“®¶¬ƒR[ƒh
 
 ## Copilot ƒŠƒtƒ@ƒNƒ^ƒŠƒ“ƒOŽwŽ¦‘
 

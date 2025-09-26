@@ -160,7 +160,7 @@ namespace WordAddIn1
                                 }
                                 else if (isPattern3)
                                 {
-                                    // MJS LucaTech GX用の処理（pattern3.pngを使用）
+                                    // LucaTech GX用の処理（pattern3.pngを使用）
                                     ExtractProductLogosPattern3(docCopy, application, strOutFileName, productSubLogoGroups);
                                 }
                                 else
@@ -203,7 +203,7 @@ namespace WordAddIn1
                                 }
                                 else if (isPattern3)
                                 {
-                                    // MJS LucaTech GX用の処理 - Pattern1と同様
+                                    // LucaTech GX用の処理 - Pattern1と同様
                                     for (int p = 0; p < pairs.Count; p++)
                                     {
                                         string destF = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", Path.GetFileName(pairs[p].Key));

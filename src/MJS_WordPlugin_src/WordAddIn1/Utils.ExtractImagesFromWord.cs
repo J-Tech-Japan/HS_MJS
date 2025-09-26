@@ -92,11 +92,11 @@ namespace WordAddIn1
                 Directory.CreateDirectory(outputDirectory);
 
             // 環境情報をログ出力
-            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Word Version: {Globals.ThisAddIn.Application.Version}");
-            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Document Compatibility Mode: {document.CompatibilityMode}");
-            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Sections Count: {document.Sections.Count}");
-            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] InlineShapes Count: {document.InlineShapes.Count}");
-            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Shapes Count: {document.Shapes.Count}");
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Word Version: {Globals.ThisAddIn.Application.Version}");
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Document Compatibility Mode: {document.CompatibilityMode}");
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Sections Count: {document.Sections.Count}");
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages] InlineShapes Count: {document.InlineShapes.Count}");
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Shapes Count: {document.Shapes.Count}");
 
             var extractedImages = new List<ExtractedImageInfo>();
             int imageCounter = 1;
