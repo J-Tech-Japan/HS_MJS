@@ -108,7 +108,7 @@
             // 
             this.CoverSelectionItemLucaTechGX.BackColor = System.Drawing.Color.Transparent;
             this.CoverSelectionItemLucaTechGX.Caption = "MJS LucaTech GX";
-            this.CoverSelectionItemLucaTechGX.CoverThumbnail = global::WordAddIn1.Properties.Resources.coverLucaTech;
+            this.CoverSelectionItemLucaTechGX.CoverThumbnail = global::WordAddIn1.Properties.Resources.pattern3;
             this.CoverSelectionItemLucaTechGX.Location = new System.Drawing.Point(310, 5);
             this.CoverSelectionItemLucaTechGX.Margin = new System.Windows.Forms.Padding(0);
             this.CoverSelectionItemLucaTechGX.Name = "CoverSelectionItemLucaTechGX";
