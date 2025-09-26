@@ -250,5 +250,64 @@ namespace WordAddIn1
             var filePath = Path.Combine(folderPath, fileName);
             return ReadLinesFromFile(filePath, encoding);
         }
+
+        /// <summary>
+        /// 現在のWord文書のフォルダにログファイルを設定
+        /// </summary>
+        /// <param name="logFileName">ログファイル名（省略時は既定値）</param>
+        public static void ConfigureLogToDocumentFolder(Microsoft.Office.Interop.Word.Application application,
+        string logFileName = "MJS_WordAddIn_logMarker.txt")
+        {
+            try
+            {
+                if (Globals.ThisAddIn.Application?.ActiveDocument == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("アクティブな文書がありません");
+                    return;
+                }
+
+                string documentPath = Globals.ThisAddIn.Application.ActiveDocument.Path;
+
+                if (string.IsNullOrEmpty(documentPath))
+                {
+                    System.Diagnostics.Debug.WriteLine("文書が保存されていません。既定のログパスを使用します");
+                    return;
+                }
+
+                // 既存のTraceListenerを検索して削除
+                for (int i = System.Diagnostics.Trace.Listeners.Count - 1; i >= 0; i--)
+                {
+                    var listener = System.Diagnostics.Trace.Listeners[i];
+                    if (listener is System.Diagnostics.TextWriterTraceListener textListener &&
+                        listener.Name == "textFileListener")
+                    {
+                        System.Diagnostics.Trace.Listeners.RemoveAt(i);
+                        listener.Dispose();
+                        break;
+                    }
+                }
+
+                // 新しいログファイルパスを作成
+                string logFilePath = Path.Combine(documentPath, logFileName);
+
+                // 新しいTraceListenerを追加
+                var newListener = new System.Diagnostics.TextWriterTraceListener(logFilePath)
+                {
+                    Name = "textFileListener",
+                    TraceOutputOptions = System.Diagnostics.TraceOptions.DateTime |
+                                       System.Diagnostics.TraceOptions.ProcessId |
+                                       System.Diagnostics.TraceOptions.ThreadId
+                };
+
+                System.Diagnostics.Trace.Listeners.Add(newListener);
+                System.Diagnostics.Trace.AutoFlush = true;
+
+                System.Diagnostics.Trace.WriteLine($"ログファイルパスを更新しました: {logFilePath}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ログファイル設定エラー: {ex.Message}");
+            }
+        }
     }
 }

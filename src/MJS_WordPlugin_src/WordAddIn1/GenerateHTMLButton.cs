@@ -27,6 +27,9 @@ namespace WordAddIn1
             var application = Globals.ThisAddIn.Application;
             var activeDocument = application.ActiveDocument;
 
+            // アクティブドキュメントのフォルダにログを出力するよう設定
+            Utils.ConfigureLogToDocumentFolder(application);
+
             // 現在の表示モードを保存
             var defaultView = application.ActiveWindow.View.Type;
             
