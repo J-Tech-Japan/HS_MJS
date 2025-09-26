@@ -91,6 +91,13 @@ namespace WordAddIn1
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
 
+            // 環境情報をログ出力
+            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Word Version: {Globals.ThisAddIn.Application.Version}");
+            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Document Compatibility Mode: {document.CompatibilityMode}");
+            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Sections Count: {document.Sections.Count}");
+            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] InlineShapes Count: {document.InlineShapes.Count}");
+            //System.Diagnostics.Trace.WriteLine($"[ExtractImages] Shapes Count: {document.Shapes.Count}");
+
             var extractedImages = new List<ExtractedImageInfo>();
             int imageCounter = 1;
 
@@ -169,7 +176,7 @@ namespace WordAddIn1
                     // 強制スキップ対象の場合
                     if (forceSkip)
                     {
-                        System.Diagnostics.Debug.WriteLine($"インライン図形をスキップ: スタイル '{paragraphStyle}' により強制スキップ");
+                        System.Diagnostics.Trace.WriteLine($"インライン図形をスキップ: スタイル '{paragraphStyle}' により強制スキップ");
                         continue;
                     }
 
@@ -179,7 +186,7 @@ namespace WordAddIn1
                     
                     if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
                     {
-                        System.Diagnostics.Debug.WriteLine($"インライン図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                        System.Diagnostics.Trace.WriteLine($"インライン図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                         continue;
                     }
 
@@ -223,7 +230,7 @@ namespace WordAddIn1
                 catch (Exception ex)
                 {
                     // 個別の図形でエラーが発生しても処理を継続
-                    System.Diagnostics.Debug.WriteLine($"インライン図形の抽出でエラー: {ex.Message}");
+                    System.Diagnostics.Trace.WriteLine($"インライン図形の抽出でエラー: {ex.Message}");
                 }
             }
         }
@@ -308,7 +315,7 @@ namespace WordAddIn1
                 catch (Exception ex)
                 {
                     // 個別の図形でエラーが発生しても処理を継続
-                    System.Diagnostics.Debug.WriteLine($"フローティング図形の抽出でエラー: {ex.Message}");
+                    System.Diagnostics.Trace.WriteLine($"フローティング図形の抽出でエラー: {ex.Message}");
                 }
             }
         }
@@ -341,7 +348,7 @@ namespace WordAddIn1
                 // 強制スキップ対象の場合
                 if (forceSkip)
                 {
-                    System.Diagnostics.Debug.WriteLine($"キャンバス図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
+                    System.Diagnostics.Trace.WriteLine($"キャンバス図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
                     return;
                 }
 
@@ -351,7 +358,7 @@ namespace WordAddIn1
                 
                 if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
                 {
-                    System.Diagnostics.Debug.WriteLine($"キャンバス図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                    System.Diagnostics.Trace.WriteLine($"キャンバス図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                 }
                 else
                 {
@@ -422,7 +429,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"キャンバス図形の抽出でエラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"キャンバス図形の抽出でエラー: {ex.Message}");
             }
         }
 
@@ -454,7 +461,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"キャンバス用マーカー挿入エラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"キャンバス用マーカー挿入エラー: {ex.Message}");
             }
         }
 
@@ -494,7 +501,7 @@ namespace WordAddIn1
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"キャンバスアイテムの抽出でエラー: {ex.Message}");
+                    System.Diagnostics.Trace.WriteLine($"キャンバスアイテムの抽出でエラー: {ex.Message}");
                 }
             }
         }
@@ -527,7 +534,7 @@ namespace WordAddIn1
                 // 強制スキップ対象の場合
                 if (forceSkip)
                 {
-                    System.Diagnostics.Debug.WriteLine($"{prefix}図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
+                    System.Diagnostics.Trace.WriteLine($"{prefix}図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
                     return;
                 }
 
@@ -537,7 +544,7 @@ namespace WordAddIn1
                 
                 if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
                 {
-                    System.Diagnostics.Debug.WriteLine($"{prefix}図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                    System.Diagnostics.Trace.WriteLine($"{prefix}図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                     return;
                 }
 
@@ -569,9 +576,19 @@ namespace WordAddIn1
                         extractedImages.Add(imageInfo);
 
                         // マーカーを追加（表紙の画像は除外）
-                        if (addMarkers && shape.Anchor != null && !IsShapeInCoverSection(shape, skipCoverMarkers))
+                        if (addMarkers)
                         {
-                            InsertMarkerAtPosition(shape.Anchor, extractResult.FilePath);
+                            bool inCoverSection = shape.Anchor != null ? IsShapeInCoverSection(shape, skipCoverMarkers) : false;
+                            System.Diagnostics.Trace.WriteLine($"[ExtractSingleShape] Anchor: {shape.Anchor != null}, InCover: {inCoverSection}");
+                            
+                            if (shape.Anchor != null && !inCoverSection)
+                            {
+                                InsertMarkerAtPosition(shape.Anchor, extractResult.FilePath);
+                            }
+                            else if (shape.Anchor == null)
+                            {
+                                System.Diagnostics.Trace.WriteLine("[ExtractSingleShape] Anchorが取得できないためマーカーをスキップ");
+                            }
                         }
 
                         imageCounter++;
@@ -580,7 +597,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"図形の抽出でエラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"図形の抽出でエラー: {ex.Message}");
             }
         }
         
@@ -640,7 +657,7 @@ namespace WordAddIn1
                             finalWidth = newSize.Width;
                             finalHeight = newSize.Height;
                             
-                            System.Diagnostics.Debug.WriteLine($"画像をリサイズしました: {originalImage.Width}x{originalImage.Height} → {finalWidth}x{finalHeight}");
+                            System.Diagnostics.Trace.WriteLine($"画像をリサイズしました: {originalImage.Width}x{originalImage.Height} → {finalWidth}x{finalHeight}");
                         }
 
                         try
@@ -681,7 +698,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"メタファイルデータからの画像生成でエラー: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"メタファイルデータからの画像生成でエラー: {ex.Message}");
                 return null;
             }
         }

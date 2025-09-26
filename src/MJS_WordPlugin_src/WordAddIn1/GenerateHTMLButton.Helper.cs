@@ -335,5 +335,55 @@ namespace WordAddIn1
                 catch { MessageBox.Show(ErrMsgHtmlOutputFailure1, ErrMsgHtmlOutputFailure2, MessageBoxButtons.OK, MessageBoxIcon.Error); }
             }
         }
+
+        /// <summary>
+        /// 指定されたテーブルに自動調整を適用すべきかどうかを判定
+        /// </summary>
+        /// <param name="table">判定対象のテーブル</param>
+        /// <param name="excludeStyles">除外対象のスタイル名配列</param>
+        /// <returns>自動調整を適用する場合はtrue、適用しない場合はfalse</returns>
+        private bool ShouldApplyAutoFitToTable(Table table, string[] excludeStyles)
+        {
+            if (table == null || excludeStyles == null || excludeStyles.Length == 0)
+                return true;
+
+            try
+            {
+                // テーブル内の全てのセルをチェック
+                foreach (Row row in table.Rows)
+                {
+                    foreach (Cell cell in row.Cells)
+                    {
+                        // セル内の段落スタイルをチェック
+                        foreach (Paragraph paragraph in cell.Range.Paragraphs)
+                        {
+                            try
+                            {
+                                string styleName = paragraph.get_Style().NameLocal;
+
+                                // 除外対象のスタイルが見つかった場合
+                                if (excludeStyles.Any(excludeStyle =>
+                                    string.Equals(styleName, excludeStyle, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    return false; // 自動調整を適用しない
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                // スタイル取得に失敗した場合は継続
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // テーブル操作で例外が発生した場合はデフォルトで自動調整を適用
+                return true;
+            }
+
+            return true; // 除外対象のスタイルが見つからなかった場合は自動調整を適用
+        }
     }
 }
