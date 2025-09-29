@@ -92,12 +92,12 @@ namespace WordAddIn1
                             includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
                             addMarkers: true,             // マーカーを追加
-                            skipCoverMarkers: false,       // 表紙の画像にはマーカーをつけない
+                            skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
                             minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
                             minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
                             includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
-                            maxOutputWidth: 1024,   // 出力画像の最大幅
-                            maxOutputHeight: 1024   // 出力画像の最大高さ
+                            maxOutputWidth: 8*1024,   // 出力画像の最大幅
+                            maxOutputHeight: 8*1024   // 出力画像の最大高さ
                         );
 
                         // 抽出統計をログに出力
@@ -111,7 +111,7 @@ namespace WordAddIn1
                         }
 
                         // CSVファイルに出力
-                        //Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
+                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -290,13 +290,6 @@ namespace WordAddIn1
 
                         // 一時キャンバス削除
                         temporaryCanvas.Delete();
-
-                        // テーブル幅の自動調整
-                        //foreach (Table wt in docCopy.Tables)
-                        //{
-                        //    if (wt.PreferredWidthType == WdPreferredWidthType.wdPreferredWidthPoints)
-                        //        wt.AllowAutoFit = true;
-                        //}
 
                         // テーブル幅の自動調整
                         foreach (Table wt in docCopy.Tables)
