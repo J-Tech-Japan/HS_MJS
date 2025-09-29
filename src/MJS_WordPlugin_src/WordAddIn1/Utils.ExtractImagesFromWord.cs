@@ -63,8 +63,8 @@ namespace WordAddIn1
         /// <param name="minOriginalWidth">元画像の最小幅（ポイント単位）</param>
         /// <param name="minOriginalHeight">元画像の最小高さ（ポイント単位）</param>
         /// <param name="includeMjsTableImages">MJS_画像（表内）スタイルの画像を抽出するかどうか</param>
-        /// <param name="maxOutputWidth">出力画像の最大幅（ピクセル単位、デフォルト: 2048）</param>
-        /// <param name="maxOutputHeight">出力画像の最大高さ（ピクセル単位、デフォルト: 2048）</param>
+        /// <param name="maxOutputWidth">出力画像の最大幅（ピクセル単位、デフォルト: 1024）</param>
+        /// <param name="maxOutputHeight">出力画像の最大高さ（ピクセル単位、デフォルト: 1024）</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
@@ -78,8 +78,8 @@ namespace WordAddIn1
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
             bool includeMjsTableImages = true,
-            int maxOutputWidth = 2048,
-            int maxOutputHeight = 2048)
+            int maxOutputWidth = 1024,
+            int maxOutputHeight = 1024)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -160,8 +160,8 @@ namespace WordAddIn1
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
             bool includeMjsTableImages = true,
-            int maxOutputWidth = 2048,
-            int maxOutputHeight = 2048)
+            int maxOutputWidth = 1024,
+            int maxOutputHeight = 1024)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -250,8 +250,8 @@ namespace WordAddIn1
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
             bool includeMjsTableImages = true,
-            int maxOutputWidth = 2048,
-            int maxOutputHeight = 2048)
+            int maxOutputWidth = 1024,
+            int maxOutputHeight = 1024)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -334,8 +334,8 @@ namespace WordAddIn1
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
             bool includeMjsTableImages = true,
-            int maxOutputWidth = 2048,
-            int maxOutputHeight = 2048)
+            int maxOutputWidth = 1024,
+            int maxOutputHeight = 1024)
         {
             try
             {
@@ -478,8 +478,8 @@ namespace WordAddIn1
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
             bool includeMjsTableImages = true,
-            int maxOutputWidth = 2048,
-            int maxOutputHeight = 2048)
+            int maxOutputWidth = 1024,
+            int maxOutputHeight = 1024)
         {
             foreach (Word.Shape canvasItem in canvas.CanvasItems)
             {
@@ -520,8 +520,8 @@ namespace WordAddIn1
             float minOriginalWidth = 50.0f,
             float minOriginalHeight = 50.0f,
             bool includeMjsTableImages = true,
-            int maxOutputWidth = 2048,
-            int maxOutputHeight = 2048)
+            int maxOutputWidth = 1024,
+            int maxOutputHeight = 1024)
         {
             try
             {
@@ -619,8 +619,8 @@ namespace WordAddIn1
         /// <param name="baseFileName">ベースファイル名</param>
         /// <param name="shapeType">図形タイプ</param>
         /// <param name="forceExtract">強制抽出フラグ</param>
-        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 2048）</param>
-        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 2048）</param>
+        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 1024）</param>
+        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 1024）</param>
         /// <returns>作成されたファイルのパスとピクセルサイズ、失敗時はnull</returns>
         private static ImageExtractionResult ExtractImageFromMetaFileDataWithSize(
             byte[] metaFileData, 
@@ -628,8 +628,8 @@ namespace WordAddIn1
             string baseFileName, 
             string shapeType,
             bool forceExtract = false,
-            int maxWidth = 2048,
-            int maxHeight = 2048)
+            int maxWidth = 1024,
+            int maxHeight = 1024)
         {
             try
             {
@@ -711,8 +711,8 @@ namespace WordAddIn1
         /// <param name="baseFileName">ベースファイル名</param>
         /// <param name="shapeType">図形タイプ</param>
         /// <param name="forceExtract">強制抽出フラグ</param>
-        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 2048）</param>
-        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 2048）</param>
+        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 1024）</param>
+        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 1024）</param>
         /// <returns>作成されたファイルのパス、失敗時はnull</returns>
         private static string ExtractImageFromMetaFileData(
             byte[] metaFileData, 
@@ -720,8 +720,8 @@ namespace WordAddIn1
             string baseFileName, 
             string shapeType,
             bool forceExtract = false,
-            int maxWidth = 2048,
-            int maxHeight = 2048)
+            int maxWidth = 1024,
+            int maxHeight = 1024)
         {
             var result = ExtractImageFromMetaFileDataWithSize(metaFileData, outputDirectory, baseFileName, shapeType, forceExtract, maxWidth, maxHeight);
             return result?.FilePath;
