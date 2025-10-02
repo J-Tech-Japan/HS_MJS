@@ -255,8 +255,9 @@ namespace WordAddIn1
         /// 現在のWord文書のフォルダにログファイルを設定
         /// </summary>
         /// <param name="logFileName">ログファイル名（省略時は既定値）</param>
-        public static void ConfigureLogToDocumentFolder(Microsoft.Office.Interop.Word.Application application,
-        string logFileName = "MJS_WordAddIn_logMarker.txt")
+        public static void ConfigureLogToDocumentFolder(
+            Microsoft.Office.Interop.Word.Application application,
+            string logFileName = "MJS_WordAddIn_logMarker.txt")
         {
             try
             {

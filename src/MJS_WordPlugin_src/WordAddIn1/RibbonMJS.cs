@@ -33,7 +33,7 @@ namespace WordAddIn1
             string versionText = version.ToString(3); // "1.0.0" 形式で取得
 
             // labelVersion はリボンデザイナで追加したラベルの名前
-            versionFileJoin.Label = $"\n\nバージョン\n{versionText}-beta";
+            versionFileJoin.Label = $"\n\nバージョン\n{versionText}";
         }
 
         // KeyValuePairのValueで比較
