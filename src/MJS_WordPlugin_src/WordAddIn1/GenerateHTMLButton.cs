@@ -89,7 +89,6 @@ namespace WordAddIn1
                             Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
                             includeInlineShapes: true,    // インライン図形を抽出
                             includeShapes: true,          // フローティング図形を抽出
-                            includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
                             addMarkers: true,             // マーカーを追加
                             skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
@@ -285,8 +284,10 @@ namespace WordAddIn1
                         Shape temporaryCanvas = docCopy.Shapes.AddCanvas(0, 0, 1, 1, ref selectionRange);
                         temporaryCanvas.WrapFormat.Type = WdWrapType.wdWrapInline;
 
-                        // キャンバス内の図形調整
-                        AdjustCanvasShapes(docCopy);
+                        Utils.AdjustCanvasShapes(docCopy,
+                            heightExpansion: 30.0f,      // 高さ拡張
+                            positionOffset: 0.59f        // 位置オフセット
+                        );
 
                         // 一時キャンバス削除
                         temporaryCanvas.Delete();
