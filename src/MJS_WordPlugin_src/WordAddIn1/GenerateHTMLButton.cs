@@ -25,7 +25,7 @@ namespace WordAddIn1
             var activeDocument = application.ActiveDocument;
 
             // アクティブドキュメントのフォルダにログを出力するよう設定
-            Utils.ConfigureLogToDocumentFolder(application);
+            //Utils.ConfigureLogToDocumentFolder(application);
 
             // 現在の表示モードを保存
             var defaultView = application.ActiveWindow.View.Type;
@@ -83,7 +83,7 @@ namespace WordAddIn1
                     try
                     {
                         // 高画質の画像とキャンバスの抽出
-                        log.WriteLine("高画質画像とキャンバスの抽出開始");
+                        //log.WriteLine("高画質画像とキャンバスの抽出開始");
                         var extractedImages = Utils.ExtractImagesFromWord(
                             docCopy,
                             Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
@@ -96,8 +96,8 @@ namespace WordAddIn1
                             minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
                             minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
                             includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
-                            maxOutputWidth: 8*1024,   // 出力画像の最大幅
-                            maxOutputHeight: 8*1024   // 出力画像の最大高さ
+                            maxOutputWidth: 1024,   // 出力画像の最大幅
+                            maxOutputHeight: 1024   // 出力画像の最大高さ
                         );
 
                         // 抽出統計をログに出力
@@ -111,7 +111,7 @@ namespace WordAddIn1
                         }
 
                         // CSVファイルに出力
-                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
+                        //Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -552,15 +552,30 @@ namespace WordAddIn1
                     finally
                     {
                         log.Close();
-                        //if (!isError && File.Exists(paths.logPath))
-                        //{
-                        //    File.Delete(paths.logPath);
-                        //}
+
+                        if (!isError && File.Exists(paths.logPath))
+                        {
+                            File.Delete(paths.logPath);
+                        }
 
                         // tmpcoverpicフォルダを削除
                         if (Directory.Exists(Path.Combine(paths.rootPath, "tmpcoverpic")))
                         {
                             Directory.Delete(Path.Combine(paths.rootPath, "tmpcoverpic"), true);
+                        }
+
+                        // indexBase.htmlファイルを削除
+                        string indexBaseHtmlPath = Path.Combine(paths.exportDirPath, "indexBase.html");
+                        if (File.Exists(indexBaseHtmlPath))
+                        {
+                            try
+                            {
+                                File.Delete(indexBaseHtmlPath);
+                            }
+                            catch (Exception)
+                            {
+                                //System.Diagnostics.Debug.WriteLine($"indexBase.html削除エラー: {ex.Message}");
+                            }
                         }
 
                         application.DocumentChange += new ApplicationEvents4_DocumentChangeEventHandler(Application_DocumentChange);
