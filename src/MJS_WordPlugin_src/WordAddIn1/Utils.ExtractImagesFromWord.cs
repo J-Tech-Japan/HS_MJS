@@ -56,7 +56,6 @@ namespace WordAddIn1
         /// <param name="outputDirectory">画像の保存先ディレクトリ</param>
         /// <param name="includeInlineShapes">インライン図形を含むかどうか</param>
         /// <param name="includeShapes">フローティング図形を含むかどうか</param>
-        /// <param name="includeCanvasItems">キャンバス内アイテムを含むかどうか</param>
         /// <param name="includeFreeforms">フリーフォーム図形を含むかどうか</param>
         /// <param name="addMarkers">抽出した画像の後ろにマーカーテキストを追加するかどうか</param>
         /// <param name="skipCoverMarkers">表紙（第1セクション）の画像にマーカーを追加しないかどうか</param>
@@ -71,7 +70,6 @@ namespace WordAddIn1
             string outputDirectory,
             bool includeInlineShapes = true,
             bool includeShapes = true,
-            bool includeCanvasItems = true,
             bool includeFreeforms = true,
             bool addMarkers = true,
             bool skipCoverMarkers = true,
@@ -128,7 +126,6 @@ namespace WordAddIn1
                         outputDirectory, 
                         ref imageCounter, 
                         extractedImages, 
-                        includeCanvasItems, 
                         includeFreeforms, 
                         addMarkers,
                         skipCoverMarkers,
@@ -243,7 +240,6 @@ namespace WordAddIn1
             string outputDirectory, 
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
-            bool includeCanvasItems, 
             bool includeFreeforms, 
             bool addMarkers = false,
             bool skipCoverMarkers = true,
@@ -257,25 +253,8 @@ namespace WordAddIn1
             {
                 try
                 {
-                    // キャンバス図形の場合
-                    if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoCanvas)
-                    {
-                        ExtractCanvasShape(
-                            shape, 
-                            outputDirectory, 
-                            ref imageCounter, 
-                            extractedImages, 
-                            includeCanvasItems, 
-                            addMarkers,
-                            skipCoverMarkers,
-                            minOriginalWidth,
-                            minOriginalHeight,
-                            includeMjsTableImages,
-                            maxOutputWidth,
-                            maxOutputHeight);
-                    }
                     // フリーフォーム図形の場合
-                    else if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
+                    if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
                     {
                         if (includeFreeforms)
                         {
@@ -316,192 +295,6 @@ namespace WordAddIn1
                 {
                     // 個別の図形でエラーが発生しても処理を継続
                     System.Diagnostics.Trace.WriteLine($"フローティング図形の抽出でエラー: {ex.Message}");
-                }
-            }
-        }
-
-        /// <summary>
-        /// キャンバス図形から画像を抽出
-        /// </summary>
-        private static void ExtractCanvasShape(
-            Word.Shape canvas, 
-            string outputDirectory, 
-            ref int imageCounter, 
-            List<ExtractedImageInfo> extractedImages, 
-            bool includeCanvasItems, 
-            bool addMarkers = false,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = 1024,
-            int maxOutputHeight = 1024)
-        {
-            try
-            {
-                // アンカー段落のスタイルを取得
-                string anchorParagraphStyle = GetShapeAnchorParagraphStyle(canvas);
-                
-                // MJSスタイルによる条件チェック
-                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, includeMjsTableImages);
-                
-                // 強制スキップ対象の場合
-                if (forceSkip)
-                {
-                    System.Diagnostics.Trace.WriteLine($"キャンバス図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
-                    return;
-                }
-
-                // 元画像サイズでのフィルタリング（強制抽出の場合はスキップ）
-                float originalWidth = canvas.Width;
-                float originalHeight = canvas.Height;
-                
-                if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
-                {
-                    System.Diagnostics.Trace.WriteLine($"キャンバス図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
-                }
-                else
-                {
-                    // キャンバス全体を画像として抽出
-                    canvas.Select();
-                    byte[] canvasData = (byte[])Globals.ThisAddIn.Application.Selection.EnhMetaFileBits;
-                    
-                    if (canvasData != null && canvasData.Length > 0)
-                    {
-                        var extractResult = ExtractImageFromMetaFileDataWithSize(
-                            canvasData, 
-                            outputDirectory, 
-                            $"canvas_{imageCounter}", 
-                            "Canvas",
-                            forceExtract,
-                            maxOutputWidth,
-                            maxOutputHeight);
-                        
-                        if (extractResult != null)
-                        {
-                            var imageInfo = new ExtractedImageInfo(
-                                extractResult.FilePath, 
-                                "キャンバス", 
-                                canvas.Anchor?.Start ?? 0,
-                                originalWidth,
-                                originalHeight,
-                                extractResult.PixelWidth,
-                                extractResult.PixelHeight
-                            );
-                            extractedImages.Add(imageInfo);
-
-                            // マーカーを追加（表紙の画像は除外）
-                            if (addMarkers && !IsShapeInCoverSection(canvas, skipCoverMarkers))
-                            {
-                                if (canvas.Anchor != null)
-                                {
-                                    InsertMarkerAtPosition(canvas.Anchor, extractResult.FilePath);
-                                }
-                                else
-                                {
-                                    // Anchorが利用できない場合、キャンバスが選択された状態で
-                                    // 現在の選択範囲を使用してマーカーを挿入
-                                    InsertMarkerForSelectedCanvas(extractResult.FilePath);
-                                }
-                            }
-
-                            imageCounter++;
-                        }
-                    }
-                }
-
-                // キャンバス内のアイテムを個別に抽出
-                if (includeCanvasItems && canvas.CanvasItems.Count > 0)
-                {
-                    ExtractCanvasItems(
-                        canvas, 
-                        outputDirectory, 
-                        ref imageCounter, 
-                        extractedImages, 
-                        addMarkers,
-                        skipCoverMarkers,
-                        minOriginalWidth,
-                        minOriginalHeight,
-                        includeMjsTableImages,
-                        maxOutputWidth,
-                        maxOutputHeight);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine($"キャンバス図形の抽出でエラー: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 選択されたキャンバス用のマーカーを挿入
-        /// </summary>
-        private static void InsertMarkerForSelectedCanvas(string filePath)
-        {
-            try
-            {
-                // ファイル名からファイル名部分のみを取得（拡張子なし）
-                string markerText = Path.GetFileNameWithoutExtension(filePath);
-                
-                // 現在の選択範囲を取得
-                var selection = Globals.ThisAddIn.Application.Selection;
-                
-                // 選択範囲の末尾に移動
-                selection.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-                
-                // 改行を挿入して新しい行を作成
-                selection.TypeText("\r");
-                
-                // 新しい行に特殊な識別子を挿入
-                string marker = $"[IMAGEMARKER:{markerText}]";
-                selection.TypeText(marker);
-                
-                // マーカーの後に改行を追加
-                selection.TypeText("\r");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine($"キャンバス用マーカー挿入エラー: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// キャンバス内のアイテムを抽出
-        /// </summary>
-        private static void ExtractCanvasItems(
-            Word.Shape canvas, 
-            string outputDirectory, 
-            ref int imageCounter, 
-            List<ExtractedImageInfo> extractedImages, 
-            bool addMarkers = false,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = 1024,
-            int maxOutputHeight = 1024)
-        {
-            foreach (Word.Shape canvasItem in canvas.CanvasItems)
-            {
-                try
-                {
-                    ExtractSingleShape(
-                        canvasItem, 
-                        outputDirectory, 
-                        ref imageCounter, 
-                        extractedImages, 
-                        "canvas_item", 
-                        addMarkers,
-                        skipCoverMarkers,
-                        minOriginalWidth,
-                        minOriginalHeight,
-                        includeMjsTableImages,
-                        maxOutputWidth,
-                        maxOutputHeight);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Trace.WriteLine($"キャンバスアイテムの抽出でエラー: {ex.Message}");
                 }
             }
         }

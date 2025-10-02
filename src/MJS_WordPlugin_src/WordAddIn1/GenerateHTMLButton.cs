@@ -89,7 +89,6 @@ namespace WordAddIn1
                             Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
                             includeInlineShapes: true,    // インライン図形を抽出
                             includeShapes: true,          // フローティング図形を抽出
-                            includeCanvasItems: false,    // キャンバス内アイテムは抽出しない
                             includeFreeforms: false,      // フリーフォーム図形は抽出しない
                             addMarkers: true,             // マーカーを追加
                             skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
