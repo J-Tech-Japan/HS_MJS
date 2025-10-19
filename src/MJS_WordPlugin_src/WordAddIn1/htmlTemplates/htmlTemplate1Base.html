@@ -355,7 +355,7 @@ gCommonRootRelPath = ".";
 			const filePart = parts.pop();
 			const dirPart = parts.join('/');
 			// #t=形式のハッシュパスとして再構築
-			return dirPart ? `${dirPart}/${"#t="}${filePart}` : `${"#t="}${filePart}`;
+			return dirPart ? `${dirPart}/${"index.html#t="}${filePart}` : `${"index.html#t="}${filePart}`;
 		}
 
 		// アンカー要素のナビゲーション処理
