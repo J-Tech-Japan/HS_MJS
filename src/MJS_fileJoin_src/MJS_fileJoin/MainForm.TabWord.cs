@@ -9,15 +9,32 @@ namespace MJS_fileJoin
 {
     public partial class MainForm
     {
+        //private void btnAddDoc_Click(object sender, EventArgs e)
+        //{
+        //    openFileDialog2.FileName = "";
+        //    openFileDialog2.Filter = "docファイル(*.doc)|*.doc|すべてのファイル(*.*)|*.*";
+        //    if (openFileDialog2.ShowDialog() == DialogResult.OK)
+        //    {
+        //        if (Path.GetExtension(openFileDialog2.FileName) != ".doc")
+        //        {
+        //            MessageBox.Show("docファイルを選択してください。");
+        //            return;
+        //        }
+        //        listBox1.Items.Add(openFileDialog2.FileName);
+        //    }
+        //    checkItems();
+        //}
+
         private void btnAddDoc_Click(object sender, EventArgs e)
         {
             openFileDialog2.FileName = "";
-            openFileDialog2.Filter = "docファイル(*.doc)|*.doc|すべてのファイル(*.*)|*.*";
+            openFileDialog2.Filter = "Wordファイル(*.doc;*.docx)|*.doc;*.docx|docファイル(*.doc)|*.doc|docxファイル(*.docx)|*.docx|すべてのファイル(*.*)|*.*";
             if (openFileDialog2.ShowDialog() == DialogResult.OK)
             {
-                if (Path.GetExtension(openFileDialog2.FileName) != ".doc")
+                string extension = Path.GetExtension(openFileDialog2.FileName).ToLower();
+                if (extension != ".doc" && extension != ".docx")
                 {
-                    MessageBox.Show("docファイルを選択してください。");
+                    MessageBox.Show("Wordファイル（.docまたは.docx）を選択してください。");
                     return;
                 }
                 listBox1.Items.Add(openFileDialog2.FileName);
@@ -56,6 +73,41 @@ namespace MJS_fileJoin
             }
         }
 
+        private void listBox1_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            foreach (string folder in s)
+            {
+                if (File.Exists(folder))
+                {
+                    string extension = Path.GetExtension(folder).ToLower();
+                    if ((extension == ".doc" || extension == ".docx") &&
+                        !folder.Contains("~$") && !listBox1.Items.Contains(folder))
+                    {
+                        listBox1.Items.Add(folder);
+                    }
+                }
+                else if (Directory.Exists(folder))
+                {
+                    // .docと.docxの両方のファイルを取得
+                    var docFiles = Directory.GetFiles(folder, "*.doc", SearchOption.AllDirectories);
+                    var docxFiles = Directory.GetFiles(folder, "*.docx", SearchOption.AllDirectories);
+
+                    // 両方の配列を結合
+                    var allWordFiles = new string[docFiles.Length + docxFiles.Length];
+                    docFiles.CopyTo(allWordFiles, 0);
+                    docxFiles.CopyTo(allWordFiles, docFiles.Length);
+
+                    foreach (string wordFile in allWordFiles)
+                    {
+                        if (!wordFile.Contains("~$") && !listBox1.Items.Contains(wordFile))
+                            listBox1.Items.Add(wordFile);
+                    }
+                }
+            }
+            checkItems();
+        }
+
         private void listBox1_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -64,28 +116,28 @@ namespace MJS_fileJoin
             }
         }
 
-        private void listBox1_DragDrop(object sender, DragEventArgs e)
-        {
-            string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            foreach (string folder in s)
-            {
-                if (File.Exists(folder) && Path.GetExtension(folder) == ".doc")
-                {
-                    if (!folder.Contains("~$") && !listBox1.Items.Contains(folder))
-                        listBox1.Items.Add(folder);
-                }
-                else if (Directory.Exists(folder))
-                {
-                    string[] fol = Directory.GetFiles(folder, "*.doc", SearchOption.AllDirectories);
-                    foreach (string webhelp in fol)
-                    {
-                        if (!webhelp.Contains("~$") && !listBox1.Items.Contains(webhelp))
-                            listBox1.Items.Add(webhelp);
-                    }
-                }
-            }
-            checkItems();
-        }
+        //private void listBox1_DragDrop(object sender, DragEventArgs e)
+        //{
+        //    string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+        //    foreach (string folder in s)
+        //    {
+        //        if (File.Exists(folder) && Path.GetExtension(folder) == ".doc")
+        //        {
+        //            if (!folder.Contains("~$") && !listBox1.Items.Contains(folder))
+        //                listBox1.Items.Add(folder);
+        //        }
+        //        else if (Directory.Exists(folder))
+        //        {
+        //            string[] fol = Directory.GetFiles(folder, "*.doc", SearchOption.AllDirectories);
+        //            foreach (string webhelp in fol)
+        //            {
+        //                if (!webhelp.Contains("~$") && !listBox1.Items.Contains(webhelp))
+        //                    listBox1.Items.Add(webhelp);
+        //            }
+        //        }
+        //    }
+        //    checkItems();
+        //}
 
         private void btnSelectOutputFolder_Click(object sender, EventArgs e)
         {
