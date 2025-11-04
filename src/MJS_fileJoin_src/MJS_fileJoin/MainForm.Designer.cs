@@ -85,9 +85,6 @@
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.label11 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.label16 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label10 = new System.Windows.Forms.Label();
@@ -698,9 +695,6 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.checkBox5);
-            this.tabPage2.Controls.Add(this.checkBox4);
-            this.tabPage2.Controls.Add(this.label16);
             this.tabPage2.Controls.Add(this.groupBox1);
             this.tabPage2.Controls.Add(this.button5);
             this.tabPage2.Controls.Add(this.button6);
@@ -721,35 +715,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Word結合";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // checkBox5
-            // 
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Location = new System.Drawing.Point(22, 213);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(80, 16);
-            this.checkBox5.TabIndex = 37;
-            this.checkBox5.Text = "PDFファイル";
-            this.checkBox5.UseVisualStyleBackColor = true;
-            // 
-            // checkBox4
-            // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(22, 193);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(83, 16);
-            this.checkBox4.TabIndex = 36;
-            this.checkBox4.Text = "Wordファイル";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(6, 175);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(214, 12);
-            this.label16.TabIndex = 35;
-            this.label16.Text = "２．出力するファイル種別を選択してください。";
             // 
             // groupBox1
             // 
@@ -839,7 +804,7 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(170, 12);
             this.label9.TabIndex = 26;
-            this.label9.Text = "３．結合ボタンをクリックしてください。";
+            this.label9.Text = "２．結合ボタンをクリックしてください。";
             // 
             // button1
             // 
@@ -1020,9 +985,6 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog2;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.CheckBox checkBox5;
-        private System.Windows.Forms.CheckBox checkBox4;
-        private System.Windows.Forms.Label label16;
     }
 }
 
