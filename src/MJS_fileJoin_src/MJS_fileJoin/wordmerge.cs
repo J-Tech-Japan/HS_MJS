@@ -78,6 +78,12 @@ namespace DocMergerComponent
                 stepStopwatch.Stop();
                 Trace.WriteLine($"[2] ファイル結合処理（全{arrCopies.Length}ファイル）: {stepStopwatch.ElapsedMilliseconds}ms ({stepStopwatch.Elapsed.TotalSeconds:F2}秒)");
 
+                // ページ番号を通し番号に設定
+                stepStopwatch = Stopwatch.StartNew();
+                ResetPageNumbering(objDocLast, form);
+                stepStopwatch.Stop();
+                Trace.WriteLine($"[2.5] ページ番号通し番号設定: {stepStopwatch.ElapsedMilliseconds}ms");
+
                 object objOutDoc = strOutDoc;
 
                 if (!check3)
