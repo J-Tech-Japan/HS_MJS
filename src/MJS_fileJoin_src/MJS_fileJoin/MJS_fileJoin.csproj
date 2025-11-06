@@ -99,6 +99,7 @@
     <Compile Include="WordMerge.CheckIndexSection.cs" />
     <Compile Include="WordMerge.CreateWordDocument.cs" />
     <Compile Include="WordMerge.cs" />
+    <Compile Include="WordMerge.LinkHeaderFooter.cs" />
     <Compile Include="WordMerge.UpdateChapterFrontNumbers.cs" />
     <Compile Include="WordMerge.UpdateHyperlinks.cs" />
     <Compile Include="WordMerge.OutlineNumbering.cs" />
