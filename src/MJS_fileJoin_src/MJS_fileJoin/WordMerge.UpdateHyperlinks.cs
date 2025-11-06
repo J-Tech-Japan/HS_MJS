@@ -7,29 +7,6 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
-        // REF形式のハイパーリンクをHYPERLINK形式に変換
-        // 【注意！】スタイルに関係なくすべてのHYPERLINKフィールドをREFに変換
-        //public static void ConvertH4HyperlinkToRefAll(Word.Document doc)
-        //{
-        //    int count = 0;
-        //    foreach (Word.Field field in doc.Fields)
-        //    {
-        //        string code = field.Code.Text;
-        //        int pos = code.IndexOf("HYPERLINK _Ref");
-        //        if (pos >= 0)
-        //        {
-        //            // "_Ref"の直後からIDを抽出
-        //            string refId = code.Substring(pos + "HYPERLINK ".Length);
-        //            // 余分な部分を除去（スペースや改行など）
-        //            refId = refId.Trim().Split(' ')[0];
-        //            // フィールドコードをREF形式に書き換え
-        //            field.Code.Text = $" REF {refId} \\h ";
-        //            field.Update();
-        //            count++;
-        //        }
-        //    }
-        //}
-
         // 特定のスタイル名を持つ「HYPERLINK _Ref...」形式のフィールドを「REF ... \h」形式に変換
         public static void ConvertHyperlinkToRef(Word.Document doc, List<string> targetStyleNames)
         {
@@ -37,24 +14,38 @@ namespace DocMergerComponent
             foreach (Word.Field field in doc.Fields)
             {
                 string code = field.Code.Text;
-                int pos = code.IndexOf("HYPERLINK _Ref");
-                if (pos >= 0)
+                
+                // HYPERLINKフィールドかつ_Refを含むかチェック
+                if (!code.Contains("HYPERLINK") || !code.Contains("_Ref"))
                 {
-                    // スタイル名を取得
-                    Word.Range rng = field.Result;
-                    string styleName = rng.get_Style() is Word.Style style ? style.NameLocal : rng.get_Style().ToString();
-                    // 指定リストに含まれていなければスキップ
-                    if (!targetStyleNames.Contains(styleName)) continue;
-
-                    // "_Ref"の直後からIDを抽出
-                    string refId = code.Substring(pos + "HYPERLINK ".Length);
-                    // 余分な部分を除去（スペースや改行など）
-                    refId = refId.Trim().Split(' ')[0];
-                    // フィールドコードをREF形式に書き換え
-                    field.Code.Text = $" REF {refId} \\h ";
-                    field.Update();
-                    count++;
+                    continue;
                 }
+
+                // 正規表現で _Ref + 数字 の形式を抽出（前に任意の文字列がある場合も対応）
+                Match match = Regex.Match(code, @"_Ref(\d+)");
+                if (!match.Success)
+                {
+                    continue;
+                }
+
+                // スタイル名を取得
+                Word.Range rng = field.Result;
+                string styleName = rng.get_Style() is Word.Style style ? style.NameLocal : rng.get_Style().ToString();
+                
+                // 指定リストに含まれていなければスキップ
+                if (!targetStyleNames.Contains(styleName))
+                {
+                    continue;
+                }
+
+                // _Ref + 数字の部分を抽出（全体）
+                string refId = match.Value;
+
+                // フィールドコードをREF形式に書き換え
+                field.Code.Text = $" REF {refId} \\h ";
+
+                field.Update();
+                count++;
             }
         }
 
