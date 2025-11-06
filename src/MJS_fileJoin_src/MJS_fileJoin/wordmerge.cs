@@ -80,7 +80,7 @@ namespace DocMergerComponent
 
                 // ページ番号を通し番号に設定
                 stepStopwatch = Stopwatch.StartNew();
-                ResetPageNumbering(objDocLast, form);
+                Utils.ResetPageNumbering(objDocLast, form);
                 stepStopwatch.Stop();
                 Trace.WriteLine($"[2.5] ページ番号通し番号設定: {stepStopwatch.ElapsedMilliseconds}ms");
 

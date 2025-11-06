@@ -1,16 +1,17 @@
+// Utils.PageNumbering.cs
+
 using System;
 using System.Diagnostics;
 using Word = Microsoft.Office.Interop.Word;
-using MJS_fileJoin;
 
-namespace DocMergerComponent
+namespace MJS_fileJoin
 {
-    public partial class DocMerger
+    internal partial class Utils
     {
         /// <summary>
-        /// 結合後のセクションのページ番号を通し番号として設定し直す
+        /// セクションのページ番号を通し番号として設定し直す
         /// </summary>
-        private void ResetPageNumbering(Word.Document document, MainForm form)
+        public static void ResetPageNumbering(Word.Document document, MainForm form)
         {
             form.label10.Text = "ページ番号を通し番号に設定中...";
             
@@ -68,7 +69,7 @@ namespace DocMergerComponent
         /// <summary>
         /// セクションのヘッダー/フッターを前のセクションとリンク
         /// </summary>
-        private bool LinkHeaderFootersToPrevious(Word.Section section)
+        private static bool LinkHeaderFootersToPrevious(Word.Section section)
         {
             bool anyLinked = false;
             
@@ -95,7 +96,7 @@ namespace DocMergerComponent
         /// <summary>
         /// 個別のHeaderFooterでLinkToPreviousを設定
         /// </summary>
-        private bool SetLinkToPrevious(Word.HeaderFooter headerFooter)
+        private static bool SetLinkToPrevious(Word.HeaderFooter headerFooter)
         {
             try
             {
@@ -116,7 +117,7 @@ namespace DocMergerComponent
         /// <summary>
         /// セクションのPageNumbers設定で再開始を無効化
         /// </summary>
-        private bool ResetPageNumbersInSection(Word.Section section)
+        private static bool ResetPageNumbersInSection(Word.Section section)
         {
             bool anyReset = false;
             
@@ -143,7 +144,7 @@ namespace DocMergerComponent
         /// <summary>
         /// 個別のHeaderFooterでページ番号の再開始を無効化
         /// </summary>
-        private bool ResetPageNumbersInHeaderFooter(Word.HeaderFooter headerFooter)
+        private static bool ResetPageNumbersInHeaderFooter(Word.HeaderFooter headerFooter)
         {
             try
             {
