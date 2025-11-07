@@ -49,25 +49,22 @@ namespace DocMergerComponent
                 // ファイル結合処理
                 stepStopwatch = Stopwatch.StartNew();
                 int fileIndex = 0;
+                
                 foreach (string strCopy in arrCopies)
                 {
                     Stopwatch fileStopwatch = Stopwatch.StartNew();
-                    
-                    objApp.Selection.EndKey(Word.WdUnits.wdStory);
-                    objApp.Selection.HomeKey(Word.WdUnits.wdStory);
+
+                    // 文書の最後に移動
                     objApp.Selection.EndKey(Word.WdUnits.wdStory);
 
-                    Application.DoEvents();
-
+                    // セクション区切りを挿入
                     objApp.Selection.InsertBreak(Word.WdBreakType.wdSectionBreakNextPage);
 
-                    Application.DoEvents();
-
                     chapCntLast = objDocLast.Sections.Count;
-                    objApp.Selection.InsertFile(strCopy, ref objMissing, objMissing, objMissing, objMissing);
+                    objApp.Selection.InsertFile(strCopy, ref objMissing, ref objMissing, ref objMissing, ref objMissing);
 
                     form.progressBar1.Increment(1);
-                    
+
                     fileStopwatch.Stop();
                     fileIndex++;
                     if (fileIndex % 5 == 0 || fileStopwatch.ElapsedMilliseconds > 1000)
@@ -75,6 +72,7 @@ namespace DocMergerComponent
                         Trace.WriteLine($"  ファイル結合 {fileIndex}/{arrCopies.Length}: {fileStopwatch.ElapsedMilliseconds}ms - {System.IO.Path.GetFileName(strCopy)}");
                     }
                 }
+
                 stepStopwatch.Stop();
                 Trace.WriteLine($"[2] ファイル結合処理（全{arrCopies.Length}ファイル）: {stepStopwatch.ElapsedMilliseconds}ms ({stepStopwatch.Elapsed.TotalSeconds:F2}秒)");
 
