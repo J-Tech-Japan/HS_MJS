@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Word = Microsoft.Office.Interop.Word;
 using System.Drawing;
-using System.Windows.Forms;
 using MJS_fileJoin;
 using System;
 using System.Text.RegularExpressions;
