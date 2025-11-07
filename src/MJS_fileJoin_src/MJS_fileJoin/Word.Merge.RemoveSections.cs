@@ -194,7 +194,6 @@ namespace DocMergerComponent
                         Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] セクション削除: スタイル='{styleName}', セクション番号={i}");
                         doc.Sections[i].Range.Delete();
                         deletedCount++;
-                        // iはデクリメントしない
                     }
                     else
                     {
