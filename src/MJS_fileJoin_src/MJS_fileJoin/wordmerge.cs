@@ -92,7 +92,6 @@ namespace DocMergerComponent
                     string[] lsStyleName = { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）", "MJS_マニュアルタイトル", "MJS_目次", "奥付タイトル", "索引見出し" };
                     RemoveSectionsInRangeByStyle(objDocLast, lsStyleName, chapCnt, ref chapCntLast, form);
                     stepStopwatch.Stop();
-                    Trace.WriteLine($"[3] セクション削除（範囲指定）: {stepStopwatch.ElapsedMilliseconds}ms");
 
                     // 索引見出し検索
                     stepStopwatch = Stopwatch.StartNew();
@@ -107,7 +106,6 @@ namespace DocMergerComponent
                     string[] lastItems = { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）", "MJS_マニュアルタイトル", "MJS_目次" };
                     RemoveSectionsFromEndByStyleWithLastFlag(objDocLast, lastItems, ref chapCntLast, ref last, form);
                     stepStopwatch.Stop();
-                    Trace.WriteLine($"[5] セクション削除（後方から）: {stepStopwatch.ElapsedMilliseconds}ms");
 
                     // 章扉の項番号を修正
                     stepStopwatch = Stopwatch.StartNew();
