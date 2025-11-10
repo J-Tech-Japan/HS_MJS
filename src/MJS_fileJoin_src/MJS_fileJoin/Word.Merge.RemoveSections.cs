@@ -136,13 +136,13 @@ namespace DocMergerComponent
                             {
                                 Trace.WriteLine($"[RemoveSectionsFromEndByStyleWithLastFlag] セクション保持（lastフラグ）: スタイル='{styleName}', セクション番号={i}");
                                 last = false;
+                                // セクションは削除されないため、次のセクションに移動
                                 i--;
                             }
                             else
                             {
                                 Trace.WriteLine($"[RemoveSectionsFromEndByStyleWithLastFlag] セクション削除: スタイル='{styleName}', セクション番号={i}");
                                 objDocLast.Sections[i].Range.Delete();
-                                chapCntLast--;
                                 deletedCount++;
                                 // iはデクリメントしない（削除により次のセクションが現在位置に来るため）
                             }
