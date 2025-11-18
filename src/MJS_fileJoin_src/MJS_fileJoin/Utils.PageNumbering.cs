@@ -9,15 +9,16 @@ namespace MJS_fileJoin
     internal partial class Utils
     {
         /// <summary>
-        /// セクションのページ番号を通し番号として設定し直す
+        /// セクションのページ番号を通し番号として設定します
+        /// ヘッダーとフッターは保持されます（空の場合のみ前のセクションとリンク）
         /// </summary>
         public static void ResetPageNumbering(Word.Document document, MainForm form)
         {
-            form.label10.Text = "ページ番号を通し番号に設定中...";
+            form.label10.Text = "ページ番号通し番号に設定中...";
             
             if (document.Sections.Count <= 1)
             {
-                Trace.WriteLine("  セクションが1つ以下のため、処理をスキップ");
+                Trace.WriteLine("  セクション数が1以下のため、処理をスキップ");
                 return;
             }
 
@@ -25,8 +26,9 @@ namespace MJS_fileJoin
             form.progressBar1.Value = 1;
 
             int processedCount = 0;
-            int linkedCount = 0;
             int resetCount = 0;
+            int preservedCount = 0;
+            int linkedCount = 0;
             int errorCount = 0;
 
             try
@@ -38,11 +40,15 @@ namespace MJS_fileJoin
                     {
                         Word.Section section = document.Sections[i];
                         
-                        // アプローチ1: LinkToPreviousを設定してヘッダー/フッターを前のセクションとリンク
-                        bool linked = LinkHeaderFootersToPrevious(section);
-                        if (linked) linkedCount++;
+                        // 空のヘッダー・フッターのみ前のセクションとリンク
+                        int linked = LinkEmptyHeaderFootersToPrevious(section);
+                        linkedCount += linked;
                         
-                        // アプローチ2: PageNumbers設定で明示的に再開始を無効化
+                        // 非空のヘッダー・フッターは保持される
+                        int preserved = PreserveNonEmptyHeaderFooters(section);
+                        preservedCount += preserved;
+                        
+                        // ページ番号の再開始を無効化（通し番号にする）
                         bool reset = ResetPageNumbersInSection(section);
                         if (reset) resetCount++;
                         
@@ -57,7 +63,7 @@ namespace MJS_fileJoin
                     form.progressBar1.Increment(1);
                 }
 
-                Trace.WriteLine($"  処理完了: {processedCount}セクション (LinkToPrevious: {linkedCount}, PageNumbers設定: {resetCount}, エラー: {errorCount})");
+                Trace.WriteLine($"  処理完了: {processedCount}セクション (空リンク: {linkedCount}, 保持: {preservedCount}, PageNumbers設定: {resetCount}, エラー: {errorCount})");
             }
             catch (Exception ex)
             {
@@ -67,43 +73,51 @@ namespace MJS_fileJoin
         }
 
         /// <summary>
-        /// セクションのヘッダー/フッターを前のセクションとリンク
+        /// 空のヘッダー・フッターのみ前のセクションとリンク
         /// </summary>
-        private static bool LinkHeaderFootersToPrevious(Word.Section section)
+        private static int LinkEmptyHeaderFootersToPrevious(Word.Section section)
         {
-            bool anyLinked = false;
+            int linkedCount = 0;
             
             try
             {
-                // フッターをリンク
-                anyLinked |= SetLinkToPrevious(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                anyLinked |= SetLinkToPrevious(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                anyLinked |= SetLinkToPrevious(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+                // フッターの処理
+                linkedCount += LinkEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
+                linkedCount += LinkEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
+                linkedCount += LinkEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
                 
-                // ヘッダーをリンク
-                anyLinked |= SetLinkToPrevious(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                anyLinked |= SetLinkToPrevious(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                anyLinked |= SetLinkToPrevious(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+                // ヘッダーの処理
+                linkedCount += LinkEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
+                linkedCount += LinkEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
+                linkedCount += LinkEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
             }
-            catch
+            catch (Exception ex)
             {
-                // 無視
+                Trace.WriteLine($"    LinkEmptyHeaderFootersToPrevious エラー: {ex.Message}");
             }
             
-            return anyLinked;
+            return linkedCount;
         }
 
         /// <summary>
-        /// 個別のHeaderFooterでLinkToPreviousを設定
+        /// 空のHeaderFooterのみLinkToPreviousを設定
         /// </summary>
-        private static bool SetLinkToPrevious(Word.HeaderFooter headerFooter)
+        private static int LinkEmptyHeaderFooter(Word.HeaderFooter headerFooter)
         {
             try
             {
-                if (!headerFooter.LinkToPrevious)
+                // 既にリンクされている場合はスキップ
+                if (headerFooter.LinkToPrevious)
+                {
+                    return 0;
+                }
+                
+                // 範囲が存在し、空の場合のみリンク
+                var range = headerFooter.Range;
+                if (range != null && string.IsNullOrWhiteSpace(range.Text.Trim()))
                 {
                     headerFooter.LinkToPrevious = true;
-                    return true;
+                    return 1;
                 }
             }
             catch
@@ -111,7 +125,60 @@ namespace MJS_fileJoin
                 // ヘッダー/フッターが存在しない場合は無視
             }
             
-            return false;
+            return 0;
+        }
+
+        /// <summary>
+        /// 非空のヘッダー・フッターを保持（LinkToPreviousをfalseに）
+        /// </summary>
+        private static int PreserveNonEmptyHeaderFooters(Word.Section section)
+        {
+            int preservedCount = 0;
+            
+            try
+            {
+                // フッターの処理
+                preservedCount += PreserveNonEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
+                preservedCount += PreserveNonEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
+                preservedCount += PreserveNonEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+                
+                // ヘッダーの処理
+                preservedCount += PreserveNonEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
+                preservedCount += PreserveNonEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
+                preservedCount += PreserveNonEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"    PreserveNonEmptyHeaderFooters エラー: {ex.Message}");
+            }
+            
+            return preservedCount;
+        }
+
+        /// <summary>
+        /// 非空のHeaderFooterのLinkToPreviousをfalseに設定
+        /// </summary>
+        private static int PreserveNonEmptyHeaderFooter(Word.HeaderFooter headerFooter)
+        {
+            try
+            {
+                // 範囲が存在し、非空の場合はリンクを解除
+                var range = headerFooter.Range;
+                if (range != null && !string.IsNullOrWhiteSpace(range.Text.Trim()))
+                {
+                    if (headerFooter.LinkToPrevious)
+                    {
+                        headerFooter.LinkToPrevious = false;
+                        return 1;
+                    }
+                }
+            }
+            catch
+            {
+                // ヘッダー/フッターが存在しない場合は無視
+            }
+            
+            return 0;
         }
 
         /// <summary>
@@ -148,7 +215,7 @@ namespace MJS_fileJoin
         {
             try
             {
-                // PageNumbersの存在をチェック（Countだけでなく、実際に設定を試みる）
+                // PageNumbersの存在をチェック（Countが使えないが、実際に設定は可能）
                 var pageNumbers = headerFooter.PageNumbers;
                 
                 // ページ番号の再開始を無効化（前のセクションから継続）
@@ -159,7 +226,7 @@ namespace MJS_fileJoin
             }
             catch
             {
-                // PageNumbersが存在しない場合やアクセスできない場合は無視
+                // PageNumbersが存在しない場合や、アクセスできない場合は無視
             }
             
             return false;
