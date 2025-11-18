@@ -20,6 +20,14 @@ namespace DocMergerComponent
             Trace.WriteLine($"結合ファイル数: {arrCopies.Length}");
             Trace.WriteLine($"出力先: {strOutDoc}");
             Trace.WriteLine($"Word保存: {check1}, スキップモード: {check3}");
+            
+            // 1つの原稿のみ指定された場合（結合なし）
+            bool isSingleDocumentMode = (arrCopies.Length == 0);
+            if (isSingleDocumentMode)
+            {
+                Trace.WriteLine("*** 単一ドキュメントモード: ハイパーリンク更新のみ実行 ***");
+            }
+            
             Trace.WriteLine("=================================================");
             
             Word.Application objApp = null;
@@ -45,41 +53,50 @@ namespace DocMergerComponent
                 form.progressBar1.Value = 1;
                 int chapCntLast = 0;
 
-                // ファイル結合処理
-                stepStopwatch = Stopwatch.StartNew();
-                int fileIndex = 0;
-                
-                foreach (string strCopy in arrCopies)
+                // 単一ドキュメントモードでない場合のみファイル結合処理を実行
+                if (!isSingleDocumentMode)
                 {
-                    Stopwatch fileStopwatch = Stopwatch.StartNew();
-
-                    // 文書の最後に移動
-                    objApp.Selection.EndKey(Word.WdUnits.wdStory);
-
-                    // セクション区切りを挿入
-                    objApp.Selection.InsertBreak(Word.WdBreakType.wdSectionBreakNextPage);
-
-                    chapCntLast = objDocLast.Sections.Count;
-                    objApp.Selection.InsertFile(strCopy, ref objMissing, ref objMissing, ref objMissing, ref objMissing);
-
-                    form.progressBar1.Increment(1);
-
-                    fileStopwatch.Stop();
-                    fileIndex++;
-                    if (fileIndex % 5 == 0 || fileStopwatch.ElapsedMilliseconds > 1000)
+                    // ファイル結合処理
+                    stepStopwatch = Stopwatch.StartNew();
+                    int fileIndex = 0;
+                    
+                    foreach (string strCopy in arrCopies)
                     {
-                        Trace.WriteLine($"  ファイル結合 {fileIndex}/{arrCopies.Length}: {fileStopwatch.ElapsedMilliseconds}ms - {System.IO.Path.GetFileName(strCopy)}");
+                        Stopwatch fileStopwatch = Stopwatch.StartNew();
+
+                        // 文書の最後に移動
+                        objApp.Selection.EndKey(Word.WdUnits.wdStory);
+
+                        // セクション区切りを挿入
+                        objApp.Selection.InsertBreak(Word.WdBreakType.wdSectionBreakNextPage);
+
+                        chapCntLast = objDocLast.Sections.Count;
+                        objApp.Selection.InsertFile(strCopy, ref objMissing, ref objMissing, ref objMissing, ref objMissing);
+
+                        form.progressBar1.Increment(1);
+
+                        fileStopwatch.Stop();
+                        fileIndex++;
+                        if (fileIndex % 5 == 0 || fileStopwatch.ElapsedMilliseconds > 1000)
+                        {
+                            Trace.WriteLine($"  ファイル結合 {fileIndex}/{arrCopies.Length}: {fileStopwatch.ElapsedMilliseconds}ms - {System.IO.Path.GetFileName(strCopy)}");
+                        }
                     }
+
+                    stepStopwatch.Stop();
+                    Trace.WriteLine($"[2] ファイル結合処理（全{arrCopies.Length}ファイル）: {stepStopwatch.ElapsedMilliseconds}ms ({stepStopwatch.Elapsed.TotalSeconds:F2}秒)");
+
+                    // ページ番号を通し番号に設定
+                    stepStopwatch = Stopwatch.StartNew();
+                    Utils.ResetPageNumbering(objDocLast, form);
+                    stepStopwatch.Stop();
+                    Trace.WriteLine($"[2.5] ページ番号通し番号設定: {stepStopwatch.ElapsedMilliseconds}ms");
                 }
-
-                stepStopwatch.Stop();
-                Trace.WriteLine($"[2] ファイル結合処理（全{arrCopies.Length}ファイル）: {stepStopwatch.ElapsedMilliseconds}ms ({stepStopwatch.Elapsed.TotalSeconds:F2}秒)");
-
-                // ページ番号を通し番号に設定
-                stepStopwatch = Stopwatch.StartNew();
-                Utils.ResetPageNumbering(objDocLast, form);
-                stepStopwatch.Stop();
-                Trace.WriteLine($"[2.5] ページ番号通し番号設定: {stepStopwatch.ElapsedMilliseconds}ms");
+                else
+                {
+                    Trace.WriteLine("[2] ファイル結合処理: スキップ（単一ドキュメント）");
+                    Trace.WriteLine("[2.5] ページ番号通し番号設定: スキップ（単一ドキュメント）");
+                }
 
                 object objOutDoc = strOutDoc;
 

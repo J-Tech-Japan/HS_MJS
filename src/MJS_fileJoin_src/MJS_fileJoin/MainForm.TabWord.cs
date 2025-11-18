@@ -134,7 +134,16 @@ namespace MJS_fileJoin
                 return;
 
             groupBox1.Visible = true;
-            label10.Text = "Word結合中...";
+            
+            // 単一ドキュメントかどうかで表示メッセージを変更
+            if (listBox1.Items.Count == 1)
+            {
+                label10.Text = "ハイパーリンク更新中...";
+            }
+            else
+            {
+                label10.Text = "Word結合中...";
+            }
 
             string strOrigFile = "";
             List<string> strCopiesDir = new List<string>();
@@ -158,17 +167,37 @@ namespace MJS_fileJoin
             
             groupBox1.Visible = false;
             
-            MessageBox.Show("Wordの結合が完了しました。");
-            DialogResult selectMess = MessageBox.Show(strOutputDir + "\r\nが出力されました。\r\n出力したWordを表示しますか？", "Word結合成功", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (selectMess == DialogResult.Yes)
+            // 単一ドキュメントかどうかで完了メッセージを変更
+            if (listBox1.Items.Count == 1)
             {
-                try
+                MessageBox.Show("ハイパーリンクの更新が完了しました。");
+                DialogResult selectMess = MessageBox.Show(strOutputDir + "\r\nが出力されました。\r\n出力したWordを表示しますか？", "ハイパーリンク更新成功", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (selectMess == DialogResult.Yes)
                 {
-                    Process.Start(strOutputDir);
+                    try
+                    {
+                        Process.Start(strOutputDir);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Wordの出力に失敗しました。", "Word出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
-                catch
+            }
+            else
+            {
+                MessageBox.Show("Wordの結合が完了しました。");
+                DialogResult selectMess = MessageBox.Show(strOutputDir + "\r\nが出力されました。\r\n出力したWordを表示しますか？", "Word結合成功", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (selectMess == DialogResult.Yes)
                 {
-                    MessageBox.Show("Wordの出力に失敗しました。", "Word出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    try
+                    {
+                        Process.Start(strOutputDir);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Wordの出力に失敗しました。", "Word出力失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
