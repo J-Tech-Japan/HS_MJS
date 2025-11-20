@@ -155,19 +155,34 @@ namespace WordAddIn1
                     // HTML本文生成
                     sw = new StreamWriter(Path.Combine(rootPath, exportDir, thisId + ".html"), false, Encoding.UTF8);
                     string htmlBody = htmlTemplate1cpy + splithtml.OuterXml + htmlTemplate2;
-                    
-                    // 手順番号spanのクラス付与・変換などの正規表現処理
-                    htmlBody = Regex.Replace(htmlBody, @"<p[^>]*?class=""MJS_oflow_step([^""]*?)""[^>]*?>(.*?)<span[^>]*?>(.*?)</span>(.*?)</p>", @"<p class=""MJS_oflow_step$1""><span class=""MJS_oflow_stepNum$2"">$3</span>$4</p>", RegexOptions.Singleline);
-                    
-                    // 特定文字（è）を手順結果spanに変換
-                    htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum"">(è)</span>", @"<span class=""MJS_oflow_stepResult""></span>", RegexOptions.Singleline);
-                    
-                    // 手順結果pタグ内のspan削除
-                    htmlBody = Regex.Replace(htmlBody, @"<p[^>]*?class=""MJS_oflow_stepResult([^""]*?)""[^>]*?>(.*?)<span[^>]*?>(.*?)</span>(.*?)</p>", @"<p class=""MJS_oflow_stepResult"">$4</p>", RegexOptions.Singleline);
-                    
-                    // 手順番号span内の入れ子spanを除去
-                    htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum""><span[^>]*?>(.*?)</span>(.*?)</span>", @"<span class=""MJS_oflow_stepNum"">$1$2</span>", RegexOptions.Singleline);
 
+                    // 手順番号spanのクラス付与・変換などの正規表現処理
+                    // パターン1: spanタグが正しく閉じられているケース
+                    string pattern1 = @"<p([^>]*?)\s+class=""MJS_oflow_step([^""]*?)""([^>]*?)>" +
+                                     @"(.*?)<span([^>]*?)>(.*?)</span>(.*?)</p>";
+                    string replacement1 = @"<p class=""MJS_oflow_step$2"">$4<span class=""MJS_oflow_stepNum"">$6</span>$7</p>";
+                    htmlBody = Regex.Replace(htmlBody, pattern1, replacement1, RegexOptions.Singleline);
+
+                    // パターン2: spanタグが閉じられていないケース（不正なHTML）
+                    string pattern2 = @"<p([^>]*?)\s+class=""MJS_oflow_step([^""]*?)""([^>]*?)>" +
+                                     @"(.*?)<span([^>]*?)>(.*?)</p>";
+                    string replacement2 = @"<p class=""MJS_oflow_step$2"">$4<span class=""MJS_oflow_stepNum"">$6</span></p>";
+                    htmlBody = Regex.Replace(htmlBody, pattern2, replacement2, RegexOptions.Singleline);
+
+                    // 特定文字（è）を手順結果spanに変換
+                    htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum"">(è)</span>",
+                                           @"<span class=""MJS_oflow_stepResult""></span>", RegexOptions.Singleline);
+
+                    // 手順結果pタグ内のspan削除（修正: すべてのコンテンツを保持）
+                    htmlBody = Regex.Replace(htmlBody, @"<p[^>]*?class=""MJS_oflow_stepResult([^""]*?)""[^>]*?>" +
+                                           @"(.*?)<span[^>]*?>(.*?)</span>(.*?)</p>",
+                                           @"<p class=""MJS_oflow_stepResult"">$2$3$4</p>", RegexOptions.Singleline);
+
+                    // 手順番号span内の入れ子spanを除去
+                    htmlBody = Regex.Replace(htmlBody, @"<span class=""MJS_oflow_stepNum""><span[^>]*?>(.*?)</span>(.*?)</span>",
+                                           @"<span class=""MJS_oflow_stepNum"">$1$2</span>", RegexOptions.Singleline);
+
+                    
                     // HTML本文の改行文字を統一
                     htmlBody = Utils.NormalizeLineEndings(htmlBody);
                     
