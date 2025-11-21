@@ -16,7 +16,22 @@ namespace WordAddIn1
 {
     public partial class RibbonMJS
     {
+        /// <summary>
+        /// HTML出力ボタンのイベントハンドラー（高画質画像抽出を有効にして実行）
+        /// </summary>
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
+        {
+            // デフォルトで高画質画像抽出を有効にする
+            GenerateHTMLButton(sender, e, extractHighQualityImages: true);
+        }
+
+        /// <summary>
+        /// HTML出力処理の本体
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">イベント引数</param>
+        /// <param name="extractHighQualityImages">高画質画像抽出機能を実行するかどうか</param>
+        private void GenerateHTMLButton(object sender, RibbonControlEventArgs e, bool extractHighQualityImages)
         {
             // HTML出力フラグをON
             blHTMLPublish = true;
@@ -82,31 +97,40 @@ namespace WordAddIn1
                     
                     try
                     {
-                        // 高画質の画像とキャンバスの抽出
-                        //log.WriteLine("高画質画像とキャンバスの抽出開始");
-                        var extractedImages = Utils.ExtractImagesFromWord(
-                            docCopy,
-                            Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
-                            includeInlineShapes: true,    // インライン図形を抽出
-                            includeShapes: true,          // フローティング図形を抽出
-                            includeFreeforms: false,      // フリーフォーム図形は抽出しない
-                            addMarkers: true,             // マーカーを追加
-                            skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
-                            minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
-                            minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
-                            includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
-                            maxOutputWidth: 1024,   // 出力画像の最大幅
-                            maxOutputHeight: 1024   // 出力画像の最大高さ
-                        );
-
-                        // 抽出統計をログに出力
-                        if (extractedImages != null)
+                        // 高画質画像抽出機能が有効な場合のみ実行
+                        List<Utils.ExtractedImageInfo> extractedImages = null;
+                        if (extractHighQualityImages)
                         {
-                            log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
+                            // 高画質の画像とキャンバスの抽出
+                            log.WriteLine("高画質画像とキャンバスの抽出開始");
+                            extractedImages = Utils.ExtractImagesFromWord(
+                                docCopy,
+                                Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
+                                includeInlineShapes: true,    // インライン図形を抽出
+                                includeShapes: true,          // フローティング図形を抽出
+                                includeFreeforms: false,      // フリーフォーム図形は抽出しない
+                                addMarkers: true,             // マーカーを追加
+                                skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
+                                minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
+                                minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
+                                includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
+                                maxOutputWidth: 1024,   // 出力画像の最大幅
+                                maxOutputHeight: 1024   // 出力画像の最大高さ
+                            );
+
+                            // 抽出統計をログに出力
+                            if (extractedImages != null)
+                            {
+                                log.WriteLine($"画像抽出完了: {extractedImages.Count}個の画像を抽出しました");
+                            }
+                            else
+                            {
+                                log.WriteLine("画像抽出結果: 抽出された画像はありません");
+                            }
                         }
                         else
                         {
-                            log.WriteLine("画像抽出結果: 抽出された画像はありません");
+                            log.WriteLine("高画質画像抽出機能: スキップ（extractHighQualityImages = false）");
                         }
 
                         // CSVファイルに出力
@@ -459,35 +483,44 @@ namespace WordAddIn1
                         // AppData/Local/Tempから画像をwebhelpフォルダにコピーする
                         CopyImagesFromAppDataLocalTemp(activeDocument.FullName);
 
-                        // 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER: xxx]を処理し、画像参照を更新）
-                        log.WriteLine("画像マーカー処理");
-                        try
+                        // 高画質画像抽出機能が有効な場合のみ、画像マーカー処理を実行
+                        if (extractHighQualityImages)
                         {
-                            int processedFiles = Utils.ProcessImageMarkersInWebhelp(paths.exportDirPath, "extracted_images");
-                            log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
-                        }
-                        catch (Exception ex)
-                        {
-                            log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
-                        }
+                            // 画像マーカーの処理（HTMLファイル内の[IMAGEMARKER: xxx]を処理し、画像参照を更新）
+                            log.WriteLine("画像マーカー処理");
+                            try
+                            {
+                                int processedFiles = Utils.ProcessImageMarkersInWebhelp(paths.exportDirPath, "extracted_images");
+                                log.WriteLine($"画像マーカー処理完了: {processedFiles}個のファイルを処理しました");
+                            }
+                            catch (Exception ex)
+                            {
+                                log.WriteLine($"画像マーカー処理エラー: {ex.Message}");
+                            }
 
-                        // search.jsファイルからイメージマーカーを削除
-                        log.WriteLine("search.jsファイルのイメージマーカー削除");
-                        try
-                        {
-                            int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
-                            if (removedMarkers >= 0)
+                            // search.jsファイルからイメージマーカーを削除
+                            log.WriteLine("search.jsファイルのイメージマーカー削除");
+                            try
                             {
-                                log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
+                                int removedMarkers = Utils.RemoveImageMarkersFromSearchJsInDirectory(paths.exportDirPath);
+                                if (removedMarkers >= 0)
+                                {
+                                    log.WriteLine($"search.jsファイルからイメージマーカー削除完了: {removedMarkers}個のマーカーを削除しました");
+                                }
+                                else
+                                {
+                                    log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
+                                }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                log.WriteLine("search.jsファイルのイメージマーカー削除でエラーが発生しました");
+                                log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            log.WriteLine($"search.jsファイルのイメージマーカー削除エラー: {ex.Message}");
+                            log.WriteLine("画像マーカー処理: スキップ（extractHighQualityImages = false）");
+                            log.WriteLine("search.jsファイルのイメージマーカー削除: スキップ（extractHighQualityImages = false）");
                         }
 
                         // HTMLファイルからシンプルなspanタグを削除
