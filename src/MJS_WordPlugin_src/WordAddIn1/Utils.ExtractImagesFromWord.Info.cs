@@ -120,7 +120,7 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(points),元サイズ(pixels),PNGサイズ(pixels),幅比率,高さ比率,幅変化,高さ変化,変化パターン");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(points),元サイズ(pixels),PNGサイズ(pixels),幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
@@ -131,71 +131,11 @@ namespace WordAddIn1
                 string widthRatioText = comparison.WidthRatio > 0 ? $"{comparison.WidthRatio:F3}" : "";
                 string heightRatioText = comparison.HeightRatio > 0 ? $"{comparison.HeightRatio:F3}" : "";
 
-                string widthChange = "";
-                string heightChange = "";
-                string changePattern = "";
-
-                if (comparison.WidthRatio > 0 && comparison.HeightRatio > 0)
-                {
-                    // 幅の変化判定
-                    if (Math.Abs(comparison.WidthRatio - 1.0) < 0.05)
-                    {
-                        widthChange = "維持";
-                    }
-                    else if (comparison.WidthRatio > 1.0)
-                    {
-                        widthChange = $"拡大({comparison.WidthRatio:F2}倍)";
-                    }
-                    else
-                    {
-                        widthChange = $"縮小({comparison.WidthRatio:F2}倍)";
-                    }
-
-                    // 高さの変化判定
-                    if (Math.Abs(comparison.HeightRatio - 1.0) < 0.05)
-                    {
-                        heightChange = "維持";
-                    }
-                    else if (comparison.HeightRatio > 1.0)
-                    {
-                        heightChange = $"拡大({comparison.HeightRatio:F2}倍)";
-                    }
-                    else
-                    {
-                        heightChange = $"縮小({comparison.HeightRatio:F2}倍)";
-                    }
-
-                    // 変化パターンの判定
-                    if (Math.Abs(comparison.WidthRatio - 1.0) < 0.05 && Math.Abs(comparison.HeightRatio - 1.0) < 0.05)
-                    {
-                        changePattern = "維持";
-                    }
-                    else if (comparison.WidthRatio > 1.05 && comparison.HeightRatio > 1.05)
-                    {
-                        changePattern = "全体拡大";
-                    }
-                    else if (comparison.WidthRatio < 0.95 && comparison.HeightRatio < 0.95)
-                    {
-                        changePattern = "全体縮小";
-                    }
-                    else if (Math.Abs(comparison.WidthRatio - comparison.HeightRatio) > 0.1)
-                    {
-                        changePattern = "アスペクト比変化";
-                    }
-                    else
-                    {
-                        changePattern = "複合変化";
-                    }
-                }
-
                 // CSVではカンマが含まれる可能性があるフィールドをダブルクォートで囲む
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
-                string widthChangeCsv = $"\"{widthChange}\"";
-                string heightChangeCsv = $"\"{heightChange}\"";
-                string changePatternCsv = $"\"{changePattern}\"";
 
-                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePoints}\",\"{originalSizePixels}\",\"{pngSizePixels}\",{widthRatioText},{heightRatioText},{widthChangeCsv},{heightChangeCsv},{changePatternCsv}");
+                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePoints}\",\"{originalSizePixels}\",\"{pngSizePixels}\",{widthRatioText},{heightRatioText}");
             }
 
             return result.ToString();
