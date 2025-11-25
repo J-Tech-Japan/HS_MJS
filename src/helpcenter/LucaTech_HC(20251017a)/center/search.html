@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+   <!-- 文字エンコーディングとビューポートの設定 -->
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+
+   <!-- ページタイトル -->
+   <title>LucaTech GX ヘルプセンター</title>
+
+   <!-- Google Fontsの事前読み込み設定 -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+   <!-- フォントファイルの読み込み（日本語と英語フォント） -->
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+   
+   <!-- CSSファイルの読み込み -->
+   <link rel="stylesheet" href="css/style.css">          <!-- メインスタイルシート -->
+   <link rel="stylesheet" href="css/pagination.css">    <!-- ページネーション用スタイル -->
+   
+   <!-- ファビコンの設定 -->
+   <link rel="icon" href="images/LucaTech_GX_favicon.ico">
+   
+   <!-- JavaScriptライブラリの読み込み -->
+   <!-- <script src="js/lib/vue.global.prod.js"></script> -->        <!-- Vue.js（プロダクション版） -->
+   <script type="text/javascript" src="js/search/utils.js"></script>  <!-- 共通ユーティリティスクリプト（HTMLエスケープなど） -->
+   <script type="text/javascript" src="js/search/searchCatalog.js"></script>  <!-- 検索カタログ管理スクリプト -->
+   <script type="text/javascript" src="js/search/searchBreadcrumb.js"></script>  <!-- パンくずリスト関連スクリプト -->
+   <script type="text/javascript" src="js/search/searchUI.js"></script>  <!-- 検索UI構築とイベント処理スクリプト -->
+   <script type="text/javascript" src="js/search/searchDisplay.js"></script>  <!-- 検索結果表示とハイライトスクリプト -->
+   <script src="js/search/searchPagination.js"></script>  <!-- ページネーション -->
+   <script type="text/javascript" src="js/search/search.js"></script>  <!-- 検索機能のメインスクリプト -->
+   <script src="js/lib/jQuery-2.1.4.min.js"></script>      <!-- jQuery -->
+   <script src="js/lib/easypiechart.js"></script>           <!-- チャート描画ライブラリ -->
+   <script src="js/lib/pagination.min.js"></script>         <!-- ページネーション機能 -->
+   <script src="js/search/searchPageInit.js"></script>          <!-- 検索ページ初期化スクリプト -->
+</head>
+
+<body class="searchindex centering-header">
+   <div id="app">
+      <header>
+         <!-- パンくずナビゲーション -->
+         <ul class="menu-breadcrumb">
+            <li><a href="index.html">LucaTech GX ヘルプTOP</a></li>
+            <li>検索結果</li>
+         </ul>
+         
+         <!-- プロダクトロゴ表示エリア -->
+         <div class="product_logo"></div>
+         
+         <!-- ページタイトル -->
+         <h1>検索結果</h1>
+
+         <!-- メイン検索ボックス -->
+         <div class="main-header-search">
+            <input id="searchkeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search">
+            <button class="btn-search"></button>
+         </div>
+      </header>
+
+      <!-- メインコンテンツエリア -->
+      <main>
+         <!-- 左側カラム：絞り込み検索機能 -->
+         <div class="column-left" id="searchcount">
+            <div class="title">絞り込み項目</div>
+            <!-- 絞り込み項目のコンテナ（JavaScriptで動的に内容が追加される） -->
+            <div class="column-left-container"></div>
+         </div>
+         
+         <!-- 右側カラム：検索結果表示エリア -->
+         <div class="column-right">
+            <!-- 検索結果ヘッダー部分 -->
+            <div class="column-right-header">
+               <!-- 検索結果がある場合の表示 -->
+               <div class="top-content hidden hasresult">「<span id="resultkeyword"></span>」の検索結果：<span id="count-all">0</span>件見つかりました。</div>
+               
+               <!-- 検索結果がない場合の表示 -->
+               <div class="top-content hidden noresult">
+                  <p class="icon"><img src="images/ic_g_search_result_non_bl_96px.svg"></p>
+                  <p>申し訳ありません。<br>検索条件に一致するトピックはありませんでした。</p>
+                  <p class="L2">別の用語で検索してみてください。<br>検索語を短くしたり、簡単な用語に変えたりすると、<br>トピックが見つかる場合もあります。</p>
+               </div>
+               
+               <!-- ページネーション（上部） -->
+               <div id="pagination" class="pagination-container" style="text-align:center"></div>
+            </div>
+            
+            <!-- 検索結果一覧表示エリア -->
+            <div class="box-click-search searchresults items">
+
+            </div>
+            
+            <!-- ページネーション（下部） -->
+            <div id="pagination-ext" class="pagination-container"></div>
+         </div>
+      </main>
+      <!-- ページフッター -->
+      <footer>
+         <div class="footer">
+            <p class="mjs_logo"></p>
+            ©2025 MIROKU JYOHO SERVICE CO., LTD.
+         </div>
+      </footer>
+   </div>
+</body>
+
+</html>

@@ -1,0 +1,370 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Adobe RoboHelp 2017" />
+<title>会社基本情報を登録する</title>
+<link rel="StyleSheet" href="MJSHELP2002.css" type="text/css" />
+<link rel="StyleSheet" href="font.css" type="text/css" />
+<link rel="StyleSheet" href="resp.css" type="text/css" />
+<style type="text/css">
+<!--
+A:visited { color:purple; }
+A:link { color:#337AB7; }
+-->
+</style>
+<script type="text/javascript" language="JavaScript">
+//<![CDATA[
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+   origWidth = innerWidth;
+   origHeight = innerHeight;
+   onresize = reDo;
+}
+onerror = null; 
+//]]>
+</script>
+<style type="text/css">
+<!--
+div.WebHelpPopupMenu { position:absolute;
+left:0px;
+top:0px;
+z-index:4;
+visibility:hidden; }
+p.WebHelpNavBar { text-align:right; }
+-->
+</style>
+<script type="text/javascript" src="template/scripts/rh.min.js"></script>
+<script type="text/javascript" src="template/scripts/common.min.js"></script>
+<script type="text/javascript" src="template/scripts/topic.min.js"></script>
+<script type="text/javascript" src="template/scripts/constants.js"></script>
+<script type="text/javascript" src="template/scripts/utils.js"></script>
+<script type="text/javascript" src="template/scripts/mhutils.js"></script>
+<script type="text/javascript" src="template/scripts/mhlang.js"></script>
+<script type="text/javascript" src="template/scripts/mhver.js"></script>
+<script type="text/javascript" src="template/scripts/settings.js"></script>
+<script type="text/javascript" src="template/scripts/XmlJsReader.js"></script>
+<script type="text/javascript" src="template/scripts/loadparentdata.js"></script>
+<script type="text/javascript" src="template/scripts/loadscreen.js"></script>
+<script type="text/javascript" src="template/scripts/loadprojdata.js"></script>
+<script type="text/javascript" src="template/scripts/mhtopic.js"></script>
+<script type="text/javascript" src="template/scripts/jquery-3.1.0.min.js"></script>
+<script type="text/javascript" src="template/scripts/resp.js"></script>
+ <link rel="stylesheet" type="text/css" href="template/styles/widgets.min.css">
+ <link rel="stylesheet" type="text/css" href="template/styles/topic.min.css">
+<script type="text/javascript" >
+gRootRelPath = ".";
+gCommonRootRelPath = ".";
+gTopicId = "1.1.0_2";
+refPage = {_Ref210748507:['CMN11003','担当者区分～処理可能部門を組み合わせて権限管理する、またはワークフローシステムを使用する場合'],_Ref210748546:['CMN11003','担当者区分・個人番号区分のみで権限管理する場合'],_Ref142913395:['CMN11003','会社基本情報を登録する'],_Ref142913466:['CMN11003','会社基本情報を登録する'],_Ref142913490:['CMN11003','会社基本情報を登録する'],_Ref142913529:['CMN11003','会社基本情報を登録する'],_Ref142317361:['CMN11004','［基本情報］タブ'],_Ref142317370:['CMN11004','［代表者／役職者］タブ'],_Ref191370401:['CMN11007','カレンダーを作成する'],};
+mergePage = {};
+	 url = [];
+
+		// メイン処理
+		$(function () {
+			// refPageの初期化 - 値の長さで降順ソートしてオブジェクトを再構築
+			// これにより、より長い文字列にマッチする参照が優先的に処理される
+			refPage = Object.values(refPage).sort((a, b) => b[1].length - a[1].length).reduce(
+				(result, value) => {
+					const key = Object.keys(refPage).find(k => refPage[k] === value);
+					result[key] = value;
+					return result;
+				},
+				{}
+			);
+
+			const text = window.location.href;
+			// 現在のURLからページIDを抽出（例：KAI01005.html → KAI01005）
+			const pageMatch = text.match("[/][A-Z]{3}[0-9]{5}[.]html");
+
+			if (pageMatch === null) {
+				return;
+			}
+
+			// ファイル名からページIDを抽出（.htmlと先頭の/を除去）
+			const id = pageMatch[0].replace("/", "").replace(".html", "");
+
+			// mergePage内のIDチェックとリダイレクト
+			// ファイルプロトコル以外の場合（サーバー上での実行時）のみ処理
+			if (location.protocol !== "file:") {
+				for (const key in mergePage) {
+					// 現在のページIDがマージ対象の場合、最初のページにリダイレクト
+					if (mergePage[key] === id) {
+						const newid = findFirstPageInMerge(id);
+						// URLフラグメント（#以降）を保持してリダイレクト
+						const ref = window.location.href.split('.html#')[1];
+						if (ref === '' || ref === undefined) {
+							document.location.href = newid + ".html#" + id;
+						} else {
+							document.location.href = newid + ".html#" + ref;
+						}
+						return;
+					}
+				}
+			}
+
+			loadNextPage(id);
+
+			if (url.length > 0) {
+				handleDynamicPageLoad(text);
+			} else {
+				handleStaticPageLoad(text);
+			}
+		});
+
+		// mergePage内で最初のページを再帰的に検索
+		function findFirstPageInMerge(page) {
+			let found = false;
+			for (const key in mergePage) {
+				if (mergePage[key] == page) {
+					found = true;
+					return findFirstPageInMerge(key);
+					break;
+				}
+			}
+			if (!found) {
+				return page;
+			}
+		}
+
+		// 次のページを再帰的に読み込み
+		function loadNextPage(id) {
+			if (mergePage[id] !== undefined) {
+				url.push({
+					api: $.ajax({
+						url: mergePage[id] + ".html"
+					}),
+					page: mergePage[id]
+				});
+				loadNextPage(mergePage[id]);
+			}
+		}
+
+		// 動的ページロード処理（複数ページを結合）
+		function handleDynamicPageLoad(text) {
+			// 全てのAjaxリクエストの完了を待つ
+			Promise.all(url.map(x => x.api))
+				.then(responses => responses.forEach(
+					(response, index) => {
+						// レスポンスからHTMLを取得し、DOMに追加
+						const html = $(response).find("div").parent();
+						const di = $('body');
+						// ページの先頭にアンカータグを追加（ページ内リンク用）
+						$(html).find("div:first").html("<a id='" + url[index].page + "'></a>");
+						// NoPageBreakクラスをHeading2に変更（スタイル調整）
+						$(html).find("p.NoPageBreak").attr("class", "Heading2");
+						di.append(html);
+
+						processRefElements();
+						processMJSRefElements();
+
+						// URLにフラグメントがある場合、そこにジャンプ
+						if (text.indexOf("#") > 0) {
+							window.location.href = text;
+						}
+
+						// bodyの内容をmainタグで囲む（セマンティックHTML）
+						di.html("<div></div><main>" + di.html() + "</main>");
+					}
+				));
+		}
+
+		// 静的ページロード処理（単一ページ）
+		function handleStaticPageLoad(text) {
+			processRefElements();
+			processMJSRefElements();
+
+			if (text.indexOf("#") > 0) {
+				window.location.href = text;
+			}
+
+			const di = $('body');
+			di.html("<div></div><main>" + di.html() + "</main>");
+		}
+
+		// .ref要素の処理
+		function processRefElements() {
+			$(".ref").each(function () {
+				const refname = $(this).attr("name");
+				$("[name=" + refname + "]").each(function () {
+					$(this).append("<a name='" + refname + "'>");
+				});
+			});
+		}
+
+		// .MJS_ref要素内のリンクと.ref要素を処理
+		function processMJSRefElements() {
+			$(".MJS_ref").each(function () {
+				// リンク要素の処理
+				$(this).find('a').each(function () {
+					processLink(this);
+				});
+
+				// .ref要素の処理
+				$(this).find('.ref').each(function () {
+					const name = $(this).attr("name");
+					// _refサフィックスを持たない要素はスキップ
+					if (name?.indexOf("_ref") === -1) {
+						return;
+					}
+
+					// _refサフィックスを除去してクリーンな名前を取得
+					const cleanName = name.replace("_ref", "");
+					if (refPage[cleanName]) {
+						const replaceStr = refPage[cleanName][1];
+						// 同じページ内に対象の.ref要素が存在するかチェック
+						if ($(".ref[name=" + cleanName + "]").length > 0) {
+							// 同一ページ内リンクとして処理
+							$(this).html($(this).html().replace(replaceStr, "<a href='#" + cleanName + "'>" + replaceStr + "</a>"));
+						} else {
+							// 外部ページへのリンクとして処理
+							const expectUrl = findFirstPageInMerge(refPage[cleanName][0]) + ".html#" + cleanName;
+							$(this).attr("href", expectUrl);
+						}
+					}
+				});
+			});
+		}
+
+		// リンク要素を処理してURLを適切に変換
+		function processLink(linkElement) {
+			const name = $(linkElement).attr("name");
+
+			if (name?.indexOf("_ref") > -1) {
+				return; // _ref を含む場合は処理しない
+			}
+
+			let currentUri = $(linkElement).attr('href').replace(/^\.\//, '');
+
+			// URL タイプの判定と処理
+			if (currentUri.match(/^https?:/)) {
+				// 外部リンク - 何もしない
+				return;
+			}
+
+			if (currentUri.match(/^#[A-Z]{3}[0-9]{5}$/)) {
+				// 内部リンク - 何もしない
+				return;
+			}
+
+			if (currentUri.startsWith("template/resource")) {
+				// テンプレート用URL - 何もしない
+				return;
+			}
+
+			if (currentUri.includes("#t=")) {
+				// 既に #t= 形式の場合は何もしない
+				return;
+			}
+
+			if (!areDirectoriesEqual(currentUri) && checkFileName(currentUri)) {
+				// 外部参照
+				$(linkElement).attr('href', changeFileNameWithHash(currentUri));
+				return;
+			}
+
+			const DOT_HTML_HASH = ".html#";
+
+			// ファイル名とフラグメントが同じ場合（例：KAI01005.html#KAI01005）
+			// refPage内のリンクとして処理
+			if (currentUri.split(DOT_HTML_HASH)[0] === currentUri.split(DOT_HTML_HASH)[1]) {
+				// refPage内のリンク処理
+				const targetId = currentUri.split('.html#')[1];
+				if (refPage[targetId]) {
+					const expectUrl = refPage[targetId][0] + ".html#" + targetId;
+					$(linkElement).attr('href', expectUrl);
+				}
+				return;
+			}
+
+			// その他の複雑なリンク処理
+			// 拡張子を含むか、_Refを含む場合のみ処理
+			if (!(currentUri?.indexOf(".") > 0 || currentUri?.indexOf("_Ref") > -1)) {
+				return;
+			}
+
+			// URLからファイル名部分とフラグメント部分を抽出
+			let subDestinationId = currentUri.split('.')[0];
+			let destinationId = currentUri.split('#')[1] === undefined ? subDestinationId : currentUri.split('#')[1];
+
+			// mergePage内での最初のページを検索
+			// マージされたページチェーンを遡って最初のページを見つける
+			for (let i = 0; i < Object.keys(mergePage).length; i++) {
+				const startId = Object.keys(mergePage).find(key => mergePage[key] === subDestinationId);
+				if (startId === undefined) break;
+				subDestinationId = startId;
+			}
+
+			let href = "";
+			// ファイル名とフラグメントが同じで、_Refを含む場合
+			if (subDestinationId === destinationId && subDestinationId?.indexOf("_Ref") > -1) {
+				// refPage内のリンク処理
+				if (refPage[subDestinationId]) {
+					href = refPage[subDestinationId][0] + ".html#" + destinationId;
+				}
+			} else {
+				// 通常のページ内リンク処理
+				href = subDestinationId + '.html#' + destinationId;
+			}
+
+			$(linkElement).attr('href', href);
+			$(linkElement).attr('onclick', "anchorElement(href.split('#Ref')[0])");
+		}
+
+		// 相対パスが同一ディレクトリを指すかチェック
+		function areDirectoriesEqual(relativePath) {
+			if (!relativePath) return false;
+			// スラッシュを含まない、または ./ で始まる場合は同一ディレクトリと判定
+			if (!relativePath.match("/") || relativePath.match(/^\.\/.*/)) return true;
+
+			// 現在のURLのディレクトリ部分を取得
+			const currentUrl = window.location.href;
+			const currentDir = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+			// 相対パスを絶対URLに解決してディレクトリ部分を比較
+			const baseUrl = window.location.origin;
+			const resolvedUrl = new URL(relativePath, baseUrl).href;
+			const resolvedDir = resolvedUrl.substring(0, resolvedUrl.lastIndexOf('/'));
+
+			return currentDir === resolvedDir;
+		}
+
+		// パスから有効なファイル名かチェック
+		function checkFileName(path) {
+			// #t= 形式の場合は、#t= の後のファイル名をチェック（#以降は除去）
+			const FILE_NAME_PATTERN = /^[A-Z]{3}[0-9]{5}[.]html$/;
+			if (path.includes("#t=")) {
+				const tParam = path.split("#t=")[1].split('#')[0];
+				return tParam.match(FILE_NAME_PATTERN);
+			}
+			const fileName = path.split('/').pop().split(/[?#]/)[0];
+			return fileName.match(FILE_NAME_PATTERN);
+		}
+
+		// ファイル名を#t=形式のハッシュパスに変換
+		function changeFileNameWithHash(path) {
+			// 既に #t= を含む場合はそのまま返す
+			if (path.includes("#t=")) {
+				return path;
+			}
+			// パスをディレクトリ部分とファイル部分に分割
+			const parts = path.split('/');
+			const filePart = parts.pop();
+			const dirPart = parts.join('/');
+			// #t=形式のハッシュパスとして再構築
+			return dirPart ? `${dirPart}/${"#t="}${filePart}` : `${"#t="}${filePart}`;
+		}
+
+		// アンカー要素のナビゲーション処理
+		function anchorElement(url) {
+			if (window.location.href.indexOf(".html#") > -1) {
+				window.location.href = url;
+			}
+		}
+</script>
+<meta name="topic-breadcrumbs" content="導入処理 > 導入処理 > 会社基本情報を登録する" />
+</head>
+<body style="text-justify-trim: punctuation;"><div><div style="text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;">導入処理 &gt; 導入処理 &gt; <a href="#">会社基本情報を登録する</a></div><p class="Heading1"><span name="_Ref142913395" class="ref" /><span name="_Ref142913466" class="ref" /><span name="_Ref142913490" class="ref" /><span name="_Ref142913529" class="ref" />会社基本情報を登録する</p><p class="MJS_menu"><img src="pict/image009.png" alt="*" />　［設定］＞［導入処理］＞［会社情報］＞［会社基本情報登録］</p><p class="MJS_lead">会社名や法人番号などの会社情報、代表者や役職者を設定します。</p><p class="Heading5"><span name="_Ref142317361" class="ref" />［基本情報］タブ</p><p class="MJS_bodyPict"><img id="キャンバス 109" src="pict/image025.png" /></p><p> </p><table class="MsoNormalTable" border="1" cellspacing="0" cellpadding="0" width="659" style="width:568.6pt;margin-left:10.0mm;border-collapse:collapse;border:none"><tr style="height:18.1pt"><td width="141" valign="top" style="width:106.1pt;border-top:solid black 1.0pt;   border-left:none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.1pt"><p class="MJS_tdItem">会社コード</p></td><td width="518" valign="top" style="width:388.35pt;border-top:solid black 1.0pt;   border-left:none;border-bottom:solid black 1.0pt;border-right:none;   padding:0mm 5.4pt 0mm 5.4pt;height:18.1pt"><p class="MJS_tdText">選択している会社の会社コードが表示されます。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">正式会社名</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">会社名を変更する場合は、60文字以内で入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">簡略会社名</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">システムの画面上で表示される名称です。</p><p class="MJS_tdText">正式会社名の［簡略会社名へコピー］をクリックすると、入力した会社名の15文字分が［簡略会社名］へコピーされます。</p><p class="MJS_tdText"><s />修正する場合は15文字以内で入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">フリガナ</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">会社名のフリガナを90文字以内で入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">法人番号</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">法人番号を入力または<img id="図 6" src="pict/image026.jpg" />をクリックして検索します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">和暦／西暦区分</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">年の表示・入力方法を［和暦］または［西暦］から選択します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">会計期間</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">選択している会社の会計期間が表示されます。変更はできません。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem"><span name="_Ref142317370" class="ref" />月次開始日</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">月次開始日が表示されます。変更はできません。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">設立年月日</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText"><s />設立年月日をカレンダーから選択または西暦で直接入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">決算期（期数）</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">当期の期数を入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">代表者役職名</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">代表者の役職名を入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">代表者氏名</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">代表者の氏名を入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">代表者名フリガナ</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">代表者氏名のフリガナを入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">郵便番号</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">会社所在地の郵便番号を入力し、<img id="図 5" src="pict/image026.jpg" />をクリックして住所を検索します。検索結果に表示された住所を選択して［OK］をクリックすると、住所が自動で反映されます。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">住所上段</p><p class="MJS_tdItem">住所下段</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">会社所在地の住所を30文字以内で入力します。<img id="図 4" src="pict/image026.jpg" />をクリックすると郵便番号を検索できます。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">住所上段フリガナ</p><p class="MJS_tdItem">住所下段フリガナ</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">住所のフリガナを入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">電話番号</p><p class="MJS_tdItem">FAX番号</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">電話番号とFAX番号を入力します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">日次入力確定採用区分</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">仕訳データの確定処理を日次で行う場合は［採用］を選択します。月次で行う場合は［未採用］に変更します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">システム別表示設定採用区分</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">財務会計や固定資産の業務システムごとに表示するマスターを変える場合は［採用］を選択します。</p><p class="MJS_tdText">表示の設定は［設定］＞［マスター登録処理］＞［その他］＞［システム別表示設定］で行います。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">ミドルネーム採用区分</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">『社員登録』などでミドルネームを登録する場合は［採用］を選択します。</p></td></tr><tr style="height:18.0pt"><td width="141" valign="top" style="width:106.1pt;border-top:none;border-left:   none;border-bottom:solid black 1.0pt;border-right:solid gray 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdItem">フリーコードに使用する記号</p></td><td width="518" valign="top" style="width:388.35pt;border:none;border-bottom:   solid black 1.0pt;padding:0mm 5.4pt 0mm 5.4pt;height:18.0pt"><p class="MJS_tdText">マスターや伝票Noのコード属性が「フリー」の場合で、半角カタカナ、半角数字、半角アルファベット（大文字・小文字）以外をコードに使用したいときは、使用する記号を入力します。</p><p class="MJS_tdText">複数の記号を登録する場合はスペースなどで区切らず、続けて入力します。最大10個まで入力できます。</p><p class="MJS_icons"><img src="pict/image006.png" alt="*" width="80" />  </p><p class="MJS_tdListItem">システムが正常に稼動しなくなる可能性があるため、次の記号は登録しないでください。<br />シングルコート（’）、ダブルコート（”）、パーセント（%）</p></td></tr></table><p> </p><p class="Heading_table">フリー項目登録</p><p class="MJS_lead">［基本情報］タブの項目を追加する場合は［フリー項目採用情報設定］で登録します。</p><p class="MJS_lead">会社の基本情報に関する項目やメモを追加で登録できます。</p><p class="MJS_bodyPict"><img id="キャンバス 107" src="pict/image027.png" /></p><p class="MJS_lead"> </p><p class="MJS_bodyPict">［フリー項目採用情報設定］画面</p><p class="MJS_bodyPict"><img id="キャンバス 104" src="pict/image028.png" /></p><p> </p><table class="MsoNormalTable" border="1" cellspacing="0" cellpadding="0" style="margin-left:10.0mm;border-collapse:collapse;border:none"><tr><td width="144" valign="top" style="width:107.75pt;border:solid windowtext 1.0pt;   border-left:none;background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt"><p class="MJS_tdItem">フリー項目名称</p></td><td width="515" valign="top" style="width:386.6pt;border-top:solid windowtext 1.0pt;   border-left:none;border-bottom:solid windowtext 1.0pt;border-right:none;   padding:0mm 5.4pt 0mm 5.4pt"><p class="MJS_tdText">項目の名前を登録します。</p></td></tr><tr><td width="144" valign="top" style="width:107.75pt;border-top:none;border-left:   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;   background:#DEEAF6;padding:0mm 5.4pt 0mm 5.4pt"><p class="MJS_tdItem">採用</p></td><td width="515" valign="top" style="width:386.6pt;border:none;border-bottom:solid windowtext 1.0pt;   padding:0mm 5.4pt 0mm 5.4pt"><p class="MJS_tdText">項目の表示／非表示を切り替えます。</p></td></tr></table><p> </p><p class="Heading5">［代表者／役職者］タブ</p><p class="MJS_lead">代表者、取締役、監査役を設定します。</p><p class="MJS_lead">［設定］＞［マスタ登録処理］＞［社員関係］＞［社員登録］および［役職登録］＞［役職登録］で社員および役職を登録している場合は、<img id="図 3" src="pict/image029.jpg" />をクリックして社員と役職を選択します。</p><p class="MJS_lead">社員コードを入力せずに氏名のみを登録することも可能です。</p><p class="MJS_bodyPict"><img id="キャンバス 102" src="pict/image030.png" /></p></div></body>
+</html>

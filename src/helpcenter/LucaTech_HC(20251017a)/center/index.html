@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+
+   <title>LucaTech GX ヘルプセンター</title>
+
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="css/style.css">
+   <link rel="icon" href="images/LucaTech_GX_favicon.ico">
+   <script src="js/lib/vue.global.prod.js"></script>
+   <script src="js/core/contents.js"></script>
+   <script src="js/search/utils.js"></script>
+</head>
+
+<body class="index">
+   <div id="app">
+      <header>
+         <p class="hc_name">LucaTech GX ヘルプセンター</p>
+         <div class="product_logo"></div>
+         <h1>お困りですか？</h1>
+         <div class="main-header-search">
+            <input id="searchkeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search">
+            <button class="btn-search"></button>
+         </div>
+         <!--p class="search_target"><a href="#">検索対象を選択</a></p-->
+      </header>
+
+      <div class="main_title">業務システムから探す</div>
+      <main>
+         <div class="categories" :class="{row2:contentsData.length>3, col1:contentsData.length===1, col2:contentsData.length===2 || contentsData.length===4}">
+            <div v-for="(item,index) in contentsData" :key="index" class="category" :class="item.ID.toLowerCase()">
+               <div>
+                  <h3>{{item.TITLE}}</h3>
+                  <div class="accordion">
+                     <ul>
+                        <template v-if="item.ID==='CMN'">
+                           <li class="sub-category">
+                           <h4>はじめに</h4>
+                              <ul>
+                                 <li><a href="../contents/startguide.pdf" target="_blank">スタートガイド</a></li>
+                                 <li><a href="../contents/CMN_JNT/index.html#t=CMN11003.html">導入の流れ</a></li>
+                              </ul>
+                           </li>
+                        </template>
+                        <li v-for="(item2,index2) in item.CONTENTS" :key="index2" :class="{'sub-category':item2.TYPE==='category'}">
+                           <a v-if="item2.TYPE==='contents'" :href="`sys_top.html?contentid=${item2.ID}`">{{item2.TITLE}}</a>
+                           <template v-else="item2.TYPE==='category'">
+                              <h4>{{item2.TITLE}}</h4>
+                              <ul>
+                                 <li v-for="(item3,index3) in item2.CONTENTS" :key="index3">
+                                    <a :href="`sys_top.html?contentid=${item3.ID}`">{{item3.TITLE}}</a>
+                                 </li>
+                              </ul>
+                           </template>
+                        </li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </main>
+      <footer class="footer_index">
+         <div class="footer_index"><p class="mjs_logo"></p>
+         ©2025 MIROKU JYOHO SERVICE CO., LTD.</div>
+      </footer>
+      <!-- BEGIN DEL 対応1 -->
+      <!-- <div class="menu-slide bg"></div>
+      <div class="menu-slide">
+         <div class="menu-top-title">
+            <h1>検索対象を選択</h1>
+            <button class="btn-click search_target"></button>
+         </div>
+         <div class="column-left">
+            <div class="column-left-container"></div>
+         </div>
+      </div> -->
+      <!-- END DEL 対応1 -->
+   </div>
+   <script>
+      const { createApp } = Vue;
+
+      createApp({
+         data() {
+            return {
+               contentsData: null
+            };
+         },
+         created() {
+            this.contentsData = CONTENTS;
+         },
+      }).mount('#app')
+   </script>
+   <script type="text/javascript" src="js/core/contents.js"></script>
+   <script src="js/lib/jQuery-2.1.4.min.js"></script>
+   <script src="js/core/menuRender.js"></script>
+   <!-- script menu slide -->
+   <script>
+      $(function () {
+        // BEGIN DEL 対応1
+        //  for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
+        //     $(".column-left > .column-left-container").append("<div class='box-check box-color-" + CONTENTS[nCount].STYLE + "'><ul>" + renderLeftColumn(CONTENTS[nCount], 0) + "</ul></div>");
+        //  }
+        // END DEL 対応1
+
+         var htmlBox = "";
+         for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
+            if (nCount % 2 == 0) {
+               htmlBox += "<div class='row-box'>";
+            }
+            htmlBox += renderTopPage(CONTENTS[nCount]);
+            if (nCount % 2 == 1) {
+               htmlBox += "</div>";
+            }
+         }
+         if (nCount == CONTENTS.length) {
+            htmlBox += "</div>";
+         }
+         $(".box-content").append(htmlBox);
+
+         $(".search_target").click(function () {
+            $('body').toggleClass('open');
+         });
+
+         $("#more_services li").click(function (e) {
+            $('li').not(this).find('.secondary-services-description').hide();
+            $(this).toggleClass('active').find('.secondary-services-description').toggle();
+         });
+        // BEGIN DEL 対応1
+        //  $('.box-check li .check-toggle').click(function (e) {
+        //     //e.preventDefault();
+        //     $(this).toggleClass('active').siblings('ul').slideToggle(500);
+        //     $(this).parent().siblings().children('.check-toggle').removeClass('active');
+        //     $(this).parent().siblings().children('ul').slideUp(500);
+        //  });
+
+        //  $('.box-check li .check-toggle').each(function () {
+        //     //e.preventDefault();
+        //     $(this).toggleClass('active').siblings('ul').slideToggle(0);
+        //     $(this).parent().siblings().children('.check-toggle').removeClass('active');
+        //     $(this).parent().siblings().children('ul').slideUp(0);
+        //  });
+
+        //  // check all with search-in
+        //  $(".search-in").change(function () {
+        //     var check = $(this).is(":checked");
+        //     $(this).parent().parent().find("ul").find(".search-in").prop("checked", check);
+        //     $(this).closest("div").removeClass("check-new");
+        //  });
+
+        //  $(".search-in").change(function () {
+        //     checkAllInTree(this);
+        //  });
+        // END DEL 対応1
+
+         // set event press enter to search
+         $("#searchkeyword").keypress(function (e) {
+            if (e.which == 13) {
+               $(".btn-search").click();
+            }
+         });
+
+         // click button searchkeyword, save all check box to localstorage
+         $(".btn-search").click(function () {
+            if ($("#searchkeyword").val() == "") {
+               return;
+            }
+            jsonModel = [];
+            for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
+               var model = buildSearchTreeModel(CONTENTS[nCount]);
+               if (model != null) {
+                  jsonModel.push(model);
+               }
+            }
+
+            // BEGIN DEL 対応1
+            // rember checked
+            // var checkId = [];
+            // $(".search-in").each(function () {
+            //    var check = $(this).is(":checked");
+            //    if (check) {
+            //       // save check id to localstorage
+            //       var id = $(this).attr("id");
+            //       checkId.push(id);
+            //    }
+            // });
+
+            // localStorage.setItem("checkId", JSON.stringify(checkId));
+            // END DEL 対応1
+            localStorage.setItem("contents", JSON.stringify(jsonModel));
+            localStorage.setItem("searchkeyword", $("#searchkeyword").val());
+            document.location.href = "search.html";
+         });
+
+         // check if document referrer from search.html
+         if (document.referrer.indexOf("search.html") > -1) {
+            // BEGIN UPD 対応1
+            // var checkId = JSON.parse(localStorage.getItem("checkId"));
+            // if (checkId != null) {
+            //    $(".search-in").prop("checked", false);
+            //    for (var nCount = 0; nCount < checkId.length; nCount++) {
+            //       $("#" + checkId[nCount]).prop("checked", true);
+            //    }
+            //    // check all parent
+            //    $(".search-in").each(function () {
+            //       checkAllInTree(this);
+            //    });
+
+            //    // set search keyword
+            //    var searchkeyword = localStorage.getItem("searchkeyword");
+            //    $("#searchkeyword").val(searchkeyword);
+
+            //    // show left menu
+            //    $("body").addClass("open");
+
+            // }
+            // set search keyword
+            var searchkeyword = localStorage.getItem("searchkeyword");
+            $("#searchkeyword").val(searchkeyword);
+
+            // show left menu
+            $("body").addClass("open");
+            // END UPD 対応1
+         }
+      });
+   </script>
+</body>
+
+</html>

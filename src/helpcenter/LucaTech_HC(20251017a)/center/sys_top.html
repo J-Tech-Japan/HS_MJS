@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+
+  <title>LucaTech GX ヘルプセンター</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/LucaTech_GX_favicon.ico">
+  <script src="js/lib/vue.global.prod.js"></script>
+  <script src="js/core/contents.js"></script>
+  <script src="js/search/utils.js"></script>
+</head>
+
+<body class="top">
+  <div id="app">
+    <header>
+      <ul class="menu-breadcrumb">
+        <li><a href="index.html">LucaTech GX ヘルプTOP</a></li>
+        <li>{{categoryTitle}}</li>
+        <li v-if="subCategoryTitle">{{subCategoryTitle}}</li>
+        <li>{{contentsTitle}}TOP</li>
+      </ul>
+      <div class="product_logo"></div>
+      <div class="sys_title">{{categoryTitle}}</div>
+      <h1>{{contentsTitle}}</h1>
+
+      <p class="search_guide"></p>
+      <div class="main-header-search">
+        <input id="searchkeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search">
+        <button class="btn-search"></button>
+      </div>
+    </header>
+    <main>
+      <div class="title">検索方法</div>
+      <a :href="`purpose.html?contentid=${contentid}`"><div class="link">
+        <span>目的から探す</span>
+        <p>「社員を登録する」「決算を確定する」など、目的に沿った操作方法を確認できます。</p></div></a>
+      <a :href="`menu.html?contentid=${contentid}`"><div class="link">
+        <span>メニューから探す</span>
+        <p>「伝票入力」「科目登録」など、処理単位での操作方法を確認できます。</p></div></a>
+    </main>
+    <footer>
+      <div class="footer"><p class="mjs_logo"></p>
+      ©2025 MIROKU JYOHO SERVICE CO., LTD.</div>
+    </footer>
+  </div>
+  <script src="js/lib/jQuery-2.1.4.min.js"></script>
+  <script src="js/core/menuRender.js"></script>
+  <input type="checkbox" id="checkbox-temp" class="hiddenlevel">
+  <script>
+    $(function () {
+      // get param from url
+      const searchParams = new URLSearchParams(window.location.search);
+      var contentid = searchParams.get('contentid');
+      // change id checkbox temp by contentid
+      $("#checkbox-temp").attr("id", "checkbox-" + contentid);
+      // set checked
+      $("#checkbox-" + contentid).prop("checked", true);
+
+      // set event press enter to search
+      $("#searchkeyword").keypress(function (e) {
+        if (e.which == 13) {
+          $(".btn-search").click();
+        }
+      });
+
+      // click button searchkeyword, save all check box to localstorage
+      $(".btn-search").click(function () {
+        if ($("#searchkeyword").val() == "") {
+          return;
+        }
+        jsonModel = [];
+        for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
+          var model = buildSearchTreeModel(CONTENTS[nCount]);
+          if (model != null) {
+            jsonModel.push(model);
+          }
+        }
+
+        // rember checked
+        var checkId = [];
+        $(".search-in").each(function () {
+          var check = $(this).is(":checked");
+          if (check) {
+            // save check id to localstorage
+            var id = $(this).attr("id");
+            checkId.push(id);
+          }
+        });
+
+        localStorage.setItem("checkId", JSON.stringify(checkId));
+        localStorage.setItem("contents", JSON.stringify(jsonModel));
+        localStorage.setItem("searchkeyword", $("#searchkeyword").val());
+        document.location.href = "search.html";
+      });
+    });
+  </script>
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          contentsData: null,
+          categoryTitle: "",
+          subCategoryTitle: ""
+        };
+      },
+      created() {
+        if (!this.contentid) {
+          location.replace("index.html");
+          return;
+        }
+        CONTENTS.forEach(category => {
+          category.CONTENTS.forEach(item => {
+            if (item.TYPE === "category") {
+              item.CONTENTS.forEach(item2 => {
+                if (item2.ID === this.contentid) {
+                  this.contentsData = item2;
+                  this.categoryTitle = category.TITLE;
+                  this.subCategoryTitle = item.TITLE;
+                }
+              });
+            } else if (item.TYPE === "contents" && item.ID === this.contentid) {
+              this.contentsData = item;
+              this.categoryTitle = category.TITLE;
+            }
+          });
+        });
+        document.title = `${this.contentsTitle} | LucaTech GX ヘルプセンター`;
+      },
+      computed: {
+        contentid() {
+          const searchParams = new URLSearchParams(window.location.search);
+          return searchParams.get('contentid');
+        },
+        contentsTitle() {
+          return this.contentsData?.TITLE ?? "";
+        },
+      },
+    }).mount('#app')
+  </script>
+</body>
+
+</html>
