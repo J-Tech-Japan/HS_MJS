@@ -278,17 +278,17 @@ namespace WordAddIn1
                     {
                         ExtractSingleShape(
                             shape, 
-                            outputDirectory, 
-                            ref imageCounter, 
-                            extractedImages, 
-                            "shape", 
-                            addMarkers,
-                            skipCoverMarkers,
-                            minOriginalWidth,
-                            minOriginalHeight,
-                            includeMjsTableImages,
-                            maxOutputWidth,
-                            maxOutputHeight);
+                                outputDirectory, 
+                                ref imageCounter, 
+                                extractedImages, 
+                                "shape", 
+                                addMarkers,
+                                skipCoverMarkers,
+                                minOriginalWidth,
+                                minOriginalHeight,
+                                includeMjsTableImages,
+                                maxOutputWidth,
+                                maxOutputHeight);
                     }
                 }
                 catch (Exception ex)
@@ -428,62 +428,114 @@ namespace WordAddIn1
             {
                 using (var memoryStream = new MemoryStream(metaFileData))
                 {
-                    using (var originalImage = Image.FromStream(memoryStream))
+                    using (var metafile = new System.Drawing.Imaging.Metafile(memoryStream))
                     {
+                        // メタファイルの実際のコンテンツ境界を取得
+                        RectangleF bounds;
+                        using (var graphics = Graphics.FromImage(new Bitmap(1, 1)))
+                        {
+                            GraphicsUnit unit = GraphicsUnit.Pixel;
+                            bounds = metafile.GetBounds(ref unit);
+                        }
+
+                        // 境界が有効かチェック
+                        if (bounds.Width <= 0 || bounds.Height <= 0)
+                        {
+                            System.Diagnostics.Trace.WriteLine("メタファイルの境界が無効です");
+                            return null;
+                        }
+
+                        System.Diagnostics.Trace.WriteLine($"メタファイル境界: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
+
+                        // 実際のコンテンツサイズ（余白なし）
+                        int contentWidth = (int)Math.Ceiling(bounds.Width);
+                        int contentHeight = (int)Math.Ceiling(bounds.Height);
+
                         // 最小サイズのフィルタリング（強制抽出の場合はスキップ）
-                        if (!forceExtract && (originalImage.Width < 250 || originalImage.Height < 250))
+                        if (!forceExtract && (contentWidth < 250 || contentHeight < 250))
                             return null;
 
                         // リサイズが必要かチェック
-                        bool needsResize = originalImage.Width > maxWidth || originalImage.Height > maxHeight;
-                        Image finalImage = originalImage;
-                        int finalWidth = originalImage.Width;
-                        int finalHeight = originalImage.Height;
+                        bool needsResize = contentWidth > maxWidth || contentHeight > maxHeight;
+                        int finalWidth = contentWidth;
+                        int finalHeight = contentHeight;
 
                         if (needsResize)
                         {
                             // 縦横比を維持してリサイズサイズを計算
-                            var newSize = CalculateResizedDimensions(originalImage.Width, originalImage.Height, maxWidth, maxHeight);
-                            
-                            // リサイズされた画像を作成
-                            finalImage = ResizeImageWithQuality(originalImage, newSize.Width, newSize.Height);
+                            var newSize = CalculateResizedDimensions(contentWidth, contentHeight, maxWidth, maxHeight);
                             finalWidth = newSize.Width;
                             finalHeight = newSize.Height;
                             
-                            System.Diagnostics.Trace.WriteLine($"画像をリサイズしました: {originalImage.Width}x{originalImage.Height} → {finalWidth}x{finalHeight}");
+                            System.Diagnostics.Trace.WriteLine($"画像をリサイズします: {contentWidth}x{contentHeight} → {finalWidth}x{finalHeight}");
                         }
 
-                        try
+                        // 余白なしで実際のコンテンツのみを含むビットマップを作成
+                        using (var bitmap = new Bitmap(finalWidth, finalHeight, PixelFormat.Format32bppArgb))
                         {
-                            // ファイル名の生成
-                            string fileName = $"{baseFileName}_{shapeType}.png";
-                            string filePath = Path.Combine(outputDirectory, fileName);
-
-                            // 重複ファイル名の回避
-                            int duplicateCounter = 1;
-                            while (File.Exists(filePath))
+                            using (var graphics = Graphics.FromImage(bitmap))
                             {
-                                fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
-                                filePath = Path.Combine(outputDirectory, fileName);
-                                duplicateCounter++;
+                                // 高品質な描画設定
+                                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                                // 背景を透明に設定
+                                graphics.Clear(Color.Transparent);
+
+                                // メタファイルの実際のコンテンツ領域のみを描画
+                                // 境界のオフセットを考慮して、コンテンツのみを抽出
+                                var destRect = new RectangleF(0, 0, finalWidth, finalHeight);
+                                graphics.DrawImage(metafile, destRect, bounds, GraphicsUnit.Pixel);
                             }
 
-                            // PNG形式で保存
-                            finalImage.Save(filePath, ImageFormat.Png);
+                            // 透明ピクセルを除去してコンテンツのみの境界を取得
+                            var trimmedBounds = GetTrimmedBounds(bitmap);
                             
-                            return new ImageExtractionResult
+                            if (trimmedBounds.Width <= 0 || trimmedBounds.Height <= 0)
                             {
-                                FilePath = filePath,
-                                PixelWidth = finalWidth,
-                                PixelHeight = finalHeight
-                            };
-                        }
-                        finally
-                        {
-                            // リサイズした画像のリソースを解放（オリジナル画像と異なる場合のみ）
-                            if (needsResize && finalImage != originalImage)
+                                System.Diagnostics.Trace.WriteLine("トリミング後の境界が無効です");
+                                return null;
+                            }
+
+                            // トリミングされた画像を作成
+                            using (var trimmedBitmap = new Bitmap(trimmedBounds.Width, trimmedBounds.Height, PixelFormat.Format32bppArgb))
                             {
-                                finalImage.Dispose();
+                                using (var graphics = Graphics.FromImage(trimmedBitmap))
+                                {
+                                    graphics.Clear(Color.White);
+                                    graphics.DrawImage(bitmap, 
+                                        new Rectangle(0, 0, trimmedBounds.Width, trimmedBounds.Height),
+                                        trimmedBounds,
+                                        GraphicsUnit.Pixel);
+                                }
+
+                                // ファイル名の生成
+                                string fileName = $"{baseFileName}_{shapeType}.png";
+                                string filePath = Path.Combine(outputDirectory, fileName);
+
+                                // 重複ファイル名の回避
+                                int duplicateCounter = 1;
+                                while (File.Exists(filePath))
+                                {
+                                    fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
+                                    filePath = Path.Combine(outputDirectory, fileName);
+                                    duplicateCounter++;
+                                }
+
+                                // PNG形式で保存
+                                trimmedBitmap.Save(filePath, ImageFormat.Png);
+                                
+                                System.Diagnostics.Trace.WriteLine($"画像を保存しました: {filePath} ({trimmedBounds.Width}x{trimmedBounds.Height})");
+                                
+                                return new ImageExtractionResult
+                                {
+                                    FilePath = filePath,
+                                    PixelWidth = trimmedBounds.Width,
+                                    PixelHeight = trimmedBounds.Height
+                                };
                             }
                         }
                     }
@@ -494,6 +546,45 @@ namespace WordAddIn1
                 System.Diagnostics.Trace.WriteLine($"メタファイルデータからの画像生成でエラー: {ex.Message}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// ビットマップから透明ピクセルを除いた実際のコンテンツ境界を取得
+        /// </summary>
+        /// <param name="bitmap">ビットマップ</param>
+        /// <returns>コンテンツの境界矩形</returns>
+        private static Rectangle GetTrimmedBounds(Bitmap bitmap)
+        {
+            int minX = bitmap.Width;
+            int minY = bitmap.Height;
+            int maxX = 0;
+            int maxY = 0;
+
+            // すべてのピクセルをスキャンして、透明でないピクセルの範囲を取得
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    Color pixel = bitmap.GetPixel(x, y);
+                    // 完全に透明でないピクセルを検出
+                    if (pixel.A > 0)
+                    {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+
+            // コンテンツが見つからなかった場合
+            if (minX > maxX || minY > maxY)
+            {
+                return Rectangle.Empty;
+            }
+
+            // 境界矩形を返す（幅と高さは+1して含める）
+            return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
         }
 
         /// <summary>
@@ -570,33 +661,6 @@ namespace WordAddIn1
             newHeight = Math.Max(1, newHeight);
 
             return new Size(newWidth, newHeight);
-        }
-
-        /// <summary>
-        /// 高品質でリサイズされた画像を作成
-        /// </summary>
-        /// <param name="originalImage">元の画像</param>
-        /// <param name="newWidth">新しい幅</param>
-        /// <param name="newHeight">新しい高さ</param>
-        /// <returns>リサイズされた画像</returns>
-        private static Image ResizeImageWithQuality(Image originalImage, int newWidth, int newHeight)
-        {
-            var resizedImage = new Bitmap(newWidth, newHeight);
-            
-            using (var graphics = Graphics.FromImage(resizedImage))
-            {
-                // 高品質なリサイズのための設定
-                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-
-                // リサイズ実行
-                graphics.DrawImage(originalImage, 0, 0, newWidth, newHeight);
-            }
-
-            return resizedImage;
         }
     }
 }
