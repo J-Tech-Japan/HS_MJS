@@ -63,12 +63,15 @@ function buildTreeviewNode(node) {
 function buildTreeview() {
     const $container = $(".column-left > .column-left-container");
     const searchCatalogue = getSearchCatalogue();
-    
-    const html = searchCatalogue
-        .map(catalogue => `<div class='box-check'><ul>${buildTreeviewNode(catalogue)}</ul></div>`)
-        .join('');
-    
-    $container.html(html);
+    // DOM操作を一括で行うため、fragmentを利用
+    const fragment = document.createDocumentFragment();
+    searchCatalogue.forEach(catalogue => {
+        const div = document.createElement('div');
+        div.className = 'box-check';
+        div.innerHTML = `<ul>${buildTreeviewNode(catalogue)}</ul>`;
+        fragment.appendChild(div);
+    });
+    $container.empty().append(fragment);
     setupTreeviewEventHandlers();
 }
 
