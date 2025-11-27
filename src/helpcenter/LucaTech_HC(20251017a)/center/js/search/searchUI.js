@@ -94,47 +94,44 @@ function buildTreeview() {
  */
 function setupTreeviewEventHandlers() {
     const $boxCheck = $('.box-check');
-    
-    // トグルクリック
-    $boxCheck.on('click', 'li .check-toggle', function (e) {
-        const $this = $(this);
-        const $siblings = $this.parent().siblings();
-        
-        $this.toggleClass('active').siblings('ul').slideToggle(500);
-        $siblings.children('.check-toggle').removeClass('active');
-        $siblings.children('ul').slideUp(500);
-    });
+    $boxCheck.on('click', 'li .check-toggle', onToggleClick);
+    $boxCheck.on('click', 'li label.custom-control-label.root', onRootLabelClick);
+    $boxCheck.on('change', '.search-in', onSearchInChange);
+    $boxCheck.on('change', '.search-in-all', onSearchInAllChange);
+    $(document).on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
+}
 
-    $boxCheck.on('click', 'li label.custom-control-label.root', function (e) {
-        $(this).closest("li").find(".check-toggle:first").click();
-    });
+function onToggleClick(e) {
+    const $this = $(this);
+    const $siblings = $this.parent().siblings();
+    $this.toggleClass('active').siblings('ul').slideToggle(500);
+    $siblings.children('.check-toggle').removeClass('active');
+    $siblings.children('ul').slideUp(500);
+}
 
-    // search-in変更イベント
-    $boxCheck.on('change', '.search-in', function() {
-        const $this = $(this);
-        const check = $this.is(":checked");
-        const $parent = $this.parent().parent();
-        
-        $parent.find("ul .search-in, ul .search-in-all").prop("checked", check);
-        $this.closest("div").add($parent.find(".check-new")).removeClass("check-new");
-        
-        if (typeof displayResult === 'function') {
-            displayResult();
-        }
-        
-        checkAllInTree(this);
-    });
+function onRootLabelClick(e) {
+    $(this).closest("li").find(".check-toggle:first").click();
+}
 
-    // search-in-all変更イベント
-    $boxCheck.on('change', '.search-in-all', function() {
-        const id = $(this).attr("id").replace("search-in-all-", "");
-        $("#search-in-" + id).prop("checked", $(this).is(":checked")).trigger("change");
-    });
+function onSearchInChange() {
+    const $this = $(this);
+    const check = $this.is(":checked");
+    const $parent = $this.parent().parent();
+    $parent.find("ul .search-in, ul .search-in-all").prop("checked", check);
+    $this.closest("div").add($parent.find(".check-new")).removeClass("check-new");
+    if (typeof displayResult === 'function') {
+        displayResult();
+    }
+    checkAllInTree(this);
+}
 
-    // rootチェックボックスのクリック防止
-    $(document).on("click", "input[type=checkbox].search-in.root", function(e){
-        e.preventDefault();
-    });
+function onSearchInAllChange() {
+    const id = $(this).attr("id").replace("search-in-all-", "");
+    $("#search-in-" + id).prop("checked", $(this).is(":checked")).trigger("change");
+}
+
+function preventRootCheckboxClick(e) {
+    e.preventDefault();
 }
 
 /**
