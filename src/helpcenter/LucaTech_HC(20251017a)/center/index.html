@@ -121,43 +121,6 @@
          }
       }).mount('#app')
    </script>
-   <script type="text/javascript" src="js/core/contents.js"></script>
-   <script src="js/lib/jQuery-2.1.4.min.js"></script>
-   <script src="js/core/menuRender.js"></script>
-   <!-- script menu slide -->
-   <script>
-      $(function () {
-        // BEGIN DEL 対応1
-        //  for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
-        //     $(".column-left > .column-left-container").append("<div class='box-check box-color-" + CONTENTS[nCount].STYLE + "'><ul>" + renderLeftColumn(CONTENTS[nCount], 0) + "</ul></div>");
-        //  }
-        // END DEL 対応1
-
-         var htmlBox = "";
-         for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
-            if (nCount % 2 == 0) {
-               htmlBox += "<div class='row-box'>";
-            }
-            htmlBox += renderTopPage(CONTENTS[nCount]);
-            if (nCount % 2 == 1) {
-               htmlBox += "</div>";
-            }
-         }
-         if (nCount == CONTENTS.length) {
-            htmlBox += "</div>";
-         }
-         $(".box-content").append(htmlBox);
-
-         $(".search_target").click(function () {
-            $('body').toggleClass('open');
-         });
-
-         $("#more_services li").click(function (e) {
-            $('li').not(this).find('.secondary-services-description').hide();
-            $(this).toggleClass('active').find('.secondary-services-description').toggle();
-         });
-      });
-   </script>
 </body>
 
 </html>
