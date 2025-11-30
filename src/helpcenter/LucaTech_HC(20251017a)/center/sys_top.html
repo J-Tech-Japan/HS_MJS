@@ -32,8 +32,8 @@
 
       <p class="search_guide"></p>
       <div class="main-header-search">
-        <input id="searchkeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search">
-        <button class="btn-search"></button>
+        <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検絢でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
+        <button class="btn-search" @click="onSearch"></button>
       </div>
     </header>
     <main>
@@ -50,57 +50,8 @@
       ©2025 MIROKU JYOHO SERVICE CO., LTD.</div>
     </footer>
   </div>
-  <script src="js/lib/jQuery-2.1.4.min.js"></script>
   <script src="js/core/menuRender.js"></script>
-  <input type="checkbox" id="checkbox-temp" class="hiddenlevel">
-  <script>
-    $(function () {
-      // get param from url
-      const searchParams = new URLSearchParams(window.location.search);
-      var contentid = searchParams.get('contentid');
-      // change id checkbox temp by contentid
-      $("#checkbox-temp").attr("id", "checkbox-" + contentid);
-      // set checked
-      $("#checkbox-" + contentid).prop("checked", true);
-
-      // set event press enter to search
-      $("#searchkeyword").keypress(function (e) {
-        if (e.which == 13) {
-          $(".btn-search").click();
-        }
-      });
-
-      // click button searchkeyword, save all check box to localstorage
-      $(".btn-search").click(function () {
-        if ($("#searchkeyword").val() == "") {
-          return;
-        }
-        jsonModel = [];
-        for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
-          var model = buildSearchTreeModel(CONTENTS[nCount]);
-          if (model != null) {
-            jsonModel.push(model);
-          }
-        }
-
-        // rember checked
-        var checkId = [];
-        $(".search-in").each(function () {
-          var check = $(this).is(":checked");
-          if (check) {
-            // save check id to localstorage
-            var id = $(this).attr("id");
-            checkId.push(id);
-          }
-        });
-
-        localStorage.setItem("checkId", JSON.stringify(checkId));
-        localStorage.setItem("contents", JSON.stringify(jsonModel));
-        localStorage.setItem("searchkeyword", $("#searchkeyword").val());
-        document.location.href = "search.html";
-      });
-    });
-  </script>
+  <input type="checkbox" :id="'checkbox-' + contentid" class="hiddenlevel" v-model="isChecked">
   <script>
     const { createApp } = Vue;
 
@@ -109,7 +60,9 @@
         return {
           contentsData: null,
           categoryTitle: "",
-          subCategoryTitle: ""
+          subCategoryTitle: "",
+          searchKeyword: "",
+          isChecked: true
         };
       },
       created() {
@@ -144,6 +97,34 @@
           return this.contentsData?.TITLE ?? "";
         },
       },
+      methods: {
+        onSearch() {
+          if (!this.searchKeyword) {
+            return;
+          }
+          let jsonModel = [];
+          for (let nCount = 0; nCount < CONTENTS.length; nCount++) {
+            let model = buildSearchTreeModel(CONTENTS[nCount]);
+            if (model != null) {
+              jsonModel.push(model);
+            }
+          }
+
+          // チェックボックスの状態を保存
+          let checkId = [];
+          const checkboxes = document.querySelectorAll(".search-in");
+          checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+              checkId.push(checkbox.id);
+            }
+          });
+
+          localStorage.setItem("checkId", JSON.stringify(checkId));
+          localStorage.setItem("contents", JSON.stringify(jsonModel));
+          localStorage.setItem("searchkeyword", this.searchKeyword);
+          document.location.href = "search.html";
+        }
+      }
     }).mount('#app')
   </script>
 </body>
