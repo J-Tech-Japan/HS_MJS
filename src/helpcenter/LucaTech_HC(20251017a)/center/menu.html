@@ -98,13 +98,15 @@
             }
           });
         });
-        const el = document.createElement("script");
-        el.src = `./js/menu/${this.contentid}_menu.js`;
-        document.head.appendChild(el);
-        el.onload = () => {
-          this.menuData = MENU;
-          document.title = `${this.title} | ${this.contentsTitle} | LucaTech GX ヘルプセンター`;
-        };
+        fetch(`./data/menu/${this.contentid}_menu.json`)
+          .then(response => response.json())
+          .then(data => {
+            this.menuData = data;
+            document.title = `${this.title} | ${this.contentsTitle} | LucaTech GX ヘルプセンター`;
+          })
+          .catch(error => {
+            console.error('メニューデータの読み込みエラー:', error);
+          });
       },
       computed: {
         contentid() {
