@@ -1,4 +1,4 @@
-// 共通のインデックスページコンポーネント (menu.html と purpose.html で使用)
+// 共通のインデックスページコンポーネント (index.html、menu.html、purpose.html、sys_top.html で使用)
 function createIndexPageApp(indexType) {
   const { createApp } = Vue;
 
@@ -11,16 +11,33 @@ function createIndexPageApp(indexType) {
         subCategoryTitle: "",
         searchKeyword: "",
         isChecked: true,
-        indexType: indexType // "menu" または "purpose"
+        indexType: indexType // "index"、"menu"、"purpose"、または "sys_top"
       };
     },
     created() {
+      // index.html の場合は contentid チェックをスキップ
+      if (this.indexType === "index") {
+        this.contentsData = CONTENTS;
+        // search.htmlからの戻りの場合、検索キーワードを復元
+        if (document.referrer.indexOf("search.html") > -1) {
+          const searchkeyword = localStorage.getItem("searchkeyword");
+          if (searchkeyword) {
+            this.searchKeyword = searchkeyword;
+          }
+        }
+        return;
+      }
+
       if (!this.contentid) {
         location.replace("index.html");
         return;
       }
       this.findContentsData();
-      this.loadIndexData();
+      if (this.indexType !== "sys_top") {
+        this.loadIndexData();
+      } else {
+        document.title = `${this.contentsTitle} | LucaTech GX ヘルプセンター`;
+      }
     },
     computed: {
       contentid() {
@@ -55,7 +72,9 @@ function createIndexPageApp(indexType) {
         };
       },
       breadcrumbLabel() {
-        return this.indexType === "menu" ? "メニューから探す" : "目的から探す";
+        if (this.indexType === "menu") return "メニューから探す";
+        if (this.indexType === "purpose") return "目的から探す";
+        return ""; // sys_top の場合は空文字
       }
     },
     methods: {
@@ -111,11 +130,13 @@ function createIndexPageApp(indexType) {
           .map(content => buildSearchTreeModel(content))
           .filter(model => model != null);
 
-        // チェックボックスの状態を保存
-        const checkId = Array.from(document.querySelectorAll(".search-in:checked"))
-          .map(checkbox => checkbox.id);
+        // index.html 以外の場合のみチェックボックスの状態を保存
+        if (this.indexType !== "index") {
+          const checkId = Array.from(document.querySelectorAll(".search-in:checked"))
+            .map(checkbox => checkbox.id);
+          localStorage.setItem("checkId", JSON.stringify(checkId));
+        }
 
-        localStorage.setItem("checkId", JSON.stringify(checkId));
         localStorage.setItem("contents", JSON.stringify(jsonModel));
         localStorage.setItem("searchkeyword", this.searchKeyword);
         document.location.href = "search.html";

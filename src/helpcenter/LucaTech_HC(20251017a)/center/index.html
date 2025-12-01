@@ -13,8 +13,9 @@
    <link rel="stylesheet" href="css/style.css">
    <link rel="icon" href="images/LucaTech_GX_favicon.ico">
    <script src="js/lib/vue.global.prod.js"></script>
-   <script src="js/core/contents.js"></script>
+   <script src="js/components/contents.js"></script>
    <script src="js/search/utils.js"></script>
+   <script src="js/components/commonIndexPage.js"></script>
 </head>
 
 <body class="index">
@@ -82,44 +83,7 @@
       <!-- END DEL 対応1 -->
    </div>
    <script>
-      const { createApp } = Vue;
-
-      createApp({
-         data() {
-            return {
-               contentsData: null,
-               searchKeyword: ""
-            };
-         },
-         created() {
-            this.contentsData = CONTENTS;
-            // search.htmlからの戻りの場合、検索キーワードを復元
-            if (document.referrer.indexOf("search.html") > -1) {
-               const searchkeyword = localStorage.getItem("searchkeyword");
-               if (searchkeyword) {
-                  this.searchKeyword = searchkeyword;
-               }
-            }
-         },
-         methods: {
-            onSearch() {
-               if (!this.searchKeyword) {
-                  return;
-               }
-               let jsonModel = [];
-               for (let nCount = 0; nCount < CONTENTS.length; nCount++) {
-                  let model = buildSearchTreeModel(CONTENTS[nCount]);
-                  if (model != null) {
-                     jsonModel.push(model);
-                  }
-               }
-
-               localStorage.setItem("contents", JSON.stringify(jsonModel));
-               localStorage.setItem("searchkeyword", this.searchKeyword);
-               document.location.href = "search.html";
-            }
-         }
-      }).mount('#app')
+      createIndexPageApp("index").mount('#app');
    </script>
 </body>
 
