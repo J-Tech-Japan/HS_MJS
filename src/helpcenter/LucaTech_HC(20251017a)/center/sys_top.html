@@ -15,6 +15,7 @@
   <script src="js/lib/vue.global.prod.js"></script>
   <script src="js/core/contents.js"></script>
   <script src="js/search/utils.js"></script>
+  <script src="js/components/commonIndexPage.js"></script>
 </head>
 
 <body class="top">
@@ -52,79 +53,7 @@
   </div>
   <input type="checkbox" :id="'checkbox-' + contentid" class="hiddenlevel" v-model="isChecked">
   <script>
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          contentsData: null,
-          categoryTitle: "",
-          subCategoryTitle: "",
-          searchKeyword: "",
-          isChecked: true
-        };
-      },
-      created() {
-        if (!this.contentid) {
-          location.replace("index.html");
-          return;
-        }
-        CONTENTS.forEach(category => {
-          category.CONTENTS.forEach(item => {
-            if (item.TYPE === "category") {
-              item.CONTENTS.forEach(item2 => {
-                if (item2.ID === this.contentid) {
-                  this.contentsData = item2;
-                  this.categoryTitle = category.TITLE;
-                  this.subCategoryTitle = item.TITLE;
-                }
-              });
-            } else if (item.TYPE === "contents" && item.ID === this.contentid) {
-              this.contentsData = item;
-              this.categoryTitle = category.TITLE;
-            }
-          });
-        });
-        document.title = `${this.contentsTitle} | LucaTech GX ヘルプセンター`;
-      },
-      computed: {
-        contentid() {
-          const searchParams = new URLSearchParams(window.location.search);
-          return searchParams.get('contentid');
-        },
-        contentsTitle() {
-          return this.contentsData?.TITLE ?? "";
-        },
-      },
-      methods: {
-        onSearch() {
-          if (!this.searchKeyword) {
-            return;
-          }
-          let jsonModel = [];
-          for (let nCount = 0; nCount < CONTENTS.length; nCount++) {
-            let model = buildSearchTreeModel(CONTENTS[nCount]);
-            if (model != null) {
-              jsonModel.push(model);
-            }
-          }
-
-          // チェックボックスの状態を保存
-          let checkId = [];
-          const checkboxes = document.querySelectorAll(".search-in");
-          checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-              checkId.push(checkbox.id);
-            }
-          });
-
-          localStorage.setItem("checkId", JSON.stringify(checkId));
-          localStorage.setItem("contents", JSON.stringify(jsonModel));
-          localStorage.setItem("searchkeyword", this.searchKeyword);
-          document.location.href = "search.html";
-        }
-      }
-    }).mount('#app')
+    createIndexPageApp("sys_top").mount('#app');
   </script>
 </body>
 
