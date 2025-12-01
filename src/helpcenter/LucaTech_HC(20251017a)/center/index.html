@@ -24,8 +24,8 @@
          <div class="product_logo"></div>
          <h1>お困りですか？</h1>
          <div class="main-header-search">
-            <input id="searchkeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search">
-            <button class="btn-search"></button>
+            <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
+            <button class="btn-search" @click="onSearch"></button>
          </div>
          <!--p class="search_target"><a href="#">検索対象を選択</a></p-->
       </header>
@@ -87,146 +87,39 @@
       createApp({
          data() {
             return {
-               contentsData: null
+               contentsData: null,
+               searchKeyword: ""
             };
          },
          created() {
             this.contentsData = CONTENTS;
-         },
-      }).mount('#app')
-   </script>
-   <script type="text/javascript" src="js/core/contents.js"></script>
-   <script src="js/lib/jQuery-2.1.4.min.js"></script>
-   <script src="js/core/menuRender.js"></script>
-   <!-- script menu slide -->
-   <script>
-      $(function () {
-        // BEGIN DEL 対応1
-        //  for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
-        //     $(".column-left > .column-left-container").append("<div class='box-check box-color-" + CONTENTS[nCount].STYLE + "'><ul>" + renderLeftColumn(CONTENTS[nCount], 0) + "</ul></div>");
-        //  }
-        // END DEL 対応1
-
-         var htmlBox = "";
-         for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
-            if (nCount % 2 == 0) {
-               htmlBox += "<div class='row-box'>";
-            }
-            htmlBox += renderTopPage(CONTENTS[nCount]);
-            if (nCount % 2 == 1) {
-               htmlBox += "</div>";
-            }
-         }
-         if (nCount == CONTENTS.length) {
-            htmlBox += "</div>";
-         }
-         $(".box-content").append(htmlBox);
-
-         $(".search_target").click(function () {
-            $('body').toggleClass('open');
-         });
-
-         $("#more_services li").click(function (e) {
-            $('li').not(this).find('.secondary-services-description').hide();
-            $(this).toggleClass('active').find('.secondary-services-description').toggle();
-         });
-        // BEGIN DEL 対応1
-        //  $('.box-check li .check-toggle').click(function (e) {
-        //     //e.preventDefault();
-        //     $(this).toggleClass('active').siblings('ul').slideToggle(500);
-        //     $(this).parent().siblings().children('.check-toggle').removeClass('active');
-        //     $(this).parent().siblings().children('ul').slideUp(500);
-        //  });
-
-        //  $('.box-check li .check-toggle').each(function () {
-        //     //e.preventDefault();
-        //     $(this).toggleClass('active').siblings('ul').slideToggle(0);
-        //     $(this).parent().siblings().children('.check-toggle').removeClass('active');
-        //     $(this).parent().siblings().children('ul').slideUp(0);
-        //  });
-
-        //  // check all with search-in
-        //  $(".search-in").change(function () {
-        //     var check = $(this).is(":checked");
-        //     $(this).parent().parent().find("ul").find(".search-in").prop("checked", check);
-        //     $(this).closest("div").removeClass("check-new");
-        //  });
-
-        //  $(".search-in").change(function () {
-        //     checkAllInTree(this);
-        //  });
-        // END DEL 対応1
-
-         // set event press enter to search
-         $("#searchkeyword").keypress(function (e) {
-            if (e.which == 13) {
-               $(".btn-search").click();
-            }
-         });
-
-         // click button searchkeyword, save all check box to localstorage
-         $(".btn-search").click(function () {
-            if ($("#searchkeyword").val() == "") {
-               return;
-            }
-            jsonModel = [];
-            for (var nCount = 0; nCount < CONTENTS.length; nCount++) {
-               var model = buildSearchTreeModel(CONTENTS[nCount]);
-               if (model != null) {
-                  jsonModel.push(model);
+            // search.htmlからの戻りの場合、検索キーワードを復元
+            if (document.referrer.indexOf("search.html") > -1) {
+               const searchkeyword = localStorage.getItem("searchkeyword");
+               if (searchkeyword) {
+                  this.searchKeyword = searchkeyword;
                }
             }
+         },
+         methods: {
+            onSearch() {
+               if (!this.searchKeyword) {
+                  return;
+               }
+               let jsonModel = [];
+               for (let nCount = 0; nCount < CONTENTS.length; nCount++) {
+                  let model = buildSearchTreeModel(CONTENTS[nCount]);
+                  if (model != null) {
+                     jsonModel.push(model);
+                  }
+               }
 
-            // BEGIN DEL 対応1
-            // rember checked
-            // var checkId = [];
-            // $(".search-in").each(function () {
-            //    var check = $(this).is(":checked");
-            //    if (check) {
-            //       // save check id to localstorage
-            //       var id = $(this).attr("id");
-            //       checkId.push(id);
-            //    }
-            // });
-
-            // localStorage.setItem("checkId", JSON.stringify(checkId));
-            // END DEL 対応1
-            localStorage.setItem("contents", JSON.stringify(jsonModel));
-            localStorage.setItem("searchkeyword", $("#searchkeyword").val());
-            document.location.href = "search.html";
-         });
-
-         // check if document referrer from search.html
-         if (document.referrer.indexOf("search.html") > -1) {
-            // BEGIN UPD 対応1
-            // var checkId = JSON.parse(localStorage.getItem("checkId"));
-            // if (checkId != null) {
-            //    $(".search-in").prop("checked", false);
-            //    for (var nCount = 0; nCount < checkId.length; nCount++) {
-            //       $("#" + checkId[nCount]).prop("checked", true);
-            //    }
-            //    // check all parent
-            //    $(".search-in").each(function () {
-            //       checkAllInTree(this);
-            //    });
-
-            //    // set search keyword
-            //    var searchkeyword = localStorage.getItem("searchkeyword");
-            //    $("#searchkeyword").val(searchkeyword);
-
-            //    // show left menu
-            //    $("body").addClass("open");
-
-            // }
-            // set search keyword
-            var searchkeyword = localStorage.getItem("searchkeyword");
-            $("#searchkeyword").val(searchkeyword);
-
-            // show left menu
-            $("body").addClass("open");
-            // END UPD 対応1
+               localStorage.setItem("contents", JSON.stringify(jsonModel));
+               localStorage.setItem("searchkeyword", this.searchKeyword);
+               document.location.href = "search.html";
+            }
          }
-      });
+      }).mount('#app')
    </script>
 </body>
 
