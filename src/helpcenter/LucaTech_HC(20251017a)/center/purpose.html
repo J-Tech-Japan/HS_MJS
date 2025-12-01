@@ -15,6 +15,7 @@
   <script src="js/lib/vue.global.prod.js"></script>
   <script src="js/core/contents.js"></script>
   <script src="js/search/utils.js"></script>
+  <script src="js/components/indexPage.js"></script>
 </head>
 
 <body class="sub index-purpose">
@@ -25,10 +26,10 @@
         <li>{{categoryTitle}}</li>
         <li v-if="subCategoryTitle">{{subCategoryTitle}}</li>
         <li><a :href="`sys_top.html?contentid=${contentid}`">{{contentsTitle}}TOP</a></li>
-        <li>目的から探す</li>
+        <li>{{breadcrumbLabel}}</li>
       </ul>
       <div class="product_logo"></div>
-      <h1 :class="`${contentid.toLowerCase().slice(0, 3)}`">{{contentsTitle}}</h1>
+      <h1 :class="contentidPrefix">{{contentsTitle}}</h1>
 
       <div class="main-header-search">
         <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
@@ -48,7 +49,9 @@
           <template v-for="item in category" :key="item">
             <h4 :id="item">{{item}}</h4>
             <ul>
-              <li v-for="(item2,index) in contents[item]" :key="index"><a :href="getUrl(item2[0])" @click="setBreadCrumbLS(getUrl(item2[0]), item)">{{item2[1]}}</a></li>
+              <li v-for="(item2,index) in contents[item]" :key="index">
+                <a :href="getUrl(item2[0])" @click="setBreadCrumbLS($event, item)">{{item2[1]}}</a>
+              </li>
             </ul>
           </template>
         </div>
@@ -60,119 +63,9 @@
     </footer>
   </div>
   <input type="checkbox" :id="'checkbox-' + contentid" class="hidden" v-model="isChecked">
+
   <script>
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          contentsData: null,
-          menuData: null,
-          categoryTitle: "",
-          subCategoryTitle: "",
-          searchKeyword: "",
-          isChecked: true
-        };
-      },
-      created() {
-        if (!this.contentid) {
-          location.replace("index.html");
-          return;
-        }
-        CONTENTS.forEach(category => {
-          category.CONTENTS.forEach(item => {
-            if (item.TYPE === "category") {
-              item.CONTENTS.forEach(item2 => {
-                if (item2.ID === this.contentid) {
-                  this.contentsData = item2;
-                  this.categoryTitle = category.TITLE;
-                  this.subCategoryTitle = item.TITLE;
-                }
-              });
-            } else if (item.TYPE === "contents" && item.ID === this.contentid) {
-              this.contentsData = item;
-              this.categoryTitle = category.TITLE;
-            }
-          });
-        });
-        fetch(`./data/purpose/${this.contentid}_purpose.json`)
-          .then(response => response.json())
-          .then(data => {
-            this.menuData = data;
-            document.title = `${this.title} | ${this.contentsTitle} | LucaTech GX ヘルプセンター`;
-          })
-          .catch(error => {
-            console.error('目的データの読み込みエラー:', error);
-          });
-      },
-      computed: {
-        contentid() {
-          const searchParams = new URLSearchParams(window.location.search);
-          return searchParams.get('contentid');
-        },
-        contentsTitle() {
-          return this.contentsData?.TITLE ?? "";
-        },
-        title() {
-          return this.menuData?.TITLE ?? "";
-        },
-        category() {
-          return this.menuData?.CATEGORY ?? [];
-        },
-        contents() {
-          return this.menuData?.CONTENTS ?? {};
-        },
-        path() {
-          return this.contentsData?.PATH ?? "";
-        }
-      },
-      methods: {
-        getUrl(id) {
-          id = id.split("#");
-          id[0] = id[0] + '.html';
-          id = id.join("#");
-          return this.path + 'index.html#t=' + id;
-        },
-        setBreadCrumbLS(path, subContentsTitle) {
-          const breadcrumb = {
-            path: path,
-            indexType: "purpose",
-            contentid: this.contentid,
-            categoryTitle: this.categoryTitle,
-            subCategoryTitle: this.subCategoryTitle,
-            contentsTitle: this.contentsTitle,
-            subContentsTitle: subContentsTitle,
-          };
-          localStorage.setItem("breadcrumb", JSON.stringify(breadcrumb));
-        },
-        onSearch() {
-          if (!this.searchKeyword) {
-            return;
-          }
-          let jsonModel = [];
-          for (let nCount = 0; nCount < CONTENTS.length; nCount++) {
-            let model = buildSearchTreeModel(CONTENTS[nCount]);
-            if (model != null) {
-              jsonModel.push(model);
-            }
-          }
-
-          // チェックボックスの状態を保存
-          let checkId = [];
-          const checkboxes = document.querySelectorAll(".search-in");
-          checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-              checkId.push(checkbox.id);
-            }
-          });
-
-          localStorage.setItem("checkId", JSON.stringify(checkId));
-          localStorage.setItem("contents", JSON.stringify(jsonModel));
-          localStorage.setItem("searchkeyword", this.searchKeyword);
-          document.location.href = "search.html";
-        }
-      }
-    }).mount('#app')
+    createIndexPageApp("purpose").mount('#app');
   </script>
 </body>
 
