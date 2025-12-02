@@ -81,11 +81,13 @@
          <div class="column-right">
             <!-- 検索結果ヘッダー部分 -->
             <div class="column-right-header">
-               <!-- 検索結果がある場合の表示 -->
-               <div class="top-content hidden hasresult">「<span id="resultkeyword"></span>」の検索結果：<span id="count-all">0</span>件見つかりました。</div>
+               <!-- 検索結果がある場合の表示（Vue.js連携） -->
+               <div class="top-content hasresult" :class="{ hidden: !hasResults }">
+                  「<span id="resultkeyword">{{ searchKeyword }}</span>」の検索結果：<span id="count-all">{{ resultCount }}</span>件見つかりました。
+               </div>
                
-               <!-- 検索結果がない場合の表示 -->
-               <div class="top-content hidden noresult">
+               <!-- 検索結果がない場合の表示（Vue.js連携） -->
+               <div class="top-content noresult" :class="{ hidden: hasResults }">
                   <p class="icon"><img src="images/ic_g_search_result_non_bl_96px.svg"></p>
                   <p>申し訳ありません。<br>検索条件に一致するトピックはありませんでした。</p>
                   <p class="L2">別の用語で検索してみてください。<br>検索語を短くしたり、簡単な用語に変えたりすると、<br>トピックが見つかる場合もあります。</p>
@@ -95,9 +97,11 @@
                <div id="pagination" class="pagination-container" style="text-align:center"></div>
             </div>
             
-            <!-- 検索結果一覧表示エリア -->
+            <!-- 検索結果一覧表示エリア（Vue.js連携） -->
             <div class="box-click-search searchresults items">
-
+               <!-- Vue.jsによる検索結果表示は現在DOM操作で実装 -->
+               <!-- 将来的にv-forでの実装を推奨: -->
+               <!-- <div v-for="result in displayedResults" :key="result.url" class="wSearchResultItem">...</div> -->
             </div>
             
             <!-- ページネーション（下部） -->

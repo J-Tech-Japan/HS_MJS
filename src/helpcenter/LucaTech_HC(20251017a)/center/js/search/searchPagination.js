@@ -49,23 +49,32 @@ function setupPagination() {
 }
 
 /**
- * ページネーション結果
+ * ページネーション結果 (jQuery依存あり)
+ * 
+ * 注意: この関数はjQuery paginationプラグインに依存しています
+ * 将来的にはネイティブ実装またはVueコンポーネントへの置き換えを推奨
+ * 
  * @param {jQuery} container - ページネーションコンテナ
  * @param {jQuery} container2 - 追加のページネーションコンテナ
  * @param {number} [page] - 初期ページ番号
  * @returns {void}
  */
 function pagination(container, container2, page) {
-    // ページネーション
-    // const container = $('.pagination-container');
-    const sources = sourcesForPagging.length==0?function () {
+    // ソースデータを準備（初回のみDOM から取得）
+    const sources = sourcesForPagging.length === 0 ? function () {
         const result = [];
-        $('.searchresults').find('.wSearchResultItem').each(function () {
-            result.push($(this).html());
+        const searchResults = document.querySelectorAll('.searchresults .wSearchResultItem');
+        searchResults.forEach(item => {
+            result.push(item.innerHTML);
         });
-        sourcesForPagging=result;
+        sourcesForPagging = result;
+        
+        // ページネーション状態を更新
+        paginationState.totalItems = result.length;
+        paginationState.totalPages = Math.ceil(result.length / PAGINATION_PAGE_SIZE);
+        
         return result;
-    }():sourcesForPagging;
+    }() : sourcesForPagging;
 
     if (sources.length) {
         const options = {
@@ -74,12 +83,20 @@ function pagination(container, container2, page) {
             prevText: "",
             nextText: "",
             callback: function (response, pagination) {
+                // ページ変更時のコールバック（ネイティブDOM APIを使用）
                 let dataHtml = '<ul>';
-                $.each(response, function (index, item) {
+                response.forEach((item, index) => {
                     dataHtml += '<li class="wSearchResultItem nd-content-search">' + item + '</li>';
                 });
                 dataHtml += '</ul>';
-                $('.searchresults').html(dataHtml);
+                
+                const searchResults = document.querySelector('.searchresults');
+                if (searchResults) {
+                    searchResults.innerHTML = dataHtml;
+                }
+                
+                // ページネーション状態を更新
+                paginationState.currentPage = pagination.pageNumber;
             }
         };
         // 共通のフック処理とページネーション初期化
@@ -110,16 +127,26 @@ function pagination(container, container2, page) {
             }
         });
 
+        // 表示/非表示の制御（ネイティブDOM API）
         if (sources.length <= PAGINATION_PAGE_SIZE) {
-            container.hide();
-            container2.hide();
+            const paginationContainer = document.getElementById('pagination');
+            const paginationExtContainer = document.getElementById('pagination-ext');
+            if (paginationContainer) paginationContainer.style.display = 'none';
+            if (paginationExtContainer) paginationExtContainer.style.display = 'none';
+            paginationState.isVisible = false;
         } else {
-            container.show();
-            container2.show();
+            const paginationContainer = document.getElementById('pagination');
+            const paginationExtContainer = document.getElementById('pagination-ext');
+            if (paginationContainer) paginationContainer.style.display = 'block';
+            if (paginationExtContainer) paginationExtContainer.style.display = 'block';
+            paginationState.isVisible = true;
         }
     } else {
-        container.hide();
-        container2.hide();
+        const paginationContainer = document.getElementById('pagination');
+        const paginationExtContainer = document.getElementById('pagination-ext');
+        if (paginationContainer) paginationContainer.style.display = 'none';
+        if (paginationExtContainer) paginationExtContainer.style.display = 'none';
+        paginationState.isVisible = false;
     }
 }
 

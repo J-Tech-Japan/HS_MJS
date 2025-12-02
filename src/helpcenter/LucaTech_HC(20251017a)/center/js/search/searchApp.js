@@ -27,19 +27,13 @@ function initializeVueSearchApp() {
             const init = reactive(initState);
             const breadcrumb = reactive(breadcrumbState);
 
-            // 検索キーワード（v-model用）
-            const searchKeyword = computed({
-                get: () => searchData.keyword,
-                set: (value) => {
-                    searchData.keyword = value;
-                }
-            });
-
-            // 検索結果数の計算プロパティ
+            // 計算プロパティ
+            const searchKeyword = computed(() => searchData.keyword);
             const resultCount = computed(() => display.resultCount);
             const hasResults = computed(() => display.hasResults);
             const isSearching = computed(() => searchData.isSearching);
             const isInitialized = computed(() => init.isInitialized);
+            const displayedResults = computed(() => display.displayedResults || []);
 
             // 検索実行メソッド
             const executeSearch = () => {
@@ -107,6 +101,7 @@ function initializeVueSearchApp() {
                 hasResults,
                 isSearching,
                 isInitialized,
+                displayedResults,
 
                 // メソッド
                 executeSearch,
