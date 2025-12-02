@@ -31,27 +31,17 @@ async function initSearch() {
  * @param {Object} node - カタログノード
  */
 function collectSearchJs(node) {
-    if (node) {
-        node.countItem = 0;
-        if (!node.breadCrum) {
-            node.breadCrum = [];
-        }
-        node.breadCrum.push(node.title);
+    node.countItem = 0;
+    node.breadCrum = node.breadCrum || [];
+    node.breadCrum.push(node.title);
 
-        if (node.searchjs) {
-            searchCatalogueJs.push(node);
-        }
-        if (node.childs) {
-            for (let i = 0; i < node.childs.length; i++) {
-                if (!node.childs[i].breadCrum) {
-                    node.childs[i].breadCrum = [];
-                }
-
-                node.childs[i].breadCrum = node.breadCrum.slice();
-
-                //node.childs[i].breadCrum[node.childs[i].breadCrum.length] = node.title;
-                collectSearchJs(node.childs[i]);
-            }
+    if (node.searchjs) {
+        searchCatalogueJs.push(node);
+    }
+    if (node.childs) {
+        for (const child of node.childs) {
+            child.breadCrum = node.breadCrum.slice();
+            collectSearchJs(child);
         }
     }
 }
@@ -77,27 +67,23 @@ function loadScript(src) {
  * @param {number} searchCatalogueItemChildPos - 現在処理中のインデックス
  */
 async function loadSearchJs(collection, searchCatalogueItemChildPos) {
-    const item = collection[searchCatalogueItemChildPos];
-    
-    try {
-        await loadScript(item.searchjs);
-        item.searchWords = searchWords;
-        
-        searchCatalogueItemChildPos++;
-        if (searchCatalogueItemChildPos < collection.length) {
-            await loadSearchJs(collection, searchCatalogueItemChildPos);
-        } else {
-            isLoaded = true;
-            $('body').addClass('open');
-            $('.box-nd-search').removeClass('hidden');
-            $('.box-content-s').addClass('hidden');
-            // 検索機能が利用可能になったことを通知
-            if (typeof search === 'function') {
-                search();
-            }
+    for (let i = searchCatalogueItemChildPos; i < collection.length; i++) {
+        const item = collection[i];
+        try {
+            await loadScript(item.searchjs);
+            item.searchWords = searchWords;
+        } catch (error) {
+            console.error(`Failed to load script: ${item.searchjs}`, error);
         }
-    } catch (error) {
-        console.error(`Failed to load script: ${item.searchjs}`, error);
+    }
+    
+    isLoaded = true;
+    $('body').addClass('open');
+    $('.box-nd-search').removeClass('hidden');
+    $('.box-content-s').addClass('hidden');
+    // 検索機能が利用可能になったことを通知
+    if (typeof search === 'function') {
+        search();
     }
 }
 
@@ -105,25 +91,19 @@ async function loadSearchJs(collection, searchCatalogueItemChildPos) {
  * カタログが読み込み完了しているかチェック
  * @returns {boolean} 読み込み完了フラグ
  */
-function isCatalogLoaded() {
-    return isLoaded;
-}
+const isCatalogLoaded = () => isLoaded;
 
 /**
  * 検索カタログを取得
  * @returns {Array} 検索カタログ配列
  */
-function getSearchCatalogue() {
-    return searchCatalogue;
-}
+const getSearchCatalogue = () => searchCatalogue;
 
 /**
  * 検索カタログJSを取得
  * @returns {Array} 検索カタログJS配列
  */
-function getSearchCatalogueJs() {
-    return searchCatalogueJs;
-}
+const getSearchCatalogueJs = () => searchCatalogueJs;
 
 /**
  * 検索カタログを設定
