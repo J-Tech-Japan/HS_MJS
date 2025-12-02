@@ -5,9 +5,6 @@
  * - 結果カウント表示
  */
 
-// 定数定義
-const CLICK_HANDLER_DELAY = 0;
-
 /**
  * 検索単語を準備する
  * @returns {Array} 検索単語配列
@@ -35,34 +32,33 @@ function performSearchAndRender(searchWord) {
     const $searchResults = $(".searchresults");
     $searchResults.empty();
 
-    const searchCatalogueJs = getSearchCatalogueJs();
-    for (let searchCatalogueJsCount = 0; searchCatalogueJsCount < searchCatalogueJs.length; searchCatalogueJsCount++) {
-        const searchCatalogueItemChild = searchCatalogueJs[searchCatalogueJsCount];
-        if ($("#search-in-" + searchCatalogueItemChild.id).is(":checked")) {
-            searchCatalogueItemChild.findItems.each(function () {
-                const breadCrum = searchCatalogueItemChild.breadCrum;
-                let displayText = $(this).parent().text();
-
-                displayText = searchKeywordsInString(displayText, searchWord); 
-                if (displayText=="") {
-                    displayText=$(this).parent().find(".displayText").text();
-                }
-
-                // 安全にHTMLを構築してエスケープされたコンテンツを使用
-                const safeTitle = escapeHtml($(this).parent().find(".search_title").text());
-                const safeDisplayText = escapeHtml(displayText);
-                const safeUrl = escapeHtml(searchCatalogueItemChild.baseUrl.replace(/\/$/, "") + "/index.html#t=" + $(this).parent().attr("id") + ".html");
-                
-                $searchResults.append($("<div class='wSearchResultItem'><div class='wSearchResultTitle title-s'><a class='nolink' href='#' onclick='openhelplink(\"" + safeUrl + "\", event);return false;'>" + safeTitle + "</a></div><div class='wSearchResultBreadCrum'>" + buildBreadCrum(breadCrum) + "</div><div class='wSearchContent'><span class='wSearchContext nd-p'>" + safeDisplayText + "</span></div></div>"));
-            });
-            countAllResult += searchCatalogueItemChild.findItems.length;
-        }
-    }
+    const catalogues = getSearchCatalogueJs();
+    catalogues.forEach(catalogue => {
+        if (!$(`#search-in-${catalogue.id}`).is(":checked")) return;
+        
+        catalogue.findItems.each(function () {
+            const $parent = $(this).parent();
+            const displayText = searchKeywordsInString($parent.text(), searchWord) || $parent.find(".displayText").text();
+            const safeTitle = escapeHtml($parent.find(".search_title").text());
+            const safeDisplayText = escapeHtml(displayText);
+            const baseUrl = catalogue.baseUrl.replace(/\/$/, "");
+            const safeUrl = escapeHtml(`${baseUrl}/index.html#t=${$parent.attr("id")}.html`);
+            
+            const resultItem = `
+                <div class='wSearchResultItem'>
+                    <div class='wSearchResultTitle title-s'>
+                        <a class='nolink' href='#' onclick='openhelplink("${safeUrl}", event);return false;'>${safeTitle}</a>
+                    </div>
+                    <div class='wSearchResultBreadCrum'>${buildBreadCrum(catalogue.breadCrum)}</div>
+                    <div class='wSearchContent'><span class='wSearchContext nd-p'>${safeDisplayText}</span></div>
+                </div>`;
+            $searchResults.append(resultItem);
+        });
+        countAllResult += catalogue.findItems.length;
+    });
     
     return countAllResult;
 }
-
-
 
 /**
  * 検索結果を表示
@@ -89,14 +85,10 @@ function displayResult() {
  */
 function updateResultCount(count) {
     const hasResults = count > 0;
-    
     $("#count-all").text(count);
     $(".hasresult").toggleClass("hidden", !hasResults);
     $(".noresult").toggleClass("hidden", hasResults);
-    
-    if (hasResults) {
-        $("#resultkeyword").text($("#searchkeyword").val());
-    }
+    if (hasResults) $("#resultkeyword").text($("#searchkeyword").val());
 }
 
 /**
@@ -108,7 +100,7 @@ function updateResultCount(count) {
  */
 function highlightSearchWord(searchWord, content, style) {
     const escapedWords = searchWord.map(word => 
-        selectorEscape(word.replace(">", "&gt;").replace("<", "&lt;"))
+        selectorEscape(word.replace(/[<>]/g, m => m === '<' ? '&lt;' : '&gt;'))
     );
 
     let hilightWord = escapedWords.join("|");
@@ -134,39 +126,29 @@ function highlightSearchWord(searchWord, content, style) {
     });
 }
 
-
-
 /**
  * 左メニューで検索カウントを表示
  * @param {Object} node - カウント表示対象のノード
  * @returns {void}
  */
 function displayCount(node) {
-    if (node) {
-        if (node.findItems) {
-            node.countItem = node.findItems.length;
-        } else {
-            node.countItem = 0;
-        }
-        if (node.childs) {
-            for (let i = 0; i < node.childs.length; i++) {
-                displayCount(node.childs[i]);
-                node.countItem += node.childs[i].countItem;
-            }
-        }
-
-        $("#count-" + node.id).html("(<span class=countnumber>" + node.countItem + "</span>)");
-        if(node.countItem==0){
-            $("label[for='search-in-" + node.id+"']").addClass("emptyresult");
-            $("label[for='search-in-all-" + node.id+"']").addClass("emptyresult");
-        }else{
-            $("label[for='search-in-" + node.id+"']").removeClass("emptyresult");
-            $("label[for='search-in-all-" + node.id+"']").removeClass("emptyresult");
-        }
-
-        // カウント数字クリック時のイベント処理
-        setupCountClickHandler();
+    if (!node) return;
+    
+    node.countItem = node.findItems ? node.findItems.length : 0;
+    
+    if (node.childs) {
+        node.childs.forEach(child => {
+            displayCount(child);
+            node.countItem += child.countItem;
+        });
     }
+
+    $(`#count-${node.id}`).html(`(<span class=countnumber>${node.countItem}</span>)`);
+    
+    const method = node.countItem === 0 ? "addClass" : "removeClass";
+    $(`label[for='search-in-${node.id}'], label[for='search-in-all-${node.id}']`)[method]("emptyresult");
+
+    setupCountClickHandler();
 }
 
 /**
@@ -178,20 +160,15 @@ function setupCountClickHandler() {
         e.preventDefault();
         e.stopImmediatePropagation();
         e.stopPropagation();
+        
         // すべてのチェックを外す
-        $(".search-in[type='checkbox']").prop("checked", false);
-        $(".search-in-all[type='checkbox']").prop("checked", false);
-        $(".search-in[type='checkbox']").closest("div").removeClass("check-new");
-        $(".search-in-all[type='checkbox']").closest("div").removeClass("check-new");
+        $(".search-in[type='checkbox'], .search-in-all[type='checkbox']")
+            .prop("checked", false)
+            .closest("div").removeClass("check-new");
 
-        const self = $(this);
-        // 現在のものをチェック
-        setTimeout(function(){
-            const id = self.closest("span.count").attr("id").replace("count-", "");
-            $("#search-in-all-" + id).prop("checked", true);
-            $("#search-in-" + id).prop("checked", true);
-            $("#search-in-" + id).trigger("change");
-        }, CLICK_HANDLER_DELAY);
+        const id = $(this).closest("span.count").attr("id").replace("count-", "");
+        $(`#search-in-all-${id}, #search-in-${id}`).prop("checked", true);
+        $(`#search-in-${id}`).trigger("change");
     });
 }
 
@@ -200,21 +177,8 @@ function setupCountClickHandler() {
  * @returns {void}
  */
 function clearSearchResults() {
-    const $searchResults = $(".searchresults");
-    $searchResults.empty();
+    $(".searchresults").empty();
     resetPaginationSource();
-}
-
-
-
-/**
- * 検索結果の表示状態を更新
- * @param {boolean} hasResults - 検索結果があるかどうか
- * @returns {void}
- */
-function updateSearchResultsVisibility(hasResults) {
-    $(".hasresult").toggleClass("hidden", !hasResults);
-    $(".noresult").toggleClass("hidden", hasResults);
 }
 
 /**
@@ -225,10 +189,8 @@ function updateSearchResultsVisibility(hasResults) {
  */
 function updateResultsUI(resultCount, keyword) {
     const hasResults = resultCount > 0;
-    
     $(".hasresult").toggleClass("hidden", !hasResults);
     $(".noresult").toggleClass("hidden", hasResults);
-    
     if (hasResults) {
         $("#count-all").text(resultCount);
         $("#resultkeyword").text(escapeHtml(keyword));
