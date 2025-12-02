@@ -1,8 +1,11 @@
 /**
- * 共通ユーティリティ関数モジュール
+ * 共通ユーティリティ関数モジュール (Vue.js対応版)
  * - HTMLエスケープ
  * - 文字列処理
  * - その他の汎用機能
+ * 
+ * このモジュールはVue.jsとの互換性を保ちつつ、
+ * jQuery依存を最小限にするよう設計されています
  */
 
 /**
@@ -26,48 +29,68 @@ function escapeHtml(unsafe) {
 }
 
 /**
- * チェックボックスの階層的な状態管理関数
+ * チェックボックスの階層的な状態管理関数 (Vue.js対応版)
  * 子チェックボックスの状態に応じて親チェックボックスの状態を更新し、
  * 必要に応じて再帰的に上位階層も更新する
+ * 
+ * jQueryからネイティブDOMメソッドに変換済み
+ * 
  * @param {Element} node - チェック状態が変更されたチェックボックス要素
  */
 function checkAllInTree(node) {
-    const $node = $(node);
-    const $parent = $($node.closest("ul").closest("li").find(".search-in")[0]);
+    // 最も近い<ul>要素を取得し、その親の<li>要素内の.search-inを探す
+    const closestUl = node.closest("ul");
+    if (!closestUl) return;
     
-    if ($parent.length === 0) return;
+    const parentLi = closestUl.closest("li");
+    if (!parentLi) return;
+    
+    const parentCheckbox = parentLi.querySelector(".search-in");
+    if (!parentCheckbox) return;
     
     // 同階層の全ての兄弟要素の状態を確認
-    const $siblings = $node.closest("ul").find(".search-in");
-    const checkedStates = $siblings.map(function() { 
-        return $(this).is(":checked"); 
-    }).get();
+    const siblings = Array.from(closestUl.querySelectorAll(".search-in"));
+    const checkedStates = siblings.map(checkbox => checkbox.checked);
     
     const allChecked = checkedStates.every(state => state);
     const someChecked = checkedStates.some(state => state);
     const allUnchecked = checkedStates.every(state => !state);
     
-    // 親要素とすべて選択要素の共通参照
-    const $parentDiv = $parent.closest("div");
-    const $allCheckbox = $parentDiv.closest("li").find("ul li:first .search-in-all");
-    const $allDiv = $parentDiv.closest("li").find("ul li:first div.custom-checkbox");
+    // 親要素の参照を取得
+    const parentDiv = parentCheckbox.closest("div");
+    const parentLiForAll = parentDiv ? parentDiv.closest("li") : null;
+    
+    let allCheckbox = null;
+    let allDiv = null;
+    
+    if (parentLiForAll) {
+        const firstLi = parentLiForAll.querySelector("ul li:first-child");
+        if (firstLi) {
+            allCheckbox = firstLi.querySelector(".search-in-all");
+            allDiv = firstLi.querySelector("div.custom-checkbox");
+        }
+    }
     
     // 状態に応じて更新
     if (allChecked) {
-        $parent.prop("checked", true);
-        $allCheckbox.prop("checked", true);
-        $parentDiv.add($allDiv).removeClass("check-new");
+        parentCheckbox.checked = true;
+        if (allCheckbox) allCheckbox.checked = true;
+        if (parentDiv) parentDiv.classList.remove("check-new");
+        if (allDiv) allDiv.classList.remove("check-new");
     } else if (someChecked) {
-        $parent.prop("checked", false);
-        $allCheckbox.prop("checked", false);
-        $parentDiv.add($allDiv).addClass("check-new");
+        parentCheckbox.checked = false;
+        if (allCheckbox) allCheckbox.checked = false;
+        if (parentDiv) parentDiv.classList.add("check-new");
+        if (allDiv) allDiv.classList.add("check-new");
     } else if (allUnchecked) {
-        $parent.prop("checked", false);
-        $allCheckbox.prop("checked", false);
-        $parentDiv.add($allDiv).removeClass("check-new");
+        parentCheckbox.checked = false;
+        if (allCheckbox) allCheckbox.checked = false;
+        if (parentDiv) parentDiv.classList.remove("check-new");
+        if (allDiv) allDiv.classList.remove("check-new");
     }
     
-    checkAllInTree($parent[0]); // 再帰的に上位階層も更新
+    // 再帰的に上位階層も更新
+    checkAllInTree(parentCheckbox);
 }
 
 /**
@@ -149,26 +172,60 @@ function normalizeSearchKeyword(keyword) {
 }
 
 /**
- * キー入力イベントの遅延実行用関数（スロットリング）
+ * キー入力イベントの遅延実行用関数（デバウンス）
  * 連続したキー入力を制御し、一定時間後に処理を実行する
+ * 
+ * Vue.jsのイベントハンドラでも使用可能
+ * 
  * @param {Function} func - 実行する関数
  * @param {number} wait - 待機時間（ミリ秒）
- * @returns {Function} スロットリングされた関数
+ * @returns {Function} デバウンスされた関数
  */
 function throttle(func, wait) {
-    return function () {
-        var that = this,
-            args = [].slice.call(arguments);
-
+    let timeoutId = null;
+    
+    return function (...args) {
+        const context = this;
+        
         // 既存のタイマーをクリア
-        clearTimeout(func._throttleTimeout);
-
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
+        }
+        
         // 指定した待機時間後に関数を実行
-        func._throttleTimeout = setTimeout(function () {
-            func.apply(that, args);
+        timeoutId = setTimeout(() => {
+            func.apply(context, args);
+            timeoutId = null;
         }, wait);
     };
 }
 
+/**
+ * デバウンス関数のエイリアス
+ * より適切な名前として提供
+ * @param {Function} func - 実行する関数
+ * @param {number} wait - 待機時間（ミリ秒）
+ * @returns {Function} デバウンスされた関数
+ */
+function debounce(func, wait) {
+    return throttle(func, wait);
+}
+
 // 他のユーティリティ関数を今後追加する場合はここに記述
 // 例: 日付フォーマット、数値フォーマット、バリデーション関数など
+
+/**
+ * 将来のモジュール化のためのエクスポート宣言
+ * ES6モジュールとして使用する場合は、以下のコメントを解除してください
+ */
+/*
+export {
+    escapeHtml,
+    checkAllInTree,
+    searchKeywordsInString,
+    buildSearchTreeModel,
+    normalizeSearchKeyword,
+    throttle,
+    debounce
+};
+*/

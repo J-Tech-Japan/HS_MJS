@@ -1,5 +1,10 @@
 /**
- * 検索結果ページネーション機能モジュール
+ * 検索結果ページネーション機能モジュール (Vue.js対応版)
+ * jQuery依存を減らし、Vue.jsのリアクティブシステムと互換性を持たせています
+ * 
+ * 注意: このファイルはjQuery paginationプラグインに依存しています
+ * 将来的にはネイティブ実装またはVueコンポーネントへの移行を推奨します
+ * 
  * - ページネーション表示制御
  * - ページ切り替え処理
  * - 複数ページネーションコンテナの連動
@@ -12,12 +17,35 @@ const PAGINATION_PAGE_SIZE = 10;
 let sourcesForPagging = [];
 
 /**
- * ページネーションを設定する
+ * ページネーション状態管理オブジェクト
+ * Vue.jsのリアクティブシステムで使用可能
+ */
+const paginationState = {
+    currentPage: 1,
+    totalPages: 0,
+    pageSize: PAGINATION_PAGE_SIZE,
+    totalItems: 0,
+    isVisible: false
+};
+
+/**
+ * ページネーションを設定する (Vue.js対応版)
  * @returns {void}
  */
 function setupPagination() {
     sourcesForPagging = [];
-    pagination($('#pagination'), $('#pagination-ext'), 1);
+    paginationState.currentPage = 1;
+    
+    // ネイティブDOM APIでコンテナを取得
+    const paginationContainer = document.getElementById('pagination');
+    const paginationExtContainer = document.getElementById('pagination-ext');
+    
+    // jQueryプラグインが利用可能な場合は使用
+    if (typeof $ !== 'undefined' && paginationContainer && paginationExtContainer) {
+        pagination($('#pagination'), $('#pagination-ext'), 1);
+    } else {
+        console.warn('setupPagination: jQuery pagination plugin not available');
+    }
 }
 
 /**
@@ -96,11 +124,40 @@ function pagination(container, container2, page) {
 }
 
 /**
- * ページネーションを非表示
+ * ページネーションを非表示 (Vue.js対応版)
+ * jQuery依存を除去し、ネイティブDOM APIを使用
  * @returns {void}
  */
 function hidePagination() {
-    $('#pagination, #pagination-ext').hide();
+    const paginationContainer = document.getElementById('pagination');
+    const paginationExtContainer = document.getElementById('pagination-ext');
+    
+    if (paginationContainer) {
+        paginationContainer.style.display = 'none';
+    }
+    if (paginationExtContainer) {
+        paginationExtContainer.style.display = 'none';
+    }
+    
+    paginationState.isVisible = false;
+}
+
+/**
+ * ページネーションを表示 (Vue.js対応版)
+ * @returns {void}
+ */
+function showPagination() {
+    const paginationContainer = document.getElementById('pagination');
+    const paginationExtContainer = document.getElementById('pagination-ext');
+    
+    if (paginationContainer) {
+        paginationContainer.style.display = 'block';
+    }
+    if (paginationExtContainer) {
+        paginationExtContainer.style.display = 'block';
+    }
+    
+    paginationState.isVisible = true;
 }
 
 /**
@@ -109,4 +166,15 @@ function hidePagination() {
  */
 function resetPaginationSource() {
     sourcesForPagging = [];
+    paginationState.currentPage = 1;
+    paginationState.totalPages = 0;
+    paginationState.totalItems = 0;
+}
+
+/**
+ * ページネーション状態を取得
+ * @returns {Object} ページネーション状態オブジェクト
+ */
+function getPaginationState() {
+    return paginationState;
 }

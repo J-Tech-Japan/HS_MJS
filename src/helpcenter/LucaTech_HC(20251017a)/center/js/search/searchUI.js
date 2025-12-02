@@ -1,9 +1,21 @@
 /**
- * 検索UI構築とイベント処理モジュール
+ * 検索UI構築とイベント処理モジュール (Vue.js対応版)
+ * jQuery依存を除去し、Vue.jsのリアクティブシステムと互換性を持たせています
+ * 
  * - ツリービューの構築
  * - 検索結果表示の構築
  * - イベントハンドラーの設定
  */
+
+/**
+ * UI状態管理オブジェクト
+ * Vue.jsのリアクティブシステムで使用可能
+ */
+const uiState = {
+    treeviewBuilt: false,
+    firstPageBuilt: false,
+    eventHandlersAttached: false
+};
 
 /**
  * チェックボックス要素を生成
@@ -58,11 +70,19 @@ function buildTreeviewNode(node) {
 }
 
 /**
- * 左メニュー全体を構築（ツリービューのエントリーポイント）
+ * 左メニュー全体を構築 (Vue.js対応版)
+ * jQuery依存を除去し、ネイティブDOM APIを使用
  */
 function buildTreeview() {
-    const $container = $(".column-left > .column-left-container");
+    // ネイティブDOM APIでコンテナを取得
+    const container = document.querySelector(".column-left > .column-left-container");
+    if (!container) {
+        console.warn('buildTreeview: .column-left-container not found');
+        return;
+    }
+    
     const searchCatalogue = getSearchCatalogue();
+    
     // DOM操作を一括で行うため、fragmentを利用
     const fragment = document.createDocumentFragment();
     searchCatalogue.forEach(catalogue => {
@@ -71,52 +91,158 @@ function buildTreeview() {
         div.innerHTML = `<ul>${buildTreeviewNode(catalogue)}</ul>`;
         fragment.appendChild(div);
     });
-    $container.empty().append(fragment);
+    
+    // コンテナをクリアしてfragmentを追加
+    container.innerHTML = '';
+    container.appendChild(fragment);
+    
+    // 状態を更新
+    uiState.treeviewBuilt = true;
+    
+    // イベントハンドラーを設定
     setupTreeviewEventHandlers();
+    
+    // ツリービュー構築完了イベントを発火
+    window.dispatchEvent(new CustomEvent('treeviewBuilt', {
+        detail: { catalogue: searchCatalogue }
+    }));
 }
 
 /**
- * ツリービューのイベントハンドラーを設定
+ * ツリービューのイベントハンドラーを設定 (Vue.js対応版)
+ * jQueryのイベントデリゲーションをネイティブイベントリスナーに変換
  */
 function setupTreeviewEventHandlers() {
-    const $boxCheck = $('.box-check');
-    $boxCheck.on('click', 'li .check-toggle', onToggleClick);
-    $boxCheck.on('click', 'li label.custom-control-label.root', onRootLabelClick);
-    $boxCheck.on('change', '.search-in', onSearchInChange);
-    $boxCheck.on('change', '.search-in-all', onSearchInAllChange);
-    $(document).on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
+    // .box-check要素にイベントリスナーを設定（イベントデリゲーション）
+    const boxCheckElements = document.querySelectorAll('.box-check');
+    
+    boxCheckElements.forEach(boxCheck => {
+        // check-toggleのクリックイベント
+        boxCheck.addEventListener('click', function(e) {
+            if (e.target.classList.contains('check-toggle')) {
+                onToggleClick(e);
+            }
+            // root labelのクリックイベント
+            if (e.target.tagName === 'LABEL' && 
+                e.target.classList.contains('custom-control-label') && 
+                e.target.classList.contains('root')) {
+                onRootLabelClick(e);
+            }
+        });
+        
+        // search-inのchangeイベント
+        boxCheck.addEventListener('change', function(e) {
+            if (e.target.classList.contains('search-in')) {
+                onSearchInChange.call(e.target, e);
+            }
+            if (e.target.classList.contains('search-in-all')) {
+                onSearchInAllChange.call(e.target, e);
+            }
+        });
+    });
+    
+    // root checkboxのクリック防止（documentレベル）
+    document.addEventListener('click', function(e) {
+        if (e.target.type === 'checkbox' && 
+            e.target.classList.contains('search-in') && 
+            e.target.classList.contains('root')) {
+            preventRootCheckboxClick(e);
+        }
+    });
+    
+    // 状態を更新
+    uiState.eventHandlersAttached = true;
 }
 
 function onToggleClick(e) {
-    const $this = $(this);
-    const $siblings = $this.parent().siblings();
-    $this.toggleClass('active').siblings('ul').slideToggle(500);
-    $siblings.children('.check-toggle').removeClass('active');
-    $siblings.children('ul').slideUp(500);
+    const target = e.target;
+    const parentLi = target.parentElement;
+    
+    // activeクラスをトグル
+    target.classList.toggle('active');
+    
+    // 隣接する<ul>要素を取得してスライドトグル
+    const nextUl = target.nextElementSibling;
+    if (nextUl && nextUl.tagName === 'UL') {
+        // 簡易的なスライドアニメーション（CSS transitionを使用することを推奨）
+        if (nextUl.style.display === 'none' || !nextUl.style.display) {
+            nextUl.style.display = 'block';
+        } else {
+            nextUl.style.display = 'none';
+        }
+    }
+    
+    // 兄弟要素の処理
+    const siblings = Array.from(parentLi.parentElement.children).filter(child => child !== parentLi);
+    siblings.forEach(sibling => {
+        const siblingToggle = sibling.querySelector('.check-toggle');
+        const siblingUl = sibling.querySelector('ul');
+        
+        if (siblingToggle) {
+            siblingToggle.classList.remove('active');
+        }
+        if (siblingUl) {
+            siblingUl.style.display = 'none';
+        }
+    });
 }
 
 function onRootLabelClick(e) {
-    $(this).closest("li").find(".check-toggle:first").click();
+    const label = e.target;
+    const li = label.closest('li');
+    if (li) {
+        const checkToggle = li.querySelector('.check-toggle');
+        if (checkToggle) {
+            checkToggle.click();
+        }
+    }
 }
 
-function onSearchInChange() {
-    const $this = $(this);
-    const check = $this.is(":checked");
-    const $parent = $this.parent().parent();
-    const $ul = $parent.find("ul");
-    const $checkboxes = $ul.find(".search-in, .search-in-all");
-    $checkboxes.prop("checked", check);
-    const $div = $this.closest("div");
-    $div.add($parent.find(".check-new")).removeClass("check-new");
+function onSearchInChange(e) {
+    const checkbox = this; // thisはイベントが発火されたチェックボックス
+    const isChecked = checkbox.checked;
+    
+    // 親要素を取得
+    const parentLi = checkbox.closest('li');
+    if (!parentLi) return;
+    
+    const ul = parentLi.querySelector('ul');
+    if (ul) {
+        // 子要素のチェックボックスをすべて更新
+        const checkboxes = ul.querySelectorAll('.search-in, .search-in-all');
+        checkboxes.forEach(cb => {
+            cb.checked = isChecked;
+        });
+    }
+    
+    // check-newクラスを削除
+    const div = checkbox.closest('div');
+    if (div) {
+        div.classList.remove('check-new');
+    }
+    
+    const checkNewElements = parentLi.querySelectorAll('.check-new');
+    checkNewElements.forEach(el => el.classList.remove('check-new'));
+    
+    // 検索結果を再表示
     if (typeof displayResult === 'function') {
         displayResult();
     }
-    checkAllInTree(this);
+    
+    // ツリー全体のチェック状態を更新
+    checkAllInTree(checkbox);
 }
 
-function onSearchInAllChange() {
-    const id = $(this).attr("id").replace("search-in-all-", "");
-    $("#search-in-" + id).prop("checked", $(this).is(":checked")).trigger("change");
+function onSearchInAllChange(e) {
+    const checkbox = this;
+    const id = checkbox.id.replace('search-in-all-', '');
+    const targetCheckbox = document.getElementById('search-in-' + id);
+    
+    if (targetCheckbox) {
+        targetCheckbox.checked = checkbox.checked;
+        // changeイベントを発火
+        targetCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 }
 
 function preventRootCheckboxClick(e) {
@@ -167,34 +293,73 @@ function buildFirstPage() {
 }
 
 /**
- * 子チェックボックスにクリックイベントを追加
+ * 子チェックボックスにクリックイベントを追加 (Vue.js対応版)
+ * jQueryのイベントデリゲーションをネイティブイベントリスナーに変換
  */
 function addHandleEventInFirstPage() {
-    const $container = $("body");
+    // body要素にイベントリスナーを設定（イベントデリゲーション）
+    document.body.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        // childチェックボックスの処理
+        if (target.type === 'checkbox' && target.classList.contains('child')) {
+            const boxS1 = target.closest('.box-s-1');
+            if (!boxS1) return;
+            
+            const parentCheckbox = boxS1.querySelector('.parent');
+            const ul = target.closest('ul');
+            if (!ul) return;
+            
+            const siblings = ul.querySelectorAll('.child');
+            const checkedStates = Array.from(siblings).map(cb => cb.checked);
+            
+            const allChecked = checkedStates.every(state => state);
+            const someChecked = checkedStates.some(state => state);
+            
+            if (parentCheckbox) {
+                parentCheckbox.checked = allChecked;
+                const parentDiv = parentCheckbox.closest('div');
+                if (parentDiv) {
+                    if (someChecked && !allChecked) {
+                        parentDiv.classList.add('check-new');
+                    } else {
+                        parentDiv.classList.remove('check-new');
+                    }
+                }
+            }
+            
+            buildTreeview();
+        }
+        
+        // parentチェックボックスの処理
+        if (target.type === 'checkbox' && target.classList.contains('parent')) {
+            const isChecked = target.checked;
+            const boxS1 = target.closest('.box-s-1');
+            if (!boxS1) return;
+            
+            const childCheckboxes = boxS1.querySelectorAll('.child');
+            childCheckboxes.forEach(cb => {
+                cb.checked = isChecked;
+            });
+            
+            const div = target.closest('div');
+            if (div) {
+                div.classList.remove('check-new');
+            }
+            
+            buildTreeview();
+        }
+    });
     
-    $container.on("click", "input[type=checkbox].child", function(){
-        const $this = $(this);
-        const $boxS1 = $this.closest(".box-s-1");
-        const $parent = $boxS1.find(".parent");
-        const $siblings = $this.closest("ul").find(".child");
-        const checkedStates = $siblings.map(function() { 
-            return $(this).is(":checked"); 
-        }).get();
-        const allChecked = checkedStates.every(state => state);
-        const someChecked = checkedStates.some(state => state);
-        const $parentDiv = $parent.closest("div");
-        $parent.prop("checked", allChecked);
-        $parentDiv.toggleClass("check-new", someChecked && !allChecked);
-        buildTreeview();
-    });
-    $container.on("click", "input[type=checkbox].parent", function(){
-        const $this = $(this);
-        const isCheck = $this.is(":checked");
-        const $boxS1 = $this.closest(".box-s-1");
-        $boxS1.find(".child").prop("checked", isCheck);
-        $this.closest("div").removeClass("check-new");
-        buildTreeview();
-    });
+    // 状態を更新
+    uiState.firstPageBuilt = true;
 }
 
+/**
+ * UI状態を取得
+ * @returns {Object} UI状態オブジェクト
+ */
+function getUIState() {
+    return uiState;
+}
 

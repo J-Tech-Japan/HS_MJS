@@ -1,18 +1,35 @@
 /**
- * 検索カタログ管理モジュール
+ * 検索カタログ管理モジュール (Vue.js対応版)
  * - カタログデータの管理
  * - 検索用JSファイルの動的読み込み
  * - カタログの初期化処理
+ * 
+ * Vue.jsのリアクティブシステムと互換性を持ちつつ、
+ * 既存のグローバル変数アクセスパターンも維持します
  */
 
-// メニュー、検索等のためのサーチカタログ
-const searchCatalogue = [];
+/**
+ * カタログストアの状態管理
+ * Vue.jsのリアクティブシステムで使用可能な構造
+ */
+const catalogStore = {
+    // メニュー、検索等のためのサーチカタログ
+    catalogue: [],
+    
+    // すべてのsearch.jsを一つの配列にまとめる
+    catalogueJs: [],
+    
+    // 読み込み状態フラグ
+    isLoaded: false,
+    
+    // 読み込み進捗（0-100%）
+    loadingProgress: 0
+};
 
-// すべてのsearch.jsを一つの配列にまとめる
-const searchCatalogueJs = [];
-
-// 読み込み状態フラグ
-let isLoaded = false;
+// 後方互換性のためのグローバル変数エイリアス
+const searchCatalogue = catalogStore.catalogue;
+const searchCatalogueJs = catalogStore.catalogueJs;
+let isLoaded = catalogStore.isLoaded;
 
 /**
  * 検索機能の初期化
@@ -72,7 +89,9 @@ function loadScript(src) {
 }
 
 /**
- * jsをブラウザに読み込んでsearchWordsを呼び出す
+ * jsをブラウザに読み込んでsearchWordsを呼び出す (Vue.js対応版)
+ * jQuery依存を除去し、ネイティブDOM APIを使用
+ * 
  * @param {Array} collection - 読み込むJSファイルのコレクション
  * @param {number} searchCatalogueItemChildPos - 現在処理中のインデックス
  */
@@ -83,21 +102,45 @@ async function loadSearchJs(collection, searchCatalogueItemChildPos) {
         await loadScript(item.searchjs);
         item.searchWords = searchWords;
         
+        // 進捗を更新
+        catalogStore.loadingProgress = Math.round(((searchCatalogueItemChildPos + 1) / collection.length) * 100);
+        
         searchCatalogueItemChildPos++;
         if (searchCatalogueItemChildPos < collection.length) {
             await loadSearchJs(collection, searchCatalogueItemChildPos);
         } else {
-            isLoaded = true;
-            $('body').addClass('open');
-            $('.box-nd-search').removeClass('hidden');
-            $('.box-content-s').addClass('hidden');
+            // 読み込み完了
+            catalogStore.isLoaded = true;
+            isLoaded = true; // 後方互換性
+            
+            // jQuery依存を除去: ネイティブDOM APIを使用
+            document.body.classList.add('open');
+            
+            const boxNdSearch = document.querySelector('.box-nd-search');
+            if (boxNdSearch) boxNdSearch.classList.remove('hidden');
+            
+            const boxContentS = document.querySelector('.box-content-s');
+            if (boxContentS) boxContentS.classList.add('hidden');
+            
             // 検索機能が利用可能になったことを通知
             if (typeof search === 'function') {
                 search();
             }
+            
+            // カスタムイベントを発火（Vueコンポーネントで監視可能）
+            window.dispatchEvent(new CustomEvent('catalogLoaded', {
+                detail: {
+                    catalogue: catalogStore.catalogue,
+                    catalogueJs: catalogStore.catalogueJs
+                }
+            }));
         }
     } catch (error) {
         console.error(`Failed to load script: ${item.searchjs}`, error);
+        // エラーイベントを発火
+        window.dispatchEvent(new CustomEvent('catalogLoadError', {
+            detail: { error, script: item.searchjs }
+        }));
     }
 }
 
@@ -106,7 +149,7 @@ async function loadSearchJs(collection, searchCatalogueItemChildPos) {
  * @returns {boolean} 読み込み完了フラグ
  */
 function isCatalogLoaded() {
-    return isLoaded;
+    return catalogStore.isLoaded;
 }
 
 /**
@@ -114,7 +157,7 @@ function isCatalogLoaded() {
  * @returns {Array} 検索カタログ配列
  */
 function getSearchCatalogue() {
-    return searchCatalogue;
+    return catalogStore.catalogue;
 }
 
 /**
@@ -122,7 +165,7 @@ function getSearchCatalogue() {
  * @returns {Array} 検索カタログJS配列
  */
 function getSearchCatalogueJs() {
-    return searchCatalogueJs;
+    return catalogStore.catalogueJs;
 }
 
 /**
@@ -130,6 +173,43 @@ function getSearchCatalogueJs() {
  * @param {Array} catalogue - 設定するカタログ配列
  */
 function setSearchCatalogue(catalogue) {
-    searchCatalogue.length = 0;
-    searchCatalogue.push(...catalogue);
+    catalogStore.catalogue.length = 0;
+    catalogStore.catalogue.push(...catalogue);
+}
+
+/**
+ * カタログストア全体を取得（Vue.js用）
+ * Vue.jsのリアクティブシステムで使用する場合はこちらを使用
+ * @returns {Object} カタログストアオブジェクト
+ */
+function getCatalogStore() {
+    return catalogStore;
+}
+
+/**
+ * カタログをリセット
+ * テストや再初期化時に使用
+ */
+function resetCatalog() {
+    catalogStore.catalogue.length = 0;
+    catalogStore.catalogueJs.length = 0;
+    catalogStore.isLoaded = false;
+    catalogStore.loadingProgress = 0;
+    isLoaded = false; // 後方互換性
+}
+
+/**
+ * 読み込み進捗を取得（0-100%）
+ * @returns {number} 読み込み進捗
+ */
+function getLoadingProgress() {
+    return catalogStore.loadingProgress;
+}
+
+/**
+ * カタログストアを取得
+ * @returns {Object} カタログストアオブジェクト
+ */
+function getCatalogStore() {
+    return catalogStore;
 }

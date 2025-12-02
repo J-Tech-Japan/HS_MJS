@@ -24,18 +24,26 @@
    <link rel="icon" href="images/LucaTech_GX_favicon.ico">
    
    <!-- JavaScriptライブラリの読み込み -->
-   <!-- <script src="js/lib/vue.global.prod.js"></script> -->        <!-- Vue.js（プロダクション版） -->
-   <script type="text/javascript" src="js/search/utils.js"></script>  <!-- 共通ユーティリティスクリプト（HTMLエスケープなど） -->
-   <script type="text/javascript" src="js/search/searchCatalog.js"></script>  <!-- 検索カタログ管理スクリプト -->
-   <script type="text/javascript" src="js/search/searchBreadcrumb.js"></script>  <!-- パンくずリスト関連スクリプト -->
-   <script type="text/javascript" src="js/search/searchUI.js"></script>  <!-- 検索UI構築とイベント処理スクリプト -->
-   <script type="text/javascript" src="js/search/searchDisplay.js"></script>  <!-- 検索結果表示とハイライトスクリプト -->
-   <script src="js/search/searchPagination.js"></script>  <!-- ページネーション -->
-   <script type="text/javascript" src="js/search/search.js"></script>  <!-- 検索機能のメインスクリプト -->
-   <script src="js/lib/jQuery-2.1.4.min.js"></script>      <!-- jQuery -->
+   <!-- Vue.js 3 -->
+   <script src="js/lib/vue.global.prod.js"></script>
+   
+   <!-- jQuery（ページネーションプラグインで必要） -->
+   <script src="js/lib/jQuery-2.1.4.min.js"></script>
    <script src="js/lib/easypiechart.js"></script>           <!-- チャート描画ライブラリ -->
    <script src="js/lib/pagination.min.js"></script>         <!-- ページネーション機能 -->
-   <script src="js/search/searchPageInit.js"></script>          <!-- 検索ページ初期化スクリプト -->
+   
+   <!-- 検索機能モジュール（Vue.js対応版） -->
+   <script type="text/javascript" src="js/search/utils.js"></script>  <!-- 共通ユーティリティ -->
+   <script type="text/javascript" src="js/search/searchCatalog.js"></script>  <!-- カタログ管理 -->
+   <script type="text/javascript" src="js/search/searchBreadcrumb.js"></script>  <!-- パンくずリスト -->
+   <script type="text/javascript" src="js/search/searchUI.js"></script>  <!-- UI構築とイベント処理 -->
+   <script type="text/javascript" src="js/search/searchDisplay.js"></script>  <!-- 検索結果表示 -->
+   <script src="js/search/searchPagination.js"></script>  <!-- ページネーション -->
+   <script type="text/javascript" src="js/search/search.js"></script>  <!-- 検索メインロジック -->
+   <script src="js/search/searchPageInit.js"></script>  <!-- ページ初期化 -->
+   
+   <!-- Vue.js統合モジュール（オプション：Vue.jsが読み込まれている場合のみ動作） -->
+   <script src="js/search/searchApp.js"></script>
 </head>
 
 <body class="searchindex centering-header">

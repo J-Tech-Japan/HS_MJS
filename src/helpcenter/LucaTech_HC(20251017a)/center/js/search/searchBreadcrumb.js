@@ -1,8 +1,19 @@
 /**
- * パンくずリスト関連モジュール
+ * パンくずリスト関連モジュール (Vue.js対応版)
+ * jQuery依存を減らし、Vue.jsのリアクティブシステムと互換性を持たせています
+ * 
  * - パンくずリストの構築
  * - パンくず情報の取得と作成
  */
+
+/**
+ * パンくずリスト状態管理オブジェクト
+ * Vue.jsのリアクティブシステムで使用可能
+ */
+const breadcrumbState = {
+    currentBreadcrumbs: [],
+    lastBreadcrumbData: null
+};
 
 /**
  * 検索結果でパンくずリストを構築
@@ -18,28 +29,39 @@ function buildBreadCrum(breadCrumArr) {
 }
 
 /**
- * パンくずリスト情報を取得
+ * パンくずリスト情報を取得 (Vue.js対応版)
+ * jQuery依存を除去し、ネイティブDOM APIを使用
  * @param {Event} event - クリックイベント
  * @returns {Array<string>} パンくずリストのテキスト配列
  */
 function getBreadcrumbTexts(event) {
-    return $(event.target)
-        .closest('.wSearchResultItem')
-        .find('.breadcrumb-item')
-        .map(function () {
-            return $(this).text();
-        })
-        .get();
+    // クリックされた要素から最も近い.wSearchResultItem要素を取得
+    const resultItem = event.target.closest('.wSearchResultItem');
+    
+    if (!resultItem) {
+        return [];
+    }
+    
+    // .breadcrumb-item要素を全て取得してテキストを配列に変換
+    const breadcrumbItems = resultItem.querySelectorAll('.breadcrumb-item');
+    const breadcrumbTexts = Array.from(breadcrumbItems).map(function(item) {
+        return item.textContent;
+    });
+    
+    // 状態を更新
+    breadcrumbState.currentBreadcrumbs = breadcrumbTexts;
+    
+    return breadcrumbTexts;
 }
 
 /**
- * パンくず情報オブジェクトを作成
+ * パンくず情報オブジェクトを作成 (Vue.js対応版)
  * @param {string} url - ヘルプページのURL
  * @param {Array<string>} breadcrumbTexts - パンくずテキスト配列
  * @returns {Object} パンくず情報オブジェクト
  */
 function createBreadcrumbData(url, breadcrumbTexts) {
-    return {
+    const breadcrumbData = {
         path: escapeHtml(url),
         indexType: "search",
         contentid: "",
@@ -51,4 +73,26 @@ function createBreadcrumbData(url, breadcrumbTexts) {
                 ? escapeHtml(breadcrumbTexts[1]) 
                 : ""
     };
+    
+    // 状態を更新
+    breadcrumbState.lastBreadcrumbData = breadcrumbData;
+    
+    return breadcrumbData;
+}
+
+/**
+ * パンくず状態を取得
+ * @returns {Object} パンくず状態オブジェクト
+ */
+function getBreadcrumbState() {
+    return breadcrumbState;
+}
+
+/**
+ * パンくず状態をリセット
+ * @returns {void}
+ */
+function resetBreadcrumbState() {
+    breadcrumbState.currentBreadcrumbs = [];
+    breadcrumbState.lastBreadcrumbData = null;
 }
