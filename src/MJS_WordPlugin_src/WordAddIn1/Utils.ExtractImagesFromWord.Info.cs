@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Utils.ExtractImagesFromWord.Info.cs
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,6 +23,7 @@ namespace WordAddIn1
             public int OriginalPixelsHeight { get; set; }
             public int PngPixelsWidth { get; set; }
             public int PngPixelsHeight { get; set; }
+            public long PngFileSize { get; set; }
             public double WidthRatio { get; set; }
             public double HeightRatio { get; set; }
             public double SizeRatio { get; set; }
@@ -55,6 +58,21 @@ namespace WordAddIn1
                 // 元画像サイズをピクセルに変換
                 int originalPixelWidth = ConvertPointsToPixels(image.OriginalWidth);
                 int originalPixelHeight = ConvertPointsToPixels(image.OriginalHeight);
+
+                // PNGファイルサイズを取得
+                long pngFileSize = 0;
+                try
+                {
+                    if (!string.IsNullOrEmpty(image.FilePath) && File.Exists(image.FilePath))
+                    {
+                        var fileInfo = new FileInfo(image.FilePath);
+                        pngFileSize = fileInfo.Length;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ファイルサイズ取得エラー ({image.FilePath}): {ex.Message}");
+                }
 
                 // 比率計算（PNG画像サイズが有効な場合のみ）
                 double widthRatio = 0;
@@ -94,6 +112,7 @@ namespace WordAddIn1
                     OriginalPixelsHeight = originalPixelHeight,
                     PngPixelsWidth = image.PngPixelWidth,
                     PngPixelsHeight = image.PngPixelHeight,
+                    PngFileSize = pngFileSize,
                     WidthRatio = widthRatio,
                     HeightRatio = heightRatio,
                     SizeRatio = sizeRatio,
@@ -120,7 +139,7 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(points),元サイズ(pixels),PNGサイズ(pixels),幅比率,高さ比率");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(points),元サイズ(pixels),PNGサイズ(pixels),PNGファイルサイズ(bytes),幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
@@ -135,7 +154,7 @@ namespace WordAddIn1
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
 
-                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePoints}\",\"{originalSizePixels}\",\"{pngSizePixels}\",{widthRatioText},{heightRatioText}");
+                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePoints}\",\"{originalSizePixels}\",\"{pngSizePixels}\",{comparison.PngFileSize},{widthRatioText},{heightRatioText}");
             }
 
             return result.ToString();
