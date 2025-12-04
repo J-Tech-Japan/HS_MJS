@@ -131,41 +131,6 @@ namespace WordAddIn1
                 throw new InvalidOperationException($"画像抽出中にエラーが発生しました: {ex.Message}", ex);
             }
         }
-
-        /// <summary>
-        /// 旧シグネチャとの互換性のためのオーバーロード
-        /// </summary>
-        [Obsolete("ImageExtractionOptionsを使用するオーバーロードを使用してください")]
-        public static List<ExtractedImageInfo> ExtractImagesFromWord(
-            Word.Document document, 
-            string outputDirectory,
-            bool includeInlineShapes = true,
-            bool includeShapes = true,
-            bool includeFreeforms = true,
-            bool addMarkers = true,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = DefaultMinOriginalSizePoints,
-            float minOriginalHeight = DefaultMinOriginalSizePoints,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = DefaultMaxOutputSizePixels,
-            int maxOutputHeight = DefaultMaxOutputSizePixels)
-        {
-            var options = new ImageExtractionOptions
-            {
-                IncludeInlineShapes = includeInlineShapes,
-                IncludeShapes = includeShapes,
-                IncludeFreeforms = includeFreeforms,
-                AddMarkers = addMarkers,
-                SkipCoverMarkers = skipCoverMarkers,
-                MinOriginalWidth = minOriginalWidth,
-                MinOriginalHeight = minOriginalHeight,
-                IncludeMjsTableImages = includeMjsTableImages,
-                MaxOutputWidth = maxOutputWidth,
-                MaxOutputHeight = maxOutputHeight
-            };
-
-            return ExtractImagesFromWord(document, outputDirectory, options);
-        }
         
         /// <summary>
         /// インライン図形からEnhMetaFileBitsを使用して画像を抽出
@@ -565,31 +530,6 @@ namespace WordAddIn1
 
             // 境界矩形を返す（幅と高さは+1して含める）
             return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
-        }
-
-        /// <summary>
-        /// EnhMetaFileBitsから画像ファイルを作成（旧版、互換性のため保持）
-        /// </summary>
-        /// <param name="metaFileData">メタファイルデータ</param>
-        /// <param name="outputDirectory">出力ディレクトリ</param>
-        /// <param name="baseFileName">ベースファイル名</param>
-        /// <param name="shapeType">図形タイプ</param>
-        /// <param name="forceExtract">強制抽出フラグ</param>
-        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 1024）</param>
-        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 1024）</param>
-        /// <returns>作成されたファイルのパス、失敗時はnull</returns>
-        [Obsolete("ExtractImageFromMetaFileDataWithSizeを使用してください")]
-        private static string ExtractImageFromMetaFileData(
-            byte[] metaFileData, 
-            string outputDirectory, 
-            string baseFileName, 
-            string shapeType,
-            bool forceExtract = false,
-            int maxWidth = DefaultMaxOutputSizePixels,
-            int maxHeight = DefaultMaxOutputSizePixels)
-        {
-            var result = ExtractImageFromMetaFileDataWithSize(metaFileData, outputDirectory, baseFileName, shapeType, forceExtract, maxWidth, maxHeight);
-            return result?.FilePath;
         }
 
         /// <summary>
