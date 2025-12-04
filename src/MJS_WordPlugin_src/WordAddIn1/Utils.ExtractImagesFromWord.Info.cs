@@ -139,11 +139,10 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(points),元サイズ(pixels),出力サイズ(pixels),出力ファイルサイズ(bytes),幅比率,高さ比率");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(pixels),出力サイズ(pixels),出力ファイルサイズ(bytes),幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
-                string originalSizePoints = $"{comparison.OriginalPointsWidth:F1}x{comparison.OriginalPointsHeight:F1}";
                 string originalSizePixels = $"{comparison.OriginalPixelsWidth}x{comparison.OriginalPixelsHeight}";
                 string pngSizePixels = $"{comparison.PngPixelsWidth}x{comparison.PngPixelsHeight}";
 
@@ -154,7 +153,7 @@ namespace WordAddIn1
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
 
-                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePoints}\",\"{originalSizePixels}\",\"{pngSizePixels}\",{comparison.PngFileSize},{widthRatioText},{heightRatioText}");
+                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",\"{pngSizePixels}\",{comparison.PngFileSize},{widthRatioText},{heightRatioText}");
             }
 
             return result.ToString();
