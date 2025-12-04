@@ -103,19 +103,26 @@ namespace WordAddIn1
                         {
                             // 高画質の画像とキャンバスの抽出
                             log.WriteLine("高画質画像とキャンバスの抽出開始");
+                            
+                            // パラメータオブジェクトの作成
+                            var imageExtractionOptions = new Utils.ImageExtractionOptions
+                            {
+                                IncludeInlineShapes = true,      // インライン図形を抽出
+                                IncludeShapes = true,            // フローティング図形を抽出
+                                IncludeFreeforms = false,        // フリーフォーム図形は抽出しない
+                                AddMarkers = true,               // マーカーを追加
+                                SkipCoverMarkers = true,         // 表紙の画像にはマーカーをつけない
+                                MinOriginalWidth = 50.0f,        // 元画像の最小幅（ポイント）
+                                MinOriginalHeight = 60.0f,       // 元画像の最小高さ（ポイント）
+                                IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
+                                MaxOutputWidth = 1024,           // 出力画像の最大幅
+                                MaxOutputHeight = 1024           // 出力画像の最大高さ
+                            };
+                            
                             extractedImages = Utils.ExtractImagesFromWord(
                                 docCopy,
                                 Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
-                                includeInlineShapes: true,    // インライン図形を抽出
-                                includeShapes: true,          // フローティング図形を抽出
-                                includeFreeforms: false,      // フリーフォーム図形は抽出しない
-                                addMarkers: true,             // マーカーを追加
-                                skipCoverMarkers: true,       // 表紙の画像にはマーカーをつけない
-                                minOriginalWidth: 50.0f,     // 元画像の最小幅（ポイント）
-                                minOriginalHeight: 60.0f,     // 元画像の最小高さ（ポイント）
-                                includeMjsTableImages: true,    // MJS_画像（表内）スタイルの画像を抽出
-                                maxOutputWidth: 1024,   // 出力画像の最大幅
-                                maxOutputHeight: 1024   // 出力画像の最大高さ
+                                imageExtractionOptions
                             );
 
                             // 抽出統計をログに出力
