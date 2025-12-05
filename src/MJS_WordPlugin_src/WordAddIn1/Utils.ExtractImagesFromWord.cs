@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Utils.ExtractImagesFromWord.cs
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,6 +11,30 @@ namespace WordAddIn1
 {
     internal partial class Utils
     {
+        // マジックナンバーの定数化
+        private const int DefaultMinContentSizePixels = 250;
+        private const int DefaultMaxOutputSizePixels = 1024;
+        private const float DefaultMinOriginalSizePoints = 50.0f;
+        private const int AlphaThresholdForTransparency = 0;
+        private const int MinPixelSize = 1;
+
+        /// <summary>
+        /// 画像抽出オプション
+        /// </summary>
+        public class ImageExtractionOptions
+        {
+            public bool IncludeInlineShapes { get; set; } = true;
+            public bool IncludeShapes { get; set; } = true;
+            public bool IncludeFreeforms { get; set; } = true;
+            public bool AddMarkers { get; set; } = true;
+            public bool SkipCoverMarkers { get; set; } = true;
+            public float MinOriginalWidth { get; set; } = DefaultMinOriginalSizePoints;
+            public float MinOriginalHeight { get; set; } = DefaultMinOriginalSizePoints;
+            public bool IncludeMjsTableImages { get; set; } = true;
+            public int MaxOutputWidth { get; set; } = DefaultMaxOutputSizePixels;
+            public int MaxOutputHeight { get; set; } = DefaultMaxOutputSizePixels;
+        }
+
         /// <summary>
         /// 抽出された画像の情報
         /// </summary>
@@ -54,30 +80,12 @@ namespace WordAddIn1
         /// </summary>
         /// <param name="document">抽出対象のWordドキュメント</param>
         /// <param name="outputDirectory">画像の保存先ディレクトリ</param>
-        /// <param name="includeInlineShapes">インライン図形を含むかどうか</param>
-        /// <param name="includeShapes">フローティング図形を含むかどうか</param>
-        /// <param name="includeFreeforms">フリーフォーム図形を含むかどうか</param>
-        /// <param name="addMarkers">抽出した画像の後ろにマーカーテキストを追加するかどうか</param>
-        /// <param name="skipCoverMarkers">表紙（第1セクション）の画像にマーカーを追加しないかどうか</param>
-        /// <param name="minOriginalWidth">元画像の最小幅（ポイント単位）</param>
-        /// <param name="minOriginalHeight">元画像の最小高さ（ポイント単位）</param>
-        /// <param name="includeMjsTableImages">MJS_画像（表内）スタイルの画像を抽出するかどうか</param>
-        /// <param name="maxOutputWidth">出力画像の最大幅（ピクセル単位、デフォルト: 1024）</param>
-        /// <param name="maxOutputHeight">出力画像の最大高さ（ピクセル単位、デフォルト: 1024）</param>
+        /// <param name="options">画像抽出オプション（nullの場合はデフォルト値を使用）</param>
         /// <returns>抽出された画像情報のリスト</returns>
         public static List<ExtractedImageInfo> ExtractImagesFromWord(
             Word.Document document, 
             string outputDirectory,
-            bool includeInlineShapes = true,
-            bool includeShapes = true,
-            bool includeFreeforms = true,
-            bool addMarkers = true,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = 1024,
-            int maxOutputHeight = 1024)
+            ImageExtractionOptions options = null)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -85,16 +93,19 @@ namespace WordAddIn1
             if (string.IsNullOrEmpty(outputDirectory))
                 throw new ArgumentException("出力ディレクトリが指定されていません。", nameof(outputDirectory));
 
+            // オプションがnullの場合はデフォルトインスタンスを作成
+            options = options ?? new ImageExtractionOptions();
+
             // 出力ディレクトリが存在しない場合は作成
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
 
             // 環境情報をログ出力
-            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Word Version: {Globals.ThisAddIn.Application.Version}");
-            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Document Compatibility Mode: {document.CompatibilityMode}");
-            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Sections Count: {document.Sections.Count}");
-            System.Diagnostics.Trace.WriteLine($"[ExtractImages] InlineShapes Count: {document.InlineShapes.Count}");
-            System.Diagnostics.Trace.WriteLine($"[ExtractImages] Shapes Count: {document.Shapes.Count}");
+            LogInfo($"Word Version: {Globals.ThisAddIn.Application.Version}");
+            LogInfo($"Document Compatibility Mode: {document.CompatibilityMode}");
+            LogInfo($"Sections Count: {document.Sections.Count}");
+            LogInfo($"InlineShapes Count: {document.InlineShapes.Count}");
+            LogInfo($"Shapes Count: {document.Shapes.Count}");
 
             var extractedImages = new List<ExtractedImageInfo>();
             int imageCounter = 1;
@@ -102,38 +113,15 @@ namespace WordAddIn1
             try
             {
                 // インライン図形の抽出
-                if (includeInlineShapes)
+                if (options.IncludeInlineShapes)
                 {
-                    ExtractInlineShapes(
-                        document, 
-                        outputDirectory, 
-                        ref imageCounter, 
-                        extractedImages, 
-                        addMarkers,
-                        skipCoverMarkers,
-                        minOriginalWidth,
-                        minOriginalHeight,
-                        includeMjsTableImages,
-                        maxOutputWidth,
-                        maxOutputHeight);
+                    ExtractInlineShapes(document, outputDirectory, ref imageCounter, extractedImages, options);
                 }
 
                 // フローティング図形の抽出
-                if (includeShapes)
+                if (options.IncludeShapes)
                 {
-                    ExtractFloatingShapes(
-                        document, 
-                        outputDirectory, 
-                        ref imageCounter, 
-                        extractedImages, 
-                        includeFreeforms, 
-                        addMarkers,
-                        skipCoverMarkers,
-                        minOriginalWidth,
-                        minOriginalHeight,
-                        includeMjsTableImages,
-                        maxOutputWidth,
-                        maxOutputHeight);
+                    ExtractFloatingShapes(document, outputDirectory, ref imageCounter, extractedImages, options);
                 }
 
                 return extractedImages;
@@ -151,14 +139,8 @@ namespace WordAddIn1
             Word.Document document, 
             string outputDirectory, 
             ref int imageCounter, 
-            List<ExtractedImageInfo> extractedImages, 
-            bool addMarkers = false,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = 1024,
-            int maxOutputHeight = 1024)
+            List<ExtractedImageInfo> extractedImages,
+            ImageExtractionOptions options)
         {
             foreach (Word.InlineShape inlineShape in document.InlineShapes)
             {
@@ -168,12 +150,12 @@ namespace WordAddIn1
                     string paragraphStyle = GetInlineShapeParagraphStyle(inlineShape);
                     
                     // MJSスタイルによる条件チェック
-                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip, includeMjsTableImages);
+                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip, options.IncludeMjsTableImages);
                     
                     // 強制スキップ対象の場合
                     if (forceSkip)
                     {
-                        System.Diagnostics.Trace.WriteLine($"インライン図形をスキップ: スタイル '{paragraphStyle}' により強制スキップ");
+                        LogInfo($"インライン図形をスキップ: スタイル '{paragraphStyle}' により強制スキップ");
                         continue;
                     }
 
@@ -181,9 +163,9 @@ namespace WordAddIn1
                     float originalWidth = inlineShape.Width;
                     float originalHeight = inlineShape.Height;
                     
-                    if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
+                    if (!forceExtract && (originalWidth < options.MinOriginalWidth || originalHeight < options.MinOriginalHeight))
                     {
-                        System.Diagnostics.Trace.WriteLine($"インライン図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                        LogInfo($"インライン図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                         continue;
                     }
 
@@ -198,8 +180,8 @@ namespace WordAddIn1
                             $"inline_image_{imageCounter}", 
                             inlineShape.Type.ToString(),
                             forceExtract,
-                            maxOutputWidth,
-                            maxOutputHeight);
+                            options.MaxOutputWidth,
+                            options.MaxOutputHeight);
                         
                         if (extractResult != null)
                         {
@@ -215,7 +197,7 @@ namespace WordAddIn1
                             extractedImages.Add(imageInfo);
 
                             // マーカーを追加（表紙の画像は除外）
-                            if (addMarkers && !IsInCoverSection(inlineShape.Range, skipCoverMarkers))
+                            if (options.AddMarkers && !IsInCoverSection(inlineShape.Range, options.SkipCoverMarkers))
                             {
                                 InsertMarker(inlineShape.Range, extractResult.FilePath);
                             }
@@ -227,7 +209,7 @@ namespace WordAddIn1
                 catch (Exception ex)
                 {
                     // 個別の図形でエラーが発生しても処理を継続
-                    System.Diagnostics.Trace.WriteLine($"インライン図形の抽出でエラー: {ex.Message}");
+                    LogError($"インライン図形の抽出でエラー", ex);
                 }
             }
         }
@@ -239,15 +221,8 @@ namespace WordAddIn1
             Word.Document document, 
             string outputDirectory, 
             ref int imageCounter, 
-            List<ExtractedImageInfo> extractedImages, 
-            bool includeFreeforms, 
-            bool addMarkers = false,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = 1024,
-            int maxOutputHeight = 1024)
+            List<ExtractedImageInfo> extractedImages,
+            ImageExtractionOptions options)
         {
             foreach (Word.Shape shape in document.Shapes)
             {
@@ -256,45 +231,21 @@ namespace WordAddIn1
                     // フリーフォーム図形の場合
                     if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoFreeform)
                     {
-                        if (includeFreeforms)
+                        if (options.IncludeFreeforms)
                         {
-                            ExtractSingleShape(
-                                shape, 
-                                outputDirectory, 
-                                ref imageCounter, 
-                                extractedImages, 
-                                "freeform", 
-                                addMarkers,
-                                skipCoverMarkers,
-                                minOriginalWidth,
-                                minOriginalHeight,
-                                includeMjsTableImages,
-                                maxOutputWidth,
-                                maxOutputHeight);
+                            ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages, "freeform", options);
                         }
                     }
                     // 通常の図形の場合
                     else
                     {
-                        ExtractSingleShape(
-                            shape, 
-                                outputDirectory, 
-                                ref imageCounter, 
-                                extractedImages, 
-                                "shape", 
-                                addMarkers,
-                                skipCoverMarkers,
-                                minOriginalWidth,
-                                minOriginalHeight,
-                                includeMjsTableImages,
-                                maxOutputWidth,
-                                maxOutputHeight);
+                        ExtractSingleShape(shape, outputDirectory, ref imageCounter, extractedImages, "shape", options);
                     }
                 }
                 catch (Exception ex)
                 {
                     // 個別の図形でエラーが発生しても処理を継続
-                    System.Diagnostics.Trace.WriteLine($"フローティング図形の抽出でエラー: {ex.Message}");
+                    LogError($"フローティング図形の抽出でエラー", ex);
                 }
             }
         }
@@ -307,14 +258,8 @@ namespace WordAddIn1
             string outputDirectory, 
             ref int imageCounter, 
             List<ExtractedImageInfo> extractedImages, 
-            string prefix = "shape", 
-            bool addMarkers = false,
-            bool skipCoverMarkers = true,
-            float minOriginalWidth = 50.0f,
-            float minOriginalHeight = 50.0f,
-            bool includeMjsTableImages = true,
-            int maxOutputWidth = 1024,
-            int maxOutputHeight = 1024)
+            string prefix,
+            ImageExtractionOptions options)
         {
             try
             {
@@ -322,12 +267,12 @@ namespace WordAddIn1
                 string anchorParagraphStyle = GetShapeAnchorParagraphStyle(shape);
                 
                 // MJSスタイルによる条件チェック
-                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, includeMjsTableImages);
+                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, options.IncludeMjsTableImages);
                 
                 // 強制スキップ対象の場合
                 if (forceSkip)
                 {
-                    System.Diagnostics.Trace.WriteLine($"{prefix}図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
+                    LogInfo($"{prefix}図形をスキップ: スタイル '{anchorParagraphStyle}' により強制スキップ");
                     return;
                 }
 
@@ -335,9 +280,9 @@ namespace WordAddIn1
                 float originalWidth = shape.Width;
                 float originalHeight = shape.Height;
                 
-                if (!forceExtract && (originalWidth < minOriginalWidth || originalHeight < minOriginalHeight))
+                if (!forceExtract && (originalWidth < options.MinOriginalWidth || originalHeight < options.MinOriginalHeight))
                 {
-                    System.Diagnostics.Trace.WriteLine($"{prefix}図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
+                    LogInfo($"{prefix}図形をスキップ: 元サイズが小さすぎます ({originalWidth:F1}x{originalHeight:F1} points)");
                     return;
                 }
 
@@ -352,8 +297,8 @@ namespace WordAddIn1
                         $"{prefix}_{imageCounter}", 
                         shape.Type.ToString(),
                         forceExtract,
-                        maxOutputWidth,
-                        maxOutputHeight);
+                        options.MaxOutputWidth,
+                        options.MaxOutputHeight);
                     
                     if (extractResult != null)
                     {
@@ -369,10 +314,10 @@ namespace WordAddIn1
                         extractedImages.Add(imageInfo);
 
                         // マーカーを追加（表紙の画像は除外）
-                        if (addMarkers)
+                        if (options.AddMarkers)
                         {
-                            bool inCoverSection = shape.Anchor != null ? IsShapeInCoverSection(shape, skipCoverMarkers) : false;
-                            System.Diagnostics.Trace.WriteLine($"[ExtractSingleShape] Anchor: {shape.Anchor != null}, InCover: {inCoverSection}");
+                            bool inCoverSection = shape.Anchor != null ? IsShapeInCoverSection(shape, options.SkipCoverMarkers) : false;
+                            LogInfo($"[ExtractSingleShape] Anchor: {shape.Anchor != null}, InCover: {inCoverSection}");
                             
                             if (shape.Anchor != null && !inCoverSection)
                             {
@@ -380,7 +325,7 @@ namespace WordAddIn1
                             }
                             else if (shape.Anchor == null)
                             {
-                                System.Diagnostics.Trace.WriteLine("[ExtractSingleShape] Anchorが取得できないためマーカーをスキップ");
+                                LogInfo("[ExtractSingleShape] Anchorが取得できないためマーカーをスキップ");
                             }
                         }
 
@@ -390,7 +335,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"図形の抽出でエラー: {ex.Message}");
+                LogError($"図形の抽出でエラー", ex);
             }
         }
         
@@ -421,8 +366,8 @@ namespace WordAddIn1
             string baseFileName, 
             string shapeType,
             bool forceExtract = false,
-            int maxWidth = 1024,
-            int maxHeight = 1024)
+            int maxWidth = DefaultMaxOutputSizePixels,
+            int maxHeight = DefaultMaxOutputSizePixels)
         {
             try
             {
@@ -441,18 +386,18 @@ namespace WordAddIn1
                         // 境界が有効かチェック
                         if (bounds.Width <= 0 || bounds.Height <= 0)
                         {
-                            System.Diagnostics.Trace.WriteLine("メタファイルの境界が無効です");
+                            LogInfo("メタファイルの境界が無効です");
                             return null;
                         }
 
-                        System.Diagnostics.Trace.WriteLine($"メタファイル境界: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
+                        LogInfo($"メタファイル境界: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
 
                         // 実際のコンテンツサイズ（余白なし）
                         int contentWidth = (int)Math.Ceiling(bounds.Width);
                         int contentHeight = (int)Math.Ceiling(bounds.Height);
 
                         // 最小サイズのフィルタリング（強制抽出の場合はスキップ）
-                        if (!forceExtract && (contentWidth < 250 || contentHeight < 250))
+                        if (!forceExtract && (contentWidth < DefaultMinContentSizePixels || contentHeight < DefaultMinContentSizePixels))
                             return null;
 
                         // リサイズが必要かチェック
@@ -467,7 +412,7 @@ namespace WordAddIn1
                             finalWidth = newSize.Width;
                             finalHeight = newSize.Height;
                             
-                            System.Diagnostics.Trace.WriteLine($"画像をリサイズします: {contentWidth}x{contentHeight} → {finalWidth}x{finalHeight}");
+                            LogInfo($"画像をリサイズします: {contentWidth}x{contentHeight} → {finalWidth}x{finalHeight}");
                         }
 
                         // 余白なしで実際のコンテンツのみを含むビットマップを作成
@@ -496,7 +441,7 @@ namespace WordAddIn1
                             
                             if (trimmedBounds.Width <= 0 || trimmedBounds.Height <= 0)
                             {
-                                System.Diagnostics.Trace.WriteLine("トリミング後の境界が無効です");
+                                LogInfo("トリミング後の境界が無効です");
                                 return null;
                             }
 
@@ -528,7 +473,7 @@ namespace WordAddIn1
                                 // PNG形式で保存
                                 trimmedBitmap.Save(filePath, ImageFormat.Png);
                                 
-                                System.Diagnostics.Trace.WriteLine($"画像を保存しました: {filePath} ({trimmedBounds.Width}x{trimmedBounds.Height})");
+                                LogInfo($"画像を保存しました: {filePath} ({trimmedBounds.Width}x{trimmedBounds.Height})");
                                 
                                 return new ImageExtractionResult
                                 {
@@ -543,7 +488,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"メタファイルデータからの画像生成でエラー: {ex.Message}");
+                LogError($"メタファイルデータからの画像生成でエラー", ex);
                 return null;
             }
         }
@@ -567,7 +512,7 @@ namespace WordAddIn1
                 {
                     Color pixel = bitmap.GetPixel(x, y);
                     // 完全に透明でないピクセルを検出
-                    if (pixel.A > 0)
+                    if (pixel.A > AlphaThresholdForTransparency)
                     {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
@@ -585,30 +530,6 @@ namespace WordAddIn1
 
             // 境界矩形を返す（幅と高さは+1して含める）
             return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
-        }
-
-        /// <summary>
-        /// EnhMetaFileBitsから画像ファイルを作成（旧版、互換性のため保持）
-        /// </summary>
-        /// <param name="metaFileData">メタファイルデータ</param>
-        /// <param name="outputDirectory">出力ディレクトリ</param>
-        /// <param name="baseFileName">ベースファイル名</param>
-        /// <param name="shapeType">図形タイプ</param>
-        /// <param name="forceExtract">強制抽出フラグ</param>
-        /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 1024）</param>
-        /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 1024）</param>
-        /// <returns>作成されたファイルのパス、失敗時はnull</returns>
-        private static string ExtractImageFromMetaFileData(
-            byte[] metaFileData, 
-            string outputDirectory, 
-            string baseFileName, 
-            string shapeType,
-            bool forceExtract = false,
-            int maxWidth = 1024,
-            int maxHeight = 1024)
-        {
-            var result = ExtractImageFromMetaFileDataWithSize(metaFileData, outputDirectory, baseFileName, shapeType, forceExtract, maxWidth, maxHeight);
-            return result?.FilePath;
         }
 
         /// <summary>
@@ -657,10 +578,27 @@ namespace WordAddIn1
             }
 
             // 最小サイズの保証（1ピクセル以上）
-            newWidth = Math.Max(1, newWidth);
-            newHeight = Math.Max(1, newHeight);
+            newWidth = Math.Max(MinPixelSize, newWidth);
+            newHeight = Math.Max(MinPixelSize, newHeight);
 
             return new Size(newWidth, newHeight);
+        }
+
+        /// <summary>
+        /// ログ情報を出力
+        /// </summary>
+        private static void LogInfo(string message)
+        {
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages] {message}");
+        }
+
+        /// <summary>
+        /// ログエラーを出力
+        /// </summary>
+        private static void LogError(string message, Exception ex = null)
+        {
+            System.Diagnostics.Trace.WriteLine($"[ExtractImages ERROR] {message}" + 
+                (ex != null ? $": {ex.Message}" : ""));
         }
     }
 }
