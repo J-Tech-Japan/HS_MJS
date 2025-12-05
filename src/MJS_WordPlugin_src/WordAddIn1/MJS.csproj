@@ -266,6 +266,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Utils.ExtractImagesFromWord.CheckStyle.cs" />
+    <Compile Include="Utils.ExtractImagesFromWord.Extraction.cs" />
+    <Compile Include="Utils.ExtractImagesFromWord.ImageProcessing.cs" />
     <Compile Include="Utils.ExtractImagesFromWord.Info.cs" />
     <Compile Include="Utils.ExtractImagesFromWord.InsertMarker.cs" />
     <Compile Include="Utils.WordImageProcess.cs" />

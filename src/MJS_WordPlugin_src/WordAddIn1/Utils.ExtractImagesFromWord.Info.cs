@@ -139,7 +139,7 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(pixels),出力サイズ(pixels),出力ファイルサイズ(bytes),幅比率,高さ比率");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(px),出力サイズ(px),出力ファイルサイズ(bytes),幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
