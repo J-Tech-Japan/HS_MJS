@@ -21,8 +21,10 @@ namespace WordAddIn1
             public float OriginalPointsHeight { get; set; }
             public int OriginalPixelsWidth { get; set; }
             public int OriginalPixelsHeight { get; set; }
+            public long OriginalTotalPixels { get; set; }
             public int PngPixelsWidth { get; set; }
             public int PngPixelsHeight { get; set; }
+            public long PngTotalPixels { get; set; }
             public long PngFileSize { get; set; }
             public double WidthRatio { get; set; }
             public double HeightRatio { get; set; }
@@ -58,6 +60,10 @@ namespace WordAddIn1
                 // 元画像サイズをピクセルに変換
                 int originalPixelWidth = ConvertPointsToPixels(image.OriginalWidth);
                 int originalPixelHeight = ConvertPointsToPixels(image.OriginalHeight);
+                long originalTotalPixels = (long)originalPixelWidth * originalPixelHeight;
+
+                // PNG画像の総ピクセル数を計算
+                long pngTotalPixels = (long)image.PngPixelWidth * image.PngPixelHeight;
 
                 // PNGファイルサイズを取得
                 long pngFileSize = 0;
@@ -84,7 +90,7 @@ namespace WordAddIn1
                 {
                     widthRatio = (double)image.PngPixelWidth / originalPixelWidth;
                     heightRatio = (double)image.PngPixelHeight / originalPixelHeight;
-                    sizeRatio = (double)(image.PngPixelWidth * image.PngPixelHeight) / (originalPixelWidth * originalPixelHeight);
+                    sizeRatio = (double)pngTotalPixels / originalTotalPixels;
 
                     // サイズ変化の判定
                     if (Math.Abs(sizeRatio - 1.0) < 0.05) // 5%以内の差
@@ -110,8 +116,10 @@ namespace WordAddIn1
                     OriginalPointsHeight = image.OriginalHeight,
                     OriginalPixelsWidth = originalPixelWidth,
                     OriginalPixelsHeight = originalPixelHeight,
+                    OriginalTotalPixels = originalTotalPixels,
                     PngPixelsWidth = image.PngPixelWidth,
                     PngPixelsHeight = image.PngPixelHeight,
+                    PngTotalPixels = pngTotalPixels,
                     PngFileSize = pngFileSize,
                     WidthRatio = widthRatio,
                     HeightRatio = heightRatio,
@@ -139,7 +147,7 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(px),出力サイズ(px),出力ファイルサイズ(bytes),幅比率,高さ比率");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(px),元総ピクセル数,出力サイズ(px),出力総ピクセル数,出力ファイルサイズ(bytes),幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
@@ -153,7 +161,7 @@ namespace WordAddIn1
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
 
-                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",\"{pngSizePixels}\",{comparison.PngFileSize},{widthRatioText},{heightRatioText}");
+                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",{comparison.OriginalTotalPixels},\"{pngSizePixels}\",{comparison.PngTotalPixels},{comparison.PngFileSize},{widthRatioText},{heightRatioText}");
             }
 
             return result.ToString();
