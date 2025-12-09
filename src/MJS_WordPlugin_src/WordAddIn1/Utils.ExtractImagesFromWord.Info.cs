@@ -26,7 +26,7 @@ namespace WordAddIn1
             public int PngPixelsHeight { get; set; }
             public long PngTotalPixels { get; set; }
             public long PngFileSize { get; set; }
-            public double BytesPerPixel { get; set; }
+            public double BitsPerPixel { get; set; }
             public double WidthRatio { get; set; }
             public double HeightRatio { get; set; }
             public double SizeRatio { get; set; }
@@ -81,11 +81,12 @@ namespace WordAddIn1
                     System.Diagnostics.Debug.WriteLine($"ファイルサイズ取得エラー ({image.FilePath}): {ex.Message}");
                 }
 
-                // Bytes/Pixel を計算
-                double bytesPerPixel = 0;
+                // Bits/Pixel を計算
+                // bpp = (ファイルサイズ × 8) / 総ピクセル数
+                double bitsPerPixel = 0;
                 if (pngTotalPixels > 0 && pngFileSize > 0)
                 {
-                    bytesPerPixel = (double)pngFileSize / pngTotalPixels;
+                    bitsPerPixel = ((double)pngFileSize * 8) / pngTotalPixels;
                 }
 
                 // 比率計算（PNG画像サイズが有効な場合のみ）
@@ -129,7 +130,7 @@ namespace WordAddIn1
                     PngPixelsHeight = image.PngPixelHeight,
                     PngTotalPixels = pngTotalPixels,
                     PngFileSize = pngFileSize,
-                    BytesPerPixel = bytesPerPixel,
+                    BitsPerPixel = bitsPerPixel,
                     WidthRatio = widthRatio,
                     HeightRatio = heightRatio,
                     SizeRatio = sizeRatio,
@@ -156,14 +157,14 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(px),元総ピクセル数,出力サイズ(px),出力総ピクセル数,出力ファイルサイズ(bytes),Bytes/Pixel,幅比率,高さ比率");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(px),元総ピクセル数,出力サイズ(px),出力総ピクセル数,出力ファイルサイズ(bytes),bpp,幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
                 string originalSizePixels = $"{comparison.OriginalPixelsWidth}x{comparison.OriginalPixelsHeight}";
                 string pngSizePixels = $"{comparison.PngPixelsWidth}x{comparison.PngPixelsHeight}";
 
-                string bytesPerPixelText = comparison.BytesPerPixel > 0 ? $"{comparison.BytesPerPixel:F3}" : "";
+                string bitsPerPixelText = comparison.BitsPerPixel > 0 ? $"{comparison.BitsPerPixel:F2}" : "";
                 string widthRatioText = comparison.WidthRatio > 0 ? $"{comparison.WidthRatio:F3}" : "";
                 string heightRatioText = comparison.HeightRatio > 0 ? $"{comparison.HeightRatio:F3}" : "";
 
@@ -171,7 +172,7 @@ namespace WordAddIn1
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
 
-                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",{comparison.OriginalTotalPixels},\"{pngSizePixels}\",{comparison.PngTotalPixels},{comparison.PngFileSize},{bytesPerPixelText},{widthRatioText},{heightRatioText}");
+                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",{comparison.OriginalTotalPixels},\"{pngSizePixels}\",{comparison.PngTotalPixels},{comparison.PngFileSize},{bitsPerPixelText},{widthRatioText},{heightRatioText}");
             }
 
             return result.ToString();
