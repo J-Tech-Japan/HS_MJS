@@ -105,6 +105,18 @@ namespace WordAddIn1
                 double sizeRatio = 0;
                 string sizeChange = "不明";
 
+                if (image.PngPixelWidth > 0 && image.PngPixelHeight > 0 && originalPixelWidth > 0 && originalPixelHeight > 0)
+                {
+                    // 幅比率 = PNG幅 / 元画像幅
+                    widthRatio = (double)image.PngPixelWidth / originalPixelWidth;
+                    
+                    // 高さ比率 = PNG高さ / 元画像高さ
+                    heightRatio = (double)image.PngPixelHeight / originalPixelHeight;
+                    
+                    // サイズ比率 = PNG総ピクセル数 / 元画像総ピクセル数
+                    sizeRatio = (double)pngTotalPixels / originalTotalPixels;
+                }
+
                 var comparison = new ImageSizeComparison
                 {
                     FileName = Path.GetFileName(image.FilePath),
@@ -153,16 +165,12 @@ namespace WordAddIn1
             {
                 string originalSizePixels = $"{comparison.OriginalPixelsWidth}x{comparison.OriginalPixelsHeight}";
                 string pngSizePixels = $"{comparison.PngPixelsWidth}x{comparison.PngPixelsHeight}";
-
                 string bitsPerPixelText = comparison.BitsPerPixel > 0 ? $"{comparison.BitsPerPixel:F2}" : "";
                 string compressionRatioText = comparison.CompressionRatio > 0 ? $"{comparison.CompressionRatio:F3}" : "";
                 string widthRatioText = comparison.WidthRatio > 0 ? $"{comparison.WidthRatio:F3}" : "";
                 string heightRatioText = comparison.HeightRatio > 0 ? $"{comparison.HeightRatio:F3}" : "";
-
-                // CSVではカンマが含まれる可能性があるフィールドをダブルクォートで囲む
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
-
                 result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",{comparison.OriginalTotalPixels},\"{pngSizePixels}\",{comparison.PngTotalPixels},{comparison.PngFileSize},{bitsPerPixelText},{compressionRatioText},{widthRatioText},{heightRatioText}");
             }
 
