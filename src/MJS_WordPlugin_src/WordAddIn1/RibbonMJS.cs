@@ -30,7 +30,7 @@ namespace WordAddIn1
 
             // アセンブリのバージョンを取得
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            string versionText = version.ToString(3); // "1.0.0" 形式で取得
+            string versionText = version.ToString(3) + "-beta"; // "1.0.0" 形式で取得
 
             // labelVersion はリボンデザイナで追加したラベルの名前
             versionFileJoin.Label = $"\n\nバージョン\n{versionText}";
