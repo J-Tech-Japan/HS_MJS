@@ -214,9 +214,12 @@ namespace DocMergerComponent
         }
 
         // ヘルパーメソッド：有効なスタイル名だけを抽出
+        // 完全一致に加えて、"マニュアルタイトル"を含むスタイル名も抽出
         private List<string> GetValidStyleNames(Word.Document doc, IEnumerable<string> styleNames)
         {
             var validStyleNames = new List<string>();
+            
+            // 完全一致のスタイルを追加
             foreach (string styleName in styleNames)
             {
                 foreach (Word.Style style in doc.Styles)
@@ -228,6 +231,17 @@ namespace DocMergerComponent
                     }
                 }
             }
+            
+            // "マニュアルタイトル"を含むスタイルを追加（重複を避ける）
+            foreach (Word.Style style in doc.Styles)
+            {
+                if (style.NameLocal.Contains("マニュアルタイトル") && !validStyleNames.Contains(style.NameLocal))
+                {
+                    validStyleNames.Add(style.NameLocal);
+                    Trace.WriteLine($"[GetValidStyleNames] 'マニュアルタイトル'を含むスタイルを検出: '{style.NameLocal}'");
+                }
+            }
+            
             return validStyleNames;
         }
     }
