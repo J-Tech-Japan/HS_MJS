@@ -37,7 +37,7 @@ namespace DocMergerComponent
                     wr.Find.set_Style(ref styleObject);
                     wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                     wr.Find.Execute();
-                    
+
                     if (wr.Find.Found)
                     {
                         Trace.WriteLine($"[RemoveSectionsInRangeByStyle] セクション削除: スタイル='{styleName}', セクション番号={i}");
@@ -113,7 +113,7 @@ namespace DocMergerComponent
                 object styleObject = styleName;
                 int i = objDocLast.Sections.Count;
                 int deletedCount = 0;
-                
+
                 while (i > chapCntLast)
                 {
                     try
@@ -129,7 +129,7 @@ namespace DocMergerComponent
                         wr.Find.set_Style(ref styleObject);
                         wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                         wr.Find.Execute();
-                        
+
                         if (wr.Find.Found)
                         {
                             if (last)
@@ -172,7 +172,7 @@ namespace DocMergerComponent
             int i = doc.Sections.Count;
             int deletedCount = 0;
             object styleObject = styleName;
-            
+
             while (i > 0)
             {
                 if (i > doc.Sections.Count)
@@ -186,7 +186,7 @@ namespace DocMergerComponent
                 wr.Find.set_Style(ref styleObject);
                 wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                 wr.Find.Execute();
-                
+
                 if (wr.Find.Found)
                 {
                     if (found)
@@ -214,18 +214,10 @@ namespace DocMergerComponent
         }
 
         // ヘルパーメソッド：有効なスタイル名だけを抽出
-        // 完全一致に加えて、lsStyleNameに"MJS_マニュアルタイトル"が含まれる場合のみ、
-        // "マニュアルタイトル"を含むスタイル名も抽出
         private List<string> GetValidStyleNames(Word.Document doc, IEnumerable<string> styleNames)
         {
             var validStyleNames = new List<string>();
-            var styleNamesArray = new List<string>(styleNames);
-            
-            // "MJS_マニュアルタイトル"が含まれているかをチェック
-            bool shouldIncludeManualTitleVariants = styleNamesArray.Contains("MJS_マニュアルタイトル");
-            
-            // 完全一致のスタイルを追加
-            foreach (string styleName in styleNamesArray)
+            foreach (string styleName in styleNames)
             {
                 foreach (Word.Style style in doc.Styles)
                 {
@@ -236,20 +228,6 @@ namespace DocMergerComponent
                     }
                 }
             }
-            
-            // "MJS_マニュアルタイトル"が指定されている場合のみ、"マニュアルタイトル"を含むスタイルを追加
-            if (shouldIncludeManualTitleVariants)
-            {
-                foreach (Word.Style style in doc.Styles)
-                {
-                    if (style.NameLocal.Contains("マニュアルタイトル") && !validStyleNames.Contains(style.NameLocal))
-                    {
-                        validStyleNames.Add(style.NameLocal);
-                        Trace.WriteLine($"[GetValidStyleNames] 'マニュアルタイトル'を含むスタイルを検出: '{style.NameLocal}'");
-                    }
-                }
-            }
-            
             return validStyleNames;
         }
     }
