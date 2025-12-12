@@ -21,9 +21,13 @@ namespace WordAddIn1
             public float OriginalPointsHeight { get; set; }
             public int OriginalPixelsWidth { get; set; }
             public int OriginalPixelsHeight { get; set; }
+            public long OriginalTotalPixels { get; set; }
             public int PngPixelsWidth { get; set; }
             public int PngPixelsHeight { get; set; }
+            public long PngTotalPixels { get; set; }
             public long PngFileSize { get; set; }
+            public double BitsPerPixel { get; set; }
+            public double CompressionRatio { get; set; }
             public double WidthRatio { get; set; }
             public double HeightRatio { get; set; }
             public double SizeRatio { get; set; }
@@ -58,6 +62,10 @@ namespace WordAddIn1
                 // 元画像サイズをピクセルに変換
                 int originalPixelWidth = ConvertPointsToPixels(image.OriginalWidth);
                 int originalPixelHeight = ConvertPointsToPixels(image.OriginalHeight);
+                long originalTotalPixels = (long)originalPixelWidth * originalPixelHeight;
+
+                // PNG画像の総ピクセル数を計算
+                long pngTotalPixels = (long)image.PngPixelWidth * image.PngPixelHeight;
 
                 // PNGファイルサイズを取得
                 long pngFileSize = 0;
@@ -74,6 +82,23 @@ namespace WordAddIn1
                     System.Diagnostics.Debug.WriteLine($"ファイルサイズ取得エラー ({image.FilePath}): {ex.Message}");
                 }
 
+                // Bits/Pixel を計算
+                // bpp = (ファイルサイズ × 8) / 総ピクセル数
+                double bitsPerPixel = 0;
+                if (pngTotalPixels > 0 && pngFileSize > 0)
+                {
+                    bitsPerPixel = ((double)pngFileSize * 8) / pngTotalPixels;
+                }
+
+                // 圧縮率を計算
+                // PNG 24bit RGB (無圧縮想定: 24 bits/pixel) に対する実際のbppの比率
+                // 値が小さいほど高圧縮、大きいほど低圧縮
+                double compressionRatio = 0;
+                if (bitsPerPixel > 0)
+                {
+                    compressionRatio = bitsPerPixel / 24.0;
+                }
+
                 // 比率計算（PNG画像サイズが有効な場合のみ）
                 double widthRatio = 0;
                 double heightRatio = 0;
@@ -82,23 +107,14 @@ namespace WordAddIn1
 
                 if (image.PngPixelWidth > 0 && image.PngPixelHeight > 0 && originalPixelWidth > 0 && originalPixelHeight > 0)
                 {
+                    // 幅比率 = PNG幅 / 元画像幅
                     widthRatio = (double)image.PngPixelWidth / originalPixelWidth;
+                    
+                    // 高さ比率 = PNG高さ / 元画像高さ
                     heightRatio = (double)image.PngPixelHeight / originalPixelHeight;
-                    sizeRatio = (double)(image.PngPixelWidth * image.PngPixelHeight) / (originalPixelWidth * originalPixelHeight);
-
-                    // サイズ変化の判定
-                    if (Math.Abs(sizeRatio - 1.0) < 0.05) // 5%以内の差
-                    {
-                        sizeChange = "ほぼ同じ";
-                    }
-                    else if (sizeRatio > 1.0)
-                    {
-                        sizeChange = $"拡大 ({sizeRatio:F2}倍)";
-                    }
-                    else
-                    {
-                        sizeChange = $"縮小 ({sizeRatio:F2}倍)";
-                    }
+                    
+                    // サイズ比率 = PNG総ピクセル数 / 元画像総ピクセル数
+                    sizeRatio = (double)pngTotalPixels / originalTotalPixels;
                 }
 
                 var comparison = new ImageSizeComparison
@@ -110,9 +126,13 @@ namespace WordAddIn1
                     OriginalPointsHeight = image.OriginalHeight,
                     OriginalPixelsWidth = originalPixelWidth,
                     OriginalPixelsHeight = originalPixelHeight,
+                    OriginalTotalPixels = originalTotalPixels,
                     PngPixelsWidth = image.PngPixelWidth,
                     PngPixelsHeight = image.PngPixelHeight,
+                    PngTotalPixels = pngTotalPixels,
                     PngFileSize = pngFileSize,
+                    BitsPerPixel = bitsPerPixel,
+                    CompressionRatio = compressionRatio,
                     WidthRatio = widthRatio,
                     HeightRatio = heightRatio,
                     SizeRatio = sizeRatio,
@@ -139,21 +159,19 @@ namespace WordAddIn1
             var result = new System.Text.StringBuilder();
 
             // CSVヘッダー
-            result.AppendLine("位置,ファイル名,種別,元サイズ(px),出力サイズ(px),出力ファイルサイズ(bytes),幅比率,高さ比率");
+            result.AppendLine("位置,ファイル名,種別,元サイズ(px),元総ピクセル数,出力サイズ(px),出力総ピクセル数,出力ファイルサイズ(bytes),BPP,圧縮率,幅比率,高さ比率");
 
             foreach (var comparison in comparisons.OrderBy(c => c.Position))
             {
                 string originalSizePixels = $"{comparison.OriginalPixelsWidth}x{comparison.OriginalPixelsHeight}";
                 string pngSizePixels = $"{comparison.PngPixelsWidth}x{comparison.PngPixelsHeight}";
-
+                string bitsPerPixelText = comparison.BitsPerPixel > 0 ? $"{comparison.BitsPerPixel:F2}" : "";
+                string compressionRatioText = comparison.CompressionRatio > 0 ? $"{comparison.CompressionRatio:F3}" : "";
                 string widthRatioText = comparison.WidthRatio > 0 ? $"{comparison.WidthRatio:F3}" : "";
                 string heightRatioText = comparison.HeightRatio > 0 ? $"{comparison.HeightRatio:F3}" : "";
-
-                // CSVではカンマが含まれる可能性があるフィールドをダブルクォートで囲む
                 string fileNameCsv = $"\"{comparison.FileName}\"";
                 string imageTypeCsv = $"\"{comparison.ImageType}\"";
-
-                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",\"{pngSizePixels}\",{comparison.PngFileSize},{widthRatioText},{heightRatioText}");
+                result.AppendLine($"{comparison.Position},{fileNameCsv},{imageTypeCsv},\"{originalSizePixels}\",{comparison.OriginalTotalPixels},\"{pngSizePixels}\",{comparison.PngTotalPixels},{comparison.PngFileSize},{bitsPerPixelText},{compressionRatioText},{widthRatioText},{heightRatioText}");
             }
 
             return result.ToString();

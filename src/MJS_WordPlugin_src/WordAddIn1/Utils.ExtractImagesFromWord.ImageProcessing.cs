@@ -20,7 +20,7 @@ namespace WordAddIn1
         }
         
         /// <summary>
-        /// EnhMetaFileBitsから画像ファイルを作成し、PNG画像のサイズも取得
+        /// EnhMetaFileBitsから画像ファイルを作成し、PNG画像のサイズを取得
         /// </summary>
         /// <param name="metaFileData">メタファイルデータ</param>
         /// <param name="outputDirectory">出力ディレクトリ</param>
@@ -29,7 +29,7 @@ namespace WordAddIn1
         /// <param name="forceExtract">強制抽出フラグ</param>
         /// <param name="maxWidth">最大幅（ピクセル、デフォルト: 1024）</param>
         /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 1024）</param>
-        /// <returns>作成されたファイルのパスとピクセルサイズ、失敗時はnull</returns>
+        /// <returns>作成されたファイルのパスとピクセルサイズ、失敗時null</returns>
         private static ImageExtractionResult ExtractImageFromMetaFileDataWithSize(
             byte[] metaFileData, 
             string outputDirectory, 
@@ -53,7 +53,7 @@ namespace WordAddIn1
                             bounds = metafile.GetBounds(ref unit);
                         }
 
-                        // 境界が有効かチェック
+                        // 境界が無効かチェック
                         if (bounds.Width <= 0 || bounds.Height <= 0)
                         {
                             LogInfo("メタファイルの境界が無効です");
@@ -62,7 +62,7 @@ namespace WordAddIn1
 
                         LogInfo($"メタファイル境界: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
 
-                        // 実際のコンテンツサイズ（余白なし）
+                        // 実際のコンテンツサイズ（丸め後）
                         int contentWidth = (int)Math.Ceiling(bounds.Width);
                         int contentHeight = (int)Math.Ceiling(bounds.Height);
 
@@ -81,11 +81,9 @@ namespace WordAddIn1
                             var newSize = CalculateResizedDimensions(contentWidth, contentHeight, maxWidth, maxHeight);
                             finalWidth = newSize.Width;
                             finalHeight = newSize.Height;
-                            
-                            LogInfo($"画像をリサイズします: {contentWidth}x{contentHeight} → {finalWidth}x{finalHeight}");
                         }
 
-                        // 余白なしで実際のコンテンツのみを含むビットマップを作成
+                        // 丸め前で実際のコンテンツのみを含むビットマップを作成
                         using (var bitmap = new Bitmap(finalWidth, finalHeight, PixelFormat.Format32bppArgb))
                         {
                             using (var graphics = Graphics.FromImage(bitmap))
@@ -100,7 +98,7 @@ namespace WordAddIn1
                                 // 背景を透明に設定
                                 graphics.Clear(Color.Transparent);
 
-                                // メタファイルの実際のコンテンツ領域のみを描画
+                                // メタファイルの実際のコンテンツの域のみを描画
                                 // 境界のオフセットを考慮して、コンテンツのみを抽出
                                 var destRect = new RectangleF(0, 0, finalWidth, finalHeight);
                                 graphics.DrawImage(metafile, destRect, bounds, GraphicsUnit.Pixel);
@@ -143,6 +141,16 @@ namespace WordAddIn1
                                 // PNG形式で保存
                                 trimmedBitmap.Save(filePath, ImageFormat.Png);
                                 
+                                // リサイズとトリミングの両方を含めた正確なログ出力
+                                if (needsResize)
+                                {
+                                    LogInfo($"画像をリサイズ・トリミングしました: {contentWidth}x{contentHeight} → リサイズ後 {finalWidth}x{finalHeight} → トリミング後 {trimmedBounds.Width}x{trimmedBounds.Height}");
+                                }
+                                else if (trimmedBounds.Width != finalWidth || trimmedBounds.Height != finalHeight)
+                                {
+                                    LogInfo($"画像をトリミングしました: {finalWidth}x{finalHeight} → {trimmedBounds.Width}x{trimmedBounds.Height}");
+                                }
+                                
                                 LogInfo($"画像を保存しました: {filePath} ({trimmedBounds.Width}x{trimmedBounds.Height})");
                                 
                                 return new ImageExtractionResult
@@ -164,7 +172,7 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// ビットマップから透明ピクセルを除いた実際のコンテンツ境界を取得
+        /// ビットマップから透明ピクセルを除去した実際のコンテンツ境界を取得
         /// </summary>
         /// <param name="bitmap">ビットマップ</param>
         /// <returns>コンテンツの境界矩形</returns>
@@ -175,7 +183,7 @@ namespace WordAddIn1
             int maxX = 0;
             int maxY = 0;
 
-            // すべてのピクセルをスキャンして、透明でないピクセルの範囲を取得
+            // すべてのピクセルをスキャンして、透明でないピクセル範囲を取得
             for (int y = 0; y < bitmap.Height; y++)
             {
                 for (int x = 0; x < bitmap.Width; x++)
@@ -223,10 +231,10 @@ namespace WordAddIn1
 
             int newWidth, newHeight;
 
-            // 幅が制限を超える場合と高さが制限を超える場合の両方を考慮
+            // 幅も高さも超過する場合と高さのみ超過する場合の両方を考慮
             if (originalWidth > maxWidth && originalHeight > maxHeight)
             {
-                // 両方が制限を超える場合、より制限が厳しい方に合わせる
+                // 両方とも超過する場合、より制限的な方に合わせる
                 double widthRatio = (double)maxWidth / originalWidth;
                 double heightRatio = (double)maxHeight / originalHeight;
                 double ratio = Math.Min(widthRatio, heightRatio);
@@ -236,13 +244,13 @@ namespace WordAddIn1
             }
             else if (originalWidth > maxWidth)
             {
-                // 幅のみが制限を超える場合
+                // 幅のみが超過する場合
                 newWidth = maxWidth;
                 newHeight = (int)Math.Round(maxWidth / aspectRatio);
             }
             else
             {
-                // 高さのみが制限を超える場合
+                // 高さのみが超過する場合
                 newHeight = maxHeight;
                 newWidth = (int)Math.Round(maxHeight * aspectRatio);
             }
