@@ -141,7 +141,7 @@ namespace WordAddIn1
                         }
 
                         // CSVファイルに出力
-                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.exportDirPath, "complete_comparison.csv"));
+                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.rootPath, "complete_comparison.csv"));
 
                         int biCount = 0;
                         bool coverExist = false;

@@ -214,10 +214,18 @@ namespace DocMergerComponent
         }
 
         // ヘルパーメソッド：有効なスタイル名だけを抽出
+        // 完全一致に加えて、lsStyleNameに"MJS_マニュアルタイトル"が含まれる場合のみ、
+        // "マニュアルタイトル"を含むスタイル名も抽出
         private List<string> GetValidStyleNames(Word.Document doc, IEnumerable<string> styleNames)
         {
             var validStyleNames = new List<string>();
-            foreach (string styleName in styleNames)
+            var styleNamesArray = new List<string>(styleNames);
+            
+            // "MJS_マニュアルタイトル"が含まれているかをチェック
+            bool shouldIncludeManualTitleVariants = styleNamesArray.Contains("MJS_マニュアルタイトル");
+            
+            // 完全一致のスタイルを追加
+            foreach (string styleName in styleNamesArray)
             {
                 foreach (Word.Style style in doc.Styles)
                 {
@@ -228,6 +236,20 @@ namespace DocMergerComponent
                     }
                 }
             }
+            
+            // "MJS_マニュアルタイトル"が指定されている場合のみ、"マニュアルタイトル"を含むスタイルを追加
+            if (shouldIncludeManualTitleVariants)
+            {
+                foreach (Word.Style style in doc.Styles)
+                {
+                    if (style.NameLocal.Contains("マニュアルタイトル") && !validStyleNames.Contains(style.NameLocal))
+                    {
+                        validStyleNames.Add(style.NameLocal);
+                        Trace.WriteLine($"[GetValidStyleNames] 'マニュアルタイトル'を含むスタイルを検出: '{style.NameLocal}'");
+                    }
+                }
+            }
+            
             return validStyleNames;
         }
     }
