@@ -37,10 +37,18 @@ namespace DocMergerComponent
                     wr.Find.set_Style(ref styleObject);
                     wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                     wr.Find.Execute();
-                    
+
                     if (wr.Find.Found)
                     {
                         Trace.WriteLine($"[RemoveSectionsInRangeByStyle] セクション削除: スタイル='{styleName}', セクション番号={i}");
+                        
+                        // ページ番号の連続性を保つため、次のセクションがある場合は
+                        // そのヘッダー・フッターを前のセクションにリンクする
+                        if (i < objDocLast.Sections.Count)
+                        {
+                            PreserveContinuousPageNumbering(objDocLast, i);
+                        }
+                        
                         objDocLast.Sections[i].Range.Delete();
                         chapCntLast--;
                         deletedCount++;
@@ -113,7 +121,7 @@ namespace DocMergerComponent
                 object styleObject = styleName;
                 int i = objDocLast.Sections.Count;
                 int deletedCount = 0;
-                
+
                 while (i > chapCntLast)
                 {
                     try
@@ -129,7 +137,7 @@ namespace DocMergerComponent
                         wr.Find.set_Style(ref styleObject);
                         wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                         wr.Find.Execute();
-                        
+
                         if (wr.Find.Found)
                         {
                             if (last)
@@ -142,6 +150,13 @@ namespace DocMergerComponent
                             else
                             {
                                 Trace.WriteLine($"[RemoveSectionsFromEndByStyleWithLastFlag] セクション削除: スタイル='{styleName}', セクション番号={i}");
+                                
+                                // ページ番号の連続性を保つ（後方走査なので次のセクションは存在する）
+                                if (i < objDocLast.Sections.Count)
+                                {
+                                    PreserveContinuousPageNumbering(objDocLast, i);
+                                }
+                                
                                 objDocLast.Sections[i].Range.Delete();
                                 deletedCount++;
                                 // iはデクリメントしない（削除により次のセクションが現在位置に来るため）
@@ -172,7 +187,7 @@ namespace DocMergerComponent
             int i = doc.Sections.Count;
             int deletedCount = 0;
             object styleObject = styleName;
-            
+
             while (i > 0)
             {
                 if (i > doc.Sections.Count)
@@ -186,12 +201,19 @@ namespace DocMergerComponent
                 wr.Find.set_Style(ref styleObject);
                 wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
                 wr.Find.Execute();
-                
+
                 if (wr.Find.Found)
                 {
                     if (found)
                     {
                         Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] セクション削除: スタイル='{styleName}', セクション番号={i}");
+                        
+                        // ページ番号の連続性を保つ
+                        if (i < doc.Sections.Count)
+                        {
+                            PreserveContinuousPageNumbering(doc, i);
+                        }
+                        
                         doc.Sections[i].Range.Delete();
                         deletedCount++;
                     }
@@ -214,43 +236,112 @@ namespace DocMergerComponent
         }
 
         // ヘルパーメソッド：有効なスタイル名だけを抽出
-        // 完全一致に加えて、lsStyleNameに"MJS_マニュアルタイトル"が含まれる場合のみ、
-        // "マニュアルタイトル"を含むスタイル名も抽出
         private List<string> GetValidStyleNames(Word.Document doc, IEnumerable<string> styleNames)
         {
             var validStyleNames = new List<string>();
-            var styleNamesArray = new List<string>(styleNames);
-            
-            // "MJS_マニュアルタイトル"が含まれているかをチェック
-            bool shouldIncludeManualTitleVariants = styleNamesArray.Contains("MJS_マニュアルタイトル");
-            
-            // 完全一致のスタイルを追加
-            foreach (string styleName in styleNamesArray)
+            foreach (string styleName in styleNames)
             {
-                foreach (Word.Style style in doc.Styles)
+                // "MJS_マニュアルタイトル"の場合は部分一致で検索
+                if (styleName == "MJS_マニュアルタイトル")
                 {
-                    if (style.NameLocal == styleName)
+                    string searchPattern = "マニュアルタイトル";
+                    foreach (Word.Style style in doc.Styles)
                     {
-                        validStyleNames.Add(styleName);
-                        break;
+                        if (style.NameLocal.Contains(searchPattern))
+                        {
+                            // 重複を避けるため、まだリストに含まれていない場合のみ追加
+                            if (!validStyleNames.Contains(style.NameLocal))
+                            {
+                                validStyleNames.Add(style.NameLocal);
+                                Trace.WriteLine($"[GetValidStyleNames] 部分一致で検出: '{style.NameLocal}' (検索パターン: '{searchPattern}')");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 通常の完全一致検索
+                    foreach (Word.Style style in doc.Styles)
+                    {
+                        if (style.NameLocal == styleName)
+                        {
+                            validStyleNames.Add(styleName);
+                            break;
+                        }
                     }
                 }
             }
-            
-            // "MJS_マニュアルタイトル"が指定されている場合のみ、"マニュアルタイトル"を含むスタイルを追加
-            if (shouldIncludeManualTitleVariants)
-            {
-                foreach (Word.Style style in doc.Styles)
-                {
-                    if (style.NameLocal.Contains("マニュアルタイトル") && !validStyleNames.Contains(style.NameLocal))
-                    {
-                        validStyleNames.Add(style.NameLocal);
-                        Trace.WriteLine($"[GetValidStyleNames] 'マニュアルタイトル'を含むスタイルを検出: '{style.NameLocal}'");
-                    }
-                }
-            }
-            
             return validStyleNames;
+        }
+
+        /// <summary>
+        /// セクション削除時にページ番号の連続性を保つ
+        /// 削除対象セクションの次のセクションが存在する場合、
+        /// そのヘッダー・フッターを前のセクションにリンクして通し番号を維持する
+        /// </summary>
+        private void PreserveContinuousPageNumbering(Word.Document doc, int sectionIndexToDelete)
+        {
+            try
+            {
+                // 次のセクションが存在しない場合は何もしない
+                if (sectionIndexToDelete >= doc.Sections.Count)
+                    return;
+
+                // 次のセクション（削除後に現在位置に来るセクション）を取得
+                Word.Section nextSection = doc.Sections[sectionIndexToDelete + 1];
+
+                // 削除対象セクションのページ番号設定を次のセクションに継承させる
+                // まず、次のセクションのヘッダー・フッターを前のセクションとリンク
+                LinkHeaderFootersToPrevious(nextSection);
+
+                Trace.WriteLine($"  [PreserveContinuousPageNumbering] セクション{sectionIndexToDelete + 1}のヘッダー・フッターをリンク");
+            }
+            catch (System.Exception ex)
+            {
+                Trace.WriteLine($"  [PreserveContinuousPageNumbering] エラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// セクションのヘッダー・フッターを前のセクションにリンク
+        /// </summary>
+        private void LinkHeaderFootersToPrevious(Word.Section section)
+        {
+            try
+            {
+                // フッターをリンク（ページ番号が通常フッターにあるため優先）
+                LinkSingleHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
+                LinkSingleHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
+                LinkSingleHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+
+                // ヘッダーもリンク
+                LinkSingleHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
+                LinkSingleHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
+                LinkSingleHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+            }
+            catch (System.Exception ex)
+            {
+                Trace.WriteLine($"    [LinkHeaderFootersToPrevious] エラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 単一のヘッダー・フッターを前のセクションにリンク
+        /// </summary>
+        private void LinkSingleHeaderFooter(Word.HeaderFooter headerFooter)
+        {
+            try
+            {
+                // 既にリンクされている場合はスキップ
+                if (!headerFooter.LinkToPrevious)
+                {
+                    headerFooter.LinkToPrevious = true;
+                }
+            }
+            catch
+            {
+                // ヘッダー/フッターが存在しない場合は無視
+            }
         }
     }
 }
