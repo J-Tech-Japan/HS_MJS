@@ -85,17 +85,10 @@ namespace DocMergerComponent
 
                     stepStopwatch.Stop();
                     Trace.WriteLine($"[2] ファイル結合処理（全{arrCopies.Length}ファイル）: {stepStopwatch.ElapsedMilliseconds}ms ({stepStopwatch.Elapsed.TotalSeconds:F2}秒)");
-
-                    // ページ番号を通し番号に設定
-                    stepStopwatch = Stopwatch.StartNew();
-                    Utils.ResetPageNumbering(objDocLast, form);
-                    stepStopwatch.Stop();
-                    Trace.WriteLine($"[2.5] ページ番号通し番号設定: {stepStopwatch.ElapsedMilliseconds}ms");
                 }
                 else
                 {
                     Trace.WriteLine("[2] ファイル結合処理: スキップ（単一ドキュメント）");
-                    Trace.WriteLine("[2.5] ページ番号通し番号設定: スキップ（単一ドキュメント）");
                 }
 
                 object objOutDoc = strOutDoc;
@@ -109,6 +102,7 @@ namespace DocMergerComponent
                     string[] lsStyleName = { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）", "MJS_マニュアルタイトル", "MJS_目次", "奥付タイトル", "索引見出し" };
                     RemoveSectionsInRangeByStyle(objDocLast, lsStyleName, chapCnt, ref chapCntLast, form);
                     stepStopwatch.Stop();
+                    Trace.WriteLine($"[3] セクション削除処理1: {stepStopwatch.ElapsedMilliseconds}ms");
 
                     // 索引見出し検索
                     stepStopwatch = Stopwatch.StartNew();
@@ -123,6 +117,19 @@ namespace DocMergerComponent
                     string[] lastItems = { "MJS_見出し 1（項番なし）", "MJS_見出し 2（項番なし）", "MJS_マニュアルタイトル", "MJS_目次" };
                     RemoveSectionsFromEndByStyleWithLastFlag(objDocLast, lastItems, ref chapCntLast, ref last, form);
                     stepStopwatch.Stop();
+                    Trace.WriteLine($"[5] セクション削除処理2: {stepStopwatch.ElapsedMilliseconds}ms");
+
+                    // 索引セクション削除
+                    stepStopwatch = Stopwatch.StartNew();
+                    RemoveSectionsByStyleKeepLast(objDocLast, "索引見出し", form);
+                    stepStopwatch.Stop();
+                    Trace.WriteLine($"[5.5] 索引セクション削除: {stepStopwatch.ElapsedMilliseconds}ms");
+
+                    // セクション削除後のページ番号通し番号設定
+                    stepStopwatch = Stopwatch.StartNew();
+                    Utils.ResetPageNumbering(objDocLast, form);
+                    stepStopwatch.Stop();
+                    Trace.WriteLine($"[5.7] セクション削除後のページ番号通し番号設定: {stepStopwatch.ElapsedMilliseconds}ms");
 
                     // 章扉の項番号を修正
                     stepStopwatch = Stopwatch.StartNew();
@@ -149,12 +156,6 @@ namespace DocMergerComponent
                     FixOutlineNumbering(objDocLast, objApp, form);
                     stepStopwatch.Stop();
                     Trace.WriteLine($"[8] アウトライン番号修正: {stepStopwatch.ElapsedMilliseconds}ms ({stepStopwatch.Elapsed.TotalSeconds:F2}秒)");
-
-                    // 索引セクション削除
-                    stepStopwatch = Stopwatch.StartNew();
-                    RemoveSectionsByStyleKeepLast(objDocLast, "索引見出し", form);
-                    stepStopwatch.Stop();
-                    Trace.WriteLine($"[9] 索引セクション削除: {stepStopwatch.ElapsedMilliseconds}ms");
 
                     // 目次と索引の更新
                     stepStopwatch = Stopwatch.StartNew();

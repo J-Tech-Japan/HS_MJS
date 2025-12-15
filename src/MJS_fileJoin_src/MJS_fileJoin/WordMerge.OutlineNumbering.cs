@@ -80,86 +80,86 @@ namespace DocMergerComponent
         // 段落のアウトライン番号を修正
         private void FixOutlineNumbering(Word.Document objDocLast, Word.Application objApp, MainForm form)
         {
-            form.label10.Text = "見出し番号修正中...";
-            
             int paragraphCount = objDocLast.ListParagraphs.Count;
-            form.progressBar1.Maximum = paragraphCount;
-            form.progressBar1.Value = 0;
-
-            // ListTemplateを事前にキャッシュ
-            var listTemplate = objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7];
             
-            // 正規表現を事前にコンパイル
-            var chapterRegex = new Regex(@"第.*?章", RegexOptions.Compiled);
-            var sectionRegex = new Regex(@"\d\.\d", RegexOptions.Compiled);
-
-            int first = 0;
-            int second = 0;
-            int third = 0;
-            int fourth = 0;
-            
-            for (int i = 1; i <= paragraphCount; i++)
+            using (var progress = Utils.BeginProgress(form, "見出し番号修正中...", paragraphCount))
             {
-                if (i % 10 == 0) // UIの更新頻度を減らす
-                {
-                    form.progressBar1.Value = i;
-                }
+                // ListTemplateを事前にキャッシュ
+                var listTemplate = objApp.ListGalleries[Word.WdListGalleryType.wdOutlineNumberGallery].ListTemplates[7];
+                
+                // 正規表現を事前にコンパイル
+                var chapterRegex = new Regex(@"第.*?章", RegexOptions.Compiled);
+                var sectionRegex = new Regex(@"\d\.\d", RegexOptions.Compiled);
 
-                var paragraph = objDocLast.ListParagraphs[i];
-                var listFormat = paragraph.Range.ListFormat;
+                int first = 0;
+                int second = 0;
+                int third = 0;
+                int fourth = 0;
                 
-                // COM オブジェクトへのアクセスを最小限に
-                string listString = listFormat.ListString;
-                
-                bool isChapter = chapterRegex.IsMatch(listString);
-                bool hasSection = sectionRegex.IsMatch(listString);
-                
-                if (!isChapter && !hasSection) continue;
+                for (int i = 1; i <= paragraphCount; i++)
+                {
+                    // UI更新頻度を調整（10段落ごと、または最後）
+                    if (i % 10 == 0 || i == paragraphCount)
+                    {
+                        progress.SetValue(i);
+                    }
 
-                int levelNumber = listFormat.ListLevelNumber;
-                int currentValue = listFormat.ListValue;
-                bool needsUpdate = false;
-                
-                if (isChapter)
-                {
-                    first++;
-                    second = 0;
-                    third = 0;
-                    fourth = 0;
-                    needsUpdate = (currentValue != first);
-                }
-                else if (levelNumber == 2)
-                {
-                    second++;
-                    third = 0;
-                    fourth = 0;
-                    needsUpdate = (currentValue != second);
-                }
-                else if (levelNumber == 3)
-                {
-                    third++;
-                    fourth = 0;
-                    needsUpdate = (currentValue != third);
-                }
-                else if (levelNumber == 4)
-                {
-                    fourth++;
-                    needsUpdate = (currentValue != fourth);
-                }
+                    var paragraph = objDocLast.ListParagraphs[i];
+                    var listFormat = paragraph.Range.ListFormat;
+                    
+                    // COM オブジェクトへのアクセスを最小限に
+                    string listString = listFormat.ListString;
+                    
+                    bool isChapter = chapterRegex.IsMatch(listString);
+                    bool hasSection = sectionRegex.IsMatch(listString);
+                    
+                    if (!isChapter && !hasSection) continue;
 
-                // 必要な場合のみテンプレートを適用
-                if (needsUpdate)
-                {
-                    listFormat.ApplyListTemplateWithLevel(
-                        listTemplate,
-                        true,
-                        Word.WdListApplyTo.wdListApplyToWholeList,
-                        Word.WdDefaultListBehavior.wdWord10ListBehavior
-                    );
+                    int levelNumber = listFormat.ListLevelNumber;
+                    int currentValue = listFormat.ListValue;
+                    bool needsUpdate = false;
+                    
+                    if (isChapter)
+                    {
+                        first++;
+                        second = 0;
+                        third = 0;
+                        fourth = 0;
+                        needsUpdate = (currentValue != first);
+                    }
+                    else if (levelNumber == 2)
+                    {
+                        second++;
+                        third = 0;
+                        fourth = 0;
+                        needsUpdate = (currentValue != second);
+                    }
+                    else if (levelNumber == 3)
+                    {
+                        third++;
+                        fourth = 0;
+                        needsUpdate = (currentValue != third);
+                    }
+                    else if (levelNumber == 4)
+                    {
+                        fourth++;
+                        needsUpdate = (currentValue != fourth);
+                    }
+
+                    // 必要な場合のみテンプレートを適用
+                    if (needsUpdate)
+                    {
+                        listFormat.ApplyListTemplateWithLevel(
+                            listTemplate,
+                            true,
+                            Word.WdListApplyTo.wdListApplyToWholeList,
+                            Word.WdDefaultListBehavior.wdWord10ListBehavior
+                        );
+                    }
                 }
+                
+                progress.Complete();
             }
-            
-            form.progressBar1.Value = paragraphCount; // 最終更新
         }
     }
 }

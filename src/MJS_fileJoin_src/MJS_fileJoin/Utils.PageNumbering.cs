@@ -14,222 +14,143 @@ namespace MJS_fileJoin
         /// </summary>
         public static void ResetPageNumbering(Word.Document document, MainForm form)
         {
-            form.label10.Text = "ページ番号通し番号に設定中...";
-            
             if (document.Sections.Count <= 1)
             {
                 Trace.WriteLine("  セクション数が1以下のため、処理をスキップ");
                 return;
             }
 
-            form.progressBar1.Maximum = document.Sections.Count;
-            form.progressBar1.Value = 1;
-
-            int processedCount = 0;
-            int resetCount = 0;
-            int preservedCount = 0;
-            int linkedCount = 0;
-            int errorCount = 0;
-
-            try
+            using (var progress = BeginProgress(form, "ページ番号通し番号に設定中...", document.Sections.Count))
             {
-                // 2番目のセクション以降を処理（最初のセクションはそのまま）
-                for (int i = 2; i <= document.Sections.Count; i++)
+                int processedCount = 0;
+                int resetCount = 0;
+                int preservedCount = 0;
+                int linkedCount = 0;
+                int errorCount = 0;
+
+                try
                 {
-                    try
+                    // 2番目のセクション以降を処理（最初のセクションはそのまま）
+                    for (int i = 2; i <= document.Sections.Count; i++)
                     {
-                        Word.Section section = document.Sections[i];
-                        
-                        // 空のヘッダー・フッターのみ前のセクションとリンク
-                        int linked = LinkEmptyHeaderFootersToPrevious(section);
-                        linkedCount += linked;
-                        
-                        // 非空のヘッダー・フッターは保持される
-                        int preserved = PreserveNonEmptyHeaderFooters(section);
-                        preservedCount += preserved;
-                        
-                        // ページ番号の再開始を無効化（通し番号にする）
-                        bool reset = ResetPageNumbersInSection(section);
-                        if (reset) resetCount++;
-                        
-                        processedCount++;
+                        try
+                        {
+                            Word.Section section = document.Sections[i];
+                            
+                            // ヘッダー・フッターの処理を統合（1回のループで完了）
+                            ProcessHeaderFooters(section, ref linkedCount, ref preservedCount, ref resetCount);
+                            
+                            processedCount++;
+                            
+                            // UI更新頻度を調整（10セクションごと、または最後）
+                            if (i % 10 == 0 || i == document.Sections.Count)
+                            {
+                                progress.SetValue(i);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCount++;
+                            Trace.WriteLine($"  セクション {i} のページ番号設定でエラー: {ex.Message}");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        errorCount++;
-                        Trace.WriteLine($"  セクション {i} のページ番号設定でエラー: {ex.Message}");
-                    }
-                    
-                    form.progressBar1.Increment(1);
-                }
 
-                Trace.WriteLine($"  処理完了: {processedCount}セクション (空リンク: {linkedCount}, 保持: {preservedCount}, PageNumbers設定: {resetCount}, エラー: {errorCount})");
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"  ページ番号設定で致命的エラー: {ex.Message}");
-                throw;
+                    progress.Complete();
+                    Trace.WriteLine($"  処理完了: {processedCount}セクション (空リンク: {linkedCount}, 保持: {preservedCount}, PageNumbers設定: {resetCount}, エラー: {errorCount})");
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"  ページ番号設定で致命的エラー: {ex.Message}");
+                    throw;
+                }
             }
         }
 
         /// <summary>
-        /// 空のヘッダー・フッターのみ前のセクションとリンク
+        /// ヘッダー・フッターの処理を統合（リンク、保持、ページ番号設定を1回で実行）
         /// </summary>
-        private static int LinkEmptyHeaderFootersToPrevious(Word.Section section)
+        private static void ProcessHeaderFooters(
+            Word.Section section, 
+            ref int linkedCount, 
+            ref int preservedCount, 
+            ref int resetCount)
         {
-            int linkedCount = 0;
-            
+            // 処理対象のインデックス
+            var indices = new[]
+            {
+                Word.WdHeaderFooterIndex.wdHeaderFooterPrimary,
+                Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage,
+                Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages
+            };
+
             try
             {
                 // フッターの処理
-                linkedCount += LinkEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                linkedCount += LinkEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                linkedCount += LinkEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+                foreach (var index in indices)
+                {
+                    ProcessSingleHeaderFooter(section.Footers[index], ref linkedCount, ref preservedCount, ref resetCount);
+                }
                 
                 // ヘッダーの処理
-                linkedCount += LinkEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                linkedCount += LinkEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                linkedCount += LinkEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
+                foreach (var index in indices)
+                {
+                    ProcessSingleHeaderFooter(section.Headers[index], ref linkedCount, ref preservedCount, ref resetCount);
+                }
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"    LinkEmptyHeaderFootersToPrevious エラー: {ex.Message}");
+                Trace.WriteLine($"    ProcessHeaderFooters エラー: {ex.Message}");
             }
-            
-            return linkedCount;
         }
 
         /// <summary>
-        /// 空のHeaderFooterのみLinkToPreviousを設定
+        /// 単一のHeaderFooterを処理（空判定、リンク/保持、ページ番号設定を統合）
         /// </summary>
-        private static int LinkEmptyHeaderFooter(Word.HeaderFooter headerFooter)
+        private static void ProcessSingleHeaderFooter(
+            Word.HeaderFooter headerFooter, 
+            ref int linkedCount, 
+            ref int preservedCount, 
+            ref int resetCount)
         {
             try
             {
-                // 既にリンクされている場合はスキップ
-                if (headerFooter.LinkToPrevious)
-                {
-                    return 0;
-                }
+                // 既にリンクされているかチェック
+                bool isLinked = headerFooter.LinkToPrevious;
                 
-                // 範囲が存在し、空の場合のみリンク
+                // 範囲取得
                 var range = headerFooter.Range;
-                if (range != null && string.IsNullOrWhiteSpace(range.Text.Trim()))
+                if (range != null)
                 {
-                    headerFooter.LinkToPrevious = true;
-                    return 1;
-                }
-            }
-            catch
-            {
-                // ヘッダー/フッターが存在しない場合は無視
-            }
-            
-            return 0;
-        }
+                    string text = range.Text?.Trim() ?? string.Empty;
+                    bool isEmpty = string.IsNullOrWhiteSpace(text);
 
-        /// <summary>
-        /// 非空のヘッダー・フッターを保持（LinkToPreviousをfalseに）
-        /// </summary>
-        private static int PreserveNonEmptyHeaderFooters(Word.Section section)
-        {
-            int preservedCount = 0;
-            
-            try
-            {
-                // フッターの処理
-                preservedCount += PreserveNonEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                preservedCount += PreserveNonEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                preservedCount += PreserveNonEmptyHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
-                
-                // ヘッダーの処理
-                preservedCount += PreserveNonEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                preservedCount += PreserveNonEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                preservedCount += PreserveNonEmptyHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"    PreserveNonEmptyHeaderFooters エラー: {ex.Message}");
-            }
-            
-            return preservedCount;
-        }
-
-        /// <summary>
-        /// 非空のHeaderFooterのLinkToPreviousをfalseに設定
-        /// </summary>
-        private static int PreserveNonEmptyHeaderFooter(Word.HeaderFooter headerFooter)
-        {
-            try
-            {
-                // 範囲が存在し、非空の場合はリンクを解除
-                var range = headerFooter.Range;
-                if (range != null && !string.IsNullOrWhiteSpace(range.Text.Trim()))
-                {
-                    if (headerFooter.LinkToPrevious)
+                    // 空の場合：リンク設定
+                    if (isEmpty && !isLinked)
+                    {
+                        headerFooter.LinkToPrevious = true;
+                        linkedCount++;
+                    }
+                    // 非空の場合：リンク解除して保持
+                    else if (!isEmpty && isLinked)
                     {
                         headerFooter.LinkToPrevious = false;
-                        return 1;
+                        preservedCount++;
                     }
+                }
+
+                // ページ番号の再開始を無効化（通し番号化）
+                var pageNumbers = headerFooter.PageNumbers;
+                if (pageNumbers != null)
+                {
+                    pageNumbers.RestartNumberingAtSection = false;
+                    pageNumbers.StartingNumber = 0; // 0 = 継続
+                    resetCount++;
                 }
             }
             catch
             {
-                // ヘッダー/フッターが存在しない場合は無視
+                // ヘッダー/フッターが存在しない場合や、アクセスできない場合は無視
             }
-            
-            return 0;
-        }
-
-        /// <summary>
-        /// セクションのPageNumbers設定で再開始を無効化
-        /// </summary>
-        private static bool ResetPageNumbersInSection(Word.Section section)
-        {
-            bool anyReset = false;
-            
-            try
-            {
-                // フッターのPageNumbersをリセット
-                anyReset |= ResetPageNumbersInHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                anyReset |= ResetPageNumbersInHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                anyReset |= ResetPageNumbersInHeaderFooter(section.Footers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
-                
-                // ヘッダーのPageNumbersをリセット
-                anyReset |= ResetPageNumbersInHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterPrimary]);
-                anyReset |= ResetPageNumbersInHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterFirstPage]);
-                anyReset |= ResetPageNumbersInHeaderFooter(section.Headers[Word.WdHeaderFooterIndex.wdHeaderFooterEvenPages]);
-            }
-            catch
-            {
-                // 無視
-            }
-            
-            return anyReset;
-        }
-
-        /// <summary>
-        /// 個別のHeaderFooterでページ番号の再開始を無効化
-        /// </summary>
-        private static bool ResetPageNumbersInHeaderFooter(Word.HeaderFooter headerFooter)
-        {
-            try
-            {
-                // PageNumbersの存在をチェック（Countが使えないが、実際に設定は可能）
-                var pageNumbers = headerFooter.PageNumbers;
-                
-                // ページ番号の再開始を無効化（前のセクションから継続）
-                pageNumbers.RestartNumberingAtSection = false;
-                pageNumbers.StartingNumber = 0; // 0 = 継続
-                
-                return true;
-            }
-            catch
-            {
-                // PageNumbersが存在しない場合や、アクセスできない場合は無視
-            }
-            
-            return false;
         }
     }
 }
