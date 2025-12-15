@@ -43,8 +43,9 @@
                            <li class="sub-category">
                            <h4>はじめに</h4>
                               <ul>
-                                 <li><a href="../contents/startguide.pdf" target="_blank">スタートガイド</a></li>
-                                 <li><a href="../contents/CMN_JNT/index.html#t=CMN11003.html">導入の流れ</a></li>
+                                 <li v-for="(link,linkIndex) in introLinks" :key="linkIndex">
+                                    <a :href="link.HREF" :target="link.TARGET || undefined">{{link.TITLE}}</a>
+                                 </li>
                               </ul>
                            </li>
                         </template>

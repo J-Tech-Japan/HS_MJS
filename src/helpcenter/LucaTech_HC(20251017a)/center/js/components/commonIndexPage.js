@@ -11,7 +11,18 @@ function createIndexPageApp(indexType) {
         subCategoryTitle: "",
         searchKeyword: "",
         isChecked: true,
-        indexType: indexType // "index"、"menu"、"purpose"、または "sys_top"
+        indexType: indexType, // "index"、"menu"、"purpose"、または "sys_top"
+        introLinks: [
+          {
+            TITLE: "スタートガイド",
+            HREF: "../contents/startguide.pdf",
+            TARGET: "_blank"
+          },
+          {
+            TITLE: "導入の流れ",
+            HREF: "../contents/CMN_JNT/index.html#t=CMN11003.html"
+          }
+        ]
       };
     },
     created() {
