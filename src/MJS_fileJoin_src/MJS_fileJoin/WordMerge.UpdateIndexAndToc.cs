@@ -9,17 +9,20 @@ namespace DocMergerComponent
         private void UpdateTocAndIndex(Word.Document doc, MainForm fm)
         {
             // 目次の更新
-            if (doc.TablesOfContents.Count >= 1)
-                doc.TablesOfContents[1].Update();
-            fm.progressBar1.Value = 1;
+            using (var progress = Utils.BeginProgress(fm, "目次更新中...", 1))
+            {
+                if (doc.TablesOfContents.Count >= 1)
+                    doc.TablesOfContents[1].Update();
+                progress.Complete();
+            }
 
             // 索引の更新
-            fm.label10.Text = "索引更新中...";
-            fm.progressBar1.Value = 0;
-            fm.progressBar1.Maximum = 1;
-            if (doc.Indexes.Count >= 1)
-                doc.Indexes[1].Update();
-            fm.progressBar1.Value = 1;
+            using (var progress = Utils.BeginProgress(fm, "索引更新中...", 1))
+            {
+                if (doc.Indexes.Count >= 1)
+                    doc.Indexes[1].Update();
+                progress.Complete();
+            }
         }
     }
 }

@@ -22,57 +22,63 @@ namespace DocMergerComponent
                 return;
             }
 
-            object shouTobiraStyle = shouTobiraStyleName;
             int allChap = objDocLast.Sections.Count;
-
-            // 正規表現を事前にコンパイル
-            Regex numberRegex = new Regex(@"^\d+?", RegexOptions.Compiled);
-
-            for (int i = 1; i <= allChap; i++)
+            
+            using (var progress = Utils.BeginProgress(fm, "章扉の項番号修正中...", allChap))
             {
-                try
+                object shouTobiraStyle = shouTobiraStyleName;
+
+                // 正規表現を事前にコンパイル
+                Regex numberRegex = new Regex(@"^\d+?", RegexOptions.Compiled);
+
+                for (int i = 1; i <= allChap; i++)
                 {
-                    Word.Range sectionRange = objDocLast.Sections[i].Range;
-                    Word.Paragraphs paragraphs = sectionRange.Paragraphs;
-                    int paragraphCount = paragraphs.Count;
-
-                    int shou = 0;
-                    bool foundChapterTitle = false;
-
-                    // 段落を一度だけ列挙
-                    for (int p = 1; p <= paragraphCount - 1; p++)
+                    try
                     {
-                        Word.Paragraph para = paragraphs[p];
-                        string styleName = para.get_Style().NameLocal.Trim();
+                        Word.Range sectionRange = objDocLast.Sections[i].Range;
+                        Word.Paragraphs paragraphs = sectionRange.Paragraphs;
+                        int paragraphCount = paragraphs.Count;
 
-                        if (styleName == targetStyleName)
-                        {
-                            shou = para.Range.ListFormat.ListValue;
-                            foundChapterTitle = true;
-                        }
-                        else if (foundChapterTitle && styleName.Contains(shouTobiraStyleName))
-                        {
-                            // 章番号が見つかった後のみ処理
-                            Word.Range paraRange = para.Range;
-                            string originalText = paraRange.Text;
-                            string newText = numberRegex.Replace(originalText, shou.ToString());
+                        int shou = 0;
+                        bool foundChapterTitle = false;
 
-                            if (originalText != newText)
+                        // 段落を一度だけ列挙
+                        for (int p = 1; p <= paragraphCount - 1; p++)
+                        {
+                            Word.Paragraph para = paragraphs[p];
+                            string styleName = para.get_Style().NameLocal.Trim();
+
+                            if (styleName == targetStyleName)
                             {
-                                paraRange.Text = newText;
-                                paraRange.set_Style(ref shouTobiraStyle);
+                                shou = para.Range.ListFormat.ListValue;
+                                foundChapterTitle = true;
+                            }
+                            else if (foundChapterTitle && styleName.Contains(shouTobiraStyleName))
+                            {
+                                // 章番号が見つかった後のみ処理
+                                Word.Range paraRange = para.Range;
+                                string originalText = paraRange.Text;
+                                string newText = numberRegex.Replace(originalText, shou.ToString());
+
+                                if (originalText != newText)
+                                {
+                                    paraRange.Text = newText;
+                                    paraRange.set_Style(ref shouTobiraStyle);
+                                }
                             }
                         }
                     }
-                }
-                catch (System.Exception ex)
-                {
-                    // エラー内容をログに記録（必要に応じて）
-                    System.Diagnostics.Debug.WriteLine(
-                        $"Section {i} でエラー: {ex.Message}");
-                }
+                    catch (System.Exception ex)
+                    {
+                        // エラー内容をログに記録（必要に応じて）
+                        System.Diagnostics.Debug.WriteLine(
+                            $"Section {i} でエラー: {ex.Message}");
+                    }
 
-                fm.progressBar1.Increment(1);
+                    progress.SetValue(i);
+                }
+                
+                progress.Complete();
             }
         }
     }

@@ -52,36 +52,45 @@ namespace DocMergerComponent
         // ハイパーリンクの更新
         private void UpdateHyperlinks(Word.Document objDocLast, MainForm fm)
         {
-            fm.label10.Text = "ハイパーリンク更新中...";
             List<string> bookmarkNames = GetBookmarkNames(objDocLast);
 
-            fm.progressBar1.Value = 0;
-            fm.progressBar1.Maximum = objDocLast.Fields.Count;
-
-            foreach (Word.Field wf in objDocLast.Fields)
+            using (var progress = Utils.BeginProgress(fm, "ハイパーリンク更新中...", objDocLast.Fields.Count))
             {
-                fm.progressBar1.Increment(1);
-                if (wf.Type == Word.WdFieldType.wdFieldHyperlink)
+                int currentIndex = 0;
+                foreach (Word.Field wf in objDocLast.Fields)
                 {
-                    if (wf.Code.Text.Contains("\"http")) continue;
-                    string text = ExtractHyperlinkText(wf.Code.Text);
-                    if (text == null) continue;
-
-                    string[] subtext = text.Split('\\');
-                    text = subtext[subtext.Length - 1];
-                    subtext = text.Split('/');
-                    text = subtext[subtext.Length - 1];
-                    string normalized = text.Replace(".html", "").Replace("#", "♯").Trim();
-                    if (bookmarkNames.Contains(normalized))
+                    currentIndex++;
+                    
+                    // UI更新頻度を調整（10フィールドごと、または最後）
+                    if (currentIndex % 10 == 0 || currentIndex == objDocLast.Fields.Count)
                     {
-                        wf.Code.Text = @"HYPERLINK \l """ + normalized + @"""";
-                        wf.Update();
+                        progress.SetValue(currentIndex);
                     }
-                    else
+                    
+                    if (wf.Type == Word.WdFieldType.wdFieldHyperlink)
                     {
-                        wf.Unlink();
+                        if (wf.Code.Text.Contains("\"http")) continue;
+                        string text = ExtractHyperlinkText(wf.Code.Text);
+                        if (text == null) continue;
+
+                        string[] subtext = text.Split('\\');
+                        text = subtext[subtext.Length - 1];
+                        subtext = text.Split('/');
+                        text = subtext[subtext.Length - 1];
+                        string normalized = text.Replace(".html", "").Replace("#", "♯").Trim();
+                        if (bookmarkNames.Contains(normalized))
+                        {
+                            wf.Code.Text = @"HYPERLINK \l """ + normalized + @"""";
+                            wf.Update();
+                        }
+                        else
+                        {
+                            wf.Unlink();
+                        }
                     }
                 }
+                
+                progress.Complete();
             }
 
             UpdateHyperlinkDisplayText(objDocLast);

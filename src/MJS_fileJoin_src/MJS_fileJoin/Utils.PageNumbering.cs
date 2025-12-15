@@ -14,57 +14,55 @@ namespace MJS_fileJoin
         /// </summary>
         public static void ResetPageNumbering(Word.Document document, MainForm form)
         {
-            form.label10.Text = "ページ番号通し番号に設定中...";
-            
             if (document.Sections.Count <= 1)
             {
                 Trace.WriteLine("  セクション数が1以下のため、処理をスキップ");
                 return;
             }
 
-            form.progressBar1.Maximum = document.Sections.Count;
-            form.progressBar1.Value = 1;
-
-            int processedCount = 0;
-            int resetCount = 0;
-            int preservedCount = 0;
-            int linkedCount = 0;
-            int errorCount = 0;
-
-            try
+            using (var progress = BeginProgress(form, "ページ番号通し番号に設定中...", document.Sections.Count))
             {
-                // 2番目のセクション以降を処理（最初のセクションはそのまま）
-                for (int i = 2; i <= document.Sections.Count; i++)
+                int processedCount = 0;
+                int resetCount = 0;
+                int preservedCount = 0;
+                int linkedCount = 0;
+                int errorCount = 0;
+
+                try
                 {
-                    try
+                    // 2番目のセクション以降を処理（最初のセクションはそのまま）
+                    for (int i = 2; i <= document.Sections.Count; i++)
                     {
-                        Word.Section section = document.Sections[i];
-                        
-                        // ヘッダー・フッターの処理を統合（1回のループで完了）
-                        ProcessHeaderFooters(section, ref linkedCount, ref preservedCount, ref resetCount);
-                        
-                        processedCount++;
-                        
-                        // UI更新頻度を調整（10セクションごと、または最後）
-                        if (i % 10 == 0 || i == document.Sections.Count)
+                        try
                         {
-                            form.progressBar1.Value = i;
+                            Word.Section section = document.Sections[i];
+                            
+                            // ヘッダー・フッターの処理を統合（1回のループで完了）
+                            ProcessHeaderFooters(section, ref linkedCount, ref preservedCount, ref resetCount);
+                            
+                            processedCount++;
+                            
+                            // UI更新頻度を調整（10セクションごと、または最後）
+                            if (i % 10 == 0 || i == document.Sections.Count)
+                            {
+                                progress.SetValue(i);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCount++;
+                            Trace.WriteLine($"  セクション {i} のページ番号設定でエラー: {ex.Message}");
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        errorCount++;
-                        Trace.WriteLine($"  セクション {i} のページ番号設定でエラー: {ex.Message}");
-                    }
-                }
 
-                form.progressBar1.Value = document.Sections.Count;
-                Trace.WriteLine($"  処理完了: {processedCount}セクション (空リンク: {linkedCount}, 保持: {preservedCount}, PageNumbers設定: {resetCount}, エラー: {errorCount})");
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"  ページ番号設定で致命的エラー: {ex.Message}");
-                throw;
+                    progress.Complete();
+                    Trace.WriteLine($"  処理完了: {processedCount}セクション (空リンク: {linkedCount}, 保持: {preservedCount}, PageNumbers設定: {resetCount}, エラー: {errorCount})");
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"  ページ番号設定で致命的エラー: {ex.Message}");
+                    throw;
+                }
             }
         }
 
