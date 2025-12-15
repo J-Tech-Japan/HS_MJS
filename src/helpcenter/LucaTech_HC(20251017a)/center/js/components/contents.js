@@ -1,13 +1,18 @@
-var baseFolderWebHelp = "../contents";
-
+// コンテンツタイプの定義
 const CONTENT_TYPE = {
-    CATEGORY: "category",
-    CONTENTS: "contents"
+    CATEGORY: "category",    // カテゴリタイプ
+    CONTENTS: "contents"     // コンテンツタイプ
 };
 
+// ベースフォルダのパス設定
+var baseFolderWebHelp = "../contents";
+
+// コンテンツパスを生成する関数
 const createPath = (id) => `${baseFolderWebHelp}/${id}/`;
 
+// 全コンテンツの定義（ライセンスフィルタ適用前）
 const CONTENTS_ALL = [
+    // 共通カテゴリ
     {
         ID: "CMN",
         TYPE: CONTENT_TYPE.CATEGORY,
@@ -52,6 +57,7 @@ const CONTENTS_ALL = [
             },
         ]
     },
+    // 財務会計システムカテゴリ
     {
         ID: "MAS",
         TYPE: CONTENT_TYPE.CATEGORY,
@@ -109,6 +115,7 @@ const CONTENTS_ALL = [
             },
         ]
     },
+    // 固定資産システムカテゴリ
     {
         ID: "DEP",
         TYPE: CONTENT_TYPE.CATEGORY,
@@ -129,6 +136,7 @@ const CONTENTS_ALL = [
             },
         ]
     },
+    // ワークフローシステムカテゴリ
     {
         ID: "FRT",
         TYPE: CONTENT_TYPE.CATEGORY,
@@ -157,12 +165,17 @@ const CONTENTS_ALL = [
     }
 ];
 
-
+/**
+ * Cookieを解析してオブジェクトに変換する関数
+ * @returns {Object} Cookie名と値のペアを持つオブジェクト
+ */
 function parseCookies() {
     try {
+        // Cookieが存在しない場合は空オブジェクトを返す
         if (!document.cookie) {
             return {};
         }
+        // Cookieを分割してオブジェクトに変換
         return document.cookie.split('; ').reduce((prev, current) => {
             const [name, ...value] = current.split('=');
             if (name) {
@@ -176,25 +189,47 @@ function parseCookies() {
     }
 }
 
+/**
+ * ライセンスCookieを解析してIDの配列に変換する関数
+ * @param {Object} cookies - Cookieオブジェクト
+ * @returns {Array<string>} ライセンスIDの配列
+ */
 function parseLicenseCookie(cookies) {
     const licenseValue = cookies['gi_license'];
+    // ライセンス値が存在しない、または空の場合は空配列を返す
     if (!licenseValue || licenseValue.trim() === '') {
         return [];
     }
+    // カンマ区切りのライセンスIDを配列に変換
     return licenseValue.split(',').map(id => id.trim()).filter(Boolean);
 }
 
+// Cookieを解析
 var cookie = parseCookies();
+// ライセンス情報を取得
 var gi_license = parseLicenseCookie(cookie);
 
+/**
+ * ライセンスに基づいてフィルタリングされたコンテンツ配列
+ * 各カテゴリとそのコンテンツをライセンスIDでフィルタリングし、
+ * アクセス可能なコンテンツのみを含む配列を生成
+ */
 const CONTENTS = CONTENTS_ALL.map(category => {
     return {
         ...category,
-        CONTENTS: category.CONTENTS.filter(contents => contents.TYPE === CONTENT_TYPE.CATEGORY ? contents.CONTENTS.some(sub => gi_license.includes(sub.ID)) : gi_license.includes(contents.ID)).map(contents => {
+        // ライセンスに基づいてコンテンツをフィルタリング
+        // カテゴリタイプの場合はサブコンテンツもチェック
+        CONTENTS: category.CONTENTS.filter(contents => 
+            contents.TYPE === CONTENT_TYPE.CATEGORY 
+                ? contents.CONTENTS.some(sub => gi_license.includes(sub.ID)) 
+                : gi_license.includes(contents.ID)
+        ).map(contents => {
+            // カテゴリタイプの場合、サブコンテンツもフィルタリング
             return contents.TYPE === CONTENT_TYPE.CATEGORY ? {
                 ...contents,
                 CONTENTS: contents.CONTENTS.filter(sub => gi_license.includes(sub.ID))
             } : contents;
         })
     };
+// コンテンツが存在するカテゴリのみを残す
 }).filter(category => category.CONTENTS.length);
