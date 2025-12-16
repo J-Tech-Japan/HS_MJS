@@ -206,30 +206,61 @@ function parseLicenseCookie(cookies) {
 
 // Cookieを解析
 var cookie = parseCookies();
+
 // ライセンス情報を取得
 var gi_license = parseLicenseCookie(cookie);
+
+/**
+ * コンテンツまたはカテゴリがライセンスでアクセス可能かチェック
+ * @param {Object} contents - チェック対象のコンテンツオブジェクト
+ * @param {Array<string>} licenseIds - 有効なライセンスIDの配列
+ * @returns {boolean} アクセス可能な場合true
+ */
+function isContentAccessible(contents, licenseIds) {
+    if (contents.TYPE === CONTENT_TYPE.CATEGORY) {
+        // カテゴリの場合、サブコンテンツのいずれかがアクセス可能ならtrue
+        return contents.CONTENTS.some(sub => licenseIds.includes(sub.ID));
+    }
+    // 通常のコンテンツの場合、そのIDがライセンスに含まれているかチェック
+    return licenseIds.includes(contents.ID);
+}
+
+/**
+ * カテゴリ内のサブコンテンツをライセンスでフィルタリング
+ * @param {Object} contents - フィルタリング対象のコンテンツオブジェクト
+ * @param {Array<string>} licenseIds - 有効なライセンスIDの配列
+ * @returns {Object} フィルタリング済みのコンテンツオブジェクト
+ */
+function filterCategoryContents(contents, licenseIds) {
+    if (contents.TYPE === CONTENT_TYPE.CATEGORY) {
+        return {
+            ...contents,
+            CONTENTS: contents.CONTENTS.filter(sub => licenseIds.includes(sub.ID))
+        };
+    }
+    return contents;
+}
+
+/**
+ * カテゴリのコンテンツ配列をライセンスでフィルタリング
+ * @param {Array<Object>} contentsList - カテゴリ内のコンテンツ配列
+ * @param {Array<string>} licenseIds - 有効なライセンスIDの配列
+ * @returns {Array<Object>} フィルタリング済みのコンテンツ配列
+ */
+function filterContentsByLicense(contentsList, licenseIds) {
+    return contentsList
+        .filter(contents => isContentAccessible(contents, licenseIds))
+        .map(contents => filterCategoryContents(contents, licenseIds));
+}
 
 /**
  * ライセンスに基づいてフィルタリングされたコンテンツ配列
  * 各カテゴリとそのコンテンツをライセンスIDでフィルタリングし、
  * アクセス可能なコンテンツのみを含む配列を生成
  */
-const CONTENTS = CONTENTS_ALL.map(category => {
-    return {
+const CONTENTS = CONTENTS_ALL
+    .map(category => ({
         ...category,
-        // ライセンスに基づいてコンテンツをフィルタリング
-        // カテゴリタイプの場合はサブコンテンツもチェック
-        CONTENTS: category.CONTENTS.filter(contents => 
-            contents.TYPE === CONTENT_TYPE.CATEGORY 
-                ? contents.CONTENTS.some(sub => gi_license.includes(sub.ID)) 
-                : gi_license.includes(contents.ID)
-        ).map(contents => {
-            // カテゴリタイプの場合、サブコンテンツもフィルタリング
-            return contents.TYPE === CONTENT_TYPE.CATEGORY ? {
-                ...contents,
-                CONTENTS: contents.CONTENTS.filter(sub => gi_license.includes(sub.ID))
-            } : contents;
-        })
-    };
-// コンテンツが存在するカテゴリのみを残す
-}).filter(category => category.CONTENTS.length);
+        CONTENTS: filterContentsByLicense(category.CONTENTS, gi_license)
+    }))
+    .filter(category => category.CONTENTS.length > 0);
