@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using MJS_fileJoin;
 using Word = Microsoft.Office.Interop.Word;
@@ -8,44 +9,60 @@ namespace DocMergerComponent
     public partial class DocMerger
     {
         // 特定のスタイル名を持つ「HYPERLINK _Ref...」形式のフィールドを「REF ... \h」形式に変換
-        public static void ConvertHyperlinkToRef(Word.Document doc, List<string> targetStyleNames)
+        private void ConvertHyperlinkToRef(Word.Document doc, List<string> targetStyleNames, MainForm form)
         {
-            int count = 0;
-            foreach (Word.Field field in doc.Fields)
+            using (var progress = Utils.BeginProgress(form, "ハイパーリンク変換中...", doc.Fields.Count))
             {
-                string code = field.Code.Text;
+                int count = 0;
+                int currentIndex = 0;
                 
-                // HYPERLINKフィールドかつ_Refを含むかチェック
-                if (!code.Contains("HYPERLINK") || !code.Contains("_Ref"))
+                foreach (Word.Field field in doc.Fields)
                 {
-                    continue;
-                }
+                    currentIndex++;
+                    
+                    // UI更新頻度を調整（10フィールドごと、または最後）
+                    if (currentIndex % 10 == 0 || currentIndex == doc.Fields.Count)
+                    {
+                        progress.SetValue(currentIndex);
+                    }
+                    
+                    string code = field.Code.Text;
+                    
+                    // HYPERLINKフィールドかつ_Refを含むかチェック
+                    if (!code.Contains("HYPERLINK") || !code.Contains("_Ref"))
+                    {
+                        continue;
+                    }
 
-                // 正規表現で _Ref + 数字 の形式を抽出（前に任意の文字列がある場合も対応）
-                Match match = Regex.Match(code, @"_Ref(\d+)");
-                if (!match.Success)
-                {
-                    continue;
-                }
+                    // 正規表現で _Ref + 数字 の形式を抽出（前に任意の文字列がある場合も対応）
+                    Match match = Regex.Match(code, @"_Ref(\d+)");
+                    if (!match.Success)
+                    {
+                        continue;
+                    }
 
-                // スタイル名を取得
-                Word.Range rng = field.Result;
-                string styleName = rng.get_Style() is Word.Style style ? style.NameLocal : rng.get_Style().ToString();
+                    // スタイル名を取得
+                    Word.Range rng = field.Result;
+                    string styleName = rng.get_Style() is Word.Style style ? style.NameLocal : rng.get_Style().ToString();
+                    
+                    // 指定リストに含まれていなければスキップ
+                    if (!targetStyleNames.Contains(styleName))
+                    {
+                        continue;
+                    }
+
+                    // _Ref + 数字の部分を抽出（全体）
+                    string refId = match.Value;
+
+                    // フィールドコードをREF形式に書き換え
+                    field.Code.Text = $" REF {refId} \\h ";
+
+                    field.Update();
+                    count++;
+                }
                 
-                // 指定リストに含まれていなければスキップ
-                if (!targetStyleNames.Contains(styleName))
-                {
-                    continue;
-                }
-
-                // _Ref + 数字の部分を抽出（全体）
-                string refId = match.Value;
-
-                // フィールドコードをREF形式に書き換え
-                field.Code.Text = $" REF {refId} \\h ";
-
-                field.Update();
-                count++;
+                progress.Complete();
+                Trace.WriteLine($"  ハイパーリンク変換完了: {count}個のフィールドを変換");
             }
         }
 

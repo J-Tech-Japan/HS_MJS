@@ -65,7 +65,7 @@ namespace DocMergerComponent
             }
         }
 
-        // 指定したスタイル名が見つかったらlastフラグをtrueにして進捗バーを進める
+        // 指定したスタイル名が見つかったらlastフラグをtrueにする
         private void SetLastFlagIfStyleFound(
             Word.Document objDocLast,
             string[] styleNames,
@@ -76,33 +76,23 @@ namespace DocMergerComponent
             // 有効なスタイル名だけを抽出
             var validStyleNames = GetValidStyleNames(objDocLast, styleNames);
             
-            using (var progress = Utils.BeginProgress(form, "索引見出し検索中...", validStyleNames.Count))
+            foreach (string styleName in validStyleNames)
             {
-                int styleIndex = 0;
-                
-                foreach (string styleName in validStyleNames)
+                object styleObject = styleName;
+                int allChap = objDocLast.Sections.Count;
+                for (int i = allChap; i > chapCntLast; i--)
                 {
-                    object styleObject = styleName;
-                    int allChap = objDocLast.Sections.Count;
-                    for (int i = allChap; i > chapCntLast; i--)
+                    Word.Range wr = objDocLast.Sections[i].Range;
+                    wr.Find.ClearFormatting();
+                    wr.Find.set_Style(ref styleObject);
+                    wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                    wr.Find.Execute();
+                    if (wr.Find.Found)
                     {
-                        Word.Range wr = objDocLast.Sections[i].Range;
-                        wr.Find.ClearFormatting();
-                        wr.Find.set_Style(ref styleObject);
-                        wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                        wr.Find.Execute();
-                        if (wr.Find.Found)
-                        {
-                            last = true;
-                            break;
-                        }
+                        last = true;
+                        break;
                     }
-                    
-                    styleIndex++;
-                    progress.SetValue(styleIndex);
                 }
-                
-                progress.Complete();
             }
         }
 
@@ -194,56 +184,45 @@ namespace DocMergerComponent
             int i = doc.Sections.Count;
             int deletedCount = 0;
             object styleObject = styleName;
-            
-            using (var progress = Utils.BeginProgress(form, "索引セクション削除中...", doc.Sections.Count))
+
+            while (i > 0)
             {
-                while (i > 0)
+                if (i > doc.Sections.Count)
                 {
-                    if (i > doc.Sections.Count)
-                    {
-                        i = doc.Sections.Count;
-                        continue;
-                    }
+                    i = doc.Sections.Count;
+                    continue;
+                }
 
-                    Word.Range wr = doc.Sections[i].Range;
-                    wr.Find.ClearFormatting();
-                    wr.Find.set_Style(ref styleObject);
-                    wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                    wr.Find.Execute();
+                Word.Range wr = doc.Sections[i].Range;
+                wr.Find.ClearFormatting();
+                wr.Find.set_Style(ref styleObject);
+                wr.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                wr.Find.Execute();
 
-                    if (wr.Find.Found)
+                if (wr.Find.Found)
+                {
+                    if (found)
                     {
-                        if (found)
-                        {
-                            Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] セクション削除: スタイル='{styleName}', セクション番号={i}");
-                            
-                            doc.Sections[i].Range.Delete();
-                            deletedCount++;
-                        }
-                        else
-                        {
-                            Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] セクション保持（最後の1つ）: スタイル='{styleName}', セクション番号={i}");
-                            found = true;
-                            i--;
-                        }
+                        Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] セクション削除: スタイル='{styleName}', セクション番号={i}");
+                        
+                        doc.Sections[i].Range.Delete();
+                        deletedCount++;
                     }
                     else
                     {
+                        Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] セクション保持（最後の1つ）: スタイル='{styleName}', セクション番号={i}");
+                        found = true;
                         i--;
                     }
-                    
-                    // プログレスバー更新（10セクションごと）
-                    if ((doc.Sections.Count - i) % 10 == 0)
-                    {
-                        progress.SetValue(doc.Sections.Count - i);
-                    }
                 }
-                if (deletedCount > 0)
+                else
                 {
-                    Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] スタイル '{styleName}' で {deletedCount} セクション削除（1つ保持）");
+                    i--;
                 }
-                
-                progress.Complete();
+            }
+            if (deletedCount > 0)
+            {
+                Trace.WriteLine($"[RemoveSectionsByStyleKeepLast] スタイル '{styleName}' で {deletedCount} セクション削除（1つ保持）");
             }
         }
 
