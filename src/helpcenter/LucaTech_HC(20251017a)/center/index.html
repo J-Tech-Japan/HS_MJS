@@ -44,14 +44,14 @@
                               <h4>{{introSection.TITLE}}</h4>
                               <ul>
                                  <li v-for="(link,linkIndex) in introSection.LINKS" :key="linkIndex">
-                                    <a :href="link.HREF" :target="link.TARGET || undefined">{{link.TITLE}}</a>
+                                    <a :href="link.HREF" :target="link.TARGET">{{link.TITLE}}</a>
                                  </li>
                               </ul>
                            </li>
                         </template>
                         <li v-for="(item2,index2) in item.CONTENTS" :key="index2" :class="{'sub-category':item2.TYPE==='category'}">
                            <a v-if="item2.TYPE==='contents'" :href="`sys_top.html?contentid=${item2.ID}`">{{item2.TITLE}}</a>
-                           <template v-else="item2.TYPE==='category'">
+                           <template v-else-if="item2.TYPE==='category'">
                               <h4>{{item2.TITLE}}</h4>
                               <ul>
                                  <li v-for="(item3,index3) in item2.CONTENTS" :key="index3">
@@ -67,8 +67,8 @@
          </div>
       </main>
       <footer class="footer_index">
-         <div class="footer_index"><p class="mjs_logo"></p>
-         ©2025 MIROKU JYOHO SERVICE CO., LTD.</div>
+         <p class="mjs_logo"></p>
+         ©2025 MIROKU JYOHO SERVICE CO., LTD.
       </footer>
       <!-- BEGIN DEL 対応1 -->
       <!-- <div class="menu-slide bg"></div>
