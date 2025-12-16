@@ -41,9 +41,9 @@
                      <ul>
                         <template v-if="item.ID==='CMN'">
                            <li class="sub-category">
-                           <h4>はじめに</h4>
+                              <h4>{{introSection.TITLE}}</h4>
                               <ul>
-                                 <li v-for="(link,linkIndex) in introLinks" :key="linkIndex">
+                                 <li v-for="(link,linkIndex) in introSection.LINKS" :key="linkIndex">
                                     <a :href="link.HREF" :target="link.TARGET || undefined">{{link.TITLE}}</a>
                                  </li>
                               </ul>
