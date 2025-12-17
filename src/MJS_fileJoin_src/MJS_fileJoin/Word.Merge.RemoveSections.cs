@@ -7,6 +7,7 @@ namespace DocMergerComponent
 {
     public partial class DocMerger
     {
+        // 指定したスタイル名のセクションを範囲内で削除
         private void RemoveSectionsInRangeByStyle(
             Word.Document objDocLast,
             string[] lsStyleName,
