@@ -877,6 +877,7 @@
             // openFileDialog2
             // 
             this.openFileDialog2.FileName = "openFileDialog2";
+            this.openFileDialog2.Filter = "Wordファイル(*.doc;*.docx)|*.doc;*.docx|docファイル(*.doc)|*.doc|docxファイル(*.docx)|*.docx|すべてのファイル(*.*)|*.*";
             // 
             // saveFileDialog1
             // 
