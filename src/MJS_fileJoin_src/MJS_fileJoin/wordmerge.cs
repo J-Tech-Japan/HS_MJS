@@ -171,7 +171,7 @@ namespace DocMergerComponent
                 // ハイパーリンク変換
                 stepStopwatch = Stopwatch.StartNew();
                 List<string> targetStyles = new List<string> { "MJS_参照先" };
-                ConvertHyperlinkToRef(objDocLast, targetStyles);
+                ConvertHyperlinkToRef(objDocLast, targetStyles, form);
                 stepStopwatch.Stop();
                 Trace.WriteLine($"[11] ハイパーリンク変換: {stepStopwatch.ElapsedMilliseconds}ms");
 

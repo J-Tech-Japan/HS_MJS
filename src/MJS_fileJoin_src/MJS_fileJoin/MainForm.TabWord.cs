@@ -122,10 +122,26 @@ namespace MJS_fileJoin
                 return;
             }
 
+            // 最初のファイルの拡張子を取得
+            string firstFile = listBox1.Items[0].ToString();
+            string firstFileExtension = Path.GetExtension(firstFile).ToLower();
+            bool isDocx = firstFileExtension == ".docx";
+
             saveFileDialog2.Title = "結合済みWordファイル保存";
-            saveFileDialog2.InitialDirectory = Path.GetDirectoryName(listBox1.Items[0].ToString());
-            saveFileDialog2.FileName = Path.GetFileName(listBox1.Items[0].ToString());
-            saveFileDialog2.Filter = "Word ファイル|*.doc|すべてのファイル|*.*";
+            saveFileDialog2.InitialDirectory = Path.GetDirectoryName(firstFile);
+            saveFileDialog2.FileName = Path.GetFileName(firstFile);
+            
+            // 入力ファイルの形式に応じてフィルターを設定
+            if (isDocx)
+            {
+                saveFileDialog2.Filter = "Word 文書 (*.docx)|*.docx|Word 97-2003 文書 (*.doc)|*.doc|すべてのファイル|*.*";
+                saveFileDialog2.DefaultExt = "docx";
+            }
+            else
+            {
+                saveFileDialog2.Filter = "Word 97-2003 文書 (*.doc)|*.doc|Word 文書 (*.docx)|*.docx|すべてのファイル|*.*";
+                saveFileDialog2.DefaultExt = "doc";
+            }
 
             string strOutputDir = "";
             if (saveFileDialog2.ShowDialog() == DialogResult.OK)
