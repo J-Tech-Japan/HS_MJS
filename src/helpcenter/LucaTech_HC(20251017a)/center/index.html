@@ -28,7 +28,6 @@
             <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
             <button class="btn-search" @click="onSearch"></button>
          </div>
-         <!--p class="search_target"><a href="#">検索対象を選択</a></p-->
       </header>
 
       <div class="main_title">業務システムから探す</div>
@@ -70,18 +69,6 @@
          <p class="mjs_logo"></p>
          ©2025 MIROKU JYOHO SERVICE CO., LTD.
       </footer>
-      <!-- BEGIN DEL 対応1 -->
-      <!-- <div class="menu-slide bg"></div>
-      <div class="menu-slide">
-         <div class="menu-top-title">
-            <h1>検索対象を選択</h1>
-            <button class="btn-click search_target"></button>
-         </div>
-         <div class="column-left">
-            <div class="column-left-container"></div>
-         </div>
-      </div> -->
-      <!-- END DEL 対応1 -->
    </div>
    <script>
       createIndexPageApp("index").mount('#app');
