@@ -113,15 +113,22 @@ function highlightSearchWord(searchWord, content, style) {
         reggt: [/&gt;(?=[^<>]*<)/gm, ">"],
         reglt: [/&lt;(?=[^<>]*<)/gm, "<"],
         regquot: [/&quot;(?=[^<>]*<)/gm, '"'],
-        regamp: [/&amp;(?=[^<>]*<)/gm, "&"],
-        reghighlight: [new RegExp(`(${hilightWord})`, 'g'), `<font class='keyword' style='${style}'>$1</font>`]
+        regamp: [/&amp;(?=[^<>]*<)/gm, "&"]
     };
 
     content.each(function() {
         let html = $(this).html();
+        
+        // まずHTMLエンティティを一時的に復元
         Object.values(replacements).forEach(([pattern, replacement]) => {
             html = html.replace(pattern, replacement);
         });
+        
+        // テキストノードのみをハイライト（HTMLタグ内を除外）
+        // HTMLタグの外側のテキストのみにマッチする正規表現を使用
+        const regex = new RegExp(`(${hilightWord})(?![^<]*>)`, 'gi');
+        html = html.replace(regex, `<font class='keyword' style='${style}'>$1</font>`);
+        
         $(this).html(html);
     });
 }
