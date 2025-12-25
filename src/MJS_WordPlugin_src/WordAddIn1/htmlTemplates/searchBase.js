@@ -7,6 +7,54 @@ var currentSearchValue = ""; // 現在の検索キーワード
 var mutationObserver = null; // MutationObserverインスタンス
 var debounceTimer = null; // DOM変更用のデバウンスタイマー
 
+// jQueryセレクタキャッシュ
+var $cachedElements = {
+  iframe: null,
+  searchField: null,
+  searchResultItemsBlock: null,
+  searchResultsEnd: null,
+  searchMsg: null,
+  searchInput: null
+};
+
+// キャッシュを初期化
+function initializeCachedElements() {
+  $cachedElements.iframe = $("iframe.topic");
+  $cachedElements.searchField = $(".wSearchField");
+  $cachedElements.searchResultItemsBlock = $(".wSearchResultItemsBlock");
+  $cachedElements.searchResultsEnd = $(".wSearchResultsEnd");
+  $cachedElements.searchMsg = $("#searchMsg");
+  $cachedElements.searchInput = $(".search-input", document);
+}
+
+// キャッシュされた要素を取得（存在チェック付き）
+function getCachedElement(key) {
+  if (!$cachedElements[key] || $cachedElements[key].length === 0) {
+    // キャッシュが無効な場合は再取得
+    switch(key) {
+      case 'iframe':
+        $cachedElements.iframe = $("iframe.topic");
+        break;
+      case 'searchField':
+        $cachedElements.searchField = $(".wSearchField");
+        break;
+      case 'searchResultItemsBlock':
+        $cachedElements.searchResultItemsBlock = $(".wSearchResultItemsBlock");
+        break;
+      case 'searchResultsEnd':
+        $cachedElements.searchResultsEnd = $(".wSearchResultsEnd");
+        break;
+      case 'searchMsg':
+        $cachedElements.searchMsg = $("#searchMsg");
+        break;
+      case 'searchInput':
+        $cachedElements.searchInput = $(".search-input", document);
+        break;
+    }
+  }
+  return $cachedElements[key];
+}
+
 function selectorEscape(val){
   return val.replace(/[-\/\\^$*+?.()|[\]{}\!]/g, '\\$&');
 }
@@ -64,7 +112,7 @@ function decodeHtmlEntities(html) {
 
 // iframeのbody要素を取得
 function getIframeBody() {
-  var $iframe = $("iframe.topic");
+  var $iframe = getCachedElement('iframe');
   if ($iframe.length === 0) return null;
   return $iframe.contents().find("body");
 }
@@ -87,7 +135,10 @@ function applyHighlight(searchValue) {
 
 // キーワードのハイライトを削除
 function removeHighlight() {
-  $("iframe.topic").contents().find(".keyword").each(function() {
+  var $body = getIframeBody();
+  if (!$body) return;
+  
+  $body.find(".keyword").each(function() {
     for(var i = 0; i < $(this)[0].childNodes.length; i++) {
       this.parentNode.insertBefore($(this)[0].childNodes[i], this);
     }
@@ -100,7 +151,7 @@ function setupMutationObserver() {
   disconnectMutationObserver();
   
   try {
-    var $iframe = $("iframe.topic");
+    var $iframe = getCachedElement('iframe');
     if ($iframe.length === 0) return;
     
     var iframeDocument = $iframe[0].contentDocument || $iframe[0].contentWindow.document;
@@ -216,6 +267,9 @@ $.expr[':'].containsNormalized = function(elem, index, match) {
 };
 
 $(function(){
+  // 要素のキャッシュを初期化
+  initializeCachedElements();
+  
   $(document).on("click", "ul.toc li.book", function() {
     if($(this).children("a[href='#'],a[href='javascript:void 0;']").length == 0)
     {
@@ -224,25 +278,31 @@ $(function(){
       });
     }
   });
-  $(".wSearchField").each(function() {
+  
+  getCachedElement('searchField').each(function() {
     $(this).off();
   });
+  
   $(document).on("keyup", ".wSearchField", function(){
+    var $searchResultItemsBlock = getCachedElement('searchResultItemsBlock');
+    var $searchResultsEnd = getCachedElement('searchResultsEnd');
+    var $searchMsg = getCachedElement('searchMsg');
+    
     if($(this).val() == "")
     {
-      $(".wSearchResultItemsBlock").html("");
-      $(".wSearchResultsEnd").addClass("rh-hide");
-      $(".wSearchResultsEnd").attr("hidden", "");
-      $("#searchMsg").html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
+      $searchResultItemsBlock.html("");
+      $searchResultsEnd.addClass("rh-hide");
+      $searchResultsEnd.attr("hidden", "");
+      $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
       removeHighlight();
       currentSearchValue = ""; // 現在の検索値をクリア
       disconnectMutationObserver(); // クリア時にObserverを切断
     }
     else
     {
-      $("#searchMsg").html("");
+      $searchMsg.html("");
       currentSearchValue = $(this).val(); // 現在の検索値を保存
-        var searchWordTmp = $(this).val().replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2").trim();
+      var searchWordTmp = $(this).val().replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2").trim();
 
       // 正規化（全角→半角カナ、小文字化）
       searchWordTmp = normalizeForSearch(searchWordTmp);
@@ -256,12 +316,12 @@ $(function(){
       var findItems = searchWords.find(".search_word"+searchQuery);
       if(findItems.length != 0)
       {
-        $(".wSearchResultsEnd").removeClass("rh-hide");
-        $(".wSearchResultsEnd").removeAttr("hidden");
-        $(".wSearchResultItemsBlock").html("");
+        $searchResultsEnd.removeClass("rh-hide");
+        $searchResultsEnd.removeAttr("hidden");
+        $searchResultItemsBlock.html("");
         findItems.each(function() {
           var displayText = $(this).parent().find(".displayText").text();
-          $(".wSearchResultItemsBlock").append($("<div class='wSearchResultItem'><a class='nolink' href='./"+$(this).parent().attr("id")+".html'><div class='wSearchResultTitle'>"+$(this).parent().find(".search_title").html()+"</div></a><div class='wSearchContent'><span class='wSearchContext'>"+displayText+"</span></div></div>"));
+          $searchResultItemsBlock.append($("<div class='wSearchResultItem'><a class='nolink' href='./"+$(this).parent().attr("id")+".html'><div class='wSearchResultTitle'>"+$(this).parent().find(".search_title").html()+"</div></a><div class='wSearchContent'><span class='wSearchContext'>"+displayText+"</span></div></div>"));
         });
         removeHighlight();
         applyHighlight(currentSearchValue);
@@ -269,18 +329,22 @@ $(function(){
       else
       {
         removeHighlight();
-        $(".wSearchResultsEnd").addClass("rh-hide");
-        $(".wSearchResultsEnd").attr("hidden", "");
-        $(".wSearchResultItemsBlock").html("");
+        $searchResultsEnd.addClass("rh-hide");
+        $searchResultsEnd.attr("hidden", "");
+        $searchResultItemsBlock.html("");
         displayText = "検索条件に一致するトピックはありません。";
-        $(".wSearchResultItemsBlock").append($("<div class='wSearchResultItem'><div class='wSearchContent'><span class='wSearchContext'>"+displayText+"</span></div></div>"));
+        $searchResultItemsBlock.append($("<div class='wSearchResultItem'><div class='wSearchContent'><span class='wSearchContext'>"+displayText+"</span></div></div>"));
       }
     }
   });
-  $("iframe.topic").on("load", function(){
-    if($(".search-input", document).is(":not(.rh-hide)") && ($(".wSearchField", document).val() != ""))
+  
+  getCachedElement('iframe').on("load", function(){
+    var $searchInput = getCachedElement('searchInput');
+    var $searchField = getCachedElement('searchField');
+    
+    if($searchInput.is(":not(.rh-hide)") && ($searchField.val() != ""))
     {
-      var searchValue = $(".wSearchField", document).val();
+      var searchValue = $searchField.val();
       currentSearchValue = searchValue; // 現在の検索値を保存
       applyHighlight(searchValue);
     }
