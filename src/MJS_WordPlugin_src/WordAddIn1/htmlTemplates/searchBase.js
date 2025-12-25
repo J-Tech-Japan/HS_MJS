@@ -21,8 +21,8 @@ function normalizeForSearch(text) {
   return normalized;
 }
 
-// iframeコンテンツにハイライトを適用
-function applyHighlight(searchValue) {
+// 検索語を正規化してエスケープ
+function prepareSearchWords(searchValue) {
   var searchWordTmp = searchValue.split("　").join(" ").trim();
   searchWordTmp = searchWordTmp.split("  ").join(" ");
   searchWordTmp = searchWordTmp.toLowerCase(); // 先に小文字化
@@ -33,19 +33,56 @@ function applyHighlight(searchValue) {
   for(var i = 0; i < searchWord.length; i++) {
     searchWord[i] = selectorEscape(searchWord[i].replace(">", "&gt;").replace("<", "&lt;"));
   }
-  var highlightWord = searchWord.join("|");
+  return searchWord;
+}
+
+// ハイライト用の正規表現パターンを生成
+function createHighlightPattern(searchWords) {
+  var highlightWord = searchWords.join("|");
   for(var i = 0; i < highlight.length; i++) {
     var reg = new RegExp(highlight[i], "gm");
     highlightWord = highlightWord.replace(reg, highlight[i]);
   }
+  return highlightWord;
+}
 
-  var reg = new RegExp("("+highlightWord+")(?=[^<>]*<)", "gmi");
+// HTMLエンティティを復元
+function decodeHtmlEntities(html) {
   var regnbsp = new RegExp("&nbsp;(?=[^<>]*<)", "gm");
   var reggt = new RegExp("&gt;(?=[^<>]*<)", "gm");
   var reglt = new RegExp("&lt;(?=[^<>]*<)", "gm");
   var regquot = new RegExp("&quot;(?=[^<>]*<)", "gm");
   var regamp = new RegExp("&amp;(?=[^<>]*<)", "gm");
-  $("iframe.topic").contents().find("body").html($("iframe.topic").contents().find("body").html().replace(regnbsp, "　").replace(reggt, ">").replace(reglt, "<").replace(regquot, '"').replace(regamp, "&").replace(reg, "<font class='keyword' style='color:rgb(0, 0, 0); background-color:rgb(252, 255, 0);'>$1</font>"));
+  
+  return html
+    .replace(regnbsp, "　")
+    .replace(reggt, ">")
+    .replace(reglt, "<")
+    .replace(regquot, '"')
+    .replace(regamp, "&");
+}
+
+// iframeのbody要素を取得
+function getIframeBody() {
+  var $iframe = $("iframe.topic");
+  if ($iframe.length === 0) return null;
+  return $iframe.contents().find("body");
+}
+
+// iframeコンテンツにハイライトを適用
+function applyHighlight(searchValue) {
+  var $body = getIframeBody();
+  if (!$body) return;
+  
+  var searchWords = prepareSearchWords(searchValue);
+  var highlightPattern = createHighlightPattern(searchWords);
+  
+  var reg = new RegExp("("+highlightPattern+")(?=[^<>]*<)", "gmi");
+  var html = $body.html();
+  var decodedHtml = decodeHtmlEntities(html);
+  var highlightedHtml = decodedHtml.replace(reg, "<font class='keyword' style='color:rgb(0, 0, 0); background-color:rgb(252, 255, 0);'>$1</font>");
+  
+  $body.html(highlightedHtml);
 }
 
 // キーワードのハイライトを削除
