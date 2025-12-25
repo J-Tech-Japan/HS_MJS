@@ -21,8 +21,8 @@ namespace WordAddIn1
         /// </summary>
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
-            // デフォルトで高画質画像抽出を有効にする
-            GenerateHTMLButton(sender, e, extractHighQualityImages: true);
+            // デフォルトで高画質画像抽出を有効にし、beta版モードはfalseに設定
+            GenerateHTMLButton(sender, e, extractHighQualityImages: false, isBetaMode: false);
         }
 
         /// <summary>
@@ -31,7 +31,8 @@ namespace WordAddIn1
         /// <param name="sender">イベント送信元</param>
         /// <param name="e">イベント引数</param>
         /// <param name="extractHighQualityImages">高画質画像抽出機能を実行するかどうか</param>
-        private void GenerateHTMLButton(object sender, RibbonControlEventArgs e, bool extractHighQualityImages)
+        /// <param name="isBetaMode">beta版モードかどうか（trueの場合、詳細ログとCSV出力を実行）</param>
+        private void GenerateHTMLButton(object sender, RibbonControlEventArgs e, bool extractHighQualityImages, bool isBetaMode)
         {
             // HTML出力フラグをON
             blHTMLPublish = true;
@@ -39,12 +40,15 @@ namespace WordAddIn1
             var application = Globals.ThisAddIn.Application;
             var activeDocument = application.ActiveDocument;
 
-            // アクティブドキュメントのフォルダにログを出力するよう設定
-            Utils.ConfigureLogToDocumentFolder(application);
+            // beta版モードの場合のみ、アクティブドキュメントのフォルダにログを出力するよう設定
+            if (isBetaMode)
+            {
+                Utils.ConfigureLogToDocumentFolder(application);
+            }
 
             // 現在の表示モードを保存
             var defaultView = application.ActiveWindow.View.Type;
-            
+
             // ローダーフォームを表示
             loader load = new loader();
             load.Show();
@@ -65,22 +69,22 @@ namespace WordAddIn1
 
                 // 出力先フォルダ名を取得
                 var webHelpFolderName = GetWebHelpFolderName(activeDocument);
-                
+
                 // 書籍情報の作成・取得
                 if (!makeBookInfo(load)) { load.Close(); load.Dispose(); return; }
-                
+
                 // マージスクリプト情報の収集
                 var mergeScript = CollectMergeScriptDict(activeDocument);
-                
+
                 // カバー選択ダイアログの処理
                 if (!HandleCoverSelection(load, out bool isEasyCloud, out bool isEdgeTracker, out bool isPattern1, out bool isPattern2, out bool isPattern3)) return;
-                
+
                 // ローダーを可視化
                 load.Visible = true;
-                
+
                 // すべての変更履歴を反映
                 activeDocument.AcceptAllRevisions();
-                
+
                 // 各種パスの準備
                 var paths = PreparePaths(activeDocument, webHelpFolderName);
 
@@ -94,7 +98,7 @@ namespace WordAddIn1
                 {
                     bool isError = false;
                     log.WriteLine("Number of sections: " + docCopy.Sections.Count);
-                    
+
                     try
                     {
                         // 高画質画像抽出機能が有効な場合のみ実行
@@ -103,7 +107,7 @@ namespace WordAddIn1
                         {
                             // 高画質の画像とキャンバスの抽出
                             log.WriteLine("高画質画像とキャンバスの抽出開始");
-                            
+
                             // パラメータオブジェクトの作成
                             var imageExtractionOptions = new Utils.ImageExtractionOptions
                             {
@@ -118,7 +122,7 @@ namespace WordAddIn1
                                 MaxOutputWidth = 1024,           // 出力画像の最大幅
                                 MaxOutputHeight = 1024           // 出力画像の最大高さ
                             };
-                            
+
                             extractedImages = Utils.ExtractImagesFromWord(
                                 docCopy,
                                 Path.Combine(paths.rootPath, paths.exportDir, "extracted_images"),
@@ -140,8 +144,17 @@ namespace WordAddIn1
                             log.WriteLine("高画質画像抽出機能: スキップ（extractHighQualityImages = false）");
                         }
 
-                        // CSVファイルに出力
-                        Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.rootPath, "complete_comparison.csv"));
+                        // beta版モードの場合のみCSVファイルに出力
+                        if (isBetaMode)
+                        {
+                            log.WriteLine("beta版モード: 画像比較CSVファイル出力開始");
+                            Utils.ExportCompleteWidthHeightComparisonListToCsvFile(extractedImages, Path.Combine(paths.rootPath, "complete_comparison.csv"));
+                            log.WriteLine("beta版モード: 画像比較CSVファイル出力完了");
+                        }
+                        else
+                        {
+                            log.WriteLine("正式版モード: 画像比較CSVファイル出力をスキップ");
+                        }
 
                         int biCount = 0;
                         bool coverExist = false;
@@ -252,12 +265,12 @@ namespace WordAddIn1
                                         using (var pattern3Image = Properties.Resources.pattern3)
                                         {
                                             string cover4Dest = Path.Combine(paths.rootPath, paths.exportDir, "template", "images", "cover-4.png");
-                                            
+
                                             if (File.Exists(cover4Dest))
                                             {
                                                 File.Delete(cover4Dest);
                                             }
-                                            
+
                                             pattern3Image.Save(cover4Dest, ImageFormat.Png);
                                         }
                                     }
@@ -365,13 +378,13 @@ namespace WordAddIn1
 
                         // HTMLファイルの読み込みと加工
                         var htmlStr = ReadAndProcessHtml(paths.tmpHtmlPath, isTmpDot);
-                        
+
                         // XMLへの変換と各種ノード取得
                         var (objXml, objToc, objBody) = LoadAndProcessXml(htmlStr, paths.docTitle);
-                        
+
                         // CSSスタイルの処理
                         var (className, styleName, chapterSplitClass) = ProcessCssStyles(objXml);
-                        
+
                         // index.htmlの書き出し
                         WriteIndexHtml(paths.indexHtmlPath, paths.docTitle, paths.docid, mergeScript, isPattern3);
 
@@ -461,29 +474,29 @@ namespace WordAddIn1
                         // HTMLテンプレートの生成
                         var htmlTemplate1 = BuildHtmlTemplate1(title4Collection, mergeScript, paths.rootPath, paths.exportDir);
                         var htmlTemplate2 = "</body>\n</html>\n";
-                        
+
                         // 目次・本文ノードの参照取得
                         XmlNode objTocCurrent = objToc.DocumentElement;
                         XmlNode objBodyCurrent = objBody.DocumentElement;
-                        
+
                         // 目次・本文の生成
                         BuildTocBodyFromXml(objXml, objBody, objToc, chapterSplitClass, styleName, paths.docid, bookInfoDef, ref objBodyCurrent, ref objTocCurrent, load);
-                        
+
                         // 本文IDの設定
                         SetDefaultBodyId(objBody, paths.docid);
-                        
+
                         // 目次ファイルの生成
                         ExportTocAsJsFiles(objToc, paths.rootPath, paths.exportDir, mergeScript);
-                        
+
                         // 一時XMLの解放
                         objXml = null;
-                        
+
                         // 一時HTMLの削除
                         File.Delete(paths.tmpHtmlPath);
-                        
+
                         // XMLノードのクリーンアップ
                         CleanUpXmlNodes(objBody);
-                        
+
                         // 検索用ファイルの生成
                         GenerateSearchFiles(objBody, paths.rootPath, paths.exportDir, paths.docid, htmlTemplate1, htmlTemplate2, htmlCoverTemplate1, htmlCoverTemplate2, objToc, mergeScript);
 

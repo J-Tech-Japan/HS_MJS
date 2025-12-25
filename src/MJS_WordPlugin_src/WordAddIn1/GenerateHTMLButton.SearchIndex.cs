@@ -124,9 +124,9 @@ namespace WordAddIn1
                         }
 
                         // 全角→半角変換メソッドをUtils.TextProcessing.csから呼び出す
-                        searchText = Utils.ConvertWideToNarrow(searchText);
+                        //searchText = Utils.ConvertWideToNarrow(searchText);
 
-                        searchText = searchText.ToLower();
+                        //searchText = searchText.ToLower();
 
                         // 検索ワード情報をsearchWordsに追加
                         searchWords.DocumentElement.AppendChild(searchWords.CreateElement("div"));
