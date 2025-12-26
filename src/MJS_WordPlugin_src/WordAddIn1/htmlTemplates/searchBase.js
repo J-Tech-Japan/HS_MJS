@@ -17,6 +17,54 @@ var $cachedElements = {
   searchInput: null
 };
 
+// 文字変換マップ（効率化のため初期化時に正規表現を構築）
+var characterMappings = (function() {
+  // 全角→半角の変換マップを作成
+  var wideToNarrowMap = {};
+  var wideToHighlightMap = {};
+  
+  for (var i = 0; i < wide.length; i++) {
+    wideToNarrowMap[wide[i]] = narrow[i];
+    wideToHighlightMap[wide[i]] = highlight[i];
+  }
+  
+  // 全角文字の正規表現パターンを作成（エスケープ処理を含む）
+  var wideCharsPattern = wide.map(function(char) {
+    return char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }).join('|');
+  
+  var wideToNarrowRegex = new RegExp(wideCharsPattern, 'g');
+  
+  // ハイライト用の正規表現パターンマップを作成
+  var highlightRegexMap = {};
+  for (var i = 0; i < highlight.length; i++) {
+    highlightRegexMap[highlight[i]] = new RegExp(highlight[i], "gm");
+  }
+  
+  return {
+    wideToNarrowMap: wideToNarrowMap,
+    wideToHighlightMap: wideToHighlightMap,
+    wideToNarrowRegex: wideToNarrowRegex,
+    highlightRegexMap: highlightRegexMap,
+    // 効率的な変換関数
+    convertWideToNarrow: function(text) {
+      return text.replace(wideToNarrowRegex, function(match) {
+        return wideToNarrowMap[match] || match;
+      });
+    },
+    // ハイライトパターンの変換
+    applyHighlightPattern: function(text) {
+      var result = text;
+      for (var pattern in highlightRegexMap) {
+        if (highlightRegexMap.hasOwnProperty(pattern)) {
+          result = result.replace(highlightRegexMap[pattern], pattern);
+        }
+      }
+      return result;
+    }
+  };
+})();
+
 // キャッシュを初期化
 function initializeCachedElements() {
   $cachedElements.iframe = $("iframe.topic");
@@ -61,22 +109,19 @@ function selectorEscape(val){
 
 // 文字列を正規化（全角→半角カナ変換、小文字化）
 function normalizeForSearch(text) {
-  var normalized = text.toLowerCase(); // 先に小文字化
-  // 全角→半角カナ変換
-  for(var i = 0; i < wide.length; i++) {
-    normalized = normalized.split(wide[i]).join(narrow[i]);
-  }
-  return normalized;
+  var normalized = text.toLowerCase();
+  // 効率的な一括変換
+  return characterMappings.convertWideToNarrow(normalized);
 }
 
 // 検索語を正規化してエスケープ
 function prepareSearchWords(searchValue) {
   var searchWordTmp = searchValue.split("　").join(" ").trim();
   searchWordTmp = searchWordTmp.split("  ").join(" ");
-  searchWordTmp = searchWordTmp.toLowerCase(); // 先に小文字化
-  for(var i = 0; i < wide.length; i++) {
-    searchWordTmp = searchWordTmp.replace(wide[i], narrow[i]);
-  }
+  searchWordTmp = searchWordTmp.toLowerCase();
+  // 効率的な一括変換
+  searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
+  
   var searchWord = searchWordTmp.split(" ");
   for(var i = 0; i < searchWord.length; i++) {
     searchWord[i] = selectorEscape(searchWord[i].replace(">", "&gt;").replace("<", "&lt;"));
@@ -87,11 +132,8 @@ function prepareSearchWords(searchValue) {
 // ハイライト用の正規表現パターンを生成
 function createHighlightPattern(searchWords) {
   var highlightWord = searchWords.join("|");
-  for(var i = 0; i < highlight.length; i++) {
-    var reg = new RegExp(highlight[i], "gm");
-    highlightWord = highlightWord.replace(reg, highlight[i]);
-  }
-  return highlightWord;
+  // 効率的なパターン変換
+  return characterMappings.applyHighlightPattern(highlightWord);
 }
 
 // HTMLエンティティを復元
