@@ -46,7 +46,7 @@ var characterMappings = (function() {
     wideToHighlightMap: wideToHighlightMap,
     wideToNarrowRegex: wideToNarrowRegex,
     highlightRegexMap: highlightRegexMap,
-    // 効率的な変換関数
+    // 全角→半角カナ変換
     convertWideToNarrow: function(text) {
       return text.replace(wideToNarrowRegex, function(match) {
         return wideToNarrowMap[match] || match;
@@ -132,7 +132,6 @@ function prepareSearchWords(searchValue) {
 // ハイライト用の正規表現パターンを生成
 function createHighlightPattern(searchWords) {
   var highlightWord = searchWords.join("|");
-  // 効率的なパターン変換
   return characterMappings.applyHighlightPattern(highlightWord);
 }
 
@@ -330,7 +329,8 @@ $(function(){
     var $searchResultsEnd = getCachedElement('searchResultsEnd');
     var $searchMsg = getCachedElement('searchMsg');
     
-    if($(this).val() == "")
+    // スペースのみの入力も空として扱う
+    if($(this).val().trim() == "")
     {
       $searchResultItemsBlock.html("");
       $searchResultsEnd.addClass("rh-hide");
@@ -348,6 +348,19 @@ $(function(){
 
       // 正規化（全角→半角カナ、小文字化）
       searchWordTmp = normalizeForSearch(searchWordTmp);
+      
+      // 修正: 正規化後も空文字列チェックを追加
+      if(searchWordTmp === "") {
+        $searchResultItemsBlock.html("");
+        $searchResultsEnd.addClass("rh-hide");
+        $searchResultsEnd.attr("hidden", "");
+        $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
+        removeHighlight();
+        currentSearchValue = "";
+        disconnectMutationObserver();
+        return;
+      }
+      
       var searchWord = searchWordTmp.split(" ");
       var searchQuery = "";
       for(i = 0; i < searchWord.length; i ++)
