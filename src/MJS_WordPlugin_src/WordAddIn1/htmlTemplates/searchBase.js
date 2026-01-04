@@ -77,30 +77,20 @@ function initializeCachedElements() {
 
 // キャッシュされた要素を取得（存在チェック付き）
 function getCachedElement(key) {
-  if (!$cachedElements[key] || $cachedElements[key].length === 0) {
-    // キャッシュが無効な場合は再取得
-    switch(key) {
-      case 'iframe':
-        $cachedElements.iframe = $("iframe.topic");
-        break;
-      case 'searchField':
-        $cachedElements.searchField = $(".wSearchField");
-        break;
-      case 'searchResultItemsBlock':
-        $cachedElements.searchResultItemsBlock = $(".wSearchResultItemsBlock");
-        break;
-      case 'searchResultsEnd':
-        $cachedElements.searchResultsEnd = $(".wSearchResultsEnd");
-        break;
-      case 'searchMsg':
-        $cachedElements.searchMsg = $("#searchMsg");
-        break;
-      case 'searchInput':
-        $cachedElements.searchInput = $(".search-input", document);
-        break;
+    // 不正なキーの検証
+    if (!elementSelectors.hasOwnProperty(key)) {
+        console.warn("getCachedElement: 不正なキー '" + key + "' が指定されました");
+        return $();
     }
-  }
-  return $cachedElements[key];
+
+    // キャッシュが無効な場合は再取得
+    if (!$cachedElements[key] || $cachedElements[key].length === 0) {
+        var selector = elementSelectors[key];
+        var context = (key === 'searchInput') ? document : undefined;
+        $cachedElements[key] = $(selector, context);
+    }
+
+    return $cachedElements[key];
 }
 
 function selectorEscape(val){
@@ -165,7 +155,6 @@ function applyHighlight(searchValue) {
   
   var searchWords = prepareSearchWords(searchValue);
   var highlightPattern = createHighlightPattern(searchWords);
-  
   var reg = new RegExp("("+highlightPattern+")(?=[^<>]*<)", "gmi");
   var html = $body.html();
   var decodedHtml = decodeHtmlEntities(html);
