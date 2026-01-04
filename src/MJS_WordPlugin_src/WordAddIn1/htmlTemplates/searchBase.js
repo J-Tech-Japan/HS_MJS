@@ -106,17 +106,15 @@ function normalizeForSearch(text) {
 
 // 検索語を正規化してエスケープ
 function prepareSearchWords(searchValue) {
-  var searchWordTmp = searchValue.split("　").join(" ").trim();
-  searchWordTmp = searchWordTmp.split("  ").join(" ");
-  searchWordTmp = searchWordTmp.toLowerCase();
-  // 効率的な一括変換
-  searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
-  
-  var searchWord = searchWordTmp.split(" ");
-  for(var i = 0; i < searchWord.length; i++) {
-    searchWord[i] = selectorEscape(searchWord[i].replace(">", "&gt;").replace("<", "&lt;"));
-  }
-  return searchWord;
+    // 複数種類のスペースを単一スペースに統一し、トリム
+    var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim();
+    // 正規化（小文字化 + 全角→半角カナ変換）
+    searchWordTmp = normalizeForSearch(searchWordTmp);
+
+    // スペースで分割してエスケープ処理
+    return searchWordTmp.split(" ").map(function (word) {
+        return selectorEscape(word.replace(/>/g, "&gt;").replace(/</g, "&lt;"));
+    });
 }
 
 // ハイライト用の正規表現パターンを生成
@@ -127,18 +125,19 @@ function createHighlightPattern(searchWords) {
 
 // HTMLエンティティを復元
 function decodeHtmlEntities(html) {
-  var regnbsp = new RegExp("&nbsp;(?=[^<>]*<)", "gm");
-  var reggt = new RegExp("&gt;(?=[^<>]*<)", "gm");
-  var reglt = new RegExp("&lt;(?=[^<>]*<)", "gm");
-  var regquot = new RegExp("&quot;(?=[^<>]*<)", "gm");
-  var regamp = new RegExp("&amp;(?=[^<>]*<)", "gm");
-  
-  return html
-    .replace(regnbsp, "　")
-    .replace(reggt, ">")
-    .replace(reglt, "<")
-    .replace(regquot, '"')
-    .replace(regamp, "&");
+    var entityMap = {
+        '&nbsp;': '　',
+        '&gt;': '>',
+        '&lt;': '<',
+        '&quot;': '"',
+        '&amp;': '&'
+    };
+
+    // 全エンティティを一度に置換（ルックアヘッド付き）
+    var pattern = new RegExp('(' + Object.keys(entityMap).join('|') + ')(?=[^<>]*<)', 'gm');
+    return html.replace(pattern, function (match) {
+        return entityMap[match];
+    });
 }
 
 // iframeのbody要素を取得
@@ -150,97 +149,75 @@ function getIframeBody() {
 
 // iframeコンテンツにハイライトを適用
 function applyHighlight(searchValue) {
-  var $body = getIframeBody();
-  if (!$body) return;
-  
-  var searchWords = prepareSearchWords(searchValue);
-  var highlightPattern = createHighlightPattern(searchWords);
-  var reg = new RegExp("("+highlightPattern+")(?=[^<>]*<)", "gmi");
-  var html = $body.html();
-  var decodedHtml = decodeHtmlEntities(html);
-  var highlightedHtml = decodedHtml.replace(reg, "<font class='keyword' style='color:rgb(0, 0, 0); background-color:rgb(252, 255, 0);'>$1</font>");
-  
-  $body.html(highlightedHtml);
+    var $body = getIframeBody();
+    if (!$body) return;
+    var searchWords = prepareSearchWords(searchValue);
+    var highlightPattern = createHighlightPattern(searchWords);
+    var regex = new RegExp("(" + highlightPattern + ")(?=[^<>]*<)", "gmi");
+    var html = decodeHtmlEntities($body.html());
+    var highlightedHtml = html.replace(regex,
+        "<font class='keyword' style='color:rgb(0,0,0);background-color:rgb(252,255,0);'>$1</font>");
+    $body.html(highlightedHtml);
 }
 
 // キーワードのハイライトを削除
 function removeHighlight() {
-  var $body = getIframeBody();
-  if (!$body) return;
-  
-  $body.find(".keyword").each(function() {
-    for(var i = 0; i < $(this)[0].childNodes.length; i++) {
-      this.parentNode.insertBefore($(this)[0].childNodes[i], this);
-    }
-    $(this).remove();
-  });
+    var $body = getIframeBody();
+    if (!$body) return;
+    $body.find(".keyword").each(function () {
+        $(this).contents().unwrap();
+    });
 }
 
 // iframeコンテンツ用のMutationObserverをセットアップ
 function setupMutationObserver() {
-  disconnectMutationObserver();
-  
-  try {
-    var $iframe = getCachedElement('iframe');
-    if ($iframe.length === 0) return;
-    
-    var iframeDocument = $iframe[0].contentDocument || $iframe[0].contentWindow.document;
-    if (!iframeDocument || !iframeDocument.body) return;
-    
-    mutationObserver = new MutationObserver(function(mutations) {
-      if (!currentSearchValue || currentSearchValue.trim() === "") {
-        return;
-      }
-      
-      var shouldReHighlight = false;
-      for (var i = 0; i < mutations.length; i++) {
-        var mutation = mutations[i];
-        if (mutation.type === 'childList') {
-          var addedKeywords = false;
-          for (var j = 0; j < mutation.addedNodes.length; j++) {
-            var node = mutation.addedNodes[j];
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              if (node.classList && node.classList.contains('keyword')) {
-                addedKeywords = true;
-                break;
-              }
-              if (node.querySelector && node.querySelector('.keyword')) {
-                addedKeywords = true;
-                break;
-              }
+    disconnectMutationObserver();
+
+    try {
+        var $iframe = getCachedElement('iframe');
+        if ($iframe.length === 0) return;
+
+        var iframeDocument = $iframe[0].contentDocument || $iframe[0].contentWindow.document;
+        if (!iframeDocument || !iframeDocument.body) return;
+
+        mutationObserver = new MutationObserver(function (mutations) {
+            if (!currentSearchValue || currentSearchValue.trim() === "") return;
+
+            var shouldReHighlight = mutations.some(function (mutation) {
+                if (mutation.type === 'characterData') return true;
+
+                if (mutation.type === 'childList') {
+                    // keywordクラスの要素のみの追加は無視
+                    var hasOnlyKeywordAddition = mutation.addedNodes.length === 1 &&
+                        Array.from(mutation.addedNodes).every(function (node) {
+                            return node.nodeType === Node.ELEMENT_NODE &&
+                                (node.classList.contains('keyword') || node.querySelector('.keyword'));
+                        });
+
+                    if (hasOnlyKeywordAddition) return false;
+
+                    return mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0;
+                }
+
+                return false;
+            });
+
+            if (shouldReHighlight) {
+                debouncedReHighlight();
             }
-          }
-          
-          if (addedKeywords && mutation.addedNodes.length === 1) {
-            continue;
-          }
-          
-          if (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0) {
-            shouldReHighlight = true;
-            break;
-          }
-        } else if (mutation.type === 'characterData') {
-          shouldReHighlight = true;
-          break;
-        }
-      }
-      
-      if (shouldReHighlight) {
-        debouncedReHighlight();
-      }
-    });
-    
-    mutationObserver.observe(iframeDocument.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: false
-    });
-    
-    console.debug("iframeコンテンツ用のMutationObserverをセットアップしました");
-  } catch (error) {
-    console.warn("MutationObserverのセットアップに失敗しました:", error);
-  }
+        });
+
+        mutationObserver.observe(iframeDocument.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: false
+        });
+
+        console.debug("iframeコンテンツ用のMutationObserverをセットアップしました");
+    } catch (error) {
+        console.warn("MutationObserverのセットアップに失敗しました:", error);
+    }
 }
 
 // デバウンスされた再ハイライト処理
