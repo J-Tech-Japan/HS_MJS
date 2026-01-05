@@ -23,6 +23,15 @@ var selectorMap = {
     searchInput: ".search-input"
 };
 
+// HTMLエンティティ復元用の正規表現（効率化のためグローバル定義）
+var htmlEntityRegexes = {
+    nbsp: /&nbsp;(?=[^<>]*<)/gm,
+    gt: /&gt;(?=[^<>]*<)/gm,
+    lt: /&lt;(?=[^<>]*<)/gm,
+    quot: /&quot;(?=[^<>]*<)/gm,
+    amp: /&amp;(?=[^<>]*<)/gm
+};
+
 // 文字変換マップ（効率化のため初期化時に正規表現を構築）
 var characterMappings = (function () {
     // 文字変換用の配列定義
@@ -117,15 +126,14 @@ function normalizeForSearch(text) {
 
 // 検索語を正規化してエスケープ
 function prepareSearchWords(searchValue) {
-    var searchWordTmp = searchValue.split("　").join(" ").trim();
-    searchWordTmp = searchWordTmp.split("  ").join(" ");
-    searchWordTmp = searchWordTmp.toLowerCase();
+    // 全角・半角スペースを統一して連続スペースを1つにまとめる
+    var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
     // 効率的な一括変換
     searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
 
     var searchWord = searchWordTmp.split(" ");
     for (var i = 0; i < searchWord.length; i++) {
-        searchWord[i] = selectorEscape(searchWord[i].replace(">", "&gt;").replace("<", "&lt;"));
+        searchWord[i] = selectorEscape(searchWord[i].replace(/>/g, "&gt;").replace(/</g, "&lt;"));
     }
     return searchWord;
 }
@@ -133,24 +141,17 @@ function prepareSearchWords(searchValue) {
 // ハイライト用の正規表現パターンを生成
 function createHighlightPattern(searchWords) {
     var highlightWord = searchWords.join("|");
-    // 効率的なパターン変換
     return characterMappings.applyHighlightPattern(highlightWord);
 }
 
 // HTMLエンティティを復元
 function decodeHtmlEntities(html) {
-    var regnbsp = new RegExp("&nbsp;(?=[^<>]*<)", "gm");
-    var reggt = new RegExp("&gt;(?=[^<>]*<)", "gm");
-    var reglt = new RegExp("&lt;(?=[^<>]*<)", "gm");
-    var regquot = new RegExp("&quot;(?=[^<>]*<)", "gm");
-    var regamp = new RegExp("&amp;(?=[^<>]*<)", "gm");
-
     return html
-        .replace(regnbsp, "　")
-        .replace(reggt, ">")
-        .replace(reglt, "<")
-        .replace(regquot, '"')
-        .replace(regamp, "&");
+        .replace(htmlEntityRegexes.nbsp, "　")
+        .replace(htmlEntityRegexes.gt, ">")
+        .replace(htmlEntityRegexes.lt, "<")
+        .replace(htmlEntityRegexes.quot, '"')
+        .replace(htmlEntityRegexes.amp, "&");
 }
 
 // iframeのbody要素を取得
@@ -302,6 +303,21 @@ function disconnectMutationObserver() {
     }
 }
 
+// 検索結果をクリア
+function clearSearchResults() {
+    var $searchResultItemsBlock = getCachedElement('searchResultItemsBlock');
+    var $searchResultsEnd = getCachedElement('searchResultsEnd');
+    var $searchMsg = getCachedElement('searchMsg');
+
+    $searchResultItemsBlock.html("");
+    $searchResultsEnd.addClass("rh-hide");
+    $searchResultsEnd.attr("hidden", "");
+    $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
+    removeHighlight();
+    currentSearchValue = "";
+    disconnectMutationObserver();
+}
+
 // カスタムの:contains()セレクタ（正規化された検索用）
 $.expr[':'].containsNormalized = function (elem, index, match) {
     var normalizedElemText = normalizeForSearch($(elem).text());
@@ -330,15 +346,9 @@ $(function () {
         var $searchResultsEnd = getCachedElement('searchResultsEnd');
         var $searchMsg = getCachedElement('searchMsg');
 
-        // 修正: trim()を追加してスペースのみの入力も空として扱う
+        // trim()を追加してスペースのみの入力も空として扱う
         if ($(this).val().trim() == "") {
-            $searchResultItemsBlock.html("");
-            $searchResultsEnd.addClass("rh-hide");
-            $searchResultsEnd.attr("hidden", "");
-            $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
-            removeHighlight();
-            currentSearchValue = ""; // 現在の検索値をクリア
-            disconnectMutationObserver(); // クリア時にObserverを切断
+            clearSearchResults();
         }
         else {
             $searchMsg.html("");
@@ -348,21 +358,15 @@ $(function () {
             // 正規化（全角→半角カナ、小文字化）
             searchWordTmp = normalizeForSearch(searchWordTmp);
 
-            // 修正: 正規化後も空文字列チェックを追加
+            // 正規化後も空文字列チェックを追加
             if (searchWordTmp === "") {
-                $searchResultItemsBlock.html("");
-                $searchResultsEnd.addClass("rh-hide");
-                $searchResultsEnd.attr("hidden", "");
-                $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
-                removeHighlight();
-                currentSearchValue = "";
-                disconnectMutationObserver();
+                clearSearchResults();
                 return;
             }
 
             var searchWord = searchWordTmp.split(" ");
             var searchQuery = "";
-            for (i = 0; i < searchWord.length; i++) {
+            for (var i = 0; i < searchWord.length; i++) {
                 searchQuery += ":containsNormalized(" + searchWord[i] + ")";
             }
 
@@ -383,7 +387,7 @@ $(function () {
                 $searchResultsEnd.addClass("rh-hide");
                 $searchResultsEnd.attr("hidden", "");
                 $searchResultItemsBlock.html("");
-                displayText = "検索条件に一致するトピックはありません。";
+                var displayText = "検索条件に一致するトピックはありません。";
                 $searchResultItemsBlock.append($("<div class='wSearchResultItem'><div class='wSearchContent'><span class='wSearchContext'>" + displayText + "</span></div></div>"));
             }
         }
