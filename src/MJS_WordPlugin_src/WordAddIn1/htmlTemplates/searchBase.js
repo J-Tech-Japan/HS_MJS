@@ -204,38 +204,23 @@ function setupMutationObserver() {
                 return;
             }
 
-            var shouldReHighlight = false;
-            for (var i = 0; i < mutations.length; i++) {
-                var mutation = mutations[i];
-                if (mutation.type === 'childList') {
-                    var addedKeywords = false;
-                    for (var j = 0; j < mutation.addedNodes.length; j++) {
-                        var node = mutation.addedNodes[j];
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            if (node.classList && node.classList.contains('keyword')) {
-                                addedKeywords = true;
-                                break;
-                            }
-                            if (node.querySelector && node.querySelector('.keyword')) {
-                                addedKeywords = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (addedKeywords && mutation.addedNodes.length === 1) {
-                        continue;
-                    }
-
-                    if (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0) {
-                        shouldReHighlight = true;
-                        break;
-                    }
-                } else if (mutation.type === 'characterData') {
-                    shouldReHighlight = true;
-                    break;
+            var shouldReHighlight = mutations.some(function(mutation) {
+                if (mutation.type === 'characterData') {
+                    return true;
                 }
-            }
+                
+                if (mutation.type === 'childList') {
+                    // キーワード要素自身の追加は無視
+                    if (isOnlyKeywordAddition(mutation)) {
+                        return false;
+                    }
+                    
+                    // ノードの追加または削除があれば再ハイライト
+                    return mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0;
+                }
+                
+                return false;
+            });
 
             if (shouldReHighlight) {
                 debouncedReHighlight();
@@ -253,6 +238,22 @@ function setupMutationObserver() {
     } catch (error) {
         console.warn("MutationObserverのセットアップに失敗しました:", error);
     }
+}
+
+// キーワード要素のみの追加かどうかを判定
+function isOnlyKeywordAddition(mutation) {
+    if (mutation.addedNodes.length !== 1) {
+        return false;
+    }
+    
+    var node = mutation.addedNodes[0];
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    
+    // 追加されたノードがキーワード要素か、キーワード要素を含むか
+    return (node.classList && node.classList.contains('keyword')) ||
+           (node.querySelector && node.querySelector('.keyword') !== null);
 }
 
 // デバウンスされた再ハイライト処理
