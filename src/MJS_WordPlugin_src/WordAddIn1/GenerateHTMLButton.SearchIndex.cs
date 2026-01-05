@@ -221,12 +221,22 @@ namespace WordAddIn1
                 .Replace(@"\u", @"\\u")
                 .Replace(@"\U", @"\\U");
             
+            // search.jsファイルの生成
             sw = new StreamWriter(Path.Combine(rootPath, exportDir, "search.js"), false, Encoding.UTF8);
             string finalSearchJs = Regex.Replace(searchJsContent, "♪", processedXml);
 
             // 最終的なsearch.jsの改行文字を統一
             finalSearchJs = Utils.NormalizeLineEndings(finalSearchJs);
             sw.Write(finalSearchJs);
+            sw.Close();
+
+            // searchWords.jsファイルの生成（searchWordsのみを格納）
+            sw = new StreamWriter(Path.Combine(rootPath, exportDir, "searchWords.js"), false, Encoding.UTF8);
+            string searchWordsOnlyJs = @"var searchWords = $('" + processedXml + "');" + "\n";
+            
+            // searchWords.jsの改行文字を統一
+            searchWordsOnlyJs = Utils.NormalizeLineEndings(searchWordsOnlyJs);
+            sw.Write(searchWordsOnlyJs);
             sw.Close();
 
             // 表紙HTMLが存在しない場合は生成
