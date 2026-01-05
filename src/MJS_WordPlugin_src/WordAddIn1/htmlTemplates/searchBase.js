@@ -183,10 +183,8 @@ function removeHighlight() {
     if (!$body) return;
 
     $body.find(".keyword").each(function () {
-        for (var i = 0; i < $(this)[0].childNodes.length; i++) {
-            this.parentNode.insertBefore($(this)[0].childNodes[i], this);
-        }
-        $(this).remove();
+        var $this = $(this);
+        $this.replaceWith($this.contents());
     });
 }
 
@@ -345,51 +343,64 @@ $(function () {
         var $searchResultItemsBlock = getCachedElement('searchResultItemsBlock');
         var $searchResultsEnd = getCachedElement('searchResultsEnd');
         var $searchMsg = getCachedElement('searchMsg');
+        var searchValue = $(this).val();
 
         // trim()を追加してスペースのみの入力も空として扱う
-        if ($(this).val().trim() == "") {
+        if (searchValue.trim() === "") {
             clearSearchResults();
+            return;
+        }
+
+        $searchMsg.html("");
+        currentSearchValue = searchValue; // 現在の検索値を保存
+        
+        // スペースを正規化
+        var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim();
+        // 正規化（全角→半角カナ、小文字化）
+        searchWordTmp = normalizeForSearch(searchWordTmp);
+
+        // 正規化後も空文字列チェックを追加
+        if (searchWordTmp === "") {
+            clearSearchResults();
+            return;
+        }
+
+        var searchWord = searchWordTmp.split(" ");
+        var searchQuery = "";
+        for (var i = 0; i < searchWord.length; i++) {
+            searchQuery += ":containsNormalized(" + searchWord[i] + ")";
+        }
+
+        var findItems = searchWords.find(".search_word" + searchQuery);
+        if (findItems.length !== 0) {
+            $searchResultsEnd.removeClass("rh-hide");
+            $searchResultsEnd.removeAttr("hidden");
+            $searchResultItemsBlock.html("");
+            findItems.each(function () {
+                var displayText = $(this).parent().find(".displayText").text();
+                var parentId = $(this).parent().attr("id");
+                var searchTitle = $(this).parent().find(".search_title").html();
+                
+                var resultHtml = "<div class='wSearchResultItem'>" +
+                    "<a class='nolink' href='./" + parentId + ".html'>" +
+                    "<div class='wSearchResultTitle'>" + searchTitle + "</div>" +
+                    "</a>" +
+                    "<div class='wSearchContent'>" +
+                    "<span class='wSearchContext'>" + displayText + "</span>" +
+                    "</div></div>";
+                
+                $searchResultItemsBlock.append($(resultHtml));
+            });
+            removeHighlight();
+            applyHighlight(currentSearchValue);
         }
         else {
-            $searchMsg.html("");
-            currentSearchValue = $(this).val(); // 現在の検索値を保存
-            var searchWordTmp = $(this).val().replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2").trim();
-
-            // 正規化（全角→半角カナ、小文字化）
-            searchWordTmp = normalizeForSearch(searchWordTmp);
-
-            // 正規化後も空文字列チェックを追加
-            if (searchWordTmp === "") {
-                clearSearchResults();
-                return;
-            }
-
-            var searchWord = searchWordTmp.split(" ");
-            var searchQuery = "";
-            for (var i = 0; i < searchWord.length; i++) {
-                searchQuery += ":containsNormalized(" + searchWord[i] + ")";
-            }
-
-            var findItems = searchWords.find(".search_word" + searchQuery);
-            if (findItems.length != 0) {
-                $searchResultsEnd.removeClass("rh-hide");
-                $searchResultsEnd.removeAttr("hidden");
-                $searchResultItemsBlock.html("");
-                findItems.each(function () {
-                    var displayText = $(this).parent().find(".displayText").text();
-                    $searchResultItemsBlock.append($("<div class='wSearchResultItem'><a class='nolink' href='./" + $(this).parent().attr("id") + ".html'><div class='wSearchResultTitle'>" + $(this).parent().find(".search_title").html() + "</div></a><div class='wSearchContent'><span class='wSearchContext'>" + displayText + "</span></div></div>"));
-                });
-                removeHighlight();
-                applyHighlight(currentSearchValue);
-            }
-            else {
-                removeHighlight();
-                $searchResultsEnd.addClass("rh-hide");
-                $searchResultsEnd.attr("hidden", "");
-                $searchResultItemsBlock.html("");
-                var displayText = "検索条件に一致するトピックはありません。";
-                $searchResultItemsBlock.append($("<div class='wSearchResultItem'><div class='wSearchContent'><span class='wSearchContext'>" + displayText + "</span></div></div>"));
-            }
+            removeHighlight();
+            $searchResultsEnd.addClass("rh-hide");
+            $searchResultsEnd.attr("hidden", "");
+            $searchResultItemsBlock.html("");
+            var displayText = "検索条件に一致するトピックはありません。";
+            $searchResultItemsBlock.append($("<div class='wSearchResultItem'><div class='wSearchContent'><span class='wSearchContext'>" + displayText + "</span></div></div>"));
         }
     });
 
