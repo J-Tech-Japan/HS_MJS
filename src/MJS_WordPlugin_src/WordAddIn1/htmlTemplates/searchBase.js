@@ -160,7 +160,6 @@ function applyHighlight(searchValue) {
 
     var searchWords = prepareSearchWords(searchValue);
     var highlightPattern = createHighlightPattern(searchWords);
-
     var reg = new RegExp("(" + highlightPattern + ")(?=[^<>]*<)", "gmi");
     var html = $body.html();
     var decodedHtml = decodeHtmlEntities(html);
@@ -359,10 +358,9 @@ $(function () {
         }
 
         var searchWord = searchWordTmp.split(" ");
-        var searchQuery = "";
-        for (var i = 0; i < searchWord.length; i++) {
-            searchQuery += ":containsNormalized(" + searchWord[i] + ")";
-        }
+        var searchQuery = searchWord.map(function(word) {
+            return ":containsNormalized(" + word + ")";
+        }).join("");
 
         var findItems = searchWords.find(".search_word" + searchQuery);
         if (findItems.length !== 0) {
