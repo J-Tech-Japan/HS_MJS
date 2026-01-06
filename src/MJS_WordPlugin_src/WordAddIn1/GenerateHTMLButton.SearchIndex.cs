@@ -231,13 +231,13 @@ namespace WordAddIn1
             sw.Close();
 
             // searchWords.jsファイルの生成（searchWordsのみを格納）
-            sw = new StreamWriter(Path.Combine(rootPath, exportDir, "searchWords.js"), false, Encoding.UTF8);
-            string searchWordsOnlyJs = @"var searchWords = $('" + processedXml + "');" + "\n";
+            //sw = new StreamWriter(Path.Combine(rootPath, exportDir, "searchWords.js"), false, Encoding.UTF8);
+            //string searchWordsOnlyJs = @"var searchWords = $('" + processedXml + "');" + "\n";
             
             // searchWords.jsの改行文字を統一
-            searchWordsOnlyJs = Utils.NormalizeLineEndings(searchWordsOnlyJs);
-            sw.Write(searchWordsOnlyJs);
-            sw.Close();
+            //searchWordsOnlyJs = Utils.NormalizeLineEndings(searchWordsOnlyJs);
+            //sw.Write(searchWordsOnlyJs);
+            //sw.Close();
 
             // 表紙HTMLが存在しない場合は生成
             if (!File.Exists(Path.Combine(rootPath, exportDir, docid + "00000.html")))
