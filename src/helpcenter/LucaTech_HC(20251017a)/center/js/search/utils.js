@@ -153,10 +153,12 @@ function buildSearchTreeModel(node) {
 function normalizeSearchKeyword(keyword) {
     if (!keyword) return [];
     
-    // すべての変換機能をオフ（システム再構築のため）
-    // let normalized = escapeHtml(keyword)
-    //     .replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2")
-    //     .trim()
+    let normalized = escapeHtml(keyword)
+        .replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2")
+        .trim();
+    
+    // 他の変換機能はオフ（システム再構築のため）
+    // normalized = normalized
     //     .toLowerCase();
     // 
     // wide.forEach((w, i) => {
@@ -165,8 +167,8 @@ function normalizeSearchKeyword(keyword) {
     // 
     // return normalized.split(" ");
     
-    // 入力値をそのまま返す（スペース区切りで配列化）
-    return keyword.split(/\s+/).filter(word => word.length > 0);
+    // エスケープ後の値をスペース区切りで配列化
+    return normalized.split(/\s+/).filter(word => word.length > 0);
 }
 
 /**

@@ -9,23 +9,11 @@
 
 /**
  * 検索単語を準備する
+ * utils.jsのnormalizeSearchKeyword関数を使用して正規化を行う
  * @returns {Array} 検索単語配列
  */
 function prepareSearchWord() {
-    // すべての変換機能をオフ（システム再構築のため）
-    // let searchWordTmp = escapeHtml($("#searchkeyword").val())
-    //     .replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2")
-    //     .trim()
-    //     .toLowerCase();
-    // 
-    // wide.forEach((w, i) => {
-    //     searchWordTmp = searchWordTmp.split(w).join(narrow[i]);
-    // });
-    // 
-    // return searchWordTmp.split(" ");
-    
-    // 入力値をそのまま返す（スペース区切りで配列化）
-    return $("#searchkeyword").val().split(/\s+/).filter(word => word.length > 0);
+    return normalizeSearchKeyword($("#searchkeyword").val());
 }
 
 /**
