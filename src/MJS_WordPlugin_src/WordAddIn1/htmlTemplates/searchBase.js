@@ -1,4 +1,8 @@
-﻿// MutationObserver機能用のグローバル変数
+﻿// ========================================
+// グローバル変数定義
+// ========================================
+
+// MutationObserver機能用のグローバル変数
 var currentSearchValue = ""; // 現在の検索キーワード
 var mutationObserver = null; // MutationObserverインスタンス
 var debounceTimer = null; // DOM変更用のデバウンスタイマー
@@ -69,6 +73,35 @@ var characterMappings = (function () {
     };
 })();
 
+// ========================================
+// 基本ユーティリティ関数（依存なし）
+// ========================================
+
+// セレクタ用のエスケープ処理
+function selectorEscape(val) {
+    return val.replace(/[-\/\\^$*+?.()|[\]{}\!]/g, '\\$&');
+}
+
+// 文字列を正規化（全角→半角カナ変換、小文字化）
+function normalizeForSearch(text) {
+    var normalized = text.toLowerCase();
+    return characterMappings.convertWideToNarrow(normalized);
+}
+
+// HTMLエンティティを復元
+function decodeHtmlEntities(html) {
+    return html
+        .replace(htmlEntityRegexes.nbsp, "　")
+        .replace(htmlEntityRegexes.gt, ">")
+        .replace(htmlEntityRegexes.lt, "<")
+        .replace(htmlEntityRegexes.quot, '"')
+        .replace(htmlEntityRegexes.amp, "&");
+}
+
+// ========================================
+// キャッシュ管理関数
+// ========================================
+
 // キャッシュを初期化
 function initializeCachedElements() {
     for (var key in selectorMap) {
@@ -97,22 +130,14 @@ function getCachedElement(key) {
     return $cachedElements[key];
 }
 
-function selectorEscape(val) {
-    return val.replace(/[-\/\\^$*+?.()|[\]{}\!]/g, '\\$&');
-}
-
-// 文字列を正規化（全角→半角カナ変換、小文字化）
-function normalizeForSearch(text) {
-    var normalized = text.toLowerCase();
-    // 効率的な一括変換
-    return characterMappings.convertWideToNarrow(normalized);
-}
+// ========================================
+// 検索処理関連関数（依存関係順）
+// ========================================
 
 // 検索語を正規化してエスケープ
 function prepareSearchWords(searchValue) {
     // 全角・半角スペースを統一して連続スペースを1つにまとめる
     var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
-    // 効率的な一括変換
     searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
 
     var searchWord = searchWordTmp.split(" ");
@@ -134,16 +159,6 @@ function createHighlightPattern(searchWords) {
         return highlightChars.join('');
     });
     return patterns.join("|");
-}
-
-// HTMLエンティティを復元
-function decodeHtmlEntities(html) {
-    return html
-        .replace(htmlEntityRegexes.nbsp, "　")
-        .replace(htmlEntityRegexes.gt, ">")
-        .replace(htmlEntityRegexes.lt, "<")
-        .replace(htmlEntityRegexes.quot, '"')
-        .replace(htmlEntityRegexes.amp, "&");
 }
 
 // iframeのbody要素を取得
@@ -177,6 +192,74 @@ function removeHighlight() {
         var $this = $(this);
         $this.replaceWith($this.contents());
     });
+}
+
+// 検索結果をクリア
+function clearSearchResults() {
+    var $searchResultItemsBlock = getCachedElement('searchResultItemsBlock');
+    var $searchResultsEnd = getCachedElement('searchResultsEnd');
+    var $searchMsg = getCachedElement('searchMsg');
+
+    $searchResultItemsBlock.html("");
+    $searchResultsEnd.addClass("rh-hide");
+    $searchResultsEnd.attr("hidden", "");
+    $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
+    removeHighlight();
+    currentSearchValue = "";
+    disconnectMutationObserver();
+}
+
+// ========================================
+// MutationObserver関連関数
+// ========================================
+
+// キーワード要素のみの追加かどうかを判定
+function isOnlyKeywordAddition(mutation) {
+    if (mutation.addedNodes.length !== 1) {
+        return false;
+    }
+    
+    var node = mutation.addedNodes[0];
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    
+    // 追加されたノードがキーワード要素か、キーワード要素を含むか
+    return (node.classList && node.classList.contains('keyword')) ||
+           (node.querySelector && node.querySelector('.keyword') !== null);
+}
+
+// デバウンスされた再ハイライト処理
+function debouncedReHighlight() {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(function () {
+        reHighlightAfterDomChange();
+    }, 500);
+}
+
+// DOM変更後の再ハイライト処理
+function reHighlightAfterDomChange() {
+    if (!currentSearchValue || currentSearchValue.trim() === "") {
+        return;
+    }
+
+    try {
+        disconnectMutationObserver();
+        removeHighlight();
+        applyHighlight(currentSearchValue);
+
+        setTimeout(function () {
+            setupMutationObserver();
+        }, 100);
+
+        console.debug("DOM変更後に検索語を再ハイライトしました");
+    } catch (error) {
+        console.warn("DOM変更後の再ハイライトに失敗しました:", error);
+        setupMutationObserver();
+    }
 }
 
 // iframeコンテンツ用のMutationObserverをセットアップ
@@ -231,55 +314,6 @@ function setupMutationObserver() {
     }
 }
 
-// キーワード要素のみの追加かどうかを判定
-function isOnlyKeywordAddition(mutation) {
-    if (mutation.addedNodes.length !== 1) {
-        return false;
-    }
-    
-    var node = mutation.addedNodes[0];
-    if (node.nodeType !== Node.ELEMENT_NODE) {
-        return false;
-    }
-    
-    // 追加されたノードがキーワード要素か、キーワード要素を含むか
-    return (node.classList && node.classList.contains('keyword')) ||
-           (node.querySelector && node.querySelector('.keyword') !== null);
-}
-
-// デバウンスされた再ハイライト処理
-function debouncedReHighlight() {
-    if (debounceTimer) {
-        clearTimeout(debounceTimer);
-    }
-
-    debounceTimer = setTimeout(function () {
-        reHighlightAfterDomChange();
-    }, 500);
-}
-
-// DOM変更後の再ハイライト処理
-function reHighlightAfterDomChange() {
-    if (!currentSearchValue || currentSearchValue.trim() === "") {
-        return;
-    }
-
-    try {
-        disconnectMutationObserver();
-        removeHighlight();
-        applyHighlight(currentSearchValue);
-
-        setTimeout(function () {
-            setupMutationObserver();
-        }, 100);
-
-        console.debug("DOM変更後に検索語を再ハイライトしました");
-    } catch (error) {
-        console.warn("DOM変更後の再ハイライトに失敗しました:", error);
-        setupMutationObserver();
-    }
-}
-
 // MutationObserverを切断
 function disconnectMutationObserver() {
     if (mutationObserver) {
@@ -293,20 +327,9 @@ function disconnectMutationObserver() {
     }
 }
 
-// 検索結果をクリア
-function clearSearchResults() {
-    var $searchResultItemsBlock = getCachedElement('searchResultItemsBlock');
-    var $searchResultsEnd = getCachedElement('searchResultsEnd');
-    var $searchMsg = getCachedElement('searchMsg');
-
-    $searchResultItemsBlock.html("");
-    $searchResultsEnd.addClass("rh-hide");
-    $searchResultsEnd.attr("hidden", "");
-    $searchMsg.html("2つ以上の語句を入力して検索する場合は、スペース（空白）で区切ります。");
-    removeHighlight();
-    currentSearchValue = "";
-    disconnectMutationObserver();
-}
+// ========================================
+// jQueryカスタムセレクタ
+// ========================================
 
 // カスタムの:contains()セレクタ（正規化された検索用）
 $.expr[':'].containsNormalized = function (elem, index, match) {
@@ -314,6 +337,10 @@ $.expr[':'].containsNormalized = function (elem, index, match) {
     var normalizedSearchText = normalizeForSearch(match[3]);
     return normalizedElemText.indexOf(normalizedSearchText) >= 0;
 };
+
+// ========================================
+// jQueryイベントハンドラー
+// ========================================
 
 $(function () {
     // 要素のキャッシュを初期化
