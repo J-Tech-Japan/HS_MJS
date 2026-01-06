@@ -4,7 +4,7 @@
  * - キーワードハイライト機能
  * - 結果カウント表示
  * 
- * 注意: utils.jsで定義されたwide、narrow、hilightを使用します
+ * 注意: utils.jsで定義されたwide、narrow、highlightを使用します
  */
 
 /**
@@ -12,16 +12,20 @@
  * @returns {Array} 検索単語配列
  */
 function prepareSearchWord() {
-    let searchWordTmp = escapeHtml($("#searchkeyword").val())
-        .replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2")
-        .trim()
-        .toLowerCase();
+    // すべての変換機能をオフ（システム再構築のため）
+    // let searchWordTmp = escapeHtml($("#searchkeyword").val())
+    //     .replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2")
+    //     .trim()
+    //     .toLowerCase();
+    // 
+    // wide.forEach((w, i) => {
+    //     searchWordTmp = searchWordTmp.split(w).join(narrow[i]);
+    // });
+    // 
+    // return searchWordTmp.split(" ");
     
-    wide.forEach((w, i) => {
-        searchWordTmp = searchWordTmp.split(w).join(narrow[i]);
-    });
-    
-    return searchWordTmp.split(" ");
+    // 入力値をそのまま返す（スペース区切りで配列化）
+    return $("#searchkeyword").val().split(/\s+/).filter(word => word.length > 0);
 }
 
 /**
@@ -105,9 +109,9 @@ function highlightSearchWord(searchWord, content, style) {
         selectorEscape(word.replace(/[<>]/g, m => m === '<' ? '&lt;' : '&gt;'))
     );
 
-    let hilightWord = escapedWords.join("|");
-    hilight.forEach(h => {
-        hilightWord = hilightWord.replace(new RegExp(h, "gm"), h);
+    let highlightWord = escapedWords.join("|");
+    highlight.forEach(h => {
+        highlightWord = highlightWord.replace(new RegExp(h, "gm"), h);
     });
 
     const replacements = {
@@ -128,7 +132,7 @@ function highlightSearchWord(searchWord, content, style) {
         
         // テキストノードのみをハイライト（HTMLタグ内を除外）
         // HTMLタグの外側のテキストのみにマッチする正規表現を使用
-        const regex = new RegExp(`(${hilightWord})(?![^<]*>)`, 'gi');
+        const regex = new RegExp(`(${highlightWord})(?![^<]*>)`, 'gi');
         html = html.replace(regex, `<font class='keyword' style='${style}'>$1</font>`);
         
         $(this).html(html);
