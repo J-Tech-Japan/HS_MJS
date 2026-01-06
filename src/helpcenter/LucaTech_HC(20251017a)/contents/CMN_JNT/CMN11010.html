@@ -59,7 +59,7 @@ p.WebHelpNavBar { text-align:right; }
 gRootRelPath = ".";
 gCommonRootRelPath = ".";
 gTopicId = "1.1.1.0_2";
-refPage = {_Ref210748507:['CMN11003','担当者区分～処理可能部門を組み合わせて権限管理する、またはワークフローシステムを使用する場合'],_Ref210748546:['CMN11003','担当者区分・個人番号区分のみで権限管理する場合'],_Ref142913395:['CMN11003','会社基本情報を登録する'],_Ref142913466:['CMN11003','会社基本情報を登録する'],_Ref142913490:['CMN11003','会社基本情報を登録する'],_Ref142913529:['CMN11003','会社基本情報を登録する'],_Ref142317361:['CMN11004','［基本情報］タブ'],_Ref142317370:['CMN11004','［代表者／役職者］タブ'],_Ref191370401:['CMN11007','カレンダーを作成する'],};
+refPage = {_Ref210748507:['CMN11003','担当者区分～処理可能部門を組み合わせて権限管理する、またはワークフローを使用する場合'],_Ref210748546:['CMN11003','担当者区分・個人番号区分のみで権限管理する場合'],_Ref142913395:['CMN11003','会社基本情報を登録する'],_Ref142913466:['CMN11003','会社基本情報を登録する'],_Ref142913490:['CMN11003','会社基本情報を登録する'],_Ref142913529:['CMN11003','会社基本情報を登録する'],_Ref211525635:['CMN11003','会社基本情報を登録する'],_Ref142317361:['CMN11004','［基本情報］タブ'],_Ref142317370:['CMN11004','［代表者／役職者］タブ'],_Ref211525688:['CMN11004','マスター採用情報を登録する'],_Ref211525699:['CMN11005','休日を登録する'],_Ref191370401:['CMN11007','カレンダーを作成する'],};
 mergePage = {};
 	 url = [];
 
@@ -194,6 +194,7 @@ mergePage = {};
 				});
 			});
 		}
+
 
 		// .MJS_ref要素内のリンクと.ref要素を処理
 		function processMJSRefElements() {
@@ -354,7 +355,7 @@ mergePage = {};
 			const filePart = parts.pop();
 			const dirPart = parts.join('/');
 			// #t=形式のハッシュパスとして再構築
-			return dirPart ? `${dirPart}/${"#t="}${filePart}` : `${"#t="}${filePart}`;
+			return dirPart ? `${dirPart}/${"index.html#t="}${filePart}` : `${"index.html#t="}${filePart}`;
 		}
 
 		// アンカー要素のナビゲーション処理
@@ -366,5 +367,5 @@ mergePage = {};
 </script>
 <meta name="topic-breadcrumbs" content="導入処理 > 導入処理 > 休日を登録する > カレンダーを作成する" />
 </head>
-<body style="text-justify-trim: punctuation;"><div><div style="text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;">導入処理 &gt; 導入処理 &gt; <a href="./CMN11006.html">休日を登録する</a> &gt; <a href="#">カレンダーを作成する</a></div><p class="Heading1 NoPageBreak"><span name="_Ref191370401" class="ref" />カレンダーを作成する</p><p class="MJS_lead">年度ごとにカレンダーを作成します。カレンダーグループで登録した休日はカレンダーに引き継がれますが、その年ごとに休日が異なる場合は、カレンダーに個別に登録します。</p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">①　</span>カレンダーグループの［…］で［カレンダー追加］をクリックします。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 37" src="pict/image050.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">②　</span>作成する年度を西暦で入力し、［追加］をクリックします。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 33" src="pict/image051.png" /></p><p class="MJS_processResult">次のメッセージが表示され、カレンダーグループにカレンダーが追加されます。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 29" src="pict/image052.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">③　</span>カレンダーグループで設定した休日に変更がある場合は、カレンダーごとに休日を設定します。カレンダーの［…］で［カレンダー設定］をクリックします。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 27" src="pict/image053.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">④　</span>その年度の休日を設定します。休日は、カレンダー上に赤字で表示されます。</p><p class="MJS_choice">［特定の日付を休日にする場合］</p><p class="MJS_choiceDesc">日付を2回クリックすると、休日（赤）になります。再度クリックすると営業日（黒）に戻ります。</p><p class="MJS_choice">［一年を通して特定の曜日を休日にする場合］</p><p class="MJS_choiceDesc">［曜日毎設定］で曜日に✔をつけます。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 23" src="pict/image054.png" /></p><p class="MJS_choice">［特定の期間を休日にする場合］</p><p class="MJS_choiceDesc">［期間設定］で日付を範囲指定します。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 20" src="pict/image055.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">⑤　</span>［更新］をクリックします。</p><p> </p><p class="Heading3" id="CMN11011">カレンダーを削除する</p><p class="MJS_lead">カレンダーを削除します。『銀行登録』や『財務基本情報登録』などでカレンダーを使用している場合は、再設定が必要です。</p><p> </p><p class="MJS_lead">［…］の［カレンダー削除］をクリックします。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 17" src="pict/image056.png" /></p><p> </p><p class="MJS_lead">次のメッセージで［削除］をクリックします。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 13" src="pict/image057.png" /></p></div></body>
+<body style="text-justify-trim: punctuation;"><div><div style="text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;">導入処理 &gt; 導入処理 &gt; <a href="./CMN11006.html">休日を登録する</a> &gt; <a href="#">カレンダーを作成する</a></div><p class="Heading1 NoPageBreak"><span name="_Ref191370401" class="ref" />カレンダーを作成する</p><p class="MJS_lead">年度ごとにカレンダーを作成します。カレンダーグループで登録した休日はカレンダーに引き継がれますが、その年ごとに休日が異なる場合は、カレンダーに個別に登録します。</p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">①　</span>カレンダーグループの［…］で［カレンダー追加］をクリックします。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 18" src="pict/image051.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">②　</span>作成する年度を西暦で入力し、［追加］をクリックします。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 17" src="pict/image052.png" /></p><p class="MJS_processResult">次のメッセージが表示され、カレンダーグループにカレンダーが追加されます。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 16" src="pict/image053.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">③　</span>カレンダーグループで設定した休日に変更がある場合は、カレンダーごとに休日を設定します。カレンダーの［…］で［カレンダー設定］をクリックします。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 15" src="pict/image054.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">④　</span>その年度の休日を設定します。休日は、カレンダー上に赤字で表示されます。</p><p class="MJS_choice">［特定の日付を休日にする場合］</p><p class="MJS_choiceDesc">日付を2回クリックすると、休日（赤）になります。再度クリックすると営業日（黒）に戻ります。</p><p class="MJS_choice">［一年を通して特定の曜日を休日にする場合］</p><p class="MJS_choiceDesc">［曜日毎設定］で曜日に✔をつけます。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 14" src="pict/image055.png" /></p><p class="MJS_choice">［特定の期間を休日にする場合］</p><p class="MJS_choiceDesc">［期間設定］で日付を範囲指定します。</p><p class="MJS_flowPict"><img border="0" id="キャンバス 13" src="pict/image056.png" /></p><p class="MJS_process"><span style="color:#1F497D;font-weight:bold;">⑤　</span>［更新］をクリックします。</p><p class="Heading3" id="CMN11011">カレンダーを削除する</p><p class="MJS_lead">カレンダーを削除します。『銀行登録』や『財務基本情報登録』などでカレンダーを使用している場合は、再設定が必要です。</p><p> </p><p class="MJS_lead">［…］の［カレンダー削除］をクリックします。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 12" src="pict/image057.png" /></p><p> </p><p class="MJS_lead">次のメッセージで［削除］をクリックします。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 11" src="pict/image058.png" /></p></div></body>
 </html>

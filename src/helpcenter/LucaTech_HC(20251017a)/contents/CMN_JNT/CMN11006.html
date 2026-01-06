@@ -59,7 +59,7 @@ p.WebHelpNavBar { text-align:right; }
 gRootRelPath = ".";
 gCommonRootRelPath = ".";
 gTopicId = "1.1.1";
-refPage = {_Ref210748507:['CMN11003','担当者区分～処理可能部門を組み合わせて権限管理する、またはワークフローシステムを使用する場合'],_Ref210748546:['CMN11003','担当者区分・個人番号区分のみで権限管理する場合'],_Ref142913395:['CMN11003','会社基本情報を登録する'],_Ref142913466:['CMN11003','会社基本情報を登録する'],_Ref142913490:['CMN11003','会社基本情報を登録する'],_Ref142913529:['CMN11003','会社基本情報を登録する'],_Ref142317361:['CMN11004','［基本情報］タブ'],_Ref142317370:['CMN11004','［代表者／役職者］タブ'],_Ref191370401:['CMN11007','カレンダーを作成する'],};
+refPage = {_Ref210748507:['CMN11003','担当者区分～処理可能部門を組み合わせて権限管理する、またはワークフローを使用する場合'],_Ref210748546:['CMN11003','担当者区分・個人番号区分のみで権限管理する場合'],_Ref142913395:['CMN11003','会社基本情報を登録する'],_Ref142913466:['CMN11003','会社基本情報を登録する'],_Ref142913490:['CMN11003','会社基本情報を登録する'],_Ref142913529:['CMN11003','会社基本情報を登録する'],_Ref211525635:['CMN11003','会社基本情報を登録する'],_Ref142317361:['CMN11004','［基本情報］タブ'],_Ref142317370:['CMN11004','［代表者／役職者］タブ'],_Ref211525688:['CMN11004','マスター採用情報を登録する'],_Ref211525699:['CMN11005','休日を登録する'],_Ref191370401:['CMN11007','カレンダーを作成する'],};
 mergePage = {};
 	 url = [];
 
@@ -194,6 +194,7 @@ mergePage = {};
 				});
 			});
 		}
+
 
 		// .MJS_ref要素内のリンクと.ref要素を処理
 		function processMJSRefElements() {
@@ -354,7 +355,7 @@ mergePage = {};
 			const filePart = parts.pop();
 			const dirPart = parts.join('/');
 			// #t=形式のハッシュパスとして再構築
-			return dirPart ? `${dirPart}/${"#t="}${filePart}` : `${"#t="}${filePart}`;
+			return dirPart ? `${dirPart}/${"index.html#t="}${filePart}` : `${"index.html#t="}${filePart}`;
 		}
 
 		// アンカー要素のナビゲーション処理
@@ -366,5 +367,5 @@ mergePage = {};
 </script>
 <meta name="topic-breadcrumbs" content="導入処理 > 導入処理 > 休日を登録する" />
 </head>
-<body style="text-justify-trim: punctuation;"><div><div style="text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;">導入処理 &gt; 導入処理 &gt; <a href="#">休日を登録する</a></div><p class="Heading1">休日を登録する</p><p class="MJS_menu"><img src="pict/image009.png" alt="*" />　［設定］＞［導入処理］＞［会社情報］＞［休日登録］</p><p class="MJS_lead">会社や金融機関などの休日を管理するカレンダーを会社ごとに登録します。</p><p> </p><p class="MJS_lead">『LucaTech GX』では、土曜・日曜・祝日が休日の「標準カレンダー」を用意しています。標準カレンダーは当年を含む12年分（過去10年、当年、翌年）が表示されます。年度更新を行うと、最も古い年度のカレンダーは削除され、翌年度分は毎年2月に自動で追加されます。</p><p> </p><p class="MJS_lead">標準カレンダーとは異なる休日を登録する場合は、カレンダーグループを作成し、グループごとにカレンダーを作成します。年度更新を行ってもカレンダーは自動で追加されないため、新しい年のカレンダーを作成する必要があります。</p><p class="MJS_ref"><span name="_Ref191370401_ref" class="ref" />⇒『<a href="_Ref191370401">1.1.2</a><a href="_Ref191370401">カレンダーを作成する</a>』参照</p><p class="MJS_lead">作成したカレンダーは、『銀行登録』などで使用します。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 79" src="pict/image036.png" /></p></div></body>
+<body style="text-justify-trim: punctuation;"><div><div style="text-align:right; font-size:10pt; line-height:15pt; punctuation-wrap:simple;">導入処理 &gt; 導入処理 &gt; <a href="#">休日を登録する</a></div><p class="Heading1"><span name="_Ref211525699" class="ref" />休日を登録する</p><p class="MJS_menu"><img src="pict/image009.png" alt="*" />　［設定］＞［導入処理］＞［会社情報］＞［休日登録］</p><p class="MJS_lead">会社や金融機関などの休日を管理するカレンダーを会社ごとに登録します。</p><p> </p><p class="MJS_lead">『LucaTech GX』では、土曜・日曜・祝日が休日の「標準カレンダー」を用意しています。標準カレンダーは当年を含む12年分（過去10年、当年、翌年）が表示されます。年度更新を行うと、最も古い年度のカレンダーは削除され、翌年度分は毎年2月に自動で追加されます。</p><p> </p><p class="MJS_lead">標準カレンダーとは異なる休日を登録する場合は、カレンダーグループを作成し、グループごとにカレンダーを作成します。年度更新を行ってもカレンダーは自動で追加されないため、新しい年のカレンダーを作成する必要があります。</p><p class="MJS_ref"><span name="_Ref191370401_ref" class="ref" />⇒『<a href="CMN11010.html">カレンダーを作成する</a>』参照</p><p class="MJS_lead">作成したカレンダーは、『銀行登録』などで使用します。</p><p class="MJS_bodyPict"><img border="0" id="キャンバス 30" src="pict/image037.png" /></p></div></body>
 </html>
