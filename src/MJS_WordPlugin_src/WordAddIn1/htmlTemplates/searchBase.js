@@ -151,31 +151,34 @@ function prepareSearchWords(searchValue) {
 function createHighlightPattern(searchWords) {
     // 各検索ワードを全角・半角両対応のパターンに変換
     var patterns = searchWords.map(function(word) {
-        var highlightChars = [];
-        var i = 0;
+        // 2文字パターンを優先的にマッチさせる正規表現を作成
+        var result = '';
+        var pos = 0;
         
-        while (i < word.length) {
-            // 2文字の組み合わせをチェック（濁音・半濁音用）
-            if (i + 1 < word.length) {
-                var twoChar = word.substring(i, i + 2);
-                if (characterMappings.narrowToHighlightMap[twoChar]) {
-                    highlightChars.push(characterMappings.narrowToHighlightMap[twoChar]);
-                    i += 2;
-                    continue;
+        while (pos < word.length) {
+            var matched = false;
+            
+            // 2文字の組み合わせを試行
+            if (pos + 1 < word.length) {
+                var twoChar = word.substring(pos, pos + 2);
+                var pattern = characterMappings.narrowToHighlightMap[twoChar];
+                if (pattern) {
+                    result += pattern;
+                    pos += 2;
+                    matched = true;
                 }
             }
             
-            // 1文字の変換
-            var char = word.charAt(i);
-            if (characterMappings.narrowToHighlightMap[char]) {
-                highlightChars.push(characterMappings.narrowToHighlightMap[char]);
-            } else {
-                highlightChars.push(char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            // 1文字で処理
+            if (!matched) {
+                var char = word.charAt(pos);
+                var pattern = characterMappings.narrowToHighlightMap[char];
+                result += pattern || char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                pos++;
             }
-            i++;
         }
         
-        return highlightChars.join('');
+        return result;
     });
     return patterns.join("|");
 }
