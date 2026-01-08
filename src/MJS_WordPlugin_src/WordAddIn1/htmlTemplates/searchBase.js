@@ -151,11 +151,30 @@ function prepareSearchWords(searchValue) {
 function createHighlightPattern(searchWords) {
     // 各検索ワードを全角・半角両対応のパターンに変換
     var patterns = searchWords.map(function(word) {
-        var chars = word.split('');
-        var highlightChars = chars.map(function(char) {
-            // 半角文字を全角・半角両対応パターンに変換
-            return characterMappings.narrowToHighlightMap[char] || char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        });
+        var highlightChars = [];
+        var i = 0;
+        
+        while (i < word.length) {
+            // 2文字の組み合わせをチェック（濁音・半濁音用）
+            if (i + 1 < word.length) {
+                var twoChar = word.substring(i, i + 2);
+                if (characterMappings.narrowToHighlightMap[twoChar]) {
+                    highlightChars.push(characterMappings.narrowToHighlightMap[twoChar]);
+                    i += 2;
+                    continue;
+                }
+            }
+            
+            // 1文字の変換
+            var char = word.charAt(i);
+            if (characterMappings.narrowToHighlightMap[char]) {
+                highlightChars.push(characterMappings.narrowToHighlightMap[char]);
+            } else {
+                highlightChars.push(char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            }
+            i++;
+        }
+        
         return highlightChars.join('');
     });
     return patterns.join("|");
