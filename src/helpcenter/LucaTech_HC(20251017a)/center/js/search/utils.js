@@ -167,6 +167,11 @@ function normalizeSearchKeyword(keyword) {
         .trim()
         .toLowerCase();
     
+    // 全角アルファベット→半角アルファベットに変換（インデックス10-35）
+    for (let i = 10; i < 36; i++) {
+        normalized = normalized.split(wide[i]).join(narrow[i]);
+    }
+    
     // 半角カタカナ→全角カタカナに変換（インデックス36以降がカタカナ）
     // 0-9（10個）+ a-z（26個）= 36個をスキップ
     for (let i = 36; i < narrow.length; i++) {
