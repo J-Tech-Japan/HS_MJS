@@ -11,8 +11,8 @@ function search() {
     // 検索キーワードを正規化（utils.jsの関数を使用）
     const searchWord = normalizeSearchKeyword($("#searchkeyword").val());
     
-    // 検索クエリを構築
-    const searchQuery = searchWord.map(word => `:contains(${word})`).join('');
+    // 検索クエリを構築（大文字小文字を区別しないカスタムセレクタを使用）
+    const searchQuery = searchWord.map(word => `:containsNormalized(${word})`).join('');
     
     // 検索を実行し、結果を取得
     const searchCatalogueJs = getSearchCatalogueJs();
