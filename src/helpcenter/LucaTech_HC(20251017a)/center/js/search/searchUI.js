@@ -40,21 +40,27 @@ function buildTreeviewNode(node) {
     }
 
     const hasChildren = Array.isArray(node.childs) && node.childs.length > 0;
-    let treeview = '<li>';
+    const parts = ['<li>'];
+    
     if (hasChildren) {
-        treeview += createCheckboxElement(node, 'has-childs root', false);
-        treeview += '<div class="check-toggle active"></div>';
-        treeview += '<ul class="box-item box-toggle">';
-        treeview += '<li>' + createCheckboxElement(node, '', true) + '</li>';
+        parts.push(
+            createCheckboxElement(node, 'has-childs root', false),
+            '<div class="check-toggle active"></div>',
+            '<ul class="box-item box-toggle">',
+            '<li>', createCheckboxElement(node, '', true), '</li>'
+        );
+        
         for (const childNode of node.childs) {
-            treeview += buildTreeviewNode(childNode);
+            parts.push(buildTreeviewNode(childNode));
         }
-        treeview += '</ul>';
+        
+        parts.push('</ul>');
     } else {
-        treeview += createCheckboxElement(node);
+        parts.push(createCheckboxElement(node));
     }
-    treeview += '</li>';
-    return treeview;
+    
+    parts.push('</li>');
+    return parts.join('');
 }
 
 /**
@@ -79,12 +85,20 @@ function buildTreeview() {
  * ツリービューのイベントハンドラーを設定
  */
 function setupTreeviewEventHandlers() {
-    const $boxCheck = $('.box-check');
-    $boxCheck.on('click', 'li .check-toggle', onToggleClick);
-    $boxCheck.on('click', 'li label.custom-control-label.root', onRootLabelClick);
-    $boxCheck.on('change', '.search-in', onSearchInChange);
-    $boxCheck.on('change', '.search-in-all', onSearchInAllChange);
-    $(document).on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
+    const $doc = $(document);
+    // 重複登録を防ぐため既存のイベントを解除
+    $doc.off('click', '.box-check li .check-toggle');
+    $doc.off('click', '.box-check li label.custom-control-label.root');
+    $doc.off('change', '.box-check .search-in');
+    $doc.off('change', '.box-check .search-in-all');
+    $doc.off('click', 'input[type=checkbox].search-in.root');
+    
+    // イベント委譲を統一
+    $doc.on('click', '.box-check li .check-toggle', onToggleClick);
+    $doc.on('click', '.box-check li label.custom-control-label.root', onRootLabelClick);
+    $doc.on('change', '.box-check .search-in', onSearchInChange);
+    $doc.on('change', '.box-check .search-in-all', onSearchInAllChange);
+    $doc.on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
 }
 
 function onToggleClick(e) {
@@ -170,9 +184,13 @@ function buildFirstPage() {
  * 子チェックボックスにクリックイベントを追加
  */
 function addHandleEventInFirstPage() {
-    const $container = $("body");
+    const $doc = $(document);
     
-    $container.on("click", "input[type=checkbox].child", function(){
+    // 重複登録を防ぐため既存のイベントを解除
+    $doc.off("click", "input[type=checkbox].child");
+    $doc.off("click", "input[type=checkbox].parent");
+    
+    $doc.on("click", "input[type=checkbox].child", function(){
         const $this = $(this);
         const $boxS1 = $this.closest(".box-s-1");
         const $parent = $boxS1.find(".parent");
@@ -187,7 +205,7 @@ function addHandleEventInFirstPage() {
         $parentDiv.toggleClass("check-new", someChecked && !allChecked);
         buildTreeview();
     });
-    $container.on("click", "input[type=checkbox].parent", function(){
+    $doc.on("click", "input[type=checkbox].parent", function(){
         const $this = $(this);
         const isCheck = $this.is(":checked");
         const $boxS1 = $this.closest(".box-s-1");
