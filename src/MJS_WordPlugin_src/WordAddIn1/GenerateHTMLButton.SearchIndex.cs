@@ -205,7 +205,7 @@ namespace WordAddIn1
                     searchJsContent += searchBaseContent;
 
                     // searchBase.jsファイルは不要になったので削除
-                    File.Delete(searchBaseJsPath);
+                    //File.Delete(searchBaseJsPath);
                 }
                 catch (Exception ex)
                 {
