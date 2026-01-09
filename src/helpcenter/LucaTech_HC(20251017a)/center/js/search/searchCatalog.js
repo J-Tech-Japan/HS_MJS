@@ -62,25 +62,38 @@ function loadScript(src) {
 }
 
 /**
+ * 検索UI表示状態を更新
+ */
+function updateSearchUI() {
+    $('body').addClass('open');
+    $('.box-nd-search').removeClass('hidden');
+    $('.box-content-s').addClass('hidden');
+}
+
+/**
  * jsをブラウザに読み込んでsearchWordsを呼び出す
  * @param {Array} collection - 読み込むJSファイルのコレクション
- * @param {number} searchCatalogueItemChildPos - 現在処理中のインデックス
+ * @param {number} startIndex - 開始インデックス（デフォルト: 0）
  */
-async function loadSearchJs(collection, searchCatalogueItemChildPos) {
-    for (let i = searchCatalogueItemChildPos; i < collection.length; i++) {
-        const item = collection[i];
+async function loadSearchJs(collection, startIndex = 0) {
+    // すべてのスクリプトを並列で読み込む
+    const loadPromises = collection.slice(startIndex).map(async (item) => {
         try {
             await loadScript(item.searchjs);
             item.searchWords = searchWords;
         } catch (error) {
             console.error(`Failed to load script: ${item.searchjs}`, error);
+            // エラーが発生してもnullを返して処理を継続
+            return null;
         }
-    }
+    });
+    
+    // すべての読み込みが完了するまで待機
+    await Promise.all(loadPromises);
     
     isLoaded = true;
-    $('body').addClass('open');
-    $('.box-nd-search').removeClass('hidden');
-    $('.box-content-s').addClass('hidden');
+    updateSearchUI();
+    
     // 検索機能が利用可能になったことを通知
     if (typeof search === 'function') {
         search();
@@ -110,6 +123,5 @@ const getSearchCatalogueJs = () => searchCatalogueJs;
  * @param {Array} catalogue - 設定するカタログ配列
  */
 function setSearchCatalogue(catalogue) {
-    searchCatalogue.length = 0;
-    searchCatalogue.push(...catalogue);
+    searchCatalogue.splice(0, searchCatalogue.length, ...catalogue);
 }
