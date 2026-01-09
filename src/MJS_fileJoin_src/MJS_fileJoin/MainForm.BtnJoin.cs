@@ -53,9 +53,12 @@ namespace MJS_fileJoin
             // 全結合元フォルダのheadingsを統合するリスト
             List<string> allHeadings = new List<string>();
 
+            // 結合元フォルダのリストを取得（search.js読み込み用）
+            List<string> htmlDirs = lbHtmlList.Items.Cast<string>().ToList();
+
             int picCount = 0;
 
-            foreach (string htmlDir in lbHtmlList.Items)
+            foreach (string htmlDir in htmlDirs)
             {
                 picCount++;
                 var pictDir = Path.Combine(htmlDir, "pict");
@@ -109,10 +112,16 @@ namespace MJS_fileJoin
             }
 
             //全文検索ファイル出力
+            // searchWords XMLを処理（エスケープ処理）
+            string processedSearchWordsXml = Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline)
+                .Replace("'", "&apos;");
+            
+            // 結合元フォルダのsearch.jsを読み込み、searchWordsを書き換え
+            string searchJsContent = GetSearchJsWithReplacedWords(htmlDirs, processedSearchWordsXml);
+            
             string searchJsPath = Path.Combine(tbOutputDir.Text, exportDir, "search.js");
             sw = new StreamWriter(searchJsPath, false, Encoding.UTF8);
-            // sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2"), @"(?<=>)([^<]*?)'([^<]*?)(?=<)", "$1&apos;$2")));
-            sw.Write(Regex.Replace(searchJs, "♪", Regex.Replace(searchWords.OuterXml, @"(?<=>)([^<]*?)""([^<]*?)(?=<)", "$1&quot;$2", RegexOptions.Singleline).Replace("'", "&apos;")));
+            sw.Write(searchJsContent);
             sw.Close();
 
             // 結合したheadingsWithCommentの各タイトルに対して
