@@ -40,7 +40,7 @@
     <main>
       <aside>
         <p class="title">{{ title }}</p>
-        <ul>
+        <ul v-if="category.length > 1">
           <li v-for="item in category" :key="item"><a :href="`#${item}`">{{item}}</a></li>
         </ul>
       </aside>
