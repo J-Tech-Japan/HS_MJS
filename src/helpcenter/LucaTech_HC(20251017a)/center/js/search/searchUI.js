@@ -32,10 +32,10 @@ function createCheckboxElement(node, additionalClass = '', isSelectAll = false) 
  * @param {Object} node - カタログノード
  * @returns {string} HTMLストリング
  */
-function buildTreeviewNode(node) {
+function buildTreeViewNode(node) {
     // 入力値検証（早期リターンで簡潔化）
     if (!node || typeof node !== 'object' || !node.id || !node.title) {
-        console.warn('buildTreeviewNode: Invalid or missing node properties');
+        console.warn('buildTreeViewNode: Invalid or missing node properties');
         return '<li></li>';
     }
 
@@ -51,7 +51,7 @@ function buildTreeviewNode(node) {
         );
         
         for (const childNode of node.childs) {
-            parts.push(buildTreeviewNode(childNode));
+            parts.push(buildTreeViewNode(childNode));
         }
         
         parts.push('</ul>');
@@ -66,7 +66,7 @@ function buildTreeviewNode(node) {
 /**
  * 左メニュー全体を構築（ツリービューのエントリーポイント）
  */
-function buildTreeview() {
+function buildTreeView() {
     const $container = $(".column-left > .column-left-container");
     const searchCatalogue = getSearchCatalogue();
     // DOM操作を一括で行うため、fragmentを利用
@@ -74,17 +74,17 @@ function buildTreeview() {
     searchCatalogue.forEach(catalogue => {
         const div = document.createElement('div');
         div.className = 'box-check';
-        div.innerHTML = `<ul>${buildTreeviewNode(catalogue)}</ul>`;
+        div.innerHTML = `<ul>${buildTreeViewNode(catalogue)}</ul>`;
         fragment.appendChild(div);
     });
     $container.empty().append(fragment);
-    setupTreeviewEventHandlers();
+    setupTreeViewEventHandlers();
 }
 
 /**
  * ツリービューのイベントハンドラーを設定
  */
-function setupTreeviewEventHandlers() {
+function setupTreeViewEventHandlers() {
     const $doc = $(document);
     // 重複登録を防ぐため既存のイベントを解除
     $doc.off('click', '.box-check li .check-toggle');
@@ -203,7 +203,7 @@ function addHandleEventInFirstPage() {
         const $parentDiv = $parent.closest("div");
         $parent.prop("checked", allChecked);
         $parentDiv.toggleClass("check-new", someChecked && !allChecked);
-        buildTreeview();
+        buildTreeView();
     });
     $doc.on("click", "input[type=checkbox].parent", function(){
         const $this = $(this);
@@ -211,7 +211,7 @@ function addHandleEventInFirstPage() {
         const $boxS1 = $this.closest(".box-s-1");
         $boxS1.find(".child").prop("checked", isCheck);
         $this.closest("div").removeClass("check-new");
-        buildTreeview();
+        buildTreeView();
     });
 }
 

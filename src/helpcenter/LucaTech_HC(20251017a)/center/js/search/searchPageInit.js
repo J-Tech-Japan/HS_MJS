@@ -34,7 +34,7 @@ $(function () {
    addHandleEventInFirstPage();
 
    // ツリービュー構築（絞り込み項目の階層表示）
-   buildTreeview();
+   buildTreeView();
    
    // 各検索項目のチェック状態を確認
    $(".search-in").each(function () {
