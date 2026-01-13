@@ -4,7 +4,10 @@
  * - キーワードハイライト機能
  * - 結果カウント表示
  * 
- * 注意: utils.jsで定義されたwide、narrow、highlightを使用します
+ * 依存関係:
+ * - utils.js: normalizeSearchKeyword, escapeHtml, selectorEscape, highlight配列
+ * - searchBreadcrumb.js: buildBreadCrum
+ * - searchPagination.js: setupPagination, resetPaginationSource
  */
 
 /**
@@ -17,9 +20,9 @@ function prepareSearchWord() {
 }
 
 /**
- * 検索を実行し結果カウントを取得する
+ * 検索を実行し結果をレンダリングする
  * @param {Array} searchWord - 検索単語配列
- * @returns {number} 総結果数
+ * @returns {number} 総結果数（レンダリングされた結果の件数）
  */
 function performSearchAndRender(searchWord) {
     let countAllResult = 0;
@@ -36,12 +39,12 @@ function performSearchAndRender(searchWord) {
             const safeTitle = escapeHtml($parent.find(".search_title").text());
             const safeDisplayText = escapeHtml(displayText);
             const baseUrl = catalogue.baseUrl.replace(/\/$/, "");
-            const safeUrl = escapeHtml(`${baseUrl}/index.html#t=${$parent.attr("id")}.html`);
+            const url = `${baseUrl}/index.html#t=${$parent.attr("id")}.html`;
             
             const resultItem = `
                 <div class='wSearchResultItem'>
                     <div class='wSearchResultTitle title-s'>
-                        <a class='nolink' href='#' onclick='openhelplink("${safeUrl}", event);return false;'>${safeTitle}</a>
+                        <a class='nolink search-result-link' href='#' data-url="${escapeHtml(url)}">${safeTitle}</a>
                     </div>
                     <div class='wSearchResultBreadCrum'>${buildBreadCrum(catalogue.breadCrum)}</div>
                     <div class='wSearchContent'><span class='wSearchContext nd-p'>${safeDisplayText}</span></div>
@@ -61,35 +64,27 @@ function performSearchAndRender(searchWord) {
 function displayResult() {
     const searchWord = prepareSearchWord();
     const countAllResult = performSearchAndRender(searchWord);
+    const keyword = $("#searchkeyword").val();
 
     // 結果件数の更新
-    updateResultCount(countAllResult);
+    updateResultsUI(countAllResult, keyword);
 
     // 検索単語をハイライト
     highlightSearchWord(searchWord,$(".wSearchContent"),"font-weight:bold");
+
+    // 検索結果リンクのイベントハンドラーを設定（XSS対策）
+    setupSearchResultLinkHandlers();
 
     // ページネーション
     setupPagination();
 }
 
 /**
- * 検索結果件数を更新
- * @param {number} count - 結果件数
- * @returns {void}
- */
-function updateResultCount(count) {
-    const hasResults = count > 0;
-    $("#count-all").text(count);
-    $(".hasresult").toggleClass("hidden", !hasResults);
-    $(".noresult").toggleClass("hidden", hasResults);
-    if (hasResults) $("#resultkeyword").text($("#searchkeyword").val());
-}
-
-/**
- * ハイライト結果
+ * 検索単語をハイライト表示する
+ * HTMLエンティティを考慮しながら、テキストノードのみをハイライトする
  * @param {Array} searchWord - 検索単語配列
  * @param {jQuery} content - ハイライト対象のjQueryオブジェクト
- * @param {string} style - ハイライトスタイル
+ * @param {string} style - ハイライトスタイル（CSSインラインスタイル）
  * @returns {void}
  */
 function highlightSearchWord(searchWord, content, style) {
@@ -225,13 +220,24 @@ function openhelplink(url, event) {
     localStorage.setItem("breadcrumb", JSON.stringify(breadcrumb));
     
     // 新しいウィンドウでヘルプを開く
-    const newWindow = window.open(url, "_blank");
+    window.open(url, "_blank");
+}
+
+/**
+ * 検索結果リンクのイベント委譲ハンドラーを設定
+ * XSS脆弱性を防ぐため、onclick属性の代わりにイベント委譲を使用
+ * @returns {void}
+ */
+function setupSearchResultLinkHandlers() {
+    // 既存のハンドラーを削除して重複を防ぐ
+    $(document).off('click', '.search-result-link');
     
-    // 将来的な検索ワードハイライト機能のための準備
-    if (newWindow) {
-        newWindow.onload = function() {
-            // TODO: 検索ワードのハイライト機能を実装
-            // hightLightSearchWord(searchWord, $(".wSearchContent"));
-        };
-    }
+    // イベント委譲でクリックイベントを処理
+    $(document).on('click', '.search-result-link', function(event) {
+        event.preventDefault();
+        const url = $(this).data('url');
+        if (url) {
+            openhelplink(url, event);
+        }
+    });
 }
