@@ -1,4 +1,3 @@
-// search.html のインラインJavaScript
 // ページ読み込み完了時の処理
 $(function () {
 

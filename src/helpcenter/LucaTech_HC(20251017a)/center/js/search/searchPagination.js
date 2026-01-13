@@ -31,15 +31,37 @@ let paginationState = {
     pageSize: PAGINATION_PAGE_SIZE
 };
 
+// データソースのキャッシュ管理
+let cachedDataSource = null;
+let lastSearchResultsHash = null;
+
 /**
- * 検索結果からデータソースを取得
+ * 検索結果からデータソースを取得（キャッシュ機能付き）
+ * @param {boolean} forceRefresh - 強制的に再取得するかどうか
  * @returns {Array} データソース配列
  */
-function collectDataSource() {
+function collectDataSource(forceRefresh = false) {
+    const $searchResults = $(SELECTORS.SEARCH_RESULTS);
+    const $items = $searchResults.find(SELECTORS.RESULT_ITEM);
+    
+    // 検索結果の変更を検出するための簡易ハッシュ
+    const currentHash = $items.length;
+    
+    // キャッシュが有効で、検索結果が変わっていない場合はキャッシュを返す
+    if (!forceRefresh && cachedDataSource !== null && lastSearchResultsHash === currentHash) {
+        return cachedDataSource;
+    }
+    
+    // データソースを取得
     const result = [];
-    $(SELECTORS.SEARCH_RESULTS).find(SELECTORS.RESULT_ITEM).each(function () {
+    $items.each(function () {
         result.push($(this).html());
     });
+    
+    // キャッシュを更新
+    cachedDataSource = result;
+    lastSearchResultsHash = currentHash;
+    
     return result;
 }
 
@@ -72,21 +94,23 @@ function togglePaginationVisibility(shouldShow) {
 
 /**
  * ページネーションを設定する
+ * @param {boolean} [forceRefresh=false] - 強制的にデータを再取得するかどうか
  */
-function setupPagination() {
+function setupPagination(forceRefresh = false) {
     sourcesForPaging = [];
     paginationState.currentPage = 1;
-    pagination(1);
+    pagination(1, forceRefresh);
 }
 
 /**
  * ページネーション結果
  * @param {number} [page=1] - 初期ページ番号
+ * @param {boolean} [forceRefresh=false] - 強制的にデータを再取得するかどうか
  */
-function pagination(page = 1) {
+function pagination(page = 1, forceRefresh = false) {
     // データソースの取得または再利用
-    if (sourcesForPaging.length === 0) {
-        sourcesForPaging = collectDataSource();
+    if (sourcesForPaging.length === 0 || forceRefresh) {
+        sourcesForPaging = collectDataSource(forceRefresh);
     }
     const sources = sourcesForPaging;
 
@@ -202,12 +226,19 @@ function renderPage(pageNum, sources) {
     const endIdx = Math.min(startIdx + PAGINATION_PAGE_SIZE, sources.length);
     const pageData = sources.slice(startIdx, endIdx);
 
-    let dataHtml = '<ul>';
-    $.each(pageData, function (index, item) {
-        dataHtml += '<li class="wSearchResultItem nd-content-search">' + item + '</li>';
+    // DocumentFragmentを使用してDOM操作を最適化
+    const ul = document.createElement('ul');
+    const fragment = document.createDocumentFragment();
+    
+    pageData.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'wSearchResultItem nd-content-search';
+        li.innerHTML = item;
+        fragment.appendChild(li);
     });
-    dataHtml += '</ul>';
-    $(SELECTORS.SEARCH_RESULTS).html(dataHtml);
+    
+    ul.appendChild(fragment);
+    $(SELECTORS.SEARCH_RESULTS).html(ul);
 }
 
 /**
@@ -299,6 +330,8 @@ function hidePagination() {
  */
 function resetPaginationSource() {
     sourcesForPaging = [];
+    cachedDataSource = null;
+    lastSearchResultsHash = null;
     paginationState.currentPage = 1;
     paginationState.totalPages = 1;
 }
