@@ -13,10 +13,15 @@
  * @returns {string} チェックボックスのHTML
  */
 function createCheckboxElement(node, additionalClass = '', isSelectAll = false) {
+    // チェック状態の初期値を設定
     const checked = node.checked ? 'checked' : '';
+    
+    // 「すべて選択」か通常チェックボックスかで属性を分岐
     const id = isSelectAll ? `search-in-all-${node.id}` : `search-in-${node.id}`;
     const className = isSelectAll ? 'search-in-all' : 'search-in';
     const labelText = isSelectAll ? '(すべて選択)' : escapeHtml(node.title);
+    
+    // 通常チェックボックスの場合のみカウント表示を追加
     const countSpan = isSelectAll ? '' : ` <span class="count" id="count-${node.id}">(0)</span>`;
     
     return `
@@ -39,10 +44,12 @@ function buildTreeViewNode(node) {
         return '<li></li>';
     }
 
+    // 子ノードの有無を確認
     const hasChildren = Array.isArray(node.childs) && node.childs.length > 0;
     const parts = ['<li>'];
     
     if (hasChildren) {
+        // 親ノードの場合：チェックボックス、トグルボタン、子リストを構築
         parts.push(
             createCheckboxElement(node, 'has-childs root', false),
             '<div class="check-toggle active"></div>',
@@ -50,12 +57,14 @@ function buildTreeViewNode(node) {
             '<li>', createCheckboxElement(node, '', true), '</li>'
         );
         
+        // 再帰的に子ノードを構築
         for (const childNode of node.childs) {
             parts.push(buildTreeViewNode(childNode));
         }
         
         parts.push('</ul>');
     } else {
+        // 葉ノードの場合：シンプルなチェックボックスのみ
         parts.push(createCheckboxElement(node));
     }
     
@@ -69,15 +78,22 @@ function buildTreeViewNode(node) {
 function buildTreeView() {
     const $container = $(".column-left > .column-left-container");
     const searchCatalogue = getSearchCatalogue();
-    // DOM操作を一括で行うため、fragmentを利用
+    
+    // DOM操作を一括で行うため、fragmentを利用（パフォーマンス最適化）
     const fragment = document.createDocumentFragment();
+    
+    // 各カタログのツリー構造を構築
     searchCatalogue.forEach(catalogue => {
         const div = document.createElement('div');
         div.className = 'box-check';
         div.innerHTML = `<ul>${buildTreeViewNode(catalogue)}</ul>`;
         fragment.appendChild(div);
     });
+    
+    // 既存の内容をクリアし、新しいツリーを挿入
     $container.empty().append(fragment);
+    
+    // イベントハンドラーを設定
     setupTreeViewEventHandlers();
 }
 
@@ -101,38 +117,76 @@ function setupTreeViewEventHandlers() {
     $doc.on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
 }
 
+/**
+ * ツリーノードの展開/折りたたみトグル処理
+ * @param {Event} e - クリックイベント
+ */
 function onToggleClick(e) {
     const $this = $(this);
     const $siblings = $this.parent().siblings();
+    
+    // 現在のノードを展開/折りたたみ（アニメーション500ms）
     $this.toggleClass('active').siblings('ul').slideToggle(500);
+    
+    // 兄弟ノードを全て折りたたむ
     $siblings.children('.check-toggle').removeClass('active');
     $siblings.children('ul').slideUp(500);
 }
 
+/**
+ * ルートラベルクリック時にトグルボタンをクリック
+ * @param {Event} e - クリックイベント
+ */
 function onRootLabelClick(e) {
+    // ラベルクリックで対応するトグルボタンをトリガー
     $(this).closest("li").find(".check-toggle:first").click();
 }
 
+/**
+ * 検索範囲チェックボックスの変更イベントハンドラー
+ * チェック状態を子要素に伝播し、検索結果を更新
+ */
 function onSearchInChange() {
     const $this = $(this);
-    const check = $this.is(":checked");
-    const $parent = $this.parent().parent();
-    const $ul = $parent.find("ul");
-    const $checkboxes = $ul.find(".search-in, .search-in-all");
-    $checkboxes.prop("checked", check);
-    const $div = $this.closest("div");
-    $div.add($parent.find(".check-new")).removeClass("check-new");
+    const isChecked = $this.is(":checked");
+    const $parentLi = $this.parent().parent();
+    
+    // 子要素のすべてのチェックボックスを同期
+    const $childCheckboxes = $parentLi.find("ul .search-in, ul .search-in-all");
+    $childCheckboxes.prop("checked", isChecked);
+    
+    // 部分選択状態のスタイルをクリア
+    const $currentDiv = $this.closest("div");
+    const $checkNewElements = $parentLi.find(".check-new");
+    $currentDiv.add($checkNewElements).removeClass("check-new");
+    
+    // 検索結果の表示を更新
     if (typeof displayResult === 'function') {
         displayResult();
     }
-    checkAllInTree(this);
+    
+    // ツリー全体のチェック状態を更新
+    if (typeof checkAllInTree === 'function') {
+        checkAllInTree(this);
+    }
 }
 
+/**
+ * 「すべて選択」チェックボックスの変更イベントハンドラー
+ * 親ノードのチェックボックスと連動
+ */
 function onSearchInAllChange() {
+    // 対応する親チェックボックスのIDを取得
     const id = $(this).attr("id").replace("search-in-all-", "");
+    // 親チェックボックスの状態を同期し、changeイベントをトリガー
     $("#search-in-" + id).prop("checked", $(this).is(":checked")).trigger("change");
 }
 
+/**
+ * ルートチェックボックスの直接クリックを防止
+ * （トグルボタン経由でのみ操作可能にする）
+ * @param {Event} e - クリックイベント
+ */
 function preventRootCheckboxClick(e) {
     e.preventDefault();
 }
@@ -190,27 +244,45 @@ function addHandleEventInFirstPage() {
     $doc.off("click", "input[type=checkbox].child");
     $doc.off("click", "input[type=checkbox].parent");
     
+    // 子チェックボックスのクリックイベント
     $doc.on("click", "input[type=checkbox].child", function(){
         const $this = $(this);
         const $boxS1 = $this.closest(".box-s-1");
         const $parent = $boxS1.find(".parent");
         const $siblings = $this.closest("ul").find(".child");
+        
+        // 全ての子チェックボックスの状態を取得
         const checkedStates = $siblings.map(function() { 
             return $(this).is(":checked"); 
         }).get();
+        
+        // すべてチェック済みか、一部チェック済みかを判定
         const allChecked = checkedStates.every(state => state);
         const someChecked = checkedStates.some(state => state);
+        
+        // 親チェックボックスの状態を更新
         const $parentDiv = $parent.closest("div");
         $parent.prop("checked", allChecked);
+        // 部分選択の場合は視覚的に表示
         $parentDiv.toggleClass("check-new", someChecked && !allChecked);
+        
+        // ツリービューを再構築
         buildTreeView();
     });
+    
+    // 親チェックボックスのクリックイベント
     $doc.on("click", "input[type=checkbox].parent", function(){
         const $this = $(this);
         const isCheck = $this.is(":checked");
         const $boxS1 = $this.closest(".box-s-1");
+        
+        // 全ての子チェックボックスを親と同じ状態に設定
         $boxS1.find(".child").prop("checked", isCheck);
+        
+        // 部分選択スタイルをクリア
         $this.closest("div").removeClass("check-new");
+        
+        // ツリービューを再構築
         buildTreeView();
     });
 }
