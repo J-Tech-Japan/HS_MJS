@@ -207,27 +207,3 @@ function normalizeSearchKeyword(keyword) {
     // 正規化後の値をスペース区切りで配列化
     return normalized.split(/\s+/).filter(word => word.length > 0);
 }
-
-/**
- * キー入力イベントの遅延実行用関数（スロットリング）
- * 連続したキー入力を制御し、一定時間後に処理を実行する
- * @param {Function} func - 実行する関数
- * @param {number} wait - 待機時間（ミリ秒）
- * @returns {Function} スロットリングされた関数
- */
-function throttle(func, wait) {
-    let timeoutId = null;
-    
-    return function () {
-        const that = this;
-        const args = arguments;
-
-        // 既存のタイマーをクリア
-        clearTimeout(timeoutId);
-
-        // 指定した待機時間後に関数を実行
-        timeoutId = setTimeout(function () {
-            func.apply(that, args);
-        }, wait);
-    };
-}
