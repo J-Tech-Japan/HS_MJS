@@ -39,12 +39,12 @@ function performSearchAndRender(searchWord) {
             const safeTitle = escapeHtml($parent.find(".search_title").text());
             const safeDisplayText = escapeHtml(displayText);
             const baseUrl = catalogue.baseUrl.replace(/\/$/, "");
-            const safeUrl = escapeHtml(`${baseUrl}/index.html#t=${$parent.attr("id")}.html`);
+            const url = `${baseUrl}/index.html#t=${$parent.attr("id")}.html`;
             
             const resultItem = `
                 <div class='wSearchResultItem'>
                     <div class='wSearchResultTitle title-s'>
-                        <a class='nolink' href='#' onclick='openhelplink("${safeUrl}", event);return false;'>${safeTitle}</a>
+                        <a class='nolink search-result-link' href='#' data-url="${escapeHtml(url)}">${safeTitle}</a>
                     </div>
                     <div class='wSearchResultBreadCrum'>${buildBreadCrum(catalogue.breadCrum)}</div>
                     <div class='wSearchContent'><span class='wSearchContext nd-p'>${safeDisplayText}</span></div>
@@ -71,6 +71,9 @@ function displayResult() {
 
     // 検索単語をハイライト
     highlightSearchWord(searchWord,$(".wSearchContent"),"font-weight:bold");
+
+    // 検索結果リンクのイベントハンドラーを設定（XSS対策）
+    setupSearchResultLinkHandlers();
 
     // ページネーション
     setupPagination();
@@ -218,4 +221,23 @@ function openhelplink(url, event) {
     
     // 新しいウィンドウでヘルプを開く
     window.open(url, "_blank");
+}
+
+/**
+ * 検索結果リンクのイベント委譲ハンドラーを設定
+ * XSS脆弱性を防ぐため、onclick属性の代わりにイベント委譲を使用
+ * @returns {void}
+ */
+function setupSearchResultLinkHandlers() {
+    // 既存のハンドラーを削除して重複を防ぐ
+    $(document).off('click', '.search-result-link');
+    
+    // イベント委譲でクリックイベントを処理
+    $(document).on('click', '.search-result-link', function(event) {
+        event.preventDefault();
+        const url = $(this).data('url');
+        if (url) {
+            openhelplink(url, event);
+        }
+    });
 }

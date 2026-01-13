@@ -29,9 +29,11 @@ $(function () {
    // ローディングアイコンを表示（検索実行中の表示）
    $('.box-click-search').html('<div class="loading"><i class="fas fa-spinner fa-spin"></i></div>');
 
+   // 検索UIのイベントハンドラーを初期化（一度だけ実行）
+   initializeSearchUI();
+
    // 初期ページの表示処理
    $('.box-content-s').html(buildFirstPage());
-   addHandleEventInFirstPage();
 
    // ツリービュー構築（絞り込み項目の階層表示）
    buildTreeView();

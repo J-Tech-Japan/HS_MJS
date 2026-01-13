@@ -92,29 +92,20 @@ function buildTreeView() {
     
     // 既存の内容をクリアし、新しいツリーを挿入
     $container.empty().append(fragment);
-    
-    // イベントハンドラーを設定
-    setupTreeViewEventHandlers();
 }
 
 /**
  * ツリービューのイベントハンドラーを設定
+ * 注意: この関数は初期化時に一度だけ呼び出されることを想定
+ * イベント委譲を使用しているため、動的に生成された要素にも自動的に適用される
  */
 function setupTreeViewEventHandlers() {
-    const $doc = $(document);
-    // 重複登録を防ぐため既存のイベントを解除
-    $doc.off('click', '.box-check li .check-toggle');
-    $doc.off('click', '.box-check li label.custom-control-label.root');
-    $doc.off('change', '.box-check .search-in');
-    $doc.off('change', '.box-check .search-in-all');
-    $doc.off('click', 'input[type=checkbox].search-in.root');
-    
-    // イベント委譲を統一
-    $doc.on('click', '.box-check li .check-toggle', onToggleClick);
-    $doc.on('click', '.box-check li label.custom-control-label.root', onRootLabelClick);
-    $doc.on('change', '.box-check .search-in', onSearchInChange);
-    $doc.on('change', '.box-check .search-in-all', onSearchInAllChange);
-    $doc.on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
+    // イベント委譲で統一（一度だけ設定）
+    $(document).on('click', '.box-check li .check-toggle', onToggleClick);
+    $(document).on('click', '.box-check li label.custom-control-label.root', onRootLabelClick);
+    $(document).on('change', '.box-check .search-in', onSearchInChange);
+    $(document).on('change', '.box-check .search-in-all', onSearchInAllChange);
+    $(document).on('click', 'input[type=checkbox].search-in.root', preventRootCheckboxClick);
 }
 
 /**
@@ -236,16 +227,12 @@ function buildFirstPage() {
 
 /**
  * 子チェックボックスにクリックイベントを追加
+ * 注意: この関数は初期化時に一度だけ呼び出されることを想定
+ * イベント委譲を使用しているため、動的に生成された要素にも自動的に適用される
  */
 function addHandleEventInFirstPage() {
-    const $doc = $(document);
-    
-    // 重複登録を防ぐため既存のイベントを解除
-    $doc.off("click", "input[type=checkbox].child");
-    $doc.off("click", "input[type=checkbox].parent");
-    
-    // 子チェックボックスのクリックイベント
-    $doc.on("click", "input[type=checkbox].child", function(){
+    // 子チェックボックスのクリックイベント（イベント委譲で一度だけ設定）
+    $(document).on("click", "input[type=checkbox].child", function(){
         const $this = $(this);
         const $boxS1 = $this.closest(".box-s-1");
         const $parent = $boxS1.find(".parent");
@@ -270,8 +257,8 @@ function addHandleEventInFirstPage() {
         buildTreeView();
     });
     
-    // 親チェックボックスのクリックイベント
-    $doc.on("click", "input[type=checkbox].parent", function(){
+    // 親チェックボックスのクリックイベント（イベント委譲で一度だけ設定）
+    $(document).on("click", "input[type=checkbox].parent", function(){
         const $this = $(this);
         const isCheck = $this.is(":checked");
         const $boxS1 = $this.closest(".box-s-1");
@@ -287,4 +274,15 @@ function addHandleEventInFirstPage() {
     });
 }
 
-
+/**
+ * 検索UIモジュールを初期化
+ * すべてのイベントハンドラーを一度だけ設定する
+ * ページ読み込み時に一度だけ呼び出すこと
+ */
+function initializeSearchUI() {
+    // ツリービューのイベントハンドラーを設定
+    setupTreeViewEventHandlers();
+    
+    // 最初のページのイベントハンドラーを設定
+    addHandleEventInFirstPage();
+}
