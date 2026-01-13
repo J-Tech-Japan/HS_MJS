@@ -34,7 +34,7 @@ namespace WordAddIn1
             // breadcrumbのJavaScriptは、LucaTech GXが選択された時のみ追加
             if (includeBreadcrumb)
             {
-                idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/hc_breadcrumb.js""></script>" + "\n";
+                idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/components/hc_breadcrumb.js""></script>" + "\n";
             }
 
             idxHtmlTemplate += @"<script type=""text/javascript"" src=""template/scripts/rh.min.js""></script>" + "\n";
