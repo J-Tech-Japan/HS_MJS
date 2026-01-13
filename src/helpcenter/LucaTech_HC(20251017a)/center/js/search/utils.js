@@ -12,33 +12,38 @@ const wide = ["０", "１", "２", "３", "４", "５", "６", "７", "８", "�
 const narrow = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "ｶﾞ", "ｷﾞ", "ｸﾞ", "ｹﾞ", "ｺﾞ", "ｻﾞ", "ｼﾞ", "ｽﾞ", "ｾﾞ", "ｿﾞ", "ﾀﾞ", "ﾁﾞ", "ﾂﾞ", "ﾃﾞ", "ﾄﾞ", "ﾊﾞ", "ﾋﾞ", "ﾌﾞ", "ﾍﾞ", "ﾎﾞ", "ﾊﾟ", "ﾋﾟ", "ﾌﾟ", "ﾍﾟ", "ﾎﾟ", "｡", "｢", "｣", "､", "ｦ", "ｧ", "ｨ", "ｩ", "ｪ", "ｫ", "ｬ", "ｭ", "ｮ", "ｯ", "ｰ", "ｱ", "ｲ", "ｳ", "ｴ", "ｵ", "ｶ", "ｷ", "ｸ", "ｹ", "ｺ", "ｻ", "ｼ", "ｽ", "ｾ", "ｿ", "ﾀ", "ﾁ", "ﾂ", "ﾃ", "ﾄ", "ﾅ", "ﾆ", "ﾇ", "ﾈ", "ﾉ", "ﾊ", "ﾋ", "ﾌ", "ﾍ", "ﾎ", "ﾏ", "ﾐ", "ﾑ", "ﾒ", "ﾓ", "ﾔ", "ﾕ", "ﾖ", "ﾗ", "ﾘ", "ﾙ", "ﾚ", "ﾛ", "ﾜ", "ﾝ"];
 const highlight = ["(?:０|0)", "(?:１|1)", "(?:２|2)", "(?:３|3)", "(?:４|4)", "(?:５|5)", "(?:６|6)", "(?:７|7)", "(?:８|8)", "(?:９|9)", "(?:ａ|a)", "(?:ｂ|b)", "(?:ｃ|c)", "(?:ｄ|d)", "(?:ｅ|e)", "(?:ｆ|f)", "(?:ｇ|g)", "(?:ｈ|h)", "(?:ｉ|i)", "(?:ｊ|j)", "(?:ｋ|k)", "(?:ｌ|l)", "(?:ｍ|m)", "(?:ｎ|n)", "(?:ｏ|o)", "(?:ｐ|p)", "(?:ｑ|q)", "(?:ｒ|r)", "(?:ｓ|s)", "(?:ｔ|t)", "(?:ｕ|u)", "(?:ｖ|v)", "(?:ｗ|w)", "(?:ｘ|x)", "(?:ｙ|y)", "(?:ｚ|z)", "(?:ガ|ｶﾞ)", "(?:ギ|ｷﾞ)", "(?:グ|ｸﾞ)", "(?:ゲ|ｹﾞ)", "(?:ゴ|ｺﾞ)", "(?:ザ|ｻﾞ)", "(?:ジ|ｼﾞ)", "(?:ズ|ｽﾞ)", "(?:ゼ|ｾﾞ)", "(?:ゾ|ｿﾞ)", "(?:ダ|ﾀﾞ)", "(?:ヂ|ﾁﾞ)", "(?:ヅ|ﾂﾞ)", "(?:デ|ﾃﾞ)", "(?:ド|ﾄﾞ)", "(?:バ|ﾊﾞ)", "(?:ビ|ﾋﾞ)", "(?:ブ|ﾌﾞ)", "(?:ベ|ﾍﾞ)", "(?:ボ|ﾎﾞ)", "(?:パ|ﾊﾟ)", "(?:ピ|ﾋﾟ)", "(?:プ|ﾌﾟ)", "(?:ペ|ﾍﾟ)", "(?:ポ|ﾎﾟ)", "(?:。|｡)", "(?:「|｢)", "(?:」|｣)", "(?:、|､)", "(?:ヲ|ｦ)", "(?:ァ|ｧ)", "(?:ィ|ｨ)", "(?:ゥ|ｩ)", "(?:ェ|ｪ)", "(?:ォ|ｫ)", "(?:ャ|ｬ)", "(?:ュ|ｭ)", "(?:ョ|ｮ)", "(?:ッ|ｯ)", "(?:ー|ｰ)", "(?:ア|ｱ)", "(?:イ|ｲ)", "(?:ウ|ｳ)", "(?:エ|ｴ)", "(?:オ|ｵ)", "(?:カ|ｶ)", "(?:キ|ｷ)", "(?:ク|ｸ)", "(?:ケ|ｹ)", "(?:コ|ｺ)", "(?:サ|ｻ)", "(?:シ|ｼ)", "(?:ス|ｽ)", "(?:セ|ｾ)", "(?:ソ|ｿ)", "(?:タ|ﾀ)", "(?:チ|ﾁ)", "(?:ツ|ﾂ)", "(?:テ|ﾃ)", "(?:ト|ﾄ)", "(?:ナ|ﾅ)", "(?:ニ|ﾆ)", "(?:ヌ|ﾇ)", "(?:ネ|ﾈ)", "(?:ノ|ﾉ)", "(?:ハ|ﾊ)", "(?:ヒ|ﾋ)", "(?:フ|ﾌ)", "(?:ヘ|ﾍ)", "(?:ホ|ﾎ)", "(?:マ|ﾏ)", "(?:ミ|ﾐ)", "(?:ム|ﾑ)", "(?:メ|ﾒ)", "(?:モ|ﾓ)", "(?:ヤ|ﾔ)", "(?:ユ|ﾕ)", "(?:ヨ|ﾖ)", "(?:ラ|ﾗ)", "(?:リ|ﾘ)", "(?:ル|ﾙ)", "(?:レ|ﾚ)", "(?:ロ|ﾛ)", "(?:ワ|ﾜ)", "(?:ン|ﾝ)"];
 
-// 効率化のための変換マップ（初期化時に一度だけ生成）
-const wideToNarrowMap = (() => {
-    const map = {};
-    // 全角アルファベット→半角アルファベット（インデックス10-35）
+// ========================================
+// 統合変換マップと正規表現（初期化時に一度だけ生成）
+// ========================================
+const charConversionConfig = (() => {
+    // 全角→半角の変換マップ（全角アルファベット、インデックス10-35）
+    const wideToNarrow = {};
     for (let i = 10; i < 36; i++) {
-        map[wide[i]] = narrow[i];
+        wideToNarrow[wide[i]] = narrow[i];
     }
-    return map;
-})();
-
-const narrowToWideMap = (() => {
-    const map = {};
-    // 半角カタカナ→全角カタカナ（インデックス36以降）
+    
+    // 半角→全角の変換マップ（半角カタカナ、インデックス36以降）
+    const narrowToWide = {};
     for (let i = 36; i < narrow.length; i++) {
-        map[narrow[i]] = wide[i];
+        narrowToWide[narrow[i]] = wide[i];
     }
-    return map;
+    
+    // 変換用の正規表現を生成
+    const wideToNarrowRegex = new RegExp(`[${Object.keys(wideToNarrow).join('')}]`, 'g');
+    const narrowToWideRegex = new RegExp(
+        Object.keys(narrowToWide)
+            .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+            .join('|'), 
+        'g'
+    );
+    
+    return {
+        wideToNarrowMap: wideToNarrow,
+        narrowToWideMap: narrowToWide,
+        wideToNarrowRegex: wideToNarrowRegex,
+        narrowToWideRegex: narrowToWideRegex
+    };
 })();
-
-// 効率的な変換用の正規表現（初期化時に一度だけ生成）
-const wideAlphabetRegex = new RegExp(`[${Object.keys(wideToNarrowMap).join('')}]`, 'g');
-const narrowKatakanaRegex = new RegExp(
-    Object.keys(narrowToWideMap)
-        .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-        .join('|'), 
-    'g'
-);
 
 // ========================================
 // jQueryカスタムセレクタ（大文字小文字を区別しない検索）
@@ -96,7 +101,7 @@ function checkAllInTree(node) {
     // 同階層の全ての兄弟要素の状態を確認
     const $siblings = $node.closest("ul").find(".search-in");
     const checkedStates = $siblings.map(function() { 
-        return $(this).is(":checked"); 
+        return this.checked; 
     }).get();
     
     const allChecked = checkedStates.every(state => state);
@@ -198,11 +203,17 @@ function normalizeSearchKeyword(keyword) {
         .trim()
         .toLowerCase();
     
-    // 全角アルファベット→半角アルファベットに変換（事前生成された正規表現とマップを使用）
-    normalized = normalized.replace(wideAlphabetRegex, match => wideToNarrowMap[match]);
+    // 全角アルファベット→半角アルファベットに変換
+    normalized = normalized.replace(
+        charConversionConfig.wideToNarrowRegex, 
+        match => charConversionConfig.wideToNarrowMap[match]
+    );
     
-    // 半角カタカナ→全角カタカナに変換（事前生成された正規表現とマップを使用）
-    normalized = normalized.replace(narrowKatakanaRegex, match => narrowToWideMap[match]);
+    // 半角カタカナ→全角カタカナに変換
+    normalized = normalized.replace(
+        charConversionConfig.narrowToWideRegex, 
+        match => charConversionConfig.narrowToWideMap[match]
+    );
     
     // 正規化後の値をスペース区切りで配列化
     return normalized.split(/\s+/).filter(word => word.length > 0);
