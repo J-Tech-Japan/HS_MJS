@@ -216,9 +216,6 @@ function openhelplink(url, event) {
     const breadcrumbTexts = getBreadcrumbTexts(event);
     const breadcrumb = createBreadcrumbData(url, breadcrumbTexts);
     
-    // 検索キーワードをブレッドクラムに追加
-    breadcrumb.searchKeyword = searchKeywordRaw;
-    
     // ローカルストレージに保存
     localStorage.setItem("breadcrumb", JSON.stringify(breadcrumb));
     
