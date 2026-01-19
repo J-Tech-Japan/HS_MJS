@@ -69,14 +69,14 @@ function displayResult() {
     // 結果件数の更新
     updateResultsUI(countAllResult, keyword);
 
-    // 検索単語をハイライト
-    highlightSearchWord(searchWord,$(".wSearchContent"),"font-weight:bold");
-
     // 検索結果リンクのイベントハンドラーを設定（XSS対策）
     setupSearchResultLinkHandlers();
 
-    // ページネーション
+    // ページネーション（ハイライトの前に実行）
     setupPagination();
+    
+    // 検索単語をハイライト（ページネーション後に実行）
+    highlightSearchWord(searchWord,$(".wSearchContent"),"font-weight:bold");
 }
 
 /**
@@ -99,6 +99,9 @@ function highlightSearchWord(searchWord, content, style) {
 
     content.each(function() {
         let html = $(this).html();
+        
+        // 既存のハイライトタグを削除してテキストのみを抽出
+        html = html.replace(/<font class='keyword'[^>]*>(.*?)<\/font>/gi, '$1');
         
         // テキストノードのみをハイライト（HTMLタグ内を除外）
         // HTMLタグの外側のテキストのみにマッチする正規表現を使用
