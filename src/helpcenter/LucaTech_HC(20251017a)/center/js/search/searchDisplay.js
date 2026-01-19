@@ -97,21 +97,8 @@ function highlightSearchWord(searchWord, content, style) {
         highlightWord = highlightWord.replace(new RegExp(h, "gm"), h);
     });
 
-    const replacements = {
-        regnbsp: [/&nbsp;(?=[^<>]*<)/gm, "　"],
-        reggt: [/&gt;(?=[^<>]*<)/gm, ">"],
-        reglt: [/&lt;(?=[^<>]*<)/gm, "<"],
-        regquot: [/&quot;(?=[^<>]*<)/gm, '"'],
-        regamp: [/&amp;(?=[^<>]*<)/gm, "&"]
-    };
-
     content.each(function() {
         let html = $(this).html();
-        
-        // まずHTMLエンティティを一時的に復元
-        Object.values(replacements).forEach(([pattern, replacement]) => {
-            html = html.replace(pattern, replacement);
-        });
         
         // テキストノードのみをハイライト（HTMLタグ内を除外）
         // HTMLタグの外側のテキストのみにマッチする正規表現を使用
