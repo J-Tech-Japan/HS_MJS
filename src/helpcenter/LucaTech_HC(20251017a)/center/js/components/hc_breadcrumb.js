@@ -46,6 +46,11 @@ BreadcrumbManager.prototype = {
 			
 			if (this.breadcrumbData.path && this.breadcrumbData.path.match(path)) {
 				this.showBreadcrumb(false);
+				
+				// 検索キーワードが存在する場合、検索ボックスに設定
+				if (this.breadcrumbData.searchKeyword) {
+					this.setSearchKeyword(this.breadcrumbData.searchKeyword);
+				}
 			} else {
 				this.showBreadcrumb(true);
 			}
@@ -170,6 +175,22 @@ BreadcrumbManager.prototype = {
 	 */
 	isActive: function () {
 		return this.isEnabled;
+	},
+
+	/**
+	 * 検索キーワードを検索ボックスに設定
+	 * @param {string} keyword - 設定するキーワード
+	 */
+	setSearchKeyword: function (keyword) {
+		if (!keyword) return;
+		
+		// 検索ボックスに値を設定（複数のセレクタを試行）
+		const $searchField = $('.wSearchField');
+		if ($searchField.length > 0) {
+			$searchField.val(keyword);
+			// keyupイベントをトリガーして検索を実行
+			$searchField.trigger('keyup');
+		}
 	}
 };
 
