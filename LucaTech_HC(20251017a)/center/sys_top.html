@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+
+  <title>LucaTech GX ヘルプセンター</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/LucaTech_GX_favicon.ico">
+  <script src="js/lib/vue.global.prod.js"></script>
+  <script src="js/components/contents.js"></script>
+  <script src="js/search/utils.js"></script>
+  <script src="js/components/commonIndexPage.js"></script>
+</head>
+
+<body class="top">
+  <div id="app">
+    <header>
+      <ul class="menu-breadcrumb">
+        <li><a href="index.html">LucaTech GX ヘルプTOP</a></li>
+        <li>{{categoryTitle}}</li>
+        <li v-if="subCategoryTitle">{{subCategoryTitle}}</li>
+        <li>{{contentsTitle}}TOP</li>
+      </ul>
+      <div class="product_logo"></div>
+      <div class="sys_title">{{categoryTitle}}</div>
+      <h1>{{contentsTitle}}</h1>
+
+      <p class="search_guide"></p>
+      <div class="main-header-search">
+        <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検絢でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
+        <button class="btn-search" @click="onSearch"></button>
+      </div>
+    </header>
+    <main>
+      <div class="title">検索方法</div>
+      <a :href="`purpose.html?contentid=${contentid}`"><div class="link">
+        <span>目的から探す</span>
+        <p>「社員を登録する」「決算を確定する」など、目的に沿った操作方法を確認できます。</p></div></a>
+      <a :href="`menu.html?contentid=${contentid}`"><div class="link">
+        <span>メニューから探す</span>
+        <p>「伝票入力」「科目登録」など、処理単位での操作方法を確認できます。</p></div></a>
+    </main>
+    <footer class="footer">
+      <p class="mjs_logo"></p>
+      ©2025 MIROKU JYOHO SERVICE CO., LTD.
+    </footer>
+  </div>
+  <input type="checkbox" :id="'checkbox-' + contentid" class="hiddenlevel" v-model="isChecked">
+  <script>
+    createIndexPageApp("sys_top").mount('#app');
+  </script>
+</body>
+
+</html>

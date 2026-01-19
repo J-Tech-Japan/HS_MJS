@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+
+  <title>LucaTech GX ヘルプセンター</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="images/LucaTech_GX_favicon.ico">
+  <script src="js/lib/vue.global.prod.js"></script>
+  <script src="js/components/contents.js"></script>
+  <script src="js/search/utils.js"></script>
+  <script src="js/components/commonIndexPage.js"></script>
+</head>
+
+<body class="sub index-purpose">
+  <div id="app">
+    <header>
+      <ul class="menu-breadcrumb">
+        <li><a href="index.html">LucaTech GX ヘルプTOP</a></li>
+        <li>{{categoryTitle}}</li>
+        <li v-if="subCategoryTitle">{{subCategoryTitle}}</li>
+        <li><a :href="`sys_top.html?contentid=${contentid}`">{{contentsTitle}}TOP</a></li>
+        <li>{{breadcrumbLabel}}</li>
+      </ul>
+      <div class="product_logo"></div>
+      <h1 :class="contentidPrefix">{{contentsTitle}}</h1>
+
+      <div class="main-header-search">
+        <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
+        <button class="btn-search" @click="onSearch"></button>
+      </div>
+    </header>
+    <!--h2>{{ title }}</h2-->
+    <main>
+      <aside>
+        <p class="title">{{ title }}</p>
+        <ul v-if="category.length > 1">
+          <li v-for="item in category" :key="item"><a :href="`#${item}`">{{item}}</a></li>
+        </ul>
+      </aside>
+      <article>
+        <div>
+          <template v-for="item in category" :key="item">
+            <h4 :id="item">{{item}}</h4>
+            <ul>
+              <li v-for="(item2,index) in contents[item]" :key="index">
+                <a :href="getUrl(item2[0])" @click="setBreadCrumbLS($event, item)">{{item2[1]}}</a>
+              </li>
+            </ul>
+          </template>
+        </div>
+      </article>
+    </main>
+    <footer class="footer">
+      <p class="mjs_logo"></p>
+      ©2025 MIROKU JYOHO SERVICE CO., LTD.
+    </footer>
+  </div>
+  <input type="checkbox" :id="'checkbox-' + contentid" class="hidden" v-model="isChecked">
+
+  <script>
+    createIndexPageApp("purpose").mount('#app');
+  </script>
+</body>
+
+</html>
