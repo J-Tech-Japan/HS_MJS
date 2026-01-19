@@ -591,6 +591,7 @@
     <Content Include="htmlTemplates\promise-6.1.0.min.js" />
     <Content Include="htmlTemplates\resp.css" />
     <Content Include="htmlTemplates\resp.js" />
+    <Content Include="htmlTemplates\screendata.js" />
     <Content Include="htmlTemplates\searchBase.js" />
     <Content Include="htmlTemplates\template\Azure_Blue01\andsearch_mark.png" />
     <Content Include="htmlTemplates\template\Azure_Blue01\andsearch_nomark.png" />
