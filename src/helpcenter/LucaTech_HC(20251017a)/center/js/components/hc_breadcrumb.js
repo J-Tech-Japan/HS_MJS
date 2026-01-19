@@ -184,12 +184,67 @@ BreadcrumbManager.prototype = {
 	setSearchKeyword: function (keyword) {
 		if (!keyword) return;
 		
-		// 検索ボックスに値を設定（複数のセレクタを試行）
-		const $searchField = $('.wSearchField');
-		if ($searchField.length > 0) {
-			$searchField.val(keyword);
-			// keyupイベントをトリガーして検索を実行
-			$searchField.trigger('keyup');
+		// RoboHelpのコントローラーを使って検索タブに切り替え
+		try {
+			// 方法1: rh.modelを使用
+			if (window.rh && window.rh.model) {
+				window.rh.model.publish(window.rh.model.scopeKey('KEY_ACTIVE_TAB'), 'fts');
+			}
+			// 方法2: data-click属性を持つ要素を探してクリック
+			else {
+				const $searchTab = $('a.fts[data-click*="toggleActiveTab"]');
+				if ($searchTab.length > 0) {
+					$searchTab[0].click();
+				}
+			}
+		} catch (e) {
+			console.log('Failed to switch to search tab:', e);
+		}
+		
+		// 検索ボックスに値を設定し、検索後に該当ページを選択
+		setTimeout(() => {
+			const $searchField = $('.wSearchField');
+			if ($searchField.length > 0) {
+				$searchField.val(keyword);
+				// keyupイベントをトリガーして検索を実行
+				$searchField.trigger('keyup');
+				
+				// 検索結果が表示された後、現在のページを選択状態にする
+				setTimeout(() => {
+					this.selectCurrentPageInSearchResults();
+				}, 500);
+			}
+		}, 300);
+	},
+
+	/**
+	 * 検索結果から現在のページを選択状態にする
+	 */
+	selectCurrentPageInSearchResults: function () {
+		try {
+			// 現在のページのパスを取得
+			const currentPath = location.pathname;
+			const currentHash = location.hash.replace('#t=', '').replace('.html', '');
+			
+			// 検索結果のリンクを探す
+			$('.searchresults a, .search-results a').each(function() {
+				const href = $(this).attr('href') || '';
+				
+				// href内に現在のハッシュが含まれているか確認
+				if (currentHash && href.includes(currentHash)) {
+					// 該当する要素を選択状態にする
+					$(this).addClass('active selected');
+					$(this).closest('li, .result-item, .searchResultItem').addClass('active selected');
+					
+					// スクロールして表示
+					if ($(this)[0].scrollIntoView) {
+						$(this)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+					}
+					return false; // ループを抜ける
+				}
+			});
+		} catch (e) {
+			console.log('Failed to select current page in search results:', e);
 		}
 	}
 };

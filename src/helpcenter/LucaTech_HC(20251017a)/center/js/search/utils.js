@@ -144,14 +144,14 @@ function searchKeywordsInString(str, keywords) {
     let lastEnd = -1;
     
     for (let keyword of keywords) {
-        const regex = new RegExp(keyword, "g");
+        const regex = new RegExp(keyword, "gi");
         const match = regex.exec(str);
         
         if (match) {
             const index = match.index;
             const length = match[0].length;
-            const start = Math.max(0, index - 10);
-            const end = Math.min(str.length, index + length + 100);
+            const start = Math.max(0, index - 50);
+            const end = Math.min(str.length, index + length + 150);
             
             result += start <= lastEnd 
                 ? "..." + str.slice(lastEnd + 1, end)
