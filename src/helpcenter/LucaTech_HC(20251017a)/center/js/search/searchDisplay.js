@@ -234,3 +234,15 @@ function setupSearchResultLinkHandlers() {
         }
     });
 }
+
+/**
+ * 現在の検索キーワードで表示中のコンテンツを再ハイライト
+ * ページネーション切り替え時などに使用
+ * @returns {void}
+ */
+function reapplyHighlight() {
+    const searchWord = prepareSearchWord();
+    if (searchWord && searchWord.length > 0 && searchWord[0]) {
+        highlightSearchWord(searchWord, $(".wSearchContent"), "font-weight:bold");
+    }
+}
