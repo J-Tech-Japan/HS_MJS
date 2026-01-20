@@ -315,6 +315,11 @@ function goToPage(pageNum, sources) {
     paginationState.currentPage = pageNum;
     renderPage(pageNum, sources);
     updateAllPaginationControls(sources);
+    
+    // ページ切り替え後にハイライトを再適用
+    if (typeof reapplyHighlight === 'function') {
+        reapplyHighlight();
+    }
 }
 
 /**
