@@ -134,7 +134,7 @@ function getCachedElement(key) {
 // 検索処理関連関数（依存関係順）
 // ========================================
 
-// 検索語を正規化してエスケープ
+// 検索語を正規化してエスケープ（jQueryセレクタ用）
 function prepareSearchWords(searchValue) {
     // 全角・半角スペースを統一して連続スペースを1つにまとめる
     var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
@@ -147,17 +147,31 @@ function prepareSearchWords(searchValue) {
     return searchWord;
 }
 
+// ハイライト用の検索語を準備（エスケープなし）
+function prepareSearchWordsForHighlight(searchValue) {
+    // 全角・半角スペースを統一して連続スペースを1つにまとめる
+    var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
+    searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
+
+    var searchWord = searchWordTmp.split(" ");
+    // HTMLエンティティのみ変換（特殊文字のエスケープはしない）
+    for (var i = 0; i < searchWord.length; i++) {
+        searchWord[i] = searchWord[i].replace(/>/g, "&gt;").replace(/</g, "&lt;");
+    }
+    return searchWord;
+}
+
 // ハイライト用の正規表現パターンを生成
 function createHighlightPattern(searchWords) {
     // 各検索ワードを全角・半角両対応のパターンに変換
-    var patterns = searchWords.map(function(word) {
+    var patterns = searchWords.map(function (word) {
         // 2文字パターンを優先的にマッチさせる正規表現を作成
         var result = '';
         var pos = 0;
-        
+
         while (pos < word.length) {
             var matched = false;
-            
+
             // 2文字の組み合わせを試行
             if (pos + 1 < word.length) {
                 var twoChar = word.substring(pos, pos + 2);
@@ -168,7 +182,7 @@ function createHighlightPattern(searchWords) {
                     matched = true;
                 }
             }
-            
+
             // 1文字で処理
             if (!matched) {
                 var char = word.charAt(pos);
@@ -177,7 +191,7 @@ function createHighlightPattern(searchWords) {
                 pos++;
             }
         }
-        
+
         return result;
     });
     return patterns.join("|");
@@ -195,7 +209,7 @@ function applyHighlight(searchValue) {
     var $body = getIframeBody();
     if (!$body) return;
 
-    var searchWords = prepareSearchWords(searchValue);
+    var searchWords = prepareSearchWordsForHighlight(searchValue);
     var highlightPattern = createHighlightPattern(searchWords);
     var reg = new RegExp("(" + highlightPattern + ")(?=[^<>]*<)", "gmi");
     var html = $body.html();
@@ -240,15 +254,15 @@ function isOnlyKeywordAddition(mutation) {
     if (mutation.addedNodes.length !== 1) {
         return false;
     }
-    
+
     var node = mutation.addedNodes[0];
     if (node.nodeType !== Node.ELEMENT_NODE) {
         return false;
     }
-    
+
     // 追加されたノードがキーワード要素か、キーワード要素を含むか
     return (node.classList && node.classList.contains('keyword')) ||
-           (node.querySelector && node.querySelector('.keyword') !== null);
+        (node.querySelector && node.querySelector('.keyword') !== null);
 }
 
 // デバウンスされた再ハイライト処理
@@ -300,21 +314,21 @@ function setupMutationObserver() {
                 return;
             }
 
-            var shouldReHighlight = mutations.some(function(mutation) {
+            var shouldReHighlight = mutations.some(function (mutation) {
                 if (mutation.type === 'characterData') {
                     return true;
                 }
-                
+
                 if (mutation.type === 'childList') {
                     // キーワード要素自身の追加は無視
                     if (isOnlyKeywordAddition(mutation)) {
                         return false;
                     }
-                    
+
                     // ノードの追加または削除があれば再ハイライト
                     return mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0;
                 }
-                
+
                 return false;
             });
 
@@ -394,7 +408,7 @@ $(function () {
 
         $searchMsg.html("");
         currentSearchValue = searchValue; // 現在の検索値を保存
-        
+
         // スペースを正規化
         var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim();
         // 正規化（全角→半角カナ、小文字化）
@@ -407,7 +421,7 @@ $(function () {
         }
 
         var searchWord = searchWordTmp.split(" ");
-        var searchQuery = searchWord.map(function(word) {
+        var searchQuery = searchWord.map(function (word) {
             return ":containsNormalized(" + word + ")";
         }).join("");
 
@@ -420,7 +434,7 @@ $(function () {
                 var displayText = $(this).parent().find(".displayText").text();
                 var parentId = $(this).parent().attr("id");
                 var searchTitle = $(this).parent().find(".search_title").html();
-                
+
                 var resultHtml = "<div class='wSearchResultItem'>" +
                     "<a class='nolink' href='./" + parentId + ".html'>" +
                     "<div class='wSearchResultTitle'>" + searchTitle + "</div>" +
@@ -428,7 +442,7 @@ $(function () {
                     "<div class='wSearchContent'>" +
                     "<span class='wSearchContext'>" + displayText + "</span>" +
                     "</div></div>";
-                
+
                 $searchResultItemsBlock.append($(resultHtml));
             });
             removeHighlight();
