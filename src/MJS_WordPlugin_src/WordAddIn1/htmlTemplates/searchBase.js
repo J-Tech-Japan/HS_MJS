@@ -47,11 +47,11 @@ var characterMappings = (function () {
     var wideToNarrowMap = {};
     var narrowToHighlightMap = {};
 
-    for (var i = 0; i < wide.length; i++) {
-        wideToNarrowMap[wide[i]] = narrow[i];
+    wide.forEach(function (wideChar, i) {
+        wideToNarrowMap[wideChar] = narrow[i];
         // 半角文字をキーにしてハイライトパターンをマップ
         narrowToHighlightMap[narrow[i]] = highlight[i];
-    }
+    });
 
     // 全角文字の正規表現パターンを作成（エスケープ処理を含む）
     var wideCharsPattern = wide.map(function (char) {
@@ -134,31 +134,28 @@ function getCachedElement(key) {
 // 検索処理関連関数（依存関係順）
 // ========================================
 
+// 検索語を正規化（共通処理）
+function normalizeSearchValue(searchValue) {
+    // 全角・半角スペースを統一して連続スペースを1つにまとめる
+    var normalized = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
+    return characterMappings.convertWideToNarrow(normalized);
+}
+
 // 検索語を正規化してエスケープ（jQueryセレクタ用）
 function prepareSearchWords(searchValue) {
-    // 全角・半角スペースを統一して連続スペースを1つにまとめる
-    var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
-    searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
-
-    var searchWord = searchWordTmp.split(" ");
-    for (var i = 0; i < searchWord.length; i++) {
-        searchWord[i] = selectorEscape(searchWord[i].replace(/>/g, "&gt;").replace(/</g, "&lt;"));
-    }
-    return searchWord;
+    var searchWordTmp = normalizeSearchValue(searchValue);
+    return searchWordTmp.split(" ").map(function (word) {
+        return selectorEscape(word.replace(/>/g, "&gt;").replace(/</g, "&lt;"));
+    });
 }
 
 // ハイライト用の検索語を準備（エスケープなし）
 function prepareSearchWordsForHighlight(searchValue) {
-    // 全角・半角スペースを統一して連続スペースを1つにまとめる
-    var searchWordTmp = searchValue.replace(/[　\s]+/g, " ").trim().toLowerCase();
-    searchWordTmp = characterMappings.convertWideToNarrow(searchWordTmp);
-
-    var searchWord = searchWordTmp.split(" ");
+    var searchWordTmp = normalizeSearchValue(searchValue);
     // HTMLエンティティのみ変換（特殊文字のエスケープはしない）
-    for (var i = 0; i < searchWord.length; i++) {
-        searchWord[i] = searchWord[i].replace(/>/g, "&gt;").replace(/</g, "&lt;");
-    }
-    return searchWord;
+    return searchWordTmp.split(" ").map(function (word) {
+        return word.replace(/>/g, "&gt;").replace(/</g, "&lt;");
+    });
 }
 
 // ハイライト用の正規表現パターンを生成
@@ -187,7 +184,12 @@ function createHighlightPattern(searchWords) {
             if (!matched) {
                 var char = word.charAt(pos);
                 var pattern = characterMappings.narrowToHighlightMap[char];
-                result += pattern || char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                if (pattern) {
+                    result += pattern;
+                } else {
+                    // 特殊文字の場合はそのままエスケープして追加
+                    result += char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                }
                 pos++;
             }
         }
@@ -224,9 +226,8 @@ function removeHighlight() {
     var $body = getIframeBody();
     if (!$body) return;
 
-    $body.find(".keyword").each(function () {
-        var $this = $(this);
-        $this.replaceWith($this.contents());
+    $body.find(".keyword").replaceWith(function () {
+        return $(this).contents();
     });
 }
 
@@ -431,17 +432,20 @@ $(function () {
             $searchResultsEnd.removeAttr("hidden");
             $searchResultItemsBlock.html("");
             findItems.each(function () {
-                var displayText = $(this).parent().find(".displayText").text();
-                var parentId = $(this).parent().attr("id");
-                var searchTitle = $(this).parent().find(".search_title").html();
+                var $parent = $(this).parent();
+                var displayText = $parent.find(".displayText").text();
+                var parentId = $parent.attr("id");
+                var searchTitle = $parent.find(".search_title").html();
 
-                var resultHtml = "<div class='wSearchResultItem'>" +
-                    "<a class='nolink' href='./" + parentId + ".html'>" +
-                    "<div class='wSearchResultTitle'>" + searchTitle + "</div>" +
-                    "</a>" +
-                    "<div class='wSearchContent'>" +
-                    "<span class='wSearchContext'>" + displayText + "</span>" +
-                    "</div></div>";
+                var resultHtml = [
+                    "<div class='wSearchResultItem'>",
+                    "<a class='nolink' href='./" + parentId + ".html'>",
+                    "<div class='wSearchResultTitle'>" + searchTitle + "</div>",
+                    "</a>",
+                    "<div class='wSearchContent'>",
+                    "<span class='wSearchContext'>" + displayText + "</span>",
+                    "</div></div>"
+                ].join("");
 
                 $searchResultItemsBlock.append($(resultHtml));
             });
@@ -453,8 +457,13 @@ $(function () {
             $searchResultsEnd.addClass("rh-hide");
             $searchResultsEnd.attr("hidden", "");
             $searchResultItemsBlock.html("");
-            var displayText = "検索条件に一致するトピックはありません。";
-            $searchResultItemsBlock.append($("<div class='wSearchResultItem'><div class='wSearchContent'><span class='wSearchContext'>" + displayText + "</span></div></div>"));
+            var noResultHtml = [
+                "<div class='wSearchResultItem'>",
+                "<div class='wSearchContent'>",
+                "<span class='wSearchContext'>検索条件に一致するトピックはありません。</span>",
+                "</div></div>"
+            ].join("");
+            $searchResultItemsBlock.append($(noResultHtml));
         }
     });
 
