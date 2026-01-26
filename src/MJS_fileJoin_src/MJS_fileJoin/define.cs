@@ -44,5 +44,32 @@ namespace MJS_fileJoin
             System.Diagnostics.Trace.WriteLine("search.jsが見つかりませんでした。最小限の内容を生成します。");
             return $"var searchWords = $('{newSearchWordsXml}');";
         }
+
+        // 結合元のsearch.jsに"キャッシュ管理関数"が含まれているかチェックするメソッド
+        private static bool HasCacheManagementFunction(List<string> htmlDirs)
+        {
+            // 結合元フォルダから最初に見つかったsearch.jsを使用
+            foreach (string htmlDir in htmlDirs)
+            {
+                string searchJsPath = Path.Combine(htmlDir, "search.js");
+                
+                if (File.Exists(searchJsPath))
+                {
+                    try
+                    {
+                        string searchJsContent = File.ReadAllText(searchJsPath, Encoding.UTF8);
+                        return searchJsContent.Contains("キャッシュ管理関数");
+                    }
+                    catch (Exception ex)
+                    {
+                        // 読み込みエラーの場合は次のフォルダを試す
+                        System.Diagnostics.Trace.WriteLine($"search.js読み込みエラー ({searchJsPath}): {ex.Message}");
+                    }
+                }
+            }
+
+            // search.jsが見つからない場合はfalseを返す
+            return false;
+        }
     }
 }
