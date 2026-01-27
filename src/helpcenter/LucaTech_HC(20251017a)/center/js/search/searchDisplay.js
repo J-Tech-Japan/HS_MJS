@@ -88,9 +88,16 @@ function displayResult() {
  * @returns {void}
  */
 function highlightSearchWord(searchWord, content, style) {
-    const escapedWords = searchWord.map(word => 
-        selectorEscape(word.replace(/[<>]/g, m => m === '<' ? '&lt;' : '&gt;'))
-    );
+    const escapedWords = searchWord.map(word => {
+        // HTMLエンティティに変換してから正規表現エスケープ
+        let escaped = word
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        return selectorEscape(escaped);
+    });
 
     let highlightWord = escapedWords.join("|");
     highlight.forEach(h => {

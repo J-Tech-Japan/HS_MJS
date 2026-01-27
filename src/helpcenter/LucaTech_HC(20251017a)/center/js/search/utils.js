@@ -198,7 +198,8 @@ function buildSearchTreeModel(node) {
 function normalizeSearchKeyword(keyword) {
     if (!keyword) return [];
     
-    let normalized = escapeHtml(keyword)
+    // 検索時はHTMLエスケープしない（コンテンツ側が既にエスケープ済みのため）
+    let normalized = keyword
         .replace(/(.*?)(?:　| )+(.*?)/g, "$1 $2")
         .trim()
         .toLowerCase();
