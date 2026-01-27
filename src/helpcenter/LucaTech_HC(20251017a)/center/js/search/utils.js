@@ -50,7 +50,10 @@ const charConversionConfig = (() => {
 // ========================================
 $.expr.pseudos.containsNormalized = $.expr.createPseudo(function(arg) {
     return function(elem) {
-        const normalizedElemText = $(elem).text().toLowerCase();
+        let normalizedElemText = $(elem).text().toLowerCase();
+        // 全角記号を半角に変換（検索キーワードと同じ正規化）
+        normalizedElemText = normalizedElemText.replace(/＆/g, '&').replace(/／/g, '/');
+        
         const normalizedSearchText = arg.toLowerCase();
         return normalizedElemText.includes(normalizedSearchText);
     };
@@ -134,18 +137,23 @@ function checkAllInTree(node) {
 /**
  * 文字列内でキーワードを検索し、該当箇所の前後のコンテキストを返す
  * @param {string} str - 検索対象の文字列
- * @param {Array<string>} keywords - 検索キーワードの配列
+ * @param {Array<string>} keywords - 検索キーワードの配列（正規化済み）
  * @returns {string} マッチした箇所の前後コンテキスト（"..."区切り）
  */
 function searchKeywordsInString(str, keywords) {
     if (!keywords[0]?.length) return "";
     
+    // 検索用に正規化したテキスト（小文字化のみ）
+    let normalizedStr = str.toLowerCase();
+    
     let result = "";
     let lastEnd = -1;
     
     for (let keyword of keywords) {
-        const regex = new RegExp(keyword, "gi");
-        const match = regex.exec(str);
+        // 正規表現の特殊文字をエスケープ
+        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedKeyword, "gi");
+        const match = regex.exec(normalizedStr);
         
         if (match) {
             const index = match.index;
@@ -153,6 +161,7 @@ function searchKeywordsInString(str, keywords) {
             const start = Math.max(0, index - 50);
             const end = Math.min(str.length, index + length + 150);
             
+            // 元のテキストから抜粋（正規化していない元の文字列）
             result += start <= lastEnd 
                 ? "..." + str.slice(lastEnd + 1, end)
                 : "..." + str.slice(start, end);

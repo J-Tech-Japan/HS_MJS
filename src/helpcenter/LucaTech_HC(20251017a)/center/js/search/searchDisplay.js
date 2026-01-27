@@ -82,38 +82,35 @@ function displayResult() {
 /**
  * 検索単語をハイライト表示する
  * HTMLエンティティを考慮しながら、テキストノードのみをハイライトする
- * @param {Array} searchWord - 検索単語配列
+ * @param {Array} searchWord - 検索単語配列（正規化済み）
  * @param {jQuery} content - ハイライト対象のjQueryオブジェクト
  * @param {string} style - ハイライトスタイル（CSSインラインスタイル）
  * @returns {void}
  */
 function highlightSearchWord(searchWord, content, style) {
-    const escapedWords = searchWord.map(word => {
-        // HTMLエンティティに変換してから正規表現エスケープ
-        let escaped = word
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        return selectorEscape(escaped);
-    });
-
-    let highlightWord = escapedWords.join("|");
-    highlight.forEach(h => {
-        highlightWord = highlightWord.replace(new RegExp(h, "gm"), h);
-    });
-
     content.each(function() {
         let html = $(this).html();
         
         // 既存のハイライトタグを削除してテキストのみを抽出
         html = html.replace(/<font class='keyword'[^>]*>(.*?)<\/font>/gi, '$1');
         
-        // テキストノードのみをハイライト（HTMLタグ内を除外）
-        // HTMLタグの外側のテキストのみにマッチする正規表現を使用
-        const regex = new RegExp(`(${highlightWord})(?![^<]*>)`, 'gi');
-        html = html.replace(regex, `<font class='keyword' style='${style}'>$1</font>`);
+        // 各検索ワードをハイライト
+        searchWord.forEach(word => {
+            // 正規表現の特殊文字をエスケープ
+            const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            
+            // HTMLエンティティ化されたパターンを作成（& を &amp; にもマッチ）
+            let pattern = escapedWord.replace(/&/g, '(?:&|&amp;)');
+            
+            // 全角英数字と半角英数字の両方にマッチ
+            highlight.forEach(h => {
+                pattern = pattern.replace(new RegExp(h, "gm"), h);
+            });
+            
+            // 大文字小文字を区別せず、HTMLタグの外側のテキストのみにマッチ
+            const regex = new RegExp(`(${pattern})(?![^<]*>)`, 'gi');
+            html = html.replace(regex, `<font class='keyword' style='${style}'>$1</font>`);
+        });
         
         $(this).html(html);
     });
@@ -186,7 +183,7 @@ function updateResultsUI(resultCount, keyword) {
     $(".noresult").toggleClass("hidden", hasResults);
     if (hasResults) {
         $("#count-all").text(resultCount);
-        $("#resultkeyword").text(escapeHtml(keyword));
+        $("#resultkeyword").text(keyword);
     }
 }
 
