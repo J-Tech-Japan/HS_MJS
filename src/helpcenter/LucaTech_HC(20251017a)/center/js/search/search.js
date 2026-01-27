@@ -11,12 +11,9 @@ function search() {
     // 検索キーワードを正規化（utils.jsの関数を使用）
     const searchWord = normalizeSearchKeyword($("#searchkeyword").val());
     
-    // 検索クエリを構築（大文字小文字を区別しないカスタムセレクタを使用）
-    const searchQuery = searchWord.map(word => `:containsNormalized(${word})`).join('');
-    
     // 検索を実行し、結果を取得
     const searchCatalogueJs = getSearchCatalogueJs();
-    const countAllResult = performSearch(searchCatalogueJs, searchQuery);
+    const countAllResult = performSearch(searchCatalogueJs, searchWord);
     
     // UIを更新
     updateSearchUI(countAllResult, $("#searchkeyword").val());
@@ -29,14 +26,23 @@ function search() {
 /**
  * 検索を実行
  * @param {Array} catalogueJs - 検索カタログデータ
- * @param {string} searchQuery - 検索クエリ
+ * @param {Array} searchWords - 正規化された検索キーワード配列
  * @returns {number} 検索結果の総数
  */
-function performSearch(catalogueJs, searchQuery) {
+function performSearch(catalogueJs, searchWords) {
     let totalCount = 0;
     
     catalogueJs.forEach(catalogue => {
-        const findItems = catalogue.searchWords.find(".search_word" + searchQuery);
+        const allItems = catalogue.searchWords.find(".search_word");
+        
+        // 各要素をフィルタリング：すべての検索ワードを含むもののみ残す
+        const findItems = allItems.filter(function() {
+            let text = $(this).text().toLowerCase();
+            
+            // すべての検索ワードが含まれているかチェック
+            return searchWords.every(word => text.includes(word));
+        });
+        
         catalogue.findItems = findItems;
         totalCount += findItems.length;
     });
@@ -51,5 +57,5 @@ function performSearch(catalogueJs, searchQuery) {
  */
 function updateSearchUI(count, keyword) {
     $("#count-all").text(count);
-    $("#resultkeyword").text(escapeHtml(keyword));
+    $("#resultkeyword").text(keyword);
 }
