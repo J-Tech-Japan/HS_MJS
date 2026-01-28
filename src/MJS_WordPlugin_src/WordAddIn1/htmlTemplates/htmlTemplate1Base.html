@@ -169,7 +169,13 @@ gCommonRootRelPath = ".";
 						// bodyの内容をmainタグで囲む（セマンティックHTML）
 						di.html("<div></div><main>" + di.html() + "</main>");
 					}
-				));
+				))
+                .then(() => {
+                    // 全てのページ結合が完了した後、respFrame.ready()を実行
+                    if (typeof respFrame !== 'undefined' && typeof respFrame.ready === 'function') {
+                        respFrame.ready();
+                    }
+                });
 		}
 
 		// 静的ページロード処理（単一ページ）
