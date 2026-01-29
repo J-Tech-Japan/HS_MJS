@@ -115,7 +115,7 @@ namespace WordAddIn1
                                 IncludeShapes = true,            // フローティング図形を抽出
                                 IncludeFreeforms = false,        // フリーフォーム図形は抽出しない
                                 AddMarkers = true,               // マーカーを追加
-                                SkipCoverMarkers = true,         // 表紙の画像にはマーカーをつけない
+                                SkipCoverMarkers = false,         // 表紙の画像にはマーカーをつけない
                                 MinOriginalWidth = 50.0f,        // 元画像の最小幅（ポイント）
                                 MinOriginalHeight = 60.0f,       // 元画像の最小高さ（ポイント）
                                 IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
