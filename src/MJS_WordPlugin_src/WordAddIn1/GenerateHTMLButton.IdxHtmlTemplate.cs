@@ -31,9 +31,10 @@ namespace WordAddIn1
             idxHtmlTemplate += @"<title>" + docTitle + "</title>" + "\n";
             idxHtmlTemplate += @"<link rel=""StyleSheet"" href=""template/Azure_Blue01/layout.css"" type=""text/css"" />" + "\n";
 
-            // breadcrumbのJavaScriptは、LucaTech GXが選択された時のみ追加
+            // faviconとbreadcrumbのJavaScriptは、LucaTech GXが選択された時のみ追加
             if (includeBreadcrumb)
             {
+                idxHtmlTemplate += @"<link rel=""icon"" href=""../../center/images/LucaTech_GX_favicon.ico"">" + "\n";
                 idxHtmlTemplate += @"<script type=""text/javascript"" src=""../../center/js/components/hc_breadcrumb.js""></script>" + "\n";
             }
 
