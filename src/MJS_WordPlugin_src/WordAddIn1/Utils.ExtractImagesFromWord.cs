@@ -13,6 +13,7 @@ namespace WordAddIn1
         private const int DefaultMinContentSizePixels = 250;
         private const int DefaultMaxOutputSizePixels = 1024;
         private const float DefaultMinOriginalSizePoints = 50.0f;
+        private const float DefaultOutputScaleMultiplier = 1.0f;
         private const int AlphaThresholdForTransparency = 0;
         private const int MinPixelSize = 1;
 
@@ -31,6 +32,13 @@ namespace WordAddIn1
             public bool IncludeMjsTableImages { get; set; } = true;
             public int MaxOutputWidth { get; set; } = DefaultMaxOutputSizePixels;
             public int MaxOutputHeight { get; set; } = DefaultMaxOutputSizePixels;
+            
+            /// <summary>
+            /// 出力画像のスケール倍率（元の画像サイズに対する倍率）
+            /// デフォルト: 1.0（元のサイズと同じ）
+            /// 例: 2.0 = 元の画像の2倍のサイズで出力
+            /// </summary>
+            public float OutputScaleMultiplier { get; set; } = DefaultOutputScaleMultiplier;
         }
 
         /// <summary>

@@ -120,7 +120,8 @@ namespace WordAddIn1
                                 MinOriginalHeight = 60.0f,       // 元画像の最小高さ（ポイント）
                                 IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
                                 MaxOutputWidth = 1024,           // 出力画像の最大幅
-                                MaxOutputHeight = 1024           // 出力画像の最大高さ
+                                MaxOutputHeight = 1024,           // 出力画像の最大高さ
+                                OutputScaleMultiplier = 2.0f     // 出力スケール倍率（1.0 = 元のサイズと同じ、2.0 = 2倍）
                             };
 
                             extractedImages = Utils.ExtractImagesFromWord(

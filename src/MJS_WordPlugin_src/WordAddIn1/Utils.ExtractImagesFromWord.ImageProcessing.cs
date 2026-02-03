@@ -31,6 +31,7 @@ namespace WordAddIn1
         /// <param name="maxHeight">最大高さ（ピクセル、デフォルト: 1024）</param>
         /// <param name="originalWidthPoints">元の画像の幅（ポイント単位、0の場合は使用しない）</param>
         /// <param name="originalHeightPoints">元の画像の高さ（ポイント単位、0の場合は使用しない）</param>
+        /// <param name="scaleMultiplier">出力スケール倍率（デフォルト: 1.0）</param>
         /// <returns>作成されたファイルのパスとピクセルサイズ、失敗時null</returns>
         private static ImageExtractionResult ExtractImageFromMetaFileDataWithSize(
             byte[] metaFileData, 
@@ -41,7 +42,8 @@ namespace WordAddIn1
             int maxWidth = DefaultMaxOutputSizePixels,
             int maxHeight = DefaultMaxOutputSizePixels,
             float originalWidthPoints = 0,
-            float originalHeightPoints = 0)
+            float originalHeightPoints = 0,
+            float scaleMultiplier = DefaultOutputScaleMultiplier)
         {
             try
             {
@@ -112,12 +114,22 @@ namespace WordAddIn1
                             int finalHeight = trimmedHeight;
                             bool resizedToOriginal = false;
                             bool resizedToMax = false;
+                            bool scaledUp = false;
 
                             // 元の画像サイズが指定されている場合、それをピクセルに変換して使用
                             if (originalWidthPoints > 0 && originalHeightPoints > 0)
                             {
                                 int targetWidth = ConvertPointsToPixels(originalWidthPoints);
                                 int targetHeight = ConvertPointsToPixels(originalHeightPoints);
+                                
+                                // スケール倍率を適用
+                                if (scaleMultiplier != 1.0f)
+                                {
+                                    targetWidth = (int)Math.Round(targetWidth * scaleMultiplier);
+                                    targetHeight = (int)Math.Round(targetHeight * scaleMultiplier);
+                                    scaledUp = true;
+                                    LogInfo($"スケール倍率 {scaleMultiplier:F2}x を適用: 目標サイズ {targetWidth}x{targetHeight}px");
+                                }
                                 
                                 // 最大サイズ制限をチェック
                                 if (targetWidth > maxWidth || targetHeight > maxHeight)
@@ -127,7 +139,7 @@ namespace WordAddIn1
                                     finalWidth = newSize.Width;
                                     finalHeight = newSize.Height;
                                     resizedToMax = true;
-                                    LogInfo($"元のサイズ({targetWidth}x{targetHeight}px)が最大サイズを超えるため、制限内にリサイズします");
+                                    LogInfo($"目標サイズ({targetWidth}x{targetHeight}px)が最大サイズを超えるため、制限内にリサイズします");
                                 }
                                 else
                                 {
@@ -186,7 +198,11 @@ namespace WordAddIn1
                                 finalBitmap.Save(filePath, ImageFormat.Png);
                                 
                                 // トリミングとリサイズの正確なログ出力
-                                if (resizedToOriginal)
+                                if (scaledUp && resizedToOriginal)
+                                {
+                                    LogInfo($"画像をトリミング・スケール適用しました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → {scaleMultiplier:F2}x倍 {finalWidth}x{finalHeight}");
+                                }
+                                else if (resizedToOriginal)
                                 {
                                     LogInfo($"画像をトリミング・元サイズにリサイズしました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → 元サイズ {finalWidth}x{finalHeight}");
                                 }
