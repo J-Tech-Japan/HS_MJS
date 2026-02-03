@@ -22,7 +22,7 @@ namespace WordAddIn1
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
             // デフォルトで高画質画像抽出を有効にし、beta版モードはfalseに設定
-            GenerateHTMLButton(sender, e, extractHighQualityImages: false, isBetaMode: false);
+            GenerateHTMLButton(sender, e, extractHighQualityImages: true, isBetaMode: true);
         }
 
         /// <summary>
