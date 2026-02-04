@@ -121,7 +121,7 @@ namespace WordAddIn1
                                 IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
                                 MaxOutputWidth = 1024,           // 出力画像の最大幅
                                 MaxOutputHeight = 1024,           // 出力画像の最大高さ
-                                OutputScaleMultiplier = 2.0f     // 出力スケール倍率（1.0 = 元のサイズと同じ、2.0 = 2倍）
+                                OutputScaleMultiplier = 2.0f     // 出力スケール倍率
                             };
 
                             extractedImages = Utils.ExtractImagesFromWord(
