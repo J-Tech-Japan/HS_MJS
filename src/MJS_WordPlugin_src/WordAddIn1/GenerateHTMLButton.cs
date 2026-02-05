@@ -22,7 +22,7 @@ namespace WordAddIn1
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
             // デフォルトで高画質画像抽出を有効にし、beta版モードはfalseに設定
-            GenerateHTMLButton(sender, e, extractHighQualityImages: false, isBetaMode: false);
+            GenerateHTMLButton(sender, e, extractHighQualityImages: true, isBetaMode: true);
         }
 
         /// <summary>
@@ -120,7 +120,8 @@ namespace WordAddIn1
                                 MinOriginalHeight = 60.0f,       // 元画像の最小高さ（ポイント）
                                 IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
                                 MaxOutputWidth = 1024,           // 出力画像の最大幅
-                                MaxOutputHeight = 1024           // 出力画像の最大高さ
+                                MaxOutputHeight = 1024,           // 出力画像の最大高さ
+                                OutputScaleMultiplier = 1.5f     // 出力スケール倍率
                             };
 
                             extractedImages = Utils.ExtractImagesFromWord(

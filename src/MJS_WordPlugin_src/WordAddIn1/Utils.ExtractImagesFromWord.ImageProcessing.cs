@@ -1,4 +1,4 @@
-// Utils.ExtractImagesFromWord.ImageProcessing.cs
+ï»¿// Utils.ExtractImagesFromWord.ImageProcessing.cs
 
 using System;
 using System.Drawing;
@@ -9,8 +9,13 @@ namespace WordAddIn1
 {
     internal partial class Utils
     {
+        // ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿å‡¦ç†ã®æœ€é©åŒ–ç”¨å®šæ•°
+        private const int TemporaryBitmapSize = 1; // ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«å¢ƒç•Œå–å¾—ç”¨ã®ä¸€æ™‚ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã‚µã‚¤ã‚º
+        private const int BytesPerPixel = 4; // ARGBå½¢å¼ã®ãƒã‚¤ãƒˆæ•°
+        private const int AlphaChannelOffset = 3; // ARGBãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã®ã‚¢ãƒ«ãƒ•ã‚¡ãƒãƒ£ãƒ³ãƒãƒ«ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+        
         /// <summary>
-        /// ‰æ‘œ’ŠoŒ‹‰Ê‚ğŠi”[‚·‚éƒNƒ‰ƒX
+        /// ç”»åƒæŠ½å‡ºçµæœã‚’æ ¼ç´ã™ã‚‹ã‚¯ãƒ©ã‚¹
         /// </summary>
         private class ImageExtractionResult
         {
@@ -20,16 +25,19 @@ namespace WordAddIn1
         }
         
         /// <summary>
-        /// EnhMetaFileBits‚©‚ç‰æ‘œƒtƒ@ƒCƒ‹‚ğì¬‚µAPNG‰æ‘œ‚ÌƒTƒCƒY‚ğæ“¾
+        /// EnhMetaFileBitsã‹ã‚‰ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä½œæˆã—ã€PNGç”»åƒã®ã‚µã‚¤ã‚ºã‚’å–å¾—
         /// </summary>
-        /// <param name="metaFileData">ƒƒ^ƒtƒ@ƒCƒ‹ƒf[ƒ^</param>
-        /// <param name="outputDirectory">o—ÍƒfƒBƒŒƒNƒgƒŠ</param>
-        /// <param name="baseFileName">ƒx[ƒXƒtƒ@ƒCƒ‹–¼</param>
-        /// <param name="shapeType">}Œ`ƒ^ƒCƒv</param>
-        /// <param name="forceExtract">‹­§’Šoƒtƒ‰ƒO</param>
-        /// <param name="maxWidth">Å‘å•iƒsƒNƒZƒ‹AƒfƒtƒHƒ‹ƒg: 1024j</param>
-        /// <param name="maxHeight">Å‘å‚‚³iƒsƒNƒZƒ‹AƒfƒtƒHƒ‹ƒg: 1024j</param>
-        /// <returns>ì¬‚³‚ê‚½ƒtƒ@ƒCƒ‹‚ÌƒpƒX‚ÆƒsƒNƒZƒ‹ƒTƒCƒYA¸”snull</returns>
+        /// <param name="metaFileData">ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‡ãƒ¼ã‚¿</param>
+        /// <param name="outputDirectory">å‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª</param>
+        /// <param name="baseFileName">ãƒ™ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«å</param>
+        /// <param name="shapeType">å›³å½¢ã‚¿ã‚¤ãƒ—</param>
+        /// <param name="forceExtract">å¼·åˆ¶æŠ½å‡ºãƒ•ãƒ©ã‚°</param>
+        /// <param name="maxWidth">æœ€å¤§å¹…ï¼ˆãƒ”ã‚¯ã‚»ãƒ«ã€ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ: 1024ï¼‰</param>
+        /// <param name="maxHeight">æœ€å¤§é«˜ã•ï¼ˆãƒ”ã‚¯ã‚»ãƒ«ã€ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ: 1024ï¼‰</param>
+        /// <param name="originalWidthPoints">å…ƒã®ç”»åƒã®å¹…ï¼ˆãƒã‚¤ãƒ³ãƒˆå˜ä½ã€0ã®å ´åˆã¯ä½¿ç”¨ã—ãªã„ï¼‰</param>
+        /// <param name="originalHeightPoints">å…ƒã®ç”»åƒã®é«˜ã•ï¼ˆãƒã‚¤ãƒ³ãƒˆå˜ä½ã€0ã®å ´åˆã¯ä½¿ç”¨ã—ãªã„ï¼‰</param>
+        /// <param name="scaleMultiplier">å‡ºåŠ›ã‚¹ã‚±ãƒ¼ãƒ«å€ç‡ï¼ˆãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ: 1.0ï¼‰</param>
+        /// <returns>ä½œæˆã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹ã¨ãƒ”ã‚¯ã‚»ãƒ«ã‚µã‚¤ã‚ºã€å¤±æ•—æ™‚null</returns>
         private static ImageExtractionResult ExtractImageFromMetaFileDataWithSize(
             byte[] metaFileData, 
             string outputDirectory, 
@@ -37,225 +45,434 @@ namespace WordAddIn1
             string shapeType,
             bool forceExtract = false,
             int maxWidth = DefaultMaxOutputSizePixels,
-            int maxHeight = DefaultMaxOutputSizePixels)
+            int maxHeight = DefaultMaxOutputSizePixels,
+            float originalWidthPoints = 0,
+            float originalHeightPoints = 0,
+            float scaleMultiplier = DefaultOutputScaleMultiplier)
         {
             try
             {
                 using (var memoryStream = new MemoryStream(metaFileData))
+                using (var metafile = new System.Drawing.Imaging.Metafile(memoryStream))
                 {
-                    using (var metafile = new System.Drawing.Imaging.Metafile(memoryStream))
+                    // ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã®å®Ÿéš›ã®ã‚³ãƒ³ãƒ†ãƒ³ãƒ„å¢ƒç•Œã‚’å–å¾—
+                    var bounds = GetMetafileBounds(metafile);
+                    if (bounds.Width <= 0 || bounds.Height <= 0)
                     {
-                        // ƒƒ^ƒtƒ@ƒCƒ‹‚ÌÀÛ‚ÌƒRƒ“ƒeƒ“ƒc‹«ŠE‚ğæ“¾
-                        RectangleF bounds;
-                        using (var graphics = Graphics.FromImage(new Bitmap(1, 1)))
-                        {
-                            GraphicsUnit unit = GraphicsUnit.Pixel;
-                            bounds = metafile.GetBounds(ref unit);
-                        }
+                        LogInfo("ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã®å¢ƒç•ŒãŒç„¡åŠ¹ã§ã™");
+                        return null;
+                    }
 
-                        // ‹«ŠE‚ª–³Œø‚©ƒ`ƒFƒbƒN
-                        if (bounds.Width <= 0 || bounds.Height <= 0)
+                    LogInfo($"ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«å¢ƒç•Œ: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
+
+                    // å®Ÿéš›ã®ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‚µã‚¤ã‚ºï¼ˆä¸¸ã‚å¾Œï¼‰
+                    var contentWidth = (int)Math.Ceiling(bounds.Width);
+                    var contentHeight = (int)Math.Ceiling(bounds.Height);
+
+                    // æœ€å°ã‚µã‚¤ã‚ºã®ãƒ•ã‚£ãƒ«ã‚¿ãƒªãƒ³ã‚°ï¼ˆå¼·åˆ¶æŠ½å‡ºã®å ´åˆã¯ã‚¹ã‚­ãƒƒãƒ—ï¼‰
+                    if (!forceExtract && (contentWidth < DefaultMinContentSizePixels || contentHeight < DefaultMinContentSizePixels))
+                    {
+                        return null;
+                    }
+
+                    // ã‚¹ãƒ†ãƒƒãƒ—1: å…ƒã®ã‚µã‚¤ã‚ºã§ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æç”»ã—ã¦ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã‚’ä½œæˆ
+                    using (var originalBitmap = new Bitmap(contentWidth, contentHeight, PixelFormat.Format32bppArgb))
+                    {
+                        RenderMetafileToBitmap(originalBitmap, metafile, bounds, contentWidth, contentHeight);
+
+                        // ã‚¹ãƒ†ãƒƒãƒ—2: é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ã‚’é™¤å»ã—ã¦ãƒˆãƒªãƒŸãƒ³ã‚°
+                        var trimmedBounds = GetTrimmedBounds(originalBitmap);
+                        if (trimmedBounds.Width <= 0 || trimmedBounds.Height <= 0)
                         {
-                            LogInfo("ƒƒ^ƒtƒ@ƒCƒ‹‚Ì‹«ŠE‚ª–³Œø‚Å‚·");
+                            LogInfo("ãƒˆãƒªãƒŸãƒ³ã‚°å¾Œã®å¢ƒç•ŒãŒç„¡åŠ¹ã§ã™");
                             return null;
                         }
 
-                        LogInfo($"ƒƒ^ƒtƒ@ƒCƒ‹‹«ŠE: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
+                        // ã‚¹ãƒ†ãƒƒãƒ—3: æœ€çµ‚ã‚µã‚¤ã‚ºã‚’æ±ºå®š
+                        var finalSize = CalculateFinalSize(
+                            trimmedBounds.Width, 
+                            trimmedBounds.Height,
+                            originalWidthPoints,
+                            originalHeightPoints,
+                            scaleMultiplier,
+                            maxWidth,
+                            maxHeight,
+                            out var resizeInfo);
 
-                        // ÀÛ‚ÌƒRƒ“ƒeƒ“ƒcƒTƒCƒYiŠÛ‚ßŒãj
-                        int contentWidth = (int)Math.Ceiling(bounds.Width);
-                        int contentHeight = (int)Math.Ceiling(bounds.Height);
-
-                        // Å¬ƒTƒCƒY‚ÌƒtƒBƒ‹ƒ^ƒŠƒ“ƒOi‹­§’Šo‚Ìê‡‚ÍƒXƒLƒbƒvj
-                        if (!forceExtract && (contentWidth < DefaultMinContentSizePixels || contentHeight < DefaultMinContentSizePixels))
-                            return null;
-
-                        // ƒŠƒTƒCƒY‚ª•K—v‚©ƒ`ƒFƒbƒN
-                        bool needsResize = contentWidth > maxWidth || contentHeight > maxHeight;
-                        int finalWidth = contentWidth;
-                        int finalHeight = contentHeight;
-
-                        if (needsResize)
+                        // ã‚¹ãƒ†ãƒƒãƒ—4: ãƒˆãƒªãƒŸãƒ³ã‚°ã•ã‚ŒãŸç”»åƒã‚’ä½œæˆï¼ˆå¿…è¦ã«å¿œã˜ã¦ãƒªã‚µã‚¤ã‚ºï¼‰
+                        using (var finalBitmap = new Bitmap(finalSize.Width, finalSize.Height, PixelFormat.Format32bppArgb))
                         {
-                            // c‰¡”ä‚ğˆÛ‚µ‚ÄƒŠƒTƒCƒYƒTƒCƒY‚ğŒvZ
-                            var newSize = CalculateResizedDimensions(contentWidth, contentHeight, maxWidth, maxHeight);
-                            finalWidth = newSize.Width;
-                            finalHeight = newSize.Height;
-                        }
+                            RenderFinalBitmap(finalBitmap, originalBitmap, trimmedBounds, finalSize);
 
-                        // ŠÛ‚ß‘O‚ÅÀÛ‚ÌƒRƒ“ƒeƒ“ƒc‚Ì‚İ‚ğŠÜ‚Şƒrƒbƒgƒ}ƒbƒv‚ğì¬
-                        using (var bitmap = new Bitmap(finalWidth, finalHeight, PixelFormat.Format32bppArgb))
-                        {
-                            using (var graphics = Graphics.FromImage(bitmap))
-                            {
-                                // ‚•i¿‚È•`‰æİ’è
-                                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-
-                                // ”wŒi‚ğ“§–¾‚Éİ’è
-                                graphics.Clear(Color.Transparent);
-
-                                // ƒƒ^ƒtƒ@ƒCƒ‹‚ÌÀÛ‚ÌƒRƒ“ƒeƒ“ƒc‚Ìˆæ‚Ì‚İ‚ğ•`‰æ
-                                // ‹«ŠE‚ÌƒIƒtƒZƒbƒg‚ğl—¶‚µ‚ÄAƒRƒ“ƒeƒ“ƒc‚Ì‚İ‚ğ’Šo
-                                var destRect = new RectangleF(0, 0, finalWidth, finalHeight);
-                                graphics.DrawImage(metafile, destRect, bounds, GraphicsUnit.Pixel);
-                            }
-
-                            // “§–¾ƒsƒNƒZƒ‹‚ğœ‹‚µ‚ÄƒRƒ“ƒeƒ“ƒc‚Ì‚İ‚Ì‹«ŠE‚ğæ“¾
-                            var trimmedBounds = GetTrimmedBounds(bitmap);
+                            // ãƒ•ã‚¡ã‚¤ãƒ«åã®ç”Ÿæˆã¨ä¿å­˜
+                            var filePath = GenerateUniqueFilePath(outputDirectory, baseFileName, shapeType);
+                            finalBitmap.Save(filePath, ImageFormat.Png);
                             
-                            if (trimmedBounds.Width <= 0 || trimmedBounds.Height <= 0)
+                            // ãƒ­ã‚°å‡ºåŠ›
+                            LogResizeOperation(contentWidth, contentHeight, trimmedBounds.Width, trimmedBounds.Height, 
+                                             finalSize.Width, finalSize.Height, resizeInfo);
+                            LogInfo($"ç”»åƒã‚’ä¿å­˜ã—ã¾ã—ãŸ: {filePath} ({finalSize.Width}x{finalSize.Height})");
+                            
+                            return new ImageExtractionResult
                             {
-                                LogInfo("ƒgƒŠƒ~ƒ“ƒOŒã‚Ì‹«ŠE‚ª–³Œø‚Å‚·");
-                                return null;
-                            }
-
-                            // ƒgƒŠƒ~ƒ“ƒO‚³‚ê‚½‰æ‘œ‚ğì¬
-                            using (var trimmedBitmap = new Bitmap(trimmedBounds.Width, trimmedBounds.Height, PixelFormat.Format32bppArgb))
-                            {
-                                using (var graphics = Graphics.FromImage(trimmedBitmap))
-                                {
-                                    graphics.Clear(Color.White);
-                                    graphics.DrawImage(bitmap, 
-                                        new Rectangle(0, 0, trimmedBounds.Width, trimmedBounds.Height),
-                                        trimmedBounds,
-                                        GraphicsUnit.Pixel);
-                                }
-
-                                // ƒtƒ@ƒCƒ‹–¼‚Ì¶¬
-                                string fileName = $"{baseFileName}_{shapeType}.png";
-                                string filePath = Path.Combine(outputDirectory, fileName);
-
-                                // d•¡ƒtƒ@ƒCƒ‹–¼‚Ì‰ñ”ğ
-                                int duplicateCounter = 1;
-                                while (File.Exists(filePath))
-                                {
-                                    fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
-                                    filePath = Path.Combine(outputDirectory, fileName);
-                                    duplicateCounter++;
-                                }
-
-                                // PNGŒ`®‚Å•Û‘¶
-                                trimmedBitmap.Save(filePath, ImageFormat.Png);
-                                
-                                // ƒŠƒTƒCƒY‚ÆƒgƒŠƒ~ƒ“ƒO‚Ì—¼•û‚ğŠÜ‚ß‚½³Šm‚ÈƒƒOo—Í
-                                if (needsResize)
-                                {
-                                    LogInfo($"‰æ‘œ‚ğƒŠƒTƒCƒYEƒgƒŠƒ~ƒ“ƒO‚µ‚Ü‚µ‚½: {contentWidth}x{contentHeight} ¨ ƒŠƒTƒCƒYŒã {finalWidth}x{finalHeight} ¨ ƒgƒŠƒ~ƒ“ƒOŒã {trimmedBounds.Width}x{trimmedBounds.Height}");
-                                }
-                                else if (trimmedBounds.Width != finalWidth || trimmedBounds.Height != finalHeight)
-                                {
-                                    LogInfo($"‰æ‘œ‚ğƒgƒŠƒ~ƒ“ƒO‚µ‚Ü‚µ‚½: {finalWidth}x{finalHeight} ¨ {trimmedBounds.Width}x{trimmedBounds.Height}");
-                                }
-                                
-                                LogInfo($"‰æ‘œ‚ğ•Û‘¶‚µ‚Ü‚µ‚½: {filePath} ({trimmedBounds.Width}x{trimmedBounds.Height})");
-                                
-                                return new ImageExtractionResult
-                                {
-                                    FilePath = filePath,
-                                    PixelWidth = trimmedBounds.Width,
-                                    PixelHeight = trimmedBounds.Height
-                                };
-                            }
+                                FilePath = filePath,
+                                PixelWidth = finalSize.Width,
+                                PixelHeight = finalSize.Height
+                            };
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogError($"ƒƒ^ƒtƒ@ƒCƒ‹ƒf[ƒ^‚©‚ç‚Ì‰æ‘œ¶¬‚ÅƒGƒ‰[", ex);
+                LogError($"ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ã®ç”»åƒç”Ÿæˆã§ã‚¨ãƒ©ãƒ¼", ex);
                 return null;
             }
         }
 
         /// <summary>
-        /// ƒrƒbƒgƒ}ƒbƒv‚©‚ç“§–¾ƒsƒNƒZƒ‹‚ğœ‹‚µ‚½ÀÛ‚ÌƒRƒ“ƒeƒ“ƒc‹«ŠE‚ğæ“¾
+        /// ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã®å¢ƒç•Œã‚’å–å¾—
         /// </summary>
-        /// <param name="bitmap">ƒrƒbƒgƒ}ƒbƒv</param>
-        /// <returns>ƒRƒ“ƒeƒ“ƒc‚Ì‹«ŠE‹éŒ`</returns>
-        private static Rectangle GetTrimmedBounds(Bitmap bitmap)
+        private static RectangleF GetMetafileBounds(System.Drawing.Imaging.Metafile metafile)
         {
-            int minX = bitmap.Width;
-            int minY = bitmap.Height;
-            int maxX = 0;
-            int maxY = 0;
-
-            // ‚·‚×‚Ä‚ÌƒsƒNƒZƒ‹‚ğƒXƒLƒƒƒ“‚µ‚ÄA“§–¾‚Å‚È‚¢ƒsƒNƒZƒ‹”ÍˆÍ‚ğæ“¾
-            for (int y = 0; y < bitmap.Height; y++)
+            using (var tempBitmap = new Bitmap(TemporaryBitmapSize, TemporaryBitmapSize))
+            using (var graphics = Graphics.FromImage(tempBitmap))
             {
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    Color pixel = bitmap.GetPixel(x, y);
-                    // Š®‘S‚É“§–¾‚Å‚È‚¢ƒsƒNƒZƒ‹‚ğŒŸo
-                    if (pixel.A > AlphaThresholdForTransparency)
-                    {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
-                    }
-                }
+                var unit = GraphicsUnit.Pixel;
+                return metafile.GetBounds(ref unit);
             }
-
-            // ƒRƒ“ƒeƒ“ƒc‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
-            if (minX > maxX || minY > maxY)
-            {
-                return Rectangle.Empty;
-            }
-
-            // ‹«ŠE‹éŒ`‚ğ•Ô‚·i•‚Æ‚‚³‚Í+1‚µ‚ÄŠÜ‚ß‚éj
-            return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
         }
 
         /// <summary>
-        /// c‰¡”ä‚ğˆÛ‚µ‚ÄƒŠƒTƒCƒYŒã‚ÌƒTƒCƒY‚ğŒvZ
+        /// ãƒ¡ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã«æç”»
         /// </summary>
-        /// <param name="originalWidth">Œ³‚Ì•</param>
-        /// <param name="originalHeight">Œ³‚Ì‚‚³</param>
-        /// <param name="maxWidth">Å‘å•</param>
-        /// <param name="maxHeight">Å‘å‚‚³</param>
-        /// <returns>ƒŠƒTƒCƒYŒã‚ÌƒTƒCƒY</returns>
+        private static void RenderMetafileToBitmap(Bitmap bitmap, System.Drawing.Imaging.Metafile metafile, 
+            RectangleF bounds, int width, int height)
+        {
+            using (var graphics = Graphics.FromImage(bitmap))
+            {
+                ConfigureHighQualityGraphics(graphics);
+                graphics.Clear(Color.Transparent);
+                
+                var destRect = new RectangleF(0, 0, width, height);
+                graphics.DrawImage(metafile, destRect, bounds, GraphicsUnit.Pixel);
+            }
+        }
+
+        /// <summary>
+        /// æœ€çµ‚çš„ãªãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã‚’æç”»
+        /// </summary>
+        private static void RenderFinalBitmap(Bitmap finalBitmap, Bitmap sourceBitmap, 
+            Rectangle trimmedBounds, Size finalSize)
+        {
+            using (var graphics = Graphics.FromImage(finalBitmap))
+            {
+                ConfigureHighQualityGraphics(graphics);
+                graphics.Clear(Color.White);
+                
+                graphics.DrawImage(sourceBitmap, 
+                    new Rectangle(0, 0, finalSize.Width, finalSize.Height),
+                    trimmedBounds,
+                    GraphicsUnit.Pixel);
+            }
+        }
+
+        /// <summary>
+        /// é«˜å“è³ªãªæç”»è¨­å®šã‚’é©ç”¨
+        /// </summary>
+        private static void ConfigureHighQualityGraphics(Graphics graphics)
+        {
+            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+        }
+
+        /// <summary>
+        /// ãƒªã‚µã‚¤ã‚ºæƒ…å ±ã‚’ä¿æŒã™ã‚‹æ§‹é€ ä½“
+        /// </summary>
+        private struct ResizeInfo
+        {
+            public bool ScaledUp;
+            public bool ResizedToOriginal;
+            public bool ResizedToMax;
+        }
+
+        /// <summary>
+        /// æœ€çµ‚çš„ãªç”»åƒã‚µã‚¤ã‚ºã‚’è¨ˆç®—
+        /// </summary>
+        private static Size CalculateFinalSize(int trimmedWidth, int trimmedHeight,
+            float originalWidthPoints, float originalHeightPoints, float scaleMultiplier,
+            int maxWidth, int maxHeight, out ResizeInfo resizeInfo)
+        {
+            resizeInfo = new ResizeInfo();
+            var finalWidth = trimmedWidth;
+            var finalHeight = trimmedHeight;
+
+            // å…ƒã®ç”»åƒã‚µã‚¤ã‚ºãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚‹å ´åˆã€ãã‚Œã‚’ãƒ”ã‚¯ã‚»ãƒ«ã«å¤‰æ›ã—ã¦ä½¿ç”¨
+            if (originalWidthPoints > 0 && originalHeightPoints > 0)
+            {
+                var targetWidth = ConvertPointsToPixels(originalWidthPoints);
+                var targetHeight = ConvertPointsToPixels(originalHeightPoints);
+                
+                // ã‚¹ã‚±ãƒ¼ãƒ«å€ç‡ã‚’é©ç”¨
+                if (scaleMultiplier != 1.0f)
+                {
+                    targetWidth = (int)Math.Round(targetWidth * scaleMultiplier);
+                    targetHeight = (int)Math.Round(targetHeight * scaleMultiplier);
+                    resizeInfo.ScaledUp = true;
+                    LogInfo($"ã‚¹ã‚±ãƒ¼ãƒ«å€ç‡ {scaleMultiplier:F2}x ã‚’é©ç”¨: ç›®æ¨™ã‚µã‚¤ã‚º {targetWidth}x{targetHeight}px");
+                }
+                
+                // æœ€å¤§ã‚µã‚¤ã‚ºåˆ¶é™ã‚’ãƒã‚§ãƒƒã‚¯
+                if (targetWidth > maxWidth || targetHeight > maxHeight)
+                {
+                    var newSize = CalculateResizedDimensions(targetWidth, targetHeight, maxWidth, maxHeight);
+                    finalWidth = newSize.Width;
+                    finalHeight = newSize.Height;
+                    resizeInfo.ResizedToMax = true;
+                    LogInfo($"ç›®æ¨™ã‚µã‚¤ã‚º({targetWidth}x{targetHeight}px)ãŒæœ€å¤§ã‚µã‚¤ã‚ºã‚’è¶…ãˆã‚‹ãŸã‚ã€åˆ¶é™å†…ã«ãƒªã‚µã‚¤ã‚ºã—ã¾ã™");
+                }
+                else
+                {
+                    finalWidth = targetWidth;
+                    finalHeight = targetHeight;
+                    resizeInfo.ResizedToOriginal = true;
+                }
+            }
+            else
+            {
+                // å…ƒã®ã‚µã‚¤ã‚ºãŒæŒ‡å®šã•ã‚Œã¦ã„ãªã„å ´åˆã¯ã€æœ€å¤§ã‚µã‚¤ã‚ºåˆ¶é™ã®ã¿é©ç”¨
+                if (trimmedWidth > maxWidth || trimmedHeight > maxHeight)
+                {
+                    var newSize = CalculateResizedDimensions(trimmedWidth, trimmedHeight, maxWidth, maxHeight);
+                    finalWidth = newSize.Width;
+                    finalHeight = newSize.Height;
+                    resizeInfo.ResizedToMax = true;
+                }
+            }
+
+            return new Size(finalWidth, finalHeight);
+        }
+
+        /// <summary>
+        /// ä¸€æ„ã®ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‚’ç”Ÿæˆ
+        /// </summary>
+        private static string GenerateUniqueFilePath(string outputDirectory, string baseFileName, string shapeType)
+        {
+            var fileName = $"{baseFileName}_{shapeType}.png";
+            var filePath = Path.Combine(outputDirectory, fileName);
+
+            var duplicateCounter = 1;
+            while (File.Exists(filePath))
+            {
+                fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
+                filePath = Path.Combine(outputDirectory, fileName);
+                duplicateCounter++;
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// ãƒªã‚µã‚¤ã‚ºæ“ä½œã®ãƒ­ã‚°ã‚’å‡ºåŠ›
+        /// </summary>
+        private static void LogResizeOperation(int contentWidth, int contentHeight, 
+            int trimmedWidth, int trimmedHeight, int finalWidth, int finalHeight, ResizeInfo resizeInfo)
+        {
+            if (resizeInfo.ScaledUp && resizeInfo.ResizedToOriginal)
+            {
+                LogInfo($"ç”»åƒã‚’ãƒˆãƒªãƒŸãƒ³ã‚°ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«é©ç”¨ã—ã¾ã—ãŸ: {contentWidth}x{contentHeight} â†’ ãƒˆãƒªãƒŸãƒ³ã‚°å¾Œ {trimmedWidth}x{trimmedHeight} â†’ ã‚¹ã‚±ãƒ¼ãƒ«é©ç”¨å¾Œ {finalWidth}x{finalHeight}");
+            }
+            else if (resizeInfo.ResizedToOriginal)
+            {
+                LogInfo($"ç”»åƒã‚’ãƒˆãƒªãƒŸãƒ³ã‚°ãƒ»å…ƒã‚µã‚¤ã‚ºã«ãƒªã‚µã‚¤ã‚ºã—ã¾ã—ãŸ: {contentWidth}x{contentHeight} â†’ ãƒˆãƒªãƒŸãƒ³ã‚°å¾Œ {trimmedWidth}x{trimmedHeight} â†’ å…ƒã‚µã‚¤ã‚º {finalWidth}x{finalHeight}");
+            }
+            else if (resizeInfo.ResizedToMax)
+            {
+                LogInfo($"ç”»åƒã‚’ãƒˆãƒªãƒŸãƒ³ã‚°ãƒ»æœ€å¤§ã‚µã‚¤ã‚ºã«ãƒªã‚µã‚¤ã‚ºã—ã¾ã—ãŸ: {contentWidth}x{contentHeight} â†’ ãƒˆãƒªãƒŸãƒ³ã‚°å¾Œ {trimmedWidth}x{trimmedHeight} â†’ æœ€å¤§ã‚µã‚¤ã‚º {finalWidth}x{finalHeight}");
+            }
+            else if (trimmedWidth != contentWidth || trimmedHeight != contentHeight)
+            {
+                LogInfo($"ç”»åƒã‚’ãƒˆãƒªãƒŸãƒ³ã‚°ã—ã¾ã—ãŸ: {contentWidth}x{contentHeight} â†’ {trimmedWidth}x{trimmedHeight}");
+            }
+        }
+
+        /// <summary>
+        /// ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã‹ã‚‰é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ã‚’é™¤å»ã—ãŸå®Ÿéš›ã®ã‚³ãƒ³ãƒ†ãƒ³ãƒ„å¢ƒç•Œã‚’å–å¾—ï¼ˆæœ€é©åŒ–ç‰ˆï¼‰
+        /// </summary>
+        /// <param name="bitmap">ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—</param>
+        /// <returns>ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã®å¢ƒç•ŒçŸ©å½¢</returns>
+        private static Rectangle GetTrimmedBounds(Bitmap bitmap)
+        {
+            var bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly,
+                PixelFormat.Format32bppArgb);
+
+            try
+            {
+                var width = bitmap.Width;
+                var height = bitmap.Height;
+                var stride = bitmapData.Stride;
+                var bytes = Math.Abs(stride) * height;
+                var rgbValues = new byte[bytes];
+
+                // ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’é…åˆ—ã«ã‚³ãƒ”ãƒ¼
+                System.Runtime.InteropServices.Marshal.Copy(bitmapData.Scan0, rgbValues, 0, bytes);
+
+                // ã‚¨ãƒƒã‚¸æ¤œå‡ºã®æœ€é©åŒ–ï¼šä¸Šä¸‹å·¦å³ã‹ã‚‰é †ã«ã‚¹ã‚­ãƒ£ãƒ³ã—ã¦æ—©æœŸçµ‚äº†
+                
+                // ä¸Šç«¯ã‚’æ¤œå‡º
+                var top = FindTopEdge(rgbValues, width, height, stride);
+                if (top == -1) return Rectangle.Empty;
+
+                // ä¸‹ç«¯ã‚’æ¤œå‡º
+                var bottom = FindBottomEdge(rgbValues, width, height, stride);
+                if (bottom == -1 || bottom < top) return Rectangle.Empty;
+
+                // å·¦ç«¯ã‚’æ¤œå‡ºï¼ˆä¸Šç«¯ã€œä¸‹ç«¯ã®ç¯„å›²å†…ã§ï¼‰
+                var left = FindLeftEdge(rgbValues, width, top, bottom, stride);
+                if (left == -1) return Rectangle.Empty;
+
+                // å³ç«¯ã‚’æ¤œå‡ºï¼ˆä¸Šç«¯ã€œä¸‹ç«¯ã®ç¯„å›²å†…ã§ï¼‰
+                var right = FindRightEdge(rgbValues, width, top, bottom, stride);
+                if (right == -1 || right < left) return Rectangle.Empty;
+
+                // å¢ƒç•ŒçŸ©å½¢ã‚’è¿”ã™ï¼ˆå¹…ã¨é«˜ã•ã¯+1ã—ã¦å«ã‚ã‚‹ï¼‰
+                return new Rectangle(left, top, right - left + 1, bottom - top + 1);
+            }
+            finally
+            {
+                bitmap.UnlockBits(bitmapData);
+            }
+        }
+
+        /// <summary>
+        /// ä¸Šç«¯ã®ã‚¨ãƒƒã‚¸ã‚’æ¤œå‡ºï¼ˆæœ€é©åŒ–ç‰ˆï¼‰
+        /// </summary>
+        private static int FindTopEdge(byte[] rgbValues, int width, int height, int stride)
+        {
+            for (var y = 0; y < height; y++)
+            {
+                var rowStart = y * stride;
+                for (var x = 0; x < width; x++)
+                {
+                    var pixelIndex = rowStart + (x * BytesPerPixel);
+                    if (rgbValues[pixelIndex + AlphaChannelOffset] > AlphaThresholdForTransparency)
+                    {
+                        return y; // æœ€åˆã®ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã£ãŸè¡Œ
+                    }
+                }
+            }
+            return -1; // ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã„
+        }
+
+        /// <summary>
+        /// ä¸‹ç«¯ã®ã‚¨ãƒƒã‚¸ã‚’æ¤œå‡ºï¼ˆæœ€é©åŒ–ç‰ˆï¼‰
+        /// </summary>
+        private static int FindBottomEdge(byte[] rgbValues, int width, int height, int stride)
+        {
+            for (var y = height - 1; y >= 0; y--)
+            {
+                var rowStart = y * stride;
+                for (var x = 0; x < width; x++)
+                {
+                    var pixelIndex = rowStart + (x * BytesPerPixel);
+                    if (rgbValues[pixelIndex + AlphaChannelOffset] > AlphaThresholdForTransparency)
+                    {
+                        return y; // æœ€åˆã®ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã£ãŸè¡Œ
+                    }
+                }
+            }
+            return -1; // ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã„
+        }
+
+        /// <summary>
+        /// å·¦ç«¯ã®ã‚¨ãƒƒã‚¸ã‚’æ¤œå‡ºï¼ˆæœ€é©åŒ–ç‰ˆï¼‰
+        /// </summary>
+        private static int FindLeftEdge(byte[] rgbValues, int width, int top, int bottom, int stride)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                for (var y = top; y <= bottom; y++)
+                {
+                    var pixelIndex = y * stride + (x * BytesPerPixel);
+                    if (rgbValues[pixelIndex + AlphaChannelOffset] > AlphaThresholdForTransparency)
+                    {
+                        return x; // æœ€åˆã®ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã£ãŸåˆ—
+                    }
+                }
+            }
+            return -1; // ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã„
+        }
+
+        /// <summary>
+        /// å³ç«¯ã®ã‚¨ãƒƒã‚¸ã‚’æ¤œå‡ºï¼ˆæœ€é©åŒ–ç‰ˆï¼‰
+        /// </summary>
+        private static int FindRightEdge(byte[] rgbValues, int width, int top, int bottom, int stride)
+        {
+            for (var x = width - 1; x >= 0; x--)
+            {
+                for (var y = top; y <= bottom; y++)
+                {
+                    var pixelIndex = y * stride + (x * BytesPerPixel);
+                    if (rgbValues[pixelIndex + AlphaChannelOffset] > AlphaThresholdForTransparency)
+                    {
+                        return x; // æœ€åˆã®ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã£ãŸåˆ—
+                    }
+                }
+            }
+            return -1; // ä¸é€æ˜ãƒ”ã‚¯ã‚»ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã„
+        }
+
+        /// <summary>
+        /// ç¸¦æ¨ªæ¯”ã‚’ç¶­æŒã—ã¦ãƒªã‚µã‚¤ã‚ºå¾Œã®ã‚µã‚¤ã‚ºã‚’è¨ˆç®—
+        /// </summary>
+        /// <param name="originalWidth">å…ƒã®å¹…</param>
+        /// <param name="originalHeight">å…ƒã®é«˜ã•</param>
+        /// <param name="maxWidth">æœ€å¤§å¹…</param>
+        /// <param name="maxHeight">æœ€å¤§é«˜ã•</param>
+        /// <returns>ãƒªã‚µã‚¤ã‚ºå¾Œã®ã‚µã‚¤ã‚º</returns>
         private static Size CalculateResizedDimensions(int originalWidth, int originalHeight, int maxWidth, int maxHeight)
         {
-            // Œ³‚ÌƒTƒCƒY‚ªÅ‘åƒTƒCƒYˆÈ‰º‚Ìê‡‚Í‚»‚Ì‚Ü‚Ü•Ô‚·
+            // å…ƒã®ã‚µã‚¤ã‚ºãŒæœ€å¤§ã‚µã‚¤ã‚ºä»¥ä¸‹ã®å ´åˆã¯ãã®ã¾ã¾è¿”ã™
             if (originalWidth <= maxWidth && originalHeight <= maxHeight)
             {
                 return new Size(originalWidth, originalHeight);
             }
 
-            // c‰¡”ä‚ğŒvZ
-            double aspectRatio = (double)originalWidth / originalHeight;
+            // ç¸¦æ¨ªæ¯”ã‚’è¨ˆç®—
+            var aspectRatio = (double)originalWidth / originalHeight;
 
             int newWidth, newHeight;
 
-            // •‚à‚‚³‚à’´‰ß‚·‚éê‡‚Æ‚‚³‚Ì‚İ’´‰ß‚·‚éê‡‚Ì—¼•û‚ğl—¶
+            // å¹…ã‚‚é«˜ã•ã‚‚è¶…éã™ã‚‹å ´åˆã¨é«˜ã•ã®ã¿è¶…éã™ã‚‹å ´åˆã®ä¸¡æ–¹ã‚’è€ƒæ…®
             if (originalWidth > maxWidth && originalHeight > maxHeight)
             {
-                // —¼•û‚Æ‚à’´‰ß‚·‚éê‡A‚æ‚è§ŒÀ“I‚È•û‚É‡‚í‚¹‚é
-                double widthRatio = (double)maxWidth / originalWidth;
-                double heightRatio = (double)maxHeight / originalHeight;
-                double ratio = Math.Min(widthRatio, heightRatio);
+                // ä¸¡æ–¹ã¨ã‚‚è¶…éã™ã‚‹å ´åˆã€ã‚ˆã‚Šåˆ¶é™çš„ãªæ–¹ã«åˆã‚ã›ã‚‹
+                var widthRatio = (double)maxWidth / originalWidth;
+                var heightRatio = (double)maxHeight / originalHeight;
+                var ratio = Math.Min(widthRatio, heightRatio);
 
                 newWidth = (int)Math.Round(originalWidth * ratio);
                 newHeight = (int)Math.Round(originalHeight * ratio);
             }
             else if (originalWidth > maxWidth)
             {
-                // •‚Ì‚İ‚ª’´‰ß‚·‚éê‡
+                // å¹…ã®ã¿ãŒè¶…éã™ã‚‹å ´åˆ
                 newWidth = maxWidth;
                 newHeight = (int)Math.Round(maxWidth / aspectRatio);
             }
             else
             {
-                // ‚‚³‚Ì‚İ‚ª’´‰ß‚·‚éê‡
+                // é«˜ã•ã®ã¿ãŒè¶…éã™ã‚‹å ´åˆ
                 newHeight = maxHeight;
                 newWidth = (int)Math.Round(maxHeight * aspectRatio);
             }
 
-            // Å¬ƒTƒCƒY‚Ì•ÛØi1ƒsƒNƒZƒ‹ˆÈãj
+            // æœ€å°ã‚µã‚¤ã‚ºã®ä¿è¨¼ï¼ˆ1ãƒ”ã‚¯ã‚»ãƒ«ä»¥ä¸Šï¼‰
             newWidth = Math.Max(MinPixelSize, newWidth);
             newHeight = Math.Max(MinPixelSize, newHeight);
 

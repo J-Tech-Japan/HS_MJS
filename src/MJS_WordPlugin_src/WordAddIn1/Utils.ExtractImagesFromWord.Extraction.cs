@@ -57,7 +57,10 @@ namespace WordAddIn1
                             inlineShape.Type.ToString(),
                             forceExtract,
                             options.MaxOutputWidth,
-                            options.MaxOutputHeight);
+                            options.MaxOutputHeight,
+                            originalWidth,
+                            originalHeight,
+                            options.OutputScaleMultiplier);
                         
                         if (extractResult != null)
                         {
@@ -174,7 +177,10 @@ namespace WordAddIn1
                         shape.Type.ToString(),
                         forceExtract,
                         options.MaxOutputWidth,
-                        options.MaxOutputHeight);
+                        options.MaxOutputHeight,
+                        originalWidth,
+                        originalHeight,
+                        options.OutputScaleMultiplier);
                     
                     if (extractResult != null)
                     {
