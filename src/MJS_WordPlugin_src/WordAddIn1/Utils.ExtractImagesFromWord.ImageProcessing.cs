@@ -48,182 +48,72 @@ namespace WordAddIn1
             try
             {
                 using (var memoryStream = new MemoryStream(metaFileData))
+                using (var metafile = new System.Drawing.Imaging.Metafile(memoryStream))
                 {
-                    using (var metafile = new System.Drawing.Imaging.Metafile(memoryStream))
+                    // メタファイルの実際のコンテンツ境界を取得
+                    var bounds = GetMetafileBounds(metafile);
+                    if (bounds.Width <= 0 || bounds.Height <= 0)
                     {
-                        // メタファイルの実際のコンテンツ境界を取得
-                        RectangleF bounds;
-                        using (var graphics = Graphics.FromImage(new Bitmap(1, 1)))
-                        {
-                            GraphicsUnit unit = GraphicsUnit.Pixel;
-                            bounds = metafile.GetBounds(ref unit);
-                        }
+                        LogInfo("メタファイルの境界が無効です");
+                        return null;
+                    }
 
-                        // 境界が無効かチェック
-                        if (bounds.Width <= 0 || bounds.Height <= 0)
+                    LogInfo($"メタファイル境界: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
+
+                    // 実際のコンテンツサイズ（丸め後）
+                    var contentWidth = (int)Math.Ceiling(bounds.Width);
+                    var contentHeight = (int)Math.Ceiling(bounds.Height);
+
+                    // 最小サイズのフィルタリング（強制抽出の場合はスキップ）
+                    if (!forceExtract && (contentWidth < DefaultMinContentSizePixels || contentHeight < DefaultMinContentSizePixels))
+                    {
+                        return null;
+                    }
+
+                    // ステップ1: 元のサイズでメタファイルを描画してビットマップを作成
+                    using (var originalBitmap = new Bitmap(contentWidth, contentHeight, PixelFormat.Format32bppArgb))
+                    {
+                        RenderMetafileToBitmap(originalBitmap, metafile, bounds, contentWidth, contentHeight);
+
+                        // ステップ2: 透明ピクセルを除去してトリミング
+                        var trimmedBounds = GetTrimmedBounds(originalBitmap);
+                        if (trimmedBounds.Width <= 0 || trimmedBounds.Height <= 0)
                         {
-                            LogInfo("メタファイルの境界が無効です");
+                            LogInfo("トリミング後の境界が無効です");
                             return null;
                         }
 
-                        LogInfo($"メタファイル境界: X={bounds.X}, Y={bounds.Y}, Width={bounds.Width}, Height={bounds.Height}");
+                        // ステップ3: 最終サイズを決定
+                        var finalSize = CalculateFinalSize(
+                            trimmedBounds.Width, 
+                            trimmedBounds.Height,
+                            originalWidthPoints,
+                            originalHeightPoints,
+                            scaleMultiplier,
+                            maxWidth,
+                            maxHeight,
+                            out var resizeInfo);
 
-                        // 実際のコンテンツサイズ（丸め後）
-                        int contentWidth = (int)Math.Ceiling(bounds.Width);
-                        int contentHeight = (int)Math.Ceiling(bounds.Height);
-
-                        // 最小サイズのフィルタリング（強制抽出の場合はスキップ）
-                        if (!forceExtract && (contentWidth < DefaultMinContentSizePixels || contentHeight < DefaultMinContentSizePixels))
-                            return null;
-
-                        // ステップ1: 元のサイズでメタファイルを描画してビットマップを作成
-                        using (var originalBitmap = new Bitmap(contentWidth, contentHeight, PixelFormat.Format32bppArgb))
+                        // ステップ4: トリミングされた画像を作成（必要に応じてリサイズ）
+                        using (var finalBitmap = new Bitmap(finalSize.Width, finalSize.Height, PixelFormat.Format32bppArgb))
                         {
-                            using (var graphics = Graphics.FromImage(originalBitmap))
-                            {
-                                // 高品質な描画設定
-                                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                            RenderFinalBitmap(finalBitmap, originalBitmap, trimmedBounds, finalSize);
 
-                                // 背景を透明に設定
-                                graphics.Clear(Color.Transparent);
-
-                                // メタファイルの実際のコンテンツ領域のみを描画
-                                var destRect = new RectangleF(0, 0, contentWidth, contentHeight);
-                                graphics.DrawImage(metafile, destRect, bounds, GraphicsUnit.Pixel);
-                            }
-
-                            // ステップ2: 透明ピクセルを除去してトリミング
-                            var trimmedBounds = GetTrimmedBounds(originalBitmap);
+                            // ファイル名の生成と保存
+                            var filePath = GenerateUniqueFilePath(outputDirectory, baseFileName, shapeType);
+                            finalBitmap.Save(filePath, ImageFormat.Png);
                             
-                            if (trimmedBounds.Width <= 0 || trimmedBounds.Height <= 0)
+                            // ログ出力
+                            LogResizeOperation(contentWidth, contentHeight, trimmedBounds.Width, trimmedBounds.Height, 
+                                             finalSize.Width, finalSize.Height, resizeInfo);
+                            LogInfo($"画像を保存しました: {filePath} ({finalSize.Width}x{finalSize.Height})");
+                            
+                            return new ImageExtractionResult
                             {
-                                LogInfo("トリミング後の境界が無効です");
-                                return null;
-                            }
-
-                            // トリミング後のサイズ
-                            int trimmedWidth = trimmedBounds.Width;
-                            int trimmedHeight = trimmedBounds.Height;
-
-                            // ステップ3: 最終サイズを決定
-                            int finalWidth = trimmedWidth;
-                            int finalHeight = trimmedHeight;
-                            bool resizedToOriginal = false;
-                            bool resizedToMax = false;
-                            bool scaledUp = false;
-
-                            // 元の画像サイズが指定されている場合、それをピクセルに変換して使用
-                            if (originalWidthPoints > 0 && originalHeightPoints > 0)
-                            {
-                                int targetWidth = ConvertPointsToPixels(originalWidthPoints);
-                                int targetHeight = ConvertPointsToPixels(originalHeightPoints);
-                                
-                                // スケール倍率を適用
-                                if (scaleMultiplier != 1.0f)
-                                {
-                                    targetWidth = (int)Math.Round(targetWidth * scaleMultiplier);
-                                    targetHeight = (int)Math.Round(targetHeight * scaleMultiplier);
-                                    scaledUp = true;
-                                    LogInfo($"スケール倍率 {scaleMultiplier:F2}x を適用: 目標サイズ {targetWidth}x{targetHeight}px");
-                                }
-                                
-                                // 最大サイズ制限をチェック
-                                if (targetWidth > maxWidth || targetHeight > maxHeight)
-                                {
-                                    // 縦横比を維持してリサイズサイズを計算
-                                    var newSize = CalculateResizedDimensions(targetWidth, targetHeight, maxWidth, maxHeight);
-                                    finalWidth = newSize.Width;
-                                    finalHeight = newSize.Height;
-                                    resizedToMax = true;
-                                    LogInfo($"目標サイズ({targetWidth}x{targetHeight}px)が最大サイズを超えるため、制限内にリサイズします");
-                                }
-                                else
-                                {
-                                    finalWidth = targetWidth;
-                                    finalHeight = targetHeight;
-                                    resizedToOriginal = true;
-                                }
-                            }
-                            else
-                            {
-                                // 元のサイズが指定されていない場合は、最大サイズ制限のみ適用
-                                if (trimmedWidth > maxWidth || trimmedHeight > maxHeight)
-                                {
-                                    var newSize = CalculateResizedDimensions(trimmedWidth, trimmedHeight, maxWidth, maxHeight);
-                                    finalWidth = newSize.Width;
-                                    finalHeight = newSize.Height;
-                                    resizedToMax = true;
-                                }
-                            }
-
-                            // ステップ4: トリミングされた画像を作成（必要に応じてリサイズ）
-                            using (var finalBitmap = new Bitmap(finalWidth, finalHeight, PixelFormat.Format32bppArgb))
-                            {
-                                using (var graphics = Graphics.FromImage(finalBitmap))
-                                {
-                                    // 高品質な描画設定（リサイズ時に重要）
-                                    graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                                    graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                                    graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-
-                                    graphics.Clear(Color.White);
-                                    
-                                    // トリミングされた部分を最終サイズに描画
-                                    graphics.DrawImage(originalBitmap, 
-                                        new Rectangle(0, 0, finalWidth, finalHeight),
-                                        trimmedBounds,
-                                        GraphicsUnit.Pixel);
-                                }
-
-                                // ファイル名の生成
-                                string fileName = $"{baseFileName}_{shapeType}.png";
-                                string filePath = Path.Combine(outputDirectory, fileName);
-
-                                // 重複ファイル名の回避
-                                int duplicateCounter = 1;
-                                while (File.Exists(filePath))
-                                {
-                                    fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
-                                    filePath = Path.Combine(outputDirectory, fileName);
-                                    duplicateCounter++;
-                                }
-
-                                // PNG形式で保存
-                                finalBitmap.Save(filePath, ImageFormat.Png);
-                                
-                                // トリミングとリサイズの正確なログ出力
-                                if (scaledUp && resizedToOriginal)
-                                {
-                                    LogInfo($"画像をトリミング・スケール適用しました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → {scaleMultiplier:F2}x倍 {finalWidth}x{finalHeight}");
-                                }
-                                else if (resizedToOriginal)
-                                {
-                                    LogInfo($"画像をトリミング・元サイズにリサイズしました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → 元サイズ {finalWidth}x{finalHeight}");
-                                }
-                                else if (resizedToMax)
-                                {
-                                    LogInfo($"画像をトリミング・最大サイズにリサイズしました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → 最大サイズ {finalWidth}x{finalHeight}");
-                                }
-                                else if (trimmedWidth != contentWidth || trimmedHeight != contentHeight)
-                                {
-                                    LogInfo($"画像をトリミングしました: {contentWidth}x{contentHeight} → {trimmedWidth}x{trimmedHeight}");
-                                }
-                                
-                                LogInfo($"画像を保存しました: {filePath} ({finalWidth}x{finalHeight})");
-                                
-                                return new ImageExtractionResult
-                                {
-                                    FilePath = filePath,
-                                    PixelWidth = finalWidth,
-                                    PixelHeight = finalHeight
-                                };
-                            }
+                                FilePath = filePath,
+                                PixelWidth = finalSize.Width,
+                                PixelHeight = finalSize.Height
+                            };
                         }
                     }
                 }
@@ -236,42 +126,232 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// ビットマップから透明ピクセルを除去した実際のコンテンツ境界を取得
+        /// メタファイルの境界を取得
+        /// </summary>
+        private static RectangleF GetMetafileBounds(System.Drawing.Imaging.Metafile metafile)
+        {
+            const int temporaryBitmapSize = 1;
+            using (var tempBitmap = new Bitmap(temporaryBitmapSize, temporaryBitmapSize))
+            using (var graphics = Graphics.FromImage(tempBitmap))
+            {
+                var unit = GraphicsUnit.Pixel;
+                return metafile.GetBounds(ref unit);
+            }
+        }
+
+        /// <summary>
+        /// メタファイルをビットマップに描画
+        /// </summary>
+        private static void RenderMetafileToBitmap(Bitmap bitmap, System.Drawing.Imaging.Metafile metafile, 
+            RectangleF bounds, int width, int height)
+        {
+            using (var graphics = Graphics.FromImage(bitmap))
+            {
+                ConfigureHighQualityGraphics(graphics);
+                graphics.Clear(Color.Transparent);
+                
+                var destRect = new RectangleF(0, 0, width, height);
+                graphics.DrawImage(metafile, destRect, bounds, GraphicsUnit.Pixel);
+            }
+        }
+
+        /// <summary>
+        /// 最終的なビットマップを描画
+        /// </summary>
+        private static void RenderFinalBitmap(Bitmap finalBitmap, Bitmap sourceBitmap, 
+            Rectangle trimmedBounds, Size finalSize)
+        {
+            using (var graphics = Graphics.FromImage(finalBitmap))
+            {
+                ConfigureHighQualityGraphics(graphics);
+                graphics.Clear(Color.White);
+                
+                graphics.DrawImage(sourceBitmap, 
+                    new Rectangle(0, 0, finalSize.Width, finalSize.Height),
+                    trimmedBounds,
+                    GraphicsUnit.Pixel);
+            }
+        }
+
+        /// <summary>
+        /// 高品質な描画設定を適用
+        /// </summary>
+        private static void ConfigureHighQualityGraphics(Graphics graphics)
+        {
+            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+        }
+
+        /// <summary>
+        /// リサイズ情報を保持する構造体
+        /// </summary>
+        private struct ResizeInfo
+        {
+            public bool ScaledUp;
+            public bool ResizedToOriginal;
+            public bool ResizedToMax;
+        }
+
+        /// <summary>
+        /// 最終的な画像サイズを計算
+        /// </summary>
+        private static Size CalculateFinalSize(int trimmedWidth, int trimmedHeight,
+            float originalWidthPoints, float originalHeightPoints, float scaleMultiplier,
+            int maxWidth, int maxHeight, out ResizeInfo resizeInfo)
+        {
+            resizeInfo = new ResizeInfo();
+            var finalWidth = trimmedWidth;
+            var finalHeight = trimmedHeight;
+
+            // 元の画像サイズが指定されている場合、それをピクセルに変換して使用
+            if (originalWidthPoints > 0 && originalHeightPoints > 0)
+            {
+                var targetWidth = ConvertPointsToPixels(originalWidthPoints);
+                var targetHeight = ConvertPointsToPixels(originalHeightPoints);
+                
+                // スケール倍率を適用
+                if (scaleMultiplier != 1.0f)
+                {
+                    targetWidth = (int)Math.Round(targetWidth * scaleMultiplier);
+                    targetHeight = (int)Math.Round(targetHeight * scaleMultiplier);
+                    resizeInfo.ScaledUp = true;
+                    LogInfo($"スケール倍率 {scaleMultiplier:F2}x を適用: 目標サイズ {targetWidth}x{targetHeight}px");
+                }
+                
+                // 最大サイズ制限をチェック
+                if (targetWidth > maxWidth || targetHeight > maxHeight)
+                {
+                    var newSize = CalculateResizedDimensions(targetWidth, targetHeight, maxWidth, maxHeight);
+                    finalWidth = newSize.Width;
+                    finalHeight = newSize.Height;
+                    resizeInfo.ResizedToMax = true;
+                    LogInfo($"目標サイズ({targetWidth}x{targetHeight}px)が最大サイズを超えるため、制限内にリサイズします");
+                }
+                else
+                {
+                    finalWidth = targetWidth;
+                    finalHeight = targetHeight;
+                    resizeInfo.ResizedToOriginal = true;
+                }
+            }
+            else
+            {
+                // 元のサイズが指定されていない場合は、最大サイズ制限のみ適用
+                if (trimmedWidth > maxWidth || trimmedHeight > maxHeight)
+                {
+                    var newSize = CalculateResizedDimensions(trimmedWidth, trimmedHeight, maxWidth, maxHeight);
+                    finalWidth = newSize.Width;
+                    finalHeight = newSize.Height;
+                    resizeInfo.ResizedToMax = true;
+                }
+            }
+
+            return new Size(finalWidth, finalHeight);
+        }
+
+        /// <summary>
+        /// 一意のファイルパスを生成
+        /// </summary>
+        private static string GenerateUniqueFilePath(string outputDirectory, string baseFileName, string shapeType)
+        {
+            var fileName = $"{baseFileName}_{shapeType}.png";
+            var filePath = Path.Combine(outputDirectory, fileName);
+
+            var duplicateCounter = 1;
+            while (File.Exists(filePath))
+            {
+                fileName = $"{baseFileName}_{shapeType}_{duplicateCounter}.png";
+                filePath = Path.Combine(outputDirectory, fileName);
+                duplicateCounter++;
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// リサイズ操作のログを出力
+        /// </summary>
+        private static void LogResizeOperation(int contentWidth, int contentHeight, 
+            int trimmedWidth, int trimmedHeight, int finalWidth, int finalHeight, ResizeInfo resizeInfo)
+        {
+            if (resizeInfo.ScaledUp && resizeInfo.ResizedToOriginal)
+            {
+                LogInfo($"画像をトリミング・スケール適用しました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → スケール適用後 {finalWidth}x{finalHeight}");
+            }
+            else if (resizeInfo.ResizedToOriginal)
+            {
+                LogInfo($"画像をトリミング・元サイズにリサイズしました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → 元サイズ {finalWidth}x{finalHeight}");
+            }
+            else if (resizeInfo.ResizedToMax)
+            {
+                LogInfo($"画像をトリミング・最大サイズにリサイズしました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → 最大サイズ {finalWidth}x{finalHeight}");
+            }
+            else if (trimmedWidth != contentWidth || trimmedHeight != contentHeight)
+            {
+                LogInfo($"画像をトリミングしました: {contentWidth}x{contentHeight} → {trimmedWidth}x{trimmedHeight}");
+            }
+        }
+
+        /// <summary>
+        /// ビットマップから透明ピクセルを除去した実際のコンテンツ境界を取得（高速版）
         /// </summary>
         /// <param name="bitmap">ビットマップ</param>
         /// <returns>コンテンツの境界矩形</returns>
         private static Rectangle GetTrimmedBounds(Bitmap bitmap)
         {
-            int minX = bitmap.Width;
-            int minY = bitmap.Height;
-            int maxX = 0;
-            int maxY = 0;
+            var bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly,
+                PixelFormat.Format32bppArgb);
 
-            // すべてのピクセルをスキャンして、透明でないピクセル範囲を取得
-            for (int y = 0; y < bitmap.Height; y++)
+            try
             {
-                for (int x = 0; x < bitmap.Width; x++)
+                var minX = bitmap.Width;
+                var minY = bitmap.Height;
+                var maxX = 0;
+                var maxY = 0;
+
+                unsafe
                 {
-                    Color pixel = bitmap.GetPixel(x, y);
-                    // 完全に透明でないピクセルを検出
-                    if (pixel.A > AlphaThresholdForTransparency)
+                    var stride = bitmapData.Stride;
+                    var scan0 = (byte*)bitmapData.Scan0;
+
+                    // すべてのピクセルをスキャンして、透明でないピクセル範囲を取得
+                    for (var y = 0; y < bitmap.Height; y++)
                     {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
+                        var row = scan0 + (y * stride);
+                        for (var x = 0; x < bitmap.Width; x++)
+                        {
+                            var alpha = row[x * 4 + 3]; // ARGB形式のアルファチャンネル
+                            
+                            // 完全に透明でないピクセルを検出
+                            if (alpha > AlphaThresholdForTransparency)
+                            {
+                                if (x < minX) minX = x;
+                                if (x > maxX) maxX = x;
+                                if (y < minY) minY = y;
+                                if (y > maxY) maxY = y;
+                            }
+                        }
                     }
                 }
-            }
 
-            // コンテンツが見つからなかった場合
-            if (minX > maxX || minY > maxY)
+                // コンテンツが見つからなかった場合
+                if (minX > maxX || minY > maxY)
+                {
+                    return Rectangle.Empty;
+                }
+
+                // 境界矩形を返す（幅と高さは+1して含める）
+                return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
+            }
+            finally
             {
-                return Rectangle.Empty;
+                bitmap.UnlockBits(bitmapData);
             }
-
-            // 境界矩形を返す（幅と高さは+1して含める）
-            return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
         }
 
         /// <summary>
@@ -291,7 +371,7 @@ namespace WordAddIn1
             }
 
             // 縦横比を計算
-            double aspectRatio = (double)originalWidth / originalHeight;
+            var aspectRatio = (double)originalWidth / originalHeight;
 
             int newWidth, newHeight;
 
@@ -299,9 +379,9 @@ namespace WordAddIn1
             if (originalWidth > maxWidth && originalHeight > maxHeight)
             {
                 // 両方とも超過する場合、より制限的な方に合わせる
-                double widthRatio = (double)maxWidth / originalWidth;
-                double heightRatio = (double)maxHeight / originalHeight;
-                double ratio = Math.Min(widthRatio, heightRatio);
+                var widthRatio = (double)maxWidth / originalWidth;
+                var heightRatio = (double)maxHeight / originalHeight;
+                var ratio = Math.Min(widthRatio, heightRatio);
 
                 newWidth = (int)Math.Round(originalWidth * ratio);
                 newHeight = (int)Math.Round(originalHeight * ratio);
