@@ -296,7 +296,7 @@ namespace WordAddIn1
         }
 
         /// <summary>
-        /// ビットマップから透明ピクセルを除去した実際のコンテンツ境界を取得（高速版）
+        /// ビットマップから透明ピクセルを除去した実際のコンテンツ境界を取得（安全版）
         /// </summary>
         /// <param name="bitmap">ビットマップ</param>
         /// <returns>コンテンツの境界矩形</returns>
@@ -314,27 +314,29 @@ namespace WordAddIn1
                 var maxX = 0;
                 var maxY = 0;
 
-                unsafe
-                {
-                    var stride = bitmapData.Stride;
-                    var scan0 = (byte*)bitmapData.Scan0;
+                var stride = bitmapData.Stride;
+                var bytes = Math.Abs(stride) * bitmap.Height;
+                var rgbValues = new byte[bytes];
 
-                    // すべてのピクセルをスキャンして、透明でないピクセル範囲を取得
-                    for (var y = 0; y < bitmap.Height; y++)
+                // ピクセルデータを配列にコピー
+                System.Runtime.InteropServices.Marshal.Copy(bitmapData.Scan0, rgbValues, 0, bytes);
+
+                // すべてのピクセルをスキャンして、透明でないピクセル範囲を取得
+                for (var y = 0; y < bitmap.Height; y++)
+                {
+                    var rowStart = y * stride;
+                    for (var x = 0; x < bitmap.Width; x++)
                     {
-                        var row = scan0 + (y * stride);
-                        for (var x = 0; x < bitmap.Width; x++)
+                        var pixelIndex = rowStart + (x * 4);
+                        var alpha = rgbValues[pixelIndex + 3]; // ARGB形式のアルファチャンネル
+                        
+                        // 完全に透明でないピクセルを検出
+                        if (alpha > AlphaThresholdForTransparency)
                         {
-                            var alpha = row[x * 4 + 3]; // ARGB形式のアルファチャンネル
-                            
-                            // 完全に透明でないピクセルを検出
-                            if (alpha > AlphaThresholdForTransparency)
-                            {
-                                if (x < minX) minX = x;
-                                if (x > maxX) maxX = x;
-                                if (y < minY) minY = y;
-                                if (y > maxY) maxY = y;
-                            }
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
                         }
                     }
                 }
