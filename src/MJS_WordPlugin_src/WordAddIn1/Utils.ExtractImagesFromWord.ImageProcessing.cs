@@ -37,6 +37,7 @@ namespace WordAddIn1
         /// <param name="originalWidthPoints">元の画像の幅（ポイント単位、0の場合は使用しない）</param>
         /// <param name="originalHeightPoints">元の画像の高さ（ポイント単位、0の場合は使用しない）</param>
         /// <param name="scaleMultiplier">出力スケール倍率（デフォルト: 1.0）</param>
+        /// <param name="disableResize">リサイズを無効化するかどうか（デフォルト: false）</param>
         /// <returns>作成されたファイルのパスとピクセルサイズ、失敗時null</returns>
         private static ImageExtractionResult ExtractImageFromMetaFileDataWithSize(
             byte[] metaFileData, 
@@ -48,7 +49,8 @@ namespace WordAddIn1
             int maxHeight = DefaultMaxOutputSizePixels,
             float originalWidthPoints = 0,
             float originalHeightPoints = 0,
-            float scaleMultiplier = DefaultOutputScaleMultiplier)
+            float scaleMultiplier = DefaultOutputScaleMultiplier,
+            bool disableResize = false)
         {
             try
             {
@@ -97,6 +99,7 @@ namespace WordAddIn1
                             scaleMultiplier,
                             maxWidth,
                             maxHeight,
+                            disableResize,
                             out var resizeInfo);
 
                         // ステップ4: トリミングされた画像を作成（必要に応じてリサイズ）
@@ -197,6 +200,7 @@ namespace WordAddIn1
             public bool ScaledUp;
             public bool ResizedToOriginal;
             public bool ResizedToMax;
+            public bool DisabledResize;
         }
 
         /// <summary>
@@ -204,11 +208,19 @@ namespace WordAddIn1
         /// </summary>
         private static Size CalculateFinalSize(int trimmedWidth, int trimmedHeight,
             float originalWidthPoints, float originalHeightPoints, float scaleMultiplier,
-            int maxWidth, int maxHeight, out ResizeInfo resizeInfo)
+            int maxWidth, int maxHeight, bool disableResize, out ResizeInfo resizeInfo)
         {
             resizeInfo = new ResizeInfo();
             var finalWidth = trimmedWidth;
             var finalHeight = trimmedHeight;
+
+            // リサイズ無効化フラグが設定されている場合は、トリミング後のサイズをそのまま返す
+            if (disableResize)
+            {
+                resizeInfo.DisabledResize = true;
+                LogInfo($"リサイズ無効化: トリミング後のサイズをそのまま出力します ({trimmedWidth}x{trimmedHeight}px)");
+                return new Size(trimmedWidth, trimmedHeight);
+            }
 
             // 元の画像サイズが指定されている場合、それをピクセルに変換して使用
             if (originalWidthPoints > 0 && originalHeightPoints > 0)
@@ -281,7 +293,11 @@ namespace WordAddIn1
         private static void LogResizeOperation(int contentWidth, int contentHeight, 
             int trimmedWidth, int trimmedHeight, int finalWidth, int finalHeight, ResizeInfo resizeInfo)
         {
-            if (resizeInfo.ScaledUp && resizeInfo.ResizedToOriginal)
+            if (resizeInfo.DisabledResize)
+            {
+                LogInfo($"リサイズ無効化: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} (リサイズなし)");
+            }
+            else if (resizeInfo.ScaledUp && resizeInfo.ResizedToOriginal)
             {
                 LogInfo($"画像をトリミング・スケール適用しました: {contentWidth}x{contentHeight} → トリミング後 {trimmedWidth}x{trimmedHeight} → スケール適用後 {finalWidth}x{finalHeight}");
             }

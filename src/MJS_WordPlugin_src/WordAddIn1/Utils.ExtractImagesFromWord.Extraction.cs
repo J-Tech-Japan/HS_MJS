@@ -60,7 +60,8 @@ namespace WordAddIn1
                             options.MaxOutputHeight,
                             originalWidth,
                             originalHeight,
-                            options.OutputScaleMultiplier);
+                            options.OutputScaleMultiplier,
+                            options.DisableResize);
                         
                         if (extractResult != null)
                         {
@@ -180,7 +181,8 @@ namespace WordAddIn1
                         options.MaxOutputHeight,
                         originalWidth,
                         originalHeight,
-                        options.OutputScaleMultiplier);
+                        options.OutputScaleMultiplier,
+                        options.DisableResize);
                     
                     if (extractResult != null)
                     {
