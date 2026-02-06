@@ -37,8 +37,34 @@ namespace WordAddIn1
             /// 出力画像のスケール倍率（元の画像サイズに対する倍率）
             /// デフォルト: 1.0（元のサイズと同じ）
             /// 例: 2.0 = 元の画像の2倍のサイズで出力
+            /// 注意: DisableResizeがtrueの場合、この設定は無視されます
             /// </summary>
             public float OutputScaleMultiplier { get; set; } = DefaultOutputScaleMultiplier;
+            
+            /// <summary>
+            /// 表内画像専用の出力スケール倍率（MJS_画像（表内）スタイルの画像に適用）
+            /// nullの場合はOutputScaleMultiplierと同じ値を使用
+            /// デフォルト: null（OutputScaleMultiplierを使用）
+            /// 例: 1.0 = 元の画像サイズ、1.5 = 1.5倍のサイズで出力
+            /// 注意: DisableResizeがtrueの場合、この設定は無視されます
+            /// </summary>
+            public float? TableImageScaleMultiplier { get; set; } = null;
+            
+            /// <summary>
+            /// コラム内画像専用の出力スケール倍率（MJS_画像（コラム内）スタイルの画像に適用）
+            /// nullの場合はOutputScaleMultiplierと同じ値を使用
+            /// デフォルト: null（OutputScaleMultiplierを使用）
+            /// 例: 1.0 = 元の画像サイズ、1.5 = 1.5倍のサイズで出力
+            /// 注意: DisableResizeがtrueの場合、この設定は無視されます
+            /// </summary>
+            public float? ColumnImageScaleMultiplier { get; set; } = null;
+            
+            /// <summary>
+            /// リサイズを無効化するかどうか（trueの場合、トリミング後のサイズで出力）
+            /// デフォルト: false（リサイズを実行）
+            /// trueの場合、OutputScaleMultiplier、TableImageScaleMultiplier、ColumnImageScaleMultiplier、MaxOutputWidth、MaxOutputHeightの設定は無視されます
+            /// </summary>
+            public bool DisableResize { get; set; } = false;
         }
 
         /// <summary>
