@@ -26,7 +26,7 @@ namespace WordAddIn1
                     string paragraphStyle = GetInlineShapeParagraphStyle(inlineShape);
                     
                     // MJSスタイルによる条件チェック
-                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip, options.IncludeMjsTableImages);
+                    CheckMjsStyleConditions(paragraphStyle, out bool forceExtract, out bool forceSkip, out bool isTableImage, out bool isColumnImage, options.IncludeMjsTableImages);
                     
                     // 強制スキップ対象の場合
                     if (forceSkip)
@@ -50,6 +50,21 @@ namespace WordAddIn1
                     
                     if (metaFileData != null && metaFileData.Length > 0)
                     {
+                        // スタイルに応じてスケール倍率を決定
+                        float scaleMultiplier;
+                        if (isTableImage && options.TableImageScaleMultiplier.HasValue)
+                        {
+                            scaleMultiplier = options.TableImageScaleMultiplier.Value;
+                        }
+                        else if (isColumnImage && options.ColumnImageScaleMultiplier.HasValue)
+                        {
+                            scaleMultiplier = options.ColumnImageScaleMultiplier.Value;
+                        }
+                        else
+                        {
+                            scaleMultiplier = options.OutputScaleMultiplier;
+                        }
+                        
                         var extractResult = ExtractImageFromMetaFileDataWithSize(
                             metaFileData, 
                             outputDirectory, 
@@ -60,7 +75,7 @@ namespace WordAddIn1
                             options.MaxOutputHeight,
                             originalWidth,
                             originalHeight,
-                            options.OutputScaleMultiplier,
+                            scaleMultiplier,
                             options.DisableResize);
                         
                         if (extractResult != null)
@@ -147,7 +162,7 @@ namespace WordAddIn1
                 string anchorParagraphStyle = GetShapeAnchorParagraphStyle(shape);
                 
                 // MJSスタイルによる条件チェック
-                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, options.IncludeMjsTableImages);
+                CheckMjsStyleConditions(anchorParagraphStyle, out bool forceExtract, out bool forceSkip, out bool isTableImage, out bool isColumnImage, options.IncludeMjsTableImages);
                 
                 // 強制スキップ対象の場合
                 if (forceSkip)
@@ -171,6 +186,21 @@ namespace WordAddIn1
                 
                 if (shapeData != null && shapeData.Length > 0)
                 {
+                    // スタイルに応じてスケール倍率を決定
+                    float scaleMultiplier;
+                    if (isTableImage && options.TableImageScaleMultiplier.HasValue)
+                    {
+                        scaleMultiplier = options.TableImageScaleMultiplier.Value;
+                    }
+                    else if (isColumnImage && options.ColumnImageScaleMultiplier.HasValue)
+                    {
+                        scaleMultiplier = options.ColumnImageScaleMultiplier.Value;
+                    }
+                    else
+                    {
+                        scaleMultiplier = options.OutputScaleMultiplier;
+                    }
+                    
                     var extractResult = ExtractImageFromMetaFileDataWithSize(
                         shapeData, 
                         outputDirectory, 
@@ -181,7 +211,7 @@ namespace WordAddIn1
                         options.MaxOutputHeight,
                         originalWidth,
                         originalHeight,
-                        options.OutputScaleMultiplier,
+                        scaleMultiplier,
                         options.DisableResize);
                     
                     if (extractResult != null)
