@@ -11,11 +11,15 @@ namespace WordAddIn1
         /// <param name="styleName">判定対象のスタイル名</param>
         /// <param name="forceExtract">強制抽出フラグ（出力）</param>
         /// <param name="forceSkip">強制スキップフラグ（出力）</param>
+        /// <param name="isTableImage">表内画像かどうか（出力）</param>
+        /// <param name="isColumnImage">コラム内画像かどうか（出力）</param>
         /// <param name="includeMjsTableImages">MJS_画像（表内）スタイルを含めるかどうか</param>
-        private static void CheckMjsStyleConditions(string styleName, out bool forceExtract, out bool forceSkip, bool includeMjsTableImages = true)
+        private static void CheckMjsStyleConditions(string styleName, out bool forceExtract, out bool forceSkip, out bool isTableImage, out bool isColumnImage, bool includeMjsTableImages = true)
         {
             forceExtract = false;
             forceSkip = false;
+            isTableImage = false;
+            isColumnImage = false;
 
             if (string.IsNullOrEmpty(styleName))
                 return;
@@ -23,6 +27,7 @@ namespace WordAddIn1
             // MJS_画像（表内）の特別処理
             if (styleName.Contains("MJS_画像（表内）"))
             {
+                isTableImage = true; // 表内画像フラグを設定
                 if (includeMjsTableImages)
                 {
                     forceExtract = true;
@@ -36,10 +41,18 @@ namespace WordAddIn1
                 return;
             }
 
+            // MJS_画像（コラム内）の特別処理
+            if (styleName.Contains("MJS_画像（コラム内）"))
+            {
+                isColumnImage = true; // コラム内画像フラグを設定
+                forceExtract = true;
+                System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定（MJSコラム内画像）");
+                return;
+            }
+
             // その他の強制抽出対象のスタイル（サイズに関わりなく必ず抽出）
             if (styleName.Contains("MJS_画像（手順内）") ||
-                styleName.Contains("MJS_画像（本文内）") ||
-                styleName.Contains("MJS_画像（コラム内）"))
+                styleName.Contains("MJS_画像（本文内）"))
             {
                 forceExtract = true;
                 System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定");
