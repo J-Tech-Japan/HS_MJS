@@ -165,13 +165,16 @@ namespace WordAddIn1
         /// <summary>
         /// 最終的なビットマップを描画
         /// </summary>
+        /// <param name="useTransparentBackground">透明背景を使用するか（デフォルト: false）</param>
         private static void RenderFinalBitmap(Bitmap finalBitmap, Bitmap sourceBitmap, 
-            Rectangle trimmedBounds, Size finalSize)
+            Rectangle trimmedBounds, Size finalSize, bool useTransparentBackground = false)
         {
             using (var graphics = Graphics.FromImage(finalBitmap))
             {
                 ConfigureHighQualityGraphics(graphics);
-                graphics.Clear(Color.White);
+                
+                // 背景色の選択
+                graphics.Clear(useTransparentBackground ? Color.Transparent : Color.White);
                 
                 graphics.DrawImage(sourceBitmap, 
                     new Rectangle(0, 0, finalSize.Width, finalSize.Height),
