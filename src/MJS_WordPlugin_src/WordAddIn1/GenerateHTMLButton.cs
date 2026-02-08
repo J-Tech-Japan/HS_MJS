@@ -122,8 +122,8 @@ namespace WordAddIn1
                                 MaxOutputWidth = 1024,           // 出力画像の最大幅
                                 MaxOutputHeight = 1024,           // 出力画像の最大高さ
                                 OutputScaleMultiplier = 1.4f,     // 出力スケール倍率（表内以外の画像）
-                                TableImageScaleMultiplier = 1.0f,  // 出力スケール倍率（表内画像専用）
-                                ColumnImageScaleMultiplier = 2.0f, // 出力スケール倍率（コラム内画像専用）
+                                TableImageScaleMultiplier = 1.2f,  // 出力スケール倍率（表内画像専用）
+                                ColumnImageScaleMultiplier = 1.2f, // 出力スケール倍率（コラム内画像専用）
                                 //DisableResize = true    // リサイズ無効化
                             };
 
