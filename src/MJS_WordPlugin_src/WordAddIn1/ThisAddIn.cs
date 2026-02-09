@@ -99,15 +99,15 @@ namespace WordAddIn1
                     "Beta版モード（詳細ログ）のデフォルト設定");
 
                 // OutputScaleMultiplier プロパティの確認と設定
-                EnsureProperty(properties, "OutputScaleMultiplier", "1.4", 
+                EnsureProperty(properties, "OutputScale", "1.4", 
                     "通常画像の出力スケール倍率のデフォルト設定");
 
                 // TableImageScaleMultiplier プロパティの確認と設定
-                EnsureProperty(properties, "TableImageScaleMultiplier", "1.2", 
+                EnsureProperty(properties, "TableImageScale", "1.2", 
                     "表内画像の出力スケール倍率のデフォルト設定");
 
                 // ColumnImageScaleMultiplier プロパティの確認と設定
-                EnsureProperty(properties, "ColumnImageScaleMultiplier", "1.2", 
+                EnsureProperty(properties, "ColumnImageScale", "1.2", 
                     "コラム内画像の出力スケール倍率のデフォルト設定");
 
                 // webHelpFolderName は既存の動作を維持（未設定の場合は自動生成されるため、ここでは設定しない）

@@ -16,9 +16,9 @@ namespace WordAddIn1
         // プロパティ名の定数
         private const string PropertyExtractHighQualityImages = "extractHighQualityImages";
         private const string PropertyIsBetaMode = "isBetaMode";
-        private const string PropertyOutputScaleMultiplier = "OutputScaleMultiplier";
-        private const string PropertyTableImageScaleMultiplier = "TableImageScaleMultiplier";
-        private const string PropertyColumnImageScaleMultiplier = "ColumnImageScaleMultiplier";
+        private const string PropertyOutputScaleMultiplier = "OutputScale";
+        private const string PropertyTableImageScaleMultiplier = "TableImageScale";
+        private const string PropertyColumnImageScaleMultiplier = "ColumnImageScale";
 
         // ブール値として認識される文字列
         private static readonly string[] TrueValues = { "true", "1", "yes" };
