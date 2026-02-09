@@ -17,12 +17,24 @@ namespace WordAddIn1
     public partial class RibbonMJS
     {
         /// <summary>
-        /// HTML出力ボタンのイベントハンドラー（高画質画像抽出を有効にして実行）
+        /// HTML出力ボタンのイベントハンドラー
+        /// カスタムドキュメントプロパティから設定を読み取り、HTML出力を実行
         /// </summary>
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
-            // デフォルトで高画質画像抽出を有効にし、beta版モードはfalseに設定
-            GenerateHTMLButton(sender, e, extractHighQualityImages: true, isBetaMode: true);
+            var application = Globals.ThisAddIn.Application;
+            var activeDocument = application.ActiveDocument;
+
+            // カスタムドキュメントプロパティから設定を取得
+            bool extractHighQualityImages = DocumentPropertySettings.GetExtractHighQualityImagesSetting(activeDocument);
+            bool isBetaMode = DocumentPropertySettings.GetBetaModeSetting(activeDocument);
+            float outputScaleMultiplier = DocumentPropertySettings.GetOutputScaleMultiplierSetting(activeDocument);
+            float tableImageScaleMultiplier = DocumentPropertySettings.GetTableImageScaleMultiplierSetting(activeDocument);
+            float columnImageScaleMultiplier = DocumentPropertySettings.GetColumnImageScaleMultiplierSetting(activeDocument);
+
+            // 設定を使用してHTML出力処理を実行
+            GenerateHTMLButton(sender, e, extractHighQualityImages, isBetaMode, 
+                outputScaleMultiplier, tableImageScaleMultiplier, columnImageScaleMultiplier);
         }
 
         /// <summary>
@@ -32,7 +44,12 @@ namespace WordAddIn1
         /// <param name="e">イベント引数</param>
         /// <param name="extractHighQualityImages">高画質画像抽出機能を実行するかどうか</param>
         /// <param name="isBetaMode">beta版モードかどうか（trueの場合、詳細ログとCSV出力を実行）</param>
-        private void GenerateHTMLButton(object sender, RibbonControlEventArgs e, bool extractHighQualityImages, bool isBetaMode)
+        /// <param name="outputScaleMultiplier">通常画像の出力スケール倍率</param>
+        /// <param name="tableImageScaleMultiplier">表内画像の出力スケール倍率</param>
+        /// <param name="columnImageScaleMultiplier">コラム内画像の出力スケール倍率</param>
+        private void GenerateHTMLButton(object sender, RibbonControlEventArgs e, 
+            bool extractHighQualityImages, bool isBetaMode,
+            float outputScaleMultiplier, float tableImageScaleMultiplier, float columnImageScaleMultiplier)
         {
             // HTML出力フラグをON
             blHTMLPublish = true;
@@ -107,6 +124,7 @@ namespace WordAddIn1
                         {
                             // 高画質の画像とキャンバスの抽出
                             log.WriteLine("高画質画像とキャンバスの抽出開始");
+                            log.WriteLine($"スケール設定: OutputScaleMultiplier={outputScaleMultiplier}, TableImageScaleMultiplier={tableImageScaleMultiplier}, ColumnImageScaleMultiplier={columnImageScaleMultiplier}");
 
                             // パラメータオブジェクトの作成
                             var imageExtractionOptions = new Utils.ImageExtractionOptions
@@ -121,9 +139,9 @@ namespace WordAddIn1
                                 IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
                                 MaxOutputWidth = 1024,           // 出力画像の最大幅
                                 MaxOutputHeight = 1024,           // 出力画像の最大高さ
-                                OutputScaleMultiplier = 1.4f,     // 出力スケール倍率（表内以外の画像）
-                                TableImageScaleMultiplier = 1.2f,  // 出力スケール倍率（表内画像専用）
-                                ColumnImageScaleMultiplier = 1.2f, // 出力スケール倍率（コラム内画像専用）
+                                OutputScaleMultiplier = outputScaleMultiplier,           // 出力スケール倍率（表内以外の画像）- カスタムプロパティから取得
+                                TableImageScaleMultiplier = tableImageScaleMultiplier,   // 出力スケール倍率（表内画像専用）- カスタムプロパティから取得
+                                ColumnImageScaleMultiplier = columnImageScaleMultiplier, // 出力スケール倍率（コラム内画像専用）- カスタムプロパティから取得
                                 //DisableResize = true    // リサイズ無効化
                             };
 

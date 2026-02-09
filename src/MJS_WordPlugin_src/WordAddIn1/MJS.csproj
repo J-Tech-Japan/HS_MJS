@@ -263,6 +263,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CheckInfo.cs" />
+    <Compile Include="DocumentPropertySettings.cs" />
     <Compile Include="GenerateHTMLButton.ProcessImages.cs">
       <SubType>Component</SubType>
     </Compile>
