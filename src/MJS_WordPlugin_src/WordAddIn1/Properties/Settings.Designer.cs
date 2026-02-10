@@ -70,5 +70,65 @@ namespace WordAddIn1.Properties {
                 this["tbURLLast"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool extractHighQualityImages {
+            get {
+                return ((bool)(this["extractHighQualityImages"]));
+            }
+            set {
+                this["extractHighQualityImages"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool isBetaMode {
+            get {
+                return ((bool)(this["isBetaMode"]));
+            }
+            set {
+                this["isBetaMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.4")]
+        public float outputScaleMultiplier {
+            get {
+                return ((float)(this["outputScaleMultiplier"]));
+            }
+            set {
+                this["outputScaleMultiplier"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.2")]
+        public float tableImageScaleMultiplier {
+            get {
+                return ((float)(this["tableImageScaleMultiplier"]));
+            }
+            set {
+                this["tableImageScaleMultiplier"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.2")]
+        public float columnImageScaleMultiplier {
+            get {
+                return ((float)(this["columnImageScaleMultiplier"]));
+            }
+            set {
+                this["columnImageScaleMultiplier"] = value;
+            }
+        }
     }
 }

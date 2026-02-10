@@ -18,19 +18,19 @@ namespace WordAddIn1
     {
         /// <summary>
         /// HTML出力ボタンのイベントハンドラー
-        /// カスタムドキュメントプロパティから設定を読み取り、HTML出力を実行
+        /// アプリケーション設定から設定を読み取り、HTML出力を実行
         /// </summary>
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
             var application = Globals.ThisAddIn.Application;
             var activeDocument = application.ActiveDocument;
 
-            // カスタムドキュメントプロパティから設定を取得
-            bool extractHighQualityImages = DocumentPropertySettings.GetExtractHighQualityImagesSetting(activeDocument);
-            bool isBetaMode = DocumentPropertySettings.GetBetaModeSetting(activeDocument);
-            float outputScaleMultiplier = DocumentPropertySettings.GetOutputScaleMultiplierSetting(activeDocument);
-            float tableImageScaleMultiplier = DocumentPropertySettings.GetTableImageScaleMultiplierSetting(activeDocument);
-            float columnImageScaleMultiplier = DocumentPropertySettings.GetColumnImageScaleMultiplierSetting(activeDocument);
+            // アプリケーション設定から設定を取得（Word全体で共有）
+            bool extractHighQualityImages = ApplicationSettings.GetExtractHighQualityImagesSetting();
+            bool isBetaMode = ApplicationSettings.GetBetaModeSetting();
+            float outputScaleMultiplier = ApplicationSettings.GetOutputScaleMultiplierSetting();
+            float tableImageScaleMultiplier = ApplicationSettings.GetTableImageScaleMultiplierSetting();
+            float columnImageScaleMultiplier = ApplicationSettings.GetColumnImageScaleMultiplierSetting();
 
             // 設定を使用してHTML出力処理を実行
             GenerateHTMLButton(sender, e, extractHighQualityImages, isBetaMode, 
