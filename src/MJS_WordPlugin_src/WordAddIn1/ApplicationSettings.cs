@@ -13,6 +13,10 @@ namespace WordAddIn1
         private const float MinScaleMultiplier = 0.1f;
         private const float MaxScaleMultiplier = 10.0f;
 
+        // 出力画像サイズの有効範囲
+        private const int MinOutputSize = 100;
+        private const int MaxOutputSize = 4096;
+
         /// <summary>
         /// 高画質画像抽出機能の設定を取得
         /// </summary>
@@ -175,6 +179,66 @@ namespace WordAddIn1
         }
 
         /// <summary>
+        /// 出力画像の最大幅設定を取得
+        /// </summary>
+        /// <returns>最大幅（デフォルト: 1024）</returns>
+        /// <remarks>
+        /// 有効範囲: 100?4096
+        /// </remarks>
+        public static int GetMaxOutputWidthSetting()
+        {
+            return GetIntSetting(
+                () => Properties.Settings.Default.maxOutputWidth,
+                1024,
+                "maxOutputWidth"
+            );
+        }
+
+        /// <summary>
+        /// 出力画像の最大幅設定を保存
+        /// </summary>
+        /// <param name="value">設定値</param>
+        /// <returns>保存に成功した場合はtrue、範囲外の値の場合はfalse</returns>
+        public static bool SetMaxOutputWidthSetting(int value)
+        {
+            return SetIntSetting(
+                value,
+                v => Properties.Settings.Default.maxOutputWidth = v,
+                "maxOutputWidth"
+            );
+        }
+
+        /// <summary>
+        /// 出力画像の最大高さ設定を取得
+        /// </summary>
+        /// <returns>最大高さ（デフォルト: 1024）</returns>
+        /// <remarks>
+        /// 有効範囲: 100?4096
+        /// </remarks>
+        public static int GetMaxOutputHeightSetting()
+        {
+            return GetIntSetting(
+                () => Properties.Settings.Default.maxOutputHeight,
+                1024,
+                "maxOutputHeight"
+            );
+        }
+
+        /// <summary>
+        /// 出力画像の最大高さ設定を保存
+        /// </summary>
+        /// <param name="value">設定値</param>
+        /// <returns>保存に成功した場合はtrue、範囲外の値の場合はfalse</returns>
+        public static bool SetMaxOutputHeightSetting(int value)
+        {
+            return SetIntSetting(
+                value,
+                v => Properties.Settings.Default.maxOutputHeight = v,
+                "maxOutputHeight"
+            );
+        }
+
+        /// <summary>
         /// 浮動小数点数の設定を取得する汎用メソッド
         /// </summary>
         private static float GetFloatSetting(Func<float> getter, float defaultValue, string settingName)
@@ -212,6 +276,58 @@ namespace WordAddIn1
                 {
                     System.Diagnostics.Debug.WriteLine(
                         $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinScaleMultiplier}?{MaxScaleMultiplier})");
+                    return false;
+                }
+
+                setter(value);
+                Properties.Settings.Default.Save();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"{settingName}設定の保存に失敗: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 整数値の設定を取得する汎用メソッド
+        /// </summary>
+        private static int GetIntSetting(Func<int> getter, int defaultValue, string settingName)
+        {
+            try
+            {
+                int value = getter();
+                
+                // 妥当な範囲内かチェック
+                if (value >= MinOutputSize && value <= MaxOutputSize)
+                {
+                    return value;
+                }
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinOutputSize}?{MaxOutputSize})");
+                return defaultValue;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"{settingName}設定の取得に失敗: {ex.Message}");
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// 整数値の設定を保存する汎用メソッド
+        /// </summary>
+        private static bool SetIntSetting(int value, Action<int> setter, string settingName)
+        {
+            try
+            {
+                // 妥当な範囲内かチェック
+                if (value < MinOutputSize || value > MaxOutputSize)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinOutputSize}?{MaxOutputSize})");
                     return false;
                 }
 

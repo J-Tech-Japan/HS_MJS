@@ -130,5 +130,29 @@ namespace WordAddIn1.Properties {
                 this["columnImageScaleMultiplier"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public int maxOutputWidth {
+            get {
+                return ((int)(this["maxOutputWidth"]));
+            }
+            set {
+                this["maxOutputWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public int maxOutputHeight {
+            get {
+                return ((int)(this["maxOutputHeight"]));
+            }
+            set {
+                this["maxOutputHeight"] = value;
+            }
+        }
     }
 }

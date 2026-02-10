@@ -31,10 +31,13 @@ namespace WordAddIn1
             float outputScaleMultiplier = ApplicationSettings.GetOutputScaleMultiplierSetting();
             float tableImageScaleMultiplier = ApplicationSettings.GetTableImageScaleMultiplierSetting();
             float columnImageScaleMultiplier = ApplicationSettings.GetColumnImageScaleMultiplierSetting();
+            int maxOutputWidth = ApplicationSettings.GetMaxOutputWidthSetting();
+            int maxOutputHeight = ApplicationSettings.GetMaxOutputHeightSetting();
 
             // 設定を使用してHTML出力処理を実行
             GenerateHTMLButton(sender, e, extractHighQualityImages, isBetaMode, 
-                outputScaleMultiplier, tableImageScaleMultiplier, columnImageScaleMultiplier);
+                outputScaleMultiplier, tableImageScaleMultiplier, columnImageScaleMultiplier,
+                maxOutputWidth, maxOutputHeight);
         }
 
         /// <summary>
@@ -47,9 +50,12 @@ namespace WordAddIn1
         /// <param name="outputScaleMultiplier">通常画像の出力スケール倍率</param>
         /// <param name="tableImageScaleMultiplier">表内画像の出力スケール倍率</param>
         /// <param name="columnImageScaleMultiplier">コラム内画像の出力スケール倍率</param>
+        /// <param name="maxOutputWidth">出力画像の最大幅</param>
+        /// <param name="maxOutputHeight">出力画像の最大高さ</param>
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e, 
             bool extractHighQualityImages, bool isBetaMode,
-            float outputScaleMultiplier, float tableImageScaleMultiplier, float columnImageScaleMultiplier)
+            float outputScaleMultiplier, float tableImageScaleMultiplier, float columnImageScaleMultiplier,
+            int maxOutputWidth, int maxOutputHeight)
         {
             // HTML出力フラグをON
             blHTMLPublish = true;
@@ -125,6 +131,7 @@ namespace WordAddIn1
                             // 高画質の画像とキャンバスの抽出
                             log.WriteLine("高画質画像とキャンバスの抽出開始");
                             log.WriteLine($"スケール設定: OutputScaleMultiplier={outputScaleMultiplier}, TableImageScaleMultiplier={tableImageScaleMultiplier}, ColumnImageScaleMultiplier={columnImageScaleMultiplier}");
+                            log.WriteLine($"最大サイズ設定: MaxOutputWidth={maxOutputWidth}, MaxOutputHeight={maxOutputHeight}");
 
                             // パラメータオブジェクトの作成
                             var imageExtractionOptions = new Utils.ImageExtractionOptions
@@ -137,8 +144,8 @@ namespace WordAddIn1
                                 MinOriginalWidth = 50.0f,        // 元画像の最小幅（ポイント）
                                 MinOriginalHeight = 60.0f,       // 元画像の最小高さ（ポイント）
                                 IncludeMjsTableImages = true,    // MJS_画像（表内）スタイルの画像を抽出
-                                MaxOutputWidth = 1024,           // 出力画像の最大幅
-                                MaxOutputHeight = 1024,           // 出力画像の最大高さ
+                                MaxOutputWidth = maxOutputWidth,           // 出力画像の最大幅 - アプリケーション設定から取得
+                                MaxOutputHeight = maxOutputHeight,           // 出力画像の最大高さ - アプリケーション設定から取得
                                 OutputScaleMultiplier = outputScaleMultiplier,           // 出力スケール倍率（表内以外の画像）- カスタムプロパティから取得
                                 TableImageScaleMultiplier = tableImageScaleMultiplier,   // 出力スケール倍率（表内画像専用）- カスタムプロパティから取得
                                 ColumnImageScaleMultiplier = columnImageScaleMultiplier, // 出力スケール倍率（コラム内画像専用）- カスタムプロパティから取得

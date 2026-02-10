@@ -40,6 +40,11 @@ namespace WordAddIn1
             this.label2 = new System.Windows.Forms.Label();
             this.numOutputScale = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.numMaxOutputHeight = new System.Windows.Forms.NumericUpDown();
+            this.label5 = new System.Windows.Forms.Label();
+            this.numMaxOutputWidth = new System.Windows.Forms.NumericUpDown();
+            this.label4 = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnResetDefaults = new System.Windows.Forms.Button();
@@ -48,6 +53,9 @@ namespace WordAddIn1
             ((System.ComponentModel.ISupportInitialize)(this.numColumnImageScale)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numTableImageScale)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numOutputScale)).BeginInit();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxOutputHeight)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxOutputWidth)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -207,9 +215,84 @@ namespace WordAddIn1
             this.label1.TabIndex = 0;
             this.label1.Text = "通常画像スケール倍率（Output）:";
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.numMaxOutputHeight);
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Controls.Add(this.numMaxOutputWidth);
+            this.groupBox3.Controls.Add(this.label4);
+            this.groupBox3.Location = new System.Drawing.Point(12, 244);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(460, 90);
+            this.groupBox3.TabIndex = 5;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "出力画像サイズ設定（100?4096）";
+            // 
+            // numMaxOutputHeight
+            // 
+            this.numMaxOutputHeight.Location = new System.Drawing.Point(230, 55);
+            this.numMaxOutputHeight.Maximum = new decimal(new int[] {
+            4096,
+            0,
+            0,
+            0});
+            this.numMaxOutputHeight.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numMaxOutputHeight.Name = "numMaxOutputHeight";
+            this.numMaxOutputHeight.Size = new System.Drawing.Size(100, 19);
+            this.numMaxOutputHeight.TabIndex = 3;
+            this.numMaxOutputHeight.Value = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(15, 57);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(158, 12);
+            this.label5.TabIndex = 2;
+            this.label5.Text = "出力画像の最大高さ（ピクセル）:";
+            // 
+            // numMaxOutputWidth
+            // 
+            this.numMaxOutputWidth.Location = new System.Drawing.Point(230, 23);
+            this.numMaxOutputWidth.Maximum = new decimal(new int[] {
+            4096,
+            0,
+            0,
+            0});
+            this.numMaxOutputWidth.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numMaxOutputWidth.Name = "numMaxOutputWidth";
+            this.numMaxOutputWidth.Size = new System.Drawing.Size(100, 19);
+            this.numMaxOutputWidth.TabIndex = 1;
+            this.numMaxOutputWidth.Value = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(15, 25);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(146, 12);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "出力画像の最大幅（ピクセル）:";
+            // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(280, 250);
+            this.btnOK.Location = new System.Drawing.Point(280, 345);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(90, 30);
             this.btnOK.TabIndex = 2;
@@ -219,7 +302,7 @@ namespace WordAddIn1
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(382, 250);
+            this.btnCancel.Location = new System.Drawing.Point(382, 345);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(90, 30);
             this.btnCancel.TabIndex = 3;
@@ -229,7 +312,7 @@ namespace WordAddIn1
             // 
             // btnResetDefaults
             // 
-            this.btnResetDefaults.Location = new System.Drawing.Point(12, 250);
+            this.btnResetDefaults.Location = new System.Drawing.Point(12, 345);
             this.btnResetDefaults.Name = "btnResetDefaults";
             this.btnResetDefaults.Size = new System.Drawing.Size(130, 30);
             this.btnResetDefaults.TabIndex = 4;
@@ -241,10 +324,11 @@ namespace WordAddIn1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 291);
+            this.ClientSize = new System.Drawing.Size(484, 386);
             this.Controls.Add(this.btnResetDefaults);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -257,9 +341,13 @@ namespace WordAddIn1
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numColumnImageScale)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numTableImageScale)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numOutputScale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxOutputWidth)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxOutputHeight)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -276,6 +364,11 @@ namespace WordAddIn1
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numOutputScale;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.NumericUpDown numMaxOutputHeight;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown numMaxOutputWidth;
+        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnResetDefaults;
