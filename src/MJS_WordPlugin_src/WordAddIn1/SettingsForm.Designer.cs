@@ -5,7 +5,7 @@ namespace WordAddIn1
     partial class SettingsForm
     {
         /// <summary>
-        /// Required designer variable.
+        /// Required designer variable variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
@@ -76,7 +76,7 @@ namespace WordAddIn1
             this.chkBetaMode.Name = "chkBetaMode";
             this.chkBetaMode.Size = new System.Drawing.Size(310, 16);
             this.chkBetaMode.TabIndex = 1;
-            this.chkBetaMode.Text = "Beta版モード（詳細ログとCSV出力を有効にする）";
+            this.chkBetaMode.Text = "詳細ログとCSV出力を有効にする";
             this.chkBetaMode.UseVisualStyleBackColor = true;
             // 
             // chkExtractHighQualityImages
@@ -322,8 +322,10 @@ namespace WordAddIn1
             // 
             // SettingsForm
             // 
+            this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(484, 386);
             this.Controls.Add(this.btnResetDefaults);
             this.Controls.Add(this.btnCancel);
