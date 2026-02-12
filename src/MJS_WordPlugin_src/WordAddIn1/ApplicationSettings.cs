@@ -174,10 +174,7 @@ namespace WordAddIn1
         /// <summary>
         /// 画像スケール設定（OutputScaleMultiplier）を取得
         /// </summary>
-        /// <returns>スケール倍率（デフォルト: 1.4f）</returns>
-        /// <remarks>
-        /// 有効範囲: 0.1?10.0
-        /// </remarks>
+        /// <returns>スケール倍率</returns>
         public static float GetOutputScaleMultiplierSetting()
         {
             return GetFloatSetting(
@@ -204,10 +201,7 @@ namespace WordAddIn1
         /// <summary>
         /// 表内画像スケール設定（TableImageScaleMultiplier）を取得
         /// </summary>
-        /// <returns>スケール倍率（デフォルト: 1.2f）</returns>
-        /// <remarks>
-        /// 有効範囲: 0.1?10.0
-        /// </remarks>
+        /// <returns>スケール倍率</returns>
         public static float GetTableImageScaleMultiplierSetting()
         {
             return GetFloatSetting(
@@ -234,10 +228,7 @@ namespace WordAddIn1
         /// <summary>
         /// コラム内画像スケール設定（ColumnImageScaleMultiplier）を取得
         /// </summary>
-        /// <returns>スケール倍率（デフォルト: 1.2f）</returns>
-        /// <remarks>
-        /// 有効範囲: 0.1?10.0
-        /// </remarks>
+        /// <returns>スケール倍率</returns>
         public static float GetColumnImageScaleMultiplierSetting()
         {
             return GetFloatSetting(
@@ -264,10 +255,7 @@ namespace WordAddIn1
         /// <summary>
         /// 出力画像の最大幅設定を取得
         /// </summary>
-        /// <returns>最大幅（デフォルト: 1024）</returns>
-        /// <remarks>
-        /// 有効範囲: 100?4096
-        /// </remarks>
+        /// <returns>最大幅</returns>
         public static int GetMaxOutputWidthSetting()
         {
             return GetIntSetting(
@@ -294,10 +282,7 @@ namespace WordAddIn1
         /// <summary>
         /// 出力画像の最大高さ設定を取得
         /// </summary>
-        /// <returns>最大高さ（デフォルト: 1024）</returns>
-        /// <remarks>
-        /// 有効範囲: 100?4096
-        /// </remarks>
+        /// <returns>最大高さ</returns>
         public static int GetMaxOutputHeightSetting()
         {
             return GetIntSetting(
