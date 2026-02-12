@@ -22,9 +22,6 @@ namespace WordAddIn1
         /// </summary>
         private void GenerateHTMLButton(object sender, RibbonControlEventArgs e)
         {
-            var application = Globals.ThisAddIn.Application;
-            var activeDocument = application.ActiveDocument;
-
             // アプリケーション設定から設定を取得（Word全体で共有）
             bool extractHighQualityImages = ApplicationSettings.GetExtractHighQualityImagesSetting();
             bool isBetaMode = ApplicationSettings.GetBetaModeSetting();

@@ -239,6 +239,44 @@ namespace WordAddIn1
         }
 
         /// <summary>
+        /// 設定ボタンの表示/非表示設定を取得
+        /// </summary>
+        /// <returns>設定ボタンを表示する場合はtrue、表示しない場合はfalse（デフォルト: true）</returns>
+        /// <remarks>
+        /// この設定により、リボンの「画像出力設定」ボタンの表示/非表示を制御できます。
+        /// 今後のバージョンによっては設定ボタンを使わない場合に、非表示にできます。
+        /// </remarks>
+        public static bool GetShowSettingsButtonSetting()
+        {
+            try
+            {
+                return Properties.Settings.Default.showSettingsButton;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"showSettingsButton設定の取得に失敗: {ex.Message}");
+                return true; // デフォルト値（表示）
+            }
+        }
+
+        /// <summary>
+        /// 設定ボタンの表示/非表示設定を保存
+        /// </summary>
+        /// <param name="value">設定値</param>
+        public static void SetShowSettingsButtonSetting(bool value)
+        {
+            try
+            {
+                Properties.Settings.Default.showSettingsButton = value;
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"showSettingsButton設定の保存に失敗: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 浮動小数点数の設定を取得する汎用メソッド
         /// </summary>
         private static float GetFloatSetting(Func<float> getter, float defaultValue, string settingName)

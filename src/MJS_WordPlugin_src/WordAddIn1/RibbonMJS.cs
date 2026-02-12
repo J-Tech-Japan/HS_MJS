@@ -35,6 +35,18 @@ namespace WordAddIn1
 
             // labelVersion はリボンデザイナで追加したラベルの名前
             versionFileJoin.Label = $"\n\nバージョン\n{versionText}";
+
+            // 設定ボタン（button11）の表示/非表示を設定から読み込んで制御
+            // デフォルトでは表示（true）
+            bool showSettingsButton = ApplicationSettings.GetShowSettingsButtonSetting();
+            button11.Visible = showSettingsButton;
+            
+            // 設定ボタンを非表示にする場合、グループ全体も非表示にする
+            // （グループ内に他のボタンがない場合）
+            if (!showSettingsButton)
+            {
+                group5.Visible = false;
+            }
         }
 
         // KeyValuePairのValueで比較

@@ -154,5 +154,17 @@ namespace WordAddIn1.Properties {
                 this["maxOutputHeight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool showSettingsButton {
+            get {
+                return ((bool)(this["showSettingsButton"]));
+            }
+            set {
+                this["showSettingsButton"] = value;
+            }
+        }
     }
 }
