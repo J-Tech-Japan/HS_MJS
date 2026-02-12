@@ -97,7 +97,7 @@ namespace WordAddIn1.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
         public float outputScaleMultiplier {
             get {
                 return ((float)(this["outputScaleMultiplier"]));
@@ -109,7 +109,7 @@ namespace WordAddIn1.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.2")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
         public float tableImageScaleMultiplier {
             get {
                 return ((float)(this["tableImageScaleMultiplier"]));
@@ -121,7 +121,7 @@ namespace WordAddIn1.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.2")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
         public float columnImageScaleMultiplier {
             get {
                 return ((float)(this["columnImageScaleMultiplier"]));

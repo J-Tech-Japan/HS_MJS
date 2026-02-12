@@ -88,7 +88,7 @@ namespace WordAddIn1
                     MessageBoxIcon.Error);
             }
         }
-
+        
         // キャンセルボタンクリック時の処理
         private void btnCancel_Click(object sender, EventArgs e)
         {
@@ -99,25 +99,16 @@ namespace WordAddIn1
         // デフォルト値に戻すボタンクリック時の処理
         private void btnResetDefaults_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show(
-                "すべての設定をデフォルト値に戻しますか？",
-                "確認",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+            // ApplicationSettingsからデフォルト値を取得して設定
+            var defaults = ApplicationSettings.GetDefaultValues();
 
-            if (result == DialogResult.Yes)
-            {
-                // ApplicationSettingsからデフォルト値を取得して設定
-                var defaults = ApplicationSettings.GetDefaultValues();
-                
-                chkExtractHighQualityImages.Checked = defaults.ExtractHighQualityImages;
-                chkBetaMode.Checked = defaults.IsBetaMode;
-                numOutputScale.Value = (decimal)defaults.OutputScaleMultiplier;
-                numTableImageScale.Value = (decimal)defaults.TableImageScaleMultiplier;
-                numColumnImageScale.Value = (decimal)defaults.ColumnImageScaleMultiplier;
-                numMaxOutputWidth.Value = defaults.MaxOutputWidth;
-                numMaxOutputHeight.Value = defaults.MaxOutputHeight;
-            }
+            chkExtractHighQualityImages.Checked = defaults.ExtractHighQualityImages;
+            chkBetaMode.Checked = defaults.IsBetaMode;
+            numOutputScale.Value = (decimal)defaults.OutputScaleMultiplier;
+            numTableImageScale.Value = (decimal)defaults.TableImageScaleMultiplier;
+            numColumnImageScale.Value = (decimal)defaults.ColumnImageScaleMultiplier;
+            numMaxOutputWidth.Value = defaults.MaxOutputWidth;
+            numMaxOutputHeight.Value = defaults.MaxOutputHeight;
         }
     }
 }

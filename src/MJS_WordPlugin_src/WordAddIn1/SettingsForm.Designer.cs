@@ -139,7 +139,7 @@ namespace WordAddIn1
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(185, 12);
             this.label3.TabIndex = 4;
-            this.label3.Text = "コラム内画像スケール倍率（Column）:";
+            this.label3.Text = "コラム内画像スケール倍率:";
             // 
             // numTableImageScale
             // 
@@ -176,7 +176,7 @@ namespace WordAddIn1
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(166, 12);
             this.label2.TabIndex = 2;
-            this.label2.Text = "表内画像スケール倍率（Table）:";
+            this.label2.Text = "表内画像スケール倍率:";
             // 
             // numOutputScale
             // 
@@ -213,7 +213,7 @@ namespace WordAddIn1
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(175, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "通常画像スケール倍率（Output）:";
+            this.label1.Text = "通常画像スケール倍率:";
             // 
             // groupBox3
             // 

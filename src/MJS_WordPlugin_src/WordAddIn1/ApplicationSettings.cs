@@ -30,7 +30,7 @@ namespace WordAddIn1
         /// <summary>
         /// デフォルト値を取得するための構造体
         /// </summary>
-        public struct DefaultValues
+        public readonly struct DefaultValues
         {
             public bool ExtractHighQualityImages { get; }
             public bool IsBetaMode { get; }
@@ -41,16 +41,24 @@ namespace WordAddIn1
             public int MaxOutputHeight { get; }
             public bool ShowSettingsButton { get; }
 
-            internal DefaultValues(bool dummy)
+            internal DefaultValues(
+                bool extractHighQualityImages,
+                bool isBetaMode,
+                float outputScaleMultiplier,
+                float tableImageScaleMultiplier,
+                float columnImageScaleMultiplier,
+                int maxOutputWidth,
+                int maxOutputHeight,
+                bool showSettingsButton)
             {
-                ExtractHighQualityImages = DefaultExtractHighQualityImages;
-                IsBetaMode = DefaultIsBetaMode;
-                OutputScaleMultiplier = DefaultOutputScaleMultiplier;
-                TableImageScaleMultiplier = DefaultTableImageScaleMultiplier;
-                ColumnImageScaleMultiplier = DefaultColumnImageScaleMultiplier;
-                MaxOutputWidth = DefaultMaxOutputWidth;
-                MaxOutputHeight = DefaultMaxOutputHeight;
-                ShowSettingsButton = DefaultShowSettingsButton;
+                ExtractHighQualityImages = extractHighQualityImages;
+                IsBetaMode = isBetaMode;
+                OutputScaleMultiplier = outputScaleMultiplier;
+                TableImageScaleMultiplier = tableImageScaleMultiplier;
+                ColumnImageScaleMultiplier = columnImageScaleMultiplier;
+                MaxOutputWidth = maxOutputWidth;
+                MaxOutputHeight = maxOutputHeight;
+                ShowSettingsButton = showSettingsButton;
             }
         }
 
@@ -60,7 +68,15 @@ namespace WordAddIn1
         /// <returns>デフォルト値を格納した構造体</returns>
         public static DefaultValues GetDefaultValues()
         {
-            return new DefaultValues(true);
+            return new DefaultValues(
+                DefaultExtractHighQualityImages,
+                DefaultIsBetaMode,
+                DefaultOutputScaleMultiplier,
+                DefaultTableImageScaleMultiplier,
+                DefaultColumnImageScaleMultiplier,
+                DefaultMaxOutputWidth,
+                DefaultMaxOutputHeight,
+                DefaultShowSettingsButton);
         }
 
         /// <summary>
@@ -90,7 +106,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"extractHighQualityImages設定の取得に失敗: {ex.Message}");
+                LogError("extractHighQualityImages", "取得", ex);
                 return DefaultExtractHighQualityImages;
             }
         }
@@ -99,16 +115,19 @@ namespace WordAddIn1
         /// 高画質画像抽出機能の設定を保存
         /// </summary>
         /// <param name="value">設定値</param>
-        public static void SetExtractHighQualityImagesSetting(bool value)
+        /// <returns>保存に成功した場合はtrue、失敗した場合はfalse</returns>
+        public static bool SetExtractHighQualityImagesSetting(bool value)
         {
             try
             {
                 Properties.Settings.Default.extractHighQualityImages = value;
                 Properties.Settings.Default.Save();
+                return true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"extractHighQualityImages設定の保存に失敗: {ex.Message}");
+                LogError("extractHighQualityImages", "保存", ex);
+                return false;
             }
         }
 
@@ -127,7 +146,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"isBetaMode設定の取得に失敗: {ex.Message}");
+                LogError("isBetaMode", "取得", ex);
                 return DefaultIsBetaMode;
             }
         }
@@ -136,16 +155,19 @@ namespace WordAddIn1
         /// beta版モードの設定を保存
         /// </summary>
         /// <param name="value">設定値</param>
-        public static void SetBetaModeSetting(bool value)
+        /// <returns>保存に成功した場合はtrue、失敗した場合はfalse</returns>
+        public static bool SetBetaModeSetting(bool value)
         {
             try
             {
                 Properties.Settings.Default.isBetaMode = value;
                 Properties.Settings.Default.Save();
+                return true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"isBetaMode設定の保存に失敗: {ex.Message}");
+                LogError("isBetaMode", "保存", ex);
+                return false;
             }
         }
 
@@ -258,7 +280,7 @@ namespace WordAddIn1
         /// <summary>
         /// 出力画像の最大幅設定を保存
         /// </summary>
-        /// <param name="value">設定値</param>
+        /// <param value="value">設定値</param>
         /// <returns>保存に成功した場合はtrue、範囲外の値の場合はfalse</returns>
         public static bool SetMaxOutputWidthSetting(int value)
         {
@@ -315,7 +337,7 @@ namespace WordAddIn1
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"showSettingsButton設定の取得に失敗: {ex.Message}");
+                LogError("showSettingsButton", "取得", ex);
                 return DefaultShowSettingsButton;
             }
         }
@@ -324,16 +346,19 @@ namespace WordAddIn1
         /// 設定ボタンの表示/非表示設定を保存
         /// </summary>
         /// <param name="value">設定値</param>
-        public static void SetShowSettingsButtonSetting(bool value)
+        /// <returns>保存に成功した場合はtrue、失敗した場合はfalse</returns>
+        public static bool SetShowSettingsButtonSetting(bool value)
         {
             try
             {
                 Properties.Settings.Default.showSettingsButton = value;
                 Properties.Settings.Default.Save();
+                return true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"showSettingsButton設定の保存に失敗: {ex.Message}");
+                LogError("showSettingsButton", "保存", ex);
+                return false;
             }
         }
 
@@ -344,7 +369,7 @@ namespace WordAddIn1
         {
             try
             {
-                float value = getter();
+                var value = getter();
                 
                 // 妥当な範囲内かチェック
                 if (value >= MinScaleMultiplier && value <= MaxScaleMultiplier)
@@ -352,13 +377,12 @@ namespace WordAddIn1
                     return value;
                 }
 
-                System.Diagnostics.Debug.WriteLine(
-                    $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinScaleMultiplier}?{MaxScaleMultiplier})");
+                LogWarning($"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinScaleMultiplier}?{MaxScaleMultiplier})。デフォルト値 {defaultValue} を使用します。");
                 return defaultValue;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"{settingName}設定の取得に失敗: {ex.Message}");
+                LogError(settingName, "取得", ex);
                 return defaultValue;
             }
         }
@@ -368,23 +392,22 @@ namespace WordAddIn1
         /// </summary>
         private static bool SetFloatSetting(float value, Action<float> setter, string settingName)
         {
+            // 妥当な範囲内かチェック
+            if (value < MinScaleMultiplier || value > MaxScaleMultiplier)
+            {
+                LogWarning($"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinScaleMultiplier}?{MaxScaleMultiplier})");
+                return false;
+            }
+
             try
             {
-                // 妥当な範囲内かチェック
-                if (value < MinScaleMultiplier || value > MaxScaleMultiplier)
-                {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinScaleMultiplier}?{MaxScaleMultiplier})");
-                    return false;
-                }
-
                 setter(value);
                 Properties.Settings.Default.Save();
                 return true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"{settingName}設定の保存に失敗: {ex.Message}");
+                LogError(settingName, "保存", ex);
                 return false;
             }
         }
@@ -396,7 +419,7 @@ namespace WordAddIn1
         {
             try
             {
-                int value = getter();
+                var value = getter();
                 
                 // 妥当な範囲内かチェック
                 if (value >= MinOutputSize && value <= MaxOutputSize)
@@ -404,13 +427,12 @@ namespace WordAddIn1
                     return value;
                 }
 
-                System.Diagnostics.Debug.WriteLine(
-                    $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinOutputSize}?{MaxOutputSize})");
+                LogWarning($"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinOutputSize}?{MaxOutputSize})。デフォルト値 {defaultValue} を使用します。");
                 return defaultValue;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"{settingName}設定の取得に失敗: {ex.Message}");
+                LogError(settingName, "取得", ex);
                 return defaultValue;
             }
         }
@@ -420,25 +442,48 @@ namespace WordAddIn1
         /// </summary>
         private static bool SetIntSetting(int value, Action<int> setter, string settingName)
         {
+            // 妥当な範囲内かチェック
+            if (value < MinOutputSize || value > MaxOutputSize)
+            {
+                LogWarning($"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinOutputSize}?{MaxOutputSize})");
+                return false;
+            }
+
             try
             {
-                // 妥当な範囲内かチェック
-                if (value < MinOutputSize || value > MaxOutputSize)
-                {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"{settingName}設定の値が範囲外です: {value} (有効範囲: {MinOutputSize}?{MaxOutputSize})");
-                    return false;
-                }
-
                 setter(value);
                 Properties.Settings.Default.Save();
                 return true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"{settingName}設定の保存に失敗: {ex.Message}");
+                LogError(settingName, "保存", ex);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// エラーログを出力する
+        /// </summary>
+        private static void LogError(string settingName, string operation, Exception ex)
+        {
+            var message = $"[ApplicationSettings] {settingName}設定の{operation}に失敗: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine(message);
+            
+            // Beta modeが有効な場合は詳細なログを出力
+            if (GetBetaModeSetting())
+            {
+                System.Diagnostics.Debug.WriteLine($"  例外の種類: {ex.GetType().FullName}");
+                System.Diagnostics.Debug.WriteLine($"  スタックトレース: {ex.StackTrace}");
+            }
+        }
+
+        /// <summary>
+        /// 警告ログを出力する
+        /// </summary>
+        private static void LogWarning(string message)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ApplicationSettings] 警告: {message}");
         }
     }
 }
