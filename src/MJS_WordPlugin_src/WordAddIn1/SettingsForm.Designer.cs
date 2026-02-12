@@ -102,7 +102,7 @@ namespace WordAddIn1
             this.groupBox2.Size = new System.Drawing.Size(460, 130);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "画像スケール設定（0.1?10.0）";
+            this.groupBox2.Text = "画像スケール設定";
             // 
             // numColumnImageScale
             // 
@@ -226,7 +226,7 @@ namespace WordAddIn1
             this.groupBox3.Size = new System.Drawing.Size(460, 90);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "出力画像サイズ設定（100?4096）";
+            this.groupBox3.Text = "出力画像サイズ設定";
             // 
             // numMaxOutputHeight
             // 
