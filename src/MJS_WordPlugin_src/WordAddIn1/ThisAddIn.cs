@@ -1,6 +1,7 @@
 ﻿// ThisAddIn.cs
 
 using System;
+using Microsoft.Office.Interop.Word;
 
 namespace WordAddIn1
 {
@@ -8,6 +9,8 @@ namespace WordAddIn1
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
+            // アプリケーション設定の初期化（必要に応じて）
+            // Properties.Settings.Default.Upgrade(); // 設定のアップグレード（バージョンアップ時に使用）
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)

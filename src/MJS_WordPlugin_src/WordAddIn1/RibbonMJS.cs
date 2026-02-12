@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -34,6 +35,18 @@ namespace WordAddIn1
 
             // labelVersion はリボンデザイナで追加したラベルの名前
             versionFileJoin.Label = $"\n\nバージョン\n{versionText}";
+
+            // 設定ボタン（button11）の表示/非表示を設定から読み込んで制御
+            // デフォルトでは表示（true）
+            bool showSettingsButton = ApplicationSettings.GetShowSettingsButtonSetting();
+            button11.Visible = showSettingsButton;
+            
+            // 設定ボタンを非表示にする場合、グループ全体も非表示にする
+            // （グループ内に他のボタンがない場合）
+            if (!showSettingsButton)
+            {
+                group5.Visible = false;
+            }
         }
 
         // KeyValuePairのValueで比較
@@ -169,6 +182,35 @@ namespace WordAddIn1
                 MessageBox.Show(ErrMsgDocumentChanged1, ErrMsgDocumentChanged2, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 button3.Enabled = false;
                 return;
+            }
+        }
+
+        /// <summary>
+        /// 設定ボタンのイベントハンドラー
+        /// </summary>
+        private void SettingsButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                using (var settingsForm = new SettingsForm())
+                {
+                    if (settingsForm.ShowDialog() == DialogResult.OK)
+                    {
+                        MessageBox.Show(
+                            "設定を保存しました。",
+                            "設定完了",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"設定画面の表示中にエラーが発生しました。{Environment.NewLine}{ex.Message}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 

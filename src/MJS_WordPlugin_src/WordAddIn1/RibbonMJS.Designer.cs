@@ -49,12 +49,16 @@
             this.button2 = this.Factory.CreateRibbonButton();
             this.button10 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
+            this.button12 = this.Factory.CreateRibbonButton();
+            this.group5 = this.Factory.CreateRibbonGroup();
+            this.button11 = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.versionFileJoin = this.Factory.CreateRibbonLabel();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group4.SuspendLayout();
+            this.group5.SuspendLayout();
             this.group3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -64,6 +68,7 @@
             this.tab1.Groups.Add(this.group1);
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group4);
+            this.tab1.Groups.Add(this.group5);
             this.tab1.Groups.Add(this.group3);
             this.tab1.Label = "MJSワードプラグイン";
             this.tab1.Name = "tab1";
@@ -152,6 +157,7 @@
             this.group4.Items.Add(this.button2);
             this.group4.Items.Add(this.button10);
             this.group4.Items.Add(this.button3);
+            this.group4.Items.Add(this.button12);
             this.group4.Name = "group4";
             // 
             // button9
@@ -192,6 +198,29 @@
             this.button3.ShowImage = true;
             this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.GenerateHTMLButton);
             // 
+            // button12
+            // 
+            this.button12.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.button12.Enabled = false;
+            this.button12.Image = global::WordAddIn1.Properties.Resources.touka;
+            this.button12.Label = " ";
+            this.button12.Name = "button12";
+            this.button12.ShowImage = true;
+            // 
+            // group5
+            // 
+            this.group5.Items.Add(this.button11);
+            this.group5.Name = "group5";
+            // 
+            // button11
+            // 
+            this.button11.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.button11.Image = global::WordAddIn1.Properties.Resources.setting;
+            this.button11.Label = "画像出力\n設定";
+            this.button11.Name = "button11";
+            this.button11.ShowImage = true;
+            this.button11.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.SettingsButton_Click);
+            // 
             // group3
             // 
             this.group3.Items.Add(this.versionFileJoin);
@@ -216,6 +245,8 @@
             this.group2.PerformLayout();
             this.group4.ResumeLayout(false);
             this.group4.PerformLayout();
+            this.group5.ResumeLayout(false);
+            this.group5.PerformLayout();
             this.group3.ResumeLayout(false);
             this.group3.PerformLayout();
             this.ResumeLayout(false);
@@ -239,9 +270,11 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button8;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button9;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button10;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button12;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel versionFileJoin;
-        //internal Microsoft.Office.Tools.Ribbon.RibbonButton button11;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button11;
     }
 
     partial class ThisRibbonCollection
