@@ -107,13 +107,16 @@ namespace WordAddIn1
 
             if (result == DialogResult.Yes)
             {
-                chkExtractHighQualityImages.Checked = true;
-                chkBetaMode.Checked = false;
-                numOutputScale.Value = 1.4m;
-                numTableImageScale.Value = 1.2m;
-                numColumnImageScale.Value = 1.2m;
-                numMaxOutputWidth.Value = 1024;
-                numMaxOutputHeight.Value = 1024;
+                // ApplicationSettingsからデフォルト値を取得して設定
+                var defaults = ApplicationSettings.GetDefaultValues();
+                
+                chkExtractHighQualityImages.Checked = defaults.ExtractHighQualityImages;
+                chkBetaMode.Checked = defaults.IsBetaMode;
+                numOutputScale.Value = (decimal)defaults.OutputScaleMultiplier;
+                numTableImageScale.Value = (decimal)defaults.TableImageScaleMultiplier;
+                numColumnImageScale.Value = (decimal)defaults.ColumnImageScaleMultiplier;
+                numMaxOutputWidth.Value = defaults.MaxOutputWidth;
+                numMaxOutputHeight.Value = defaults.MaxOutputHeight;
             }
         }
     }

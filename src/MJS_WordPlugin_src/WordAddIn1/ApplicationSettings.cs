@@ -17,6 +17,67 @@ namespace WordAddIn1
         private const int MinOutputSize = 100;
         private const int MaxOutputSize = 4096;
 
+        // デフォルト値の定義（Settings.settingsと一致させる）
+        private const bool DefaultExtractHighQualityImages = true;
+        private const bool DefaultIsBetaMode = false;
+        private const float DefaultOutputScaleMultiplier = 1.5f;
+        private const float DefaultTableImageScaleMultiplier = 1.5f;
+        private const float DefaultColumnImageScaleMultiplier = 1.5f;
+        private const int DefaultMaxOutputWidth = 1024;
+        private const int DefaultMaxOutputHeight = 1024;
+        private const bool DefaultShowSettingsButton = true;
+
+        /// <summary>
+        /// デフォルト値を取得するための構造体
+        /// </summary>
+        public struct DefaultValues
+        {
+            public bool ExtractHighQualityImages { get; }
+            public bool IsBetaMode { get; }
+            public float OutputScaleMultiplier { get; }
+            public float TableImageScaleMultiplier { get; }
+            public float ColumnImageScaleMultiplier { get; }
+            public int MaxOutputWidth { get; }
+            public int MaxOutputHeight { get; }
+            public bool ShowSettingsButton { get; }
+
+            internal DefaultValues(bool dummy)
+            {
+                ExtractHighQualityImages = DefaultExtractHighQualityImages;
+                IsBetaMode = DefaultIsBetaMode;
+                OutputScaleMultiplier = DefaultOutputScaleMultiplier;
+                TableImageScaleMultiplier = DefaultTableImageScaleMultiplier;
+                ColumnImageScaleMultiplier = DefaultColumnImageScaleMultiplier;
+                MaxOutputWidth = DefaultMaxOutputWidth;
+                MaxOutputHeight = DefaultMaxOutputHeight;
+                ShowSettingsButton = DefaultShowSettingsButton;
+            }
+        }
+
+        /// <summary>
+        /// すべてのデフォルト値を取得
+        /// </summary>
+        /// <returns>デフォルト値を格納した構造体</returns>
+        public static DefaultValues GetDefaultValues()
+        {
+            return new DefaultValues(true);
+        }
+
+        /// <summary>
+        /// すべての設定をデフォルト値にリセット
+        /// </summary>
+        public static void ResetAllToDefaults()
+        {
+            SetExtractHighQualityImagesSetting(DefaultExtractHighQualityImages);
+            SetBetaModeSetting(DefaultIsBetaMode);
+            SetOutputScaleMultiplierSetting(DefaultOutputScaleMultiplier);
+            SetTableImageScaleMultiplierSetting(DefaultTableImageScaleMultiplier);
+            SetColumnImageScaleMultiplierSetting(DefaultColumnImageScaleMultiplier);
+            SetMaxOutputWidthSetting(DefaultMaxOutputWidth);
+            SetMaxOutputHeightSetting(DefaultMaxOutputHeight);
+            SetShowSettingsButtonSetting(DefaultShowSettingsButton);
+        }
+
         /// <summary>
         /// 高画質画像抽出機能の設定を取得
         /// </summary>
@@ -30,7 +91,7 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"extractHighQualityImages設定の取得に失敗: {ex.Message}");
-                return true; // デフォルト値
+                return DefaultExtractHighQualityImages;
             }
         }
 
@@ -67,7 +128,7 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"isBetaMode設定の取得に失敗: {ex.Message}");
-                return false; // デフォルト値
+                return DefaultIsBetaMode;
             }
         }
 
@@ -99,7 +160,7 @@ namespace WordAddIn1
         {
             return GetFloatSetting(
                 () => Properties.Settings.Default.outputScaleMultiplier,
-                1.4f,
+                DefaultOutputScaleMultiplier,
                 "outputScaleMultiplier"
             );
         }
@@ -129,7 +190,7 @@ namespace WordAddIn1
         {
             return GetFloatSetting(
                 () => Properties.Settings.Default.tableImageScaleMultiplier,
-                1.2f,
+                DefaultTableImageScaleMultiplier,
                 "tableImageScaleMultiplier"
             );
         }
@@ -159,7 +220,7 @@ namespace WordAddIn1
         {
             return GetFloatSetting(
                 () => Properties.Settings.Default.columnImageScaleMultiplier,
-                1.2f,
+                DefaultColumnImageScaleMultiplier,
                 "columnImageScaleMultiplier"
             );
         }
@@ -189,7 +250,7 @@ namespace WordAddIn1
         {
             return GetIntSetting(
                 () => Properties.Settings.Default.maxOutputWidth,
-                1024,
+                DefaultMaxOutputWidth,
                 "maxOutputWidth"
             );
         }
@@ -219,7 +280,7 @@ namespace WordAddIn1
         {
             return GetIntSetting(
                 () => Properties.Settings.Default.maxOutputHeight,
-                1024,
+                DefaultMaxOutputHeight,
                 "maxOutputHeight"
             );
         }
@@ -255,7 +316,7 @@ namespace WordAddIn1
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"showSettingsButton設定の取得に失敗: {ex.Message}");
-                return true; // デフォルト値（表示）
+                return DefaultShowSettingsButton;
             }
         }
 
