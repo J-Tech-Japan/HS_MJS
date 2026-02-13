@@ -164,6 +164,26 @@ const CONTENTS_ALL = [
         ]
     }
 ];
+LicenseCodeModel = {
+    "CMN_CMP": ["0046710001"],
+    "CMN_DAT": ["0046710130", "0046735030"],
+    "CMN_JNT": ["0046710001"],
+    "CMN_MAS": ["0046710001"],
+    "CMN_OPE": ["0046710001"],
+    "CMN_UTL": ["0046710001"],
+    "DEP_JNT": ["0046735010"],
+    "DEP_SIS": ["0046735010"],
+    "MAS_BAB": ["0046710010"],
+    "MAS_DAY": ["0046710010"],
+    "MAS_DEP": ["0046710010"],
+    "MAS_EAL": ["0046710010"],
+    "MAS_JNT": ["0046710010"],
+    "MAS_OPE": ["0046710010"],
+    "MAS_SOA": ["0046710010"],
+    "WFL_DAY": ["0046735130"],
+    "WFL_FOM": ["0046735130"],
+    "WFL_JNT": ["0046735130"]
+};
 
 
 var cookie = document.cookie.split('; ').reduce((prev, current) => {
@@ -172,15 +192,28 @@ var cookie = document.cookie.split('; ').reduce((prev, current) => {
     return prev;
 }, {});
 
-var gi_license = "gi_license" in cookie ? cookie.gi_license.split(",") : [];
+var gilicense = "gilicense" in cookie ? cookie.gilicense.split("%2C") : [];
+let codeList = [];
 
+for (const key in LicenseCodeModel) {
+    const values = LicenseCodeModel[key];
+    for (const target of gilicense) {
+        if (values.includes(target)) {
+            const prefix = key.split("/")[0];
+            codeList.push(prefix);
+            break; // 同じキーに対して複数回追加しないように
+        }
+    }
+}
+
+const uniqueCodeList = [...new Set(codeList)];
 CONTENTS = CONTENTS_ALL.map(category => {
     return {
         ...category,
-        CONTENTS: category.CONTENTS.filter(contents => contents.TYPE === CONTENT_TYPE.CATEGORY ? contents.CONTENTS.some(sub => gi_license.includes(sub.ID)) : gi_license.includes(contents.ID)).map(contents => {
+        CONTENTS: category.CONTENTS.filter(contents => contents.TYPE === CONTENT_TYPE.CATEGORY ? contents.CONTENTS.some(sub => uniqueCodeList.includes(sub.ID)) : uniqueCodeList.includes(contents.ID)).map(contents => {
             return contents.TYPE === CONTENT_TYPE.CATEGORY ? {
                 ...contents,
-                CONTENTS: contents.CONTENTS.filter(sub => gi_license.includes(sub.ID))
+                CONTENTS: contents.CONTENTS.filter(sub => uniqueCodeList.includes(sub.ID))
             } : contents;
         })
     };

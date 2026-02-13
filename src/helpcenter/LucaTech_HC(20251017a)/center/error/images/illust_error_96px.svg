@@ -1,0 +1,23 @@
+<svg id="illust_error_96px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="長方形_158745" data-name="長方形 158745" width="96" height="96" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="グループ_185703" data-name="グループ 185703" clip-path="url(#clip-path)">
+    <path id="パス_41458" data-name="パス 41458" d="M48,0h0A48,48,0,1,1,0,48,48,48,0,0,1,48,0" fill="#f0f0f0"/>
+  </g>
+  <g id="グループ_186876" data-name="グループ 186876" transform="translate(-1390 -496)">
+    <rect id="長方形_158757" data-name="長方形 158757" width="96" height="96" transform="translate(1390 496)" fill="none"/>
+    <g id="ic_message_information" transform="translate(31 -9)">
+      <circle id="楕円形_9700" data-name="楕円形 9700" cx="25" cy="25" r="25" transform="translate(1382 528)" fill="#fff"/>
+      <path id="楕円形_9700_-_アウトライン" data-name="楕円形 9700 - アウトライン" d="M25,2a23.007,23.007,0,0,0-8.952,44.193,23.006,23.006,0,0,0,17.9-42.387A22.854,22.854,0,0,0,25,2m0-2A25,25,0,1,1,0,25,25,25,0,0,1,25,0Z" transform="translate(1382 528)" fill="#d93333"/>
+      <g id="グループ_186876-2" data-name="グループ 186876" transform="translate(-38.5 10)">
+        <path id="パス_41520" data-name="パス 41520" d="M24,21a1,1,0,0,0-1,1V34a1,1,0,0,0,2,0V22a1,1,0,0,0-1-1" transform="translate(1469 568) rotate(180)" fill="#d93333"/>
+        <path id="パス_41520_-_アウトライン" data-name="パス 41520 - アウトライン" d="M24,35.5A1.5,1.5,0,0,1,22.5,34V22a1.5,1.5,0,0,1,3,0V34A1.5,1.5,0,0,1,24,35.5Zm0-14a.5.5,0,0,0-.5.5V34a.5.5,0,0,0,1,0V22A.5.5,0,0,0,24,21.5Z" transform="translate(1469 568) rotate(180)" fill="rgba(0,0,0,0)"/>
+        <path id="パス_41521" data-name="パス 41521" d="M24,15.5A1.5,1.5,0,1,0,25.5,17,1.5,1.5,0,0,0,24,15.5" transform="translate(1469 568) rotate(180)" fill="#d93333"/>
+        <path id="パス_41521_-_アウトライン" data-name="パス 41521 - アウトライン" d="M24,19a2,2,0,1,1,2-2A2,2,0,0,1,24,19Zm0-3a1,1,0,1,0,1,1A1,1,0,0,0,24,16Z" transform="translate(1469 568) rotate(180)" fill="rgba(0,0,0,0)"/>
+      </g>
+    </g>
+  </g>
+</svg>

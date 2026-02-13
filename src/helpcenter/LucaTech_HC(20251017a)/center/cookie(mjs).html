@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <title>LucaTech GX ヘルプセンター</title>
+   <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-B16FEXDJYQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-B16FEXDJYQ');
+</script>
+</head>
+
+<body class="index">
+   <input id="input_cookie" type="text" style="width: 800px; min-height: 20px"><button onclick="setCookie()" style="min-height: 20px; margin-left: 10px;">cookie設定</button>
+   <script>
+      function setCookie() {
+         const element = document.getElementById('input_cookie');
+         document.cookie = "gilicense=" + element.value;
+         console.log(document.cookie);
+      }
+   </script>
+</body>
+
+</html>

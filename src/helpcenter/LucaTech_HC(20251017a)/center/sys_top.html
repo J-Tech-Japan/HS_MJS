@@ -16,6 +16,13 @@
   <script src="js/components/contents.js"></script>
   <script src="js/search/utils.js"></script>
   <script src="js/components/commonIndexPage.js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-B16FEXDJYQ');
+</script>
 </head>
 
 <body class="top">
@@ -33,7 +40,7 @@
 
       <p class="search_guide"></p>
       <div class="main-header-search">
-        <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検絢でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
+        <input v-model="searchKeyword" class="form-control-search" placeholder="キーワード検索でヘルプを見つける。例：インポート、仕訳　入力" type="search" autocomplete="on" name="searchkeyword" @keyup.enter="onSearch">
         <button class="btn-search" @click="onSearch"></button>
       </div>
     </header>
