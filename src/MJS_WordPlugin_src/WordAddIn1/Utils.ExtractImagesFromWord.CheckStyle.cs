@@ -45,6 +45,7 @@ namespace WordAddIn1
             if (styleName.Contains("MJS_画像（コラム内）"))
             {
                 isColumnImage = true; // コラム内画像フラグを設定
+                forceExtract = true;
                 System.Diagnostics.Trace.WriteLine($"スタイル '{styleName}' により強制抽出対象に設定（MJSコラム内画像）");
                 return;
             }
